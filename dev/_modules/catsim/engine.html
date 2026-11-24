@@ -1013,7 +1013,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    other check::</span>
 
 <span class="sd">      while (item_id := engine.select_next(state, context)) is not None:</span>
-<span class="sd">        engine.apply_response(state, item_id, ask_examinee(item_id), context)</span>
+<span class="sd">        engine.apply_response(state, item_id, response=ask_examinee(item_id), context=context)</span>
 
 <span class="sd">    The stopper is consulted here only for a session that has no responses yet. After that,</span>
 <span class="sd">    :meth:`apply_response` evaluates it once for every new state, and what it records is final.</span>
@@ -1052,6 +1052,7 @@ window.runMermaid = runMermaid;</script>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span>
     <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
     <span class="n">response</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CatStepResult</span><span class="p">:</span>
@@ -1160,7 +1161,7 @@ window.runMermaid = runMermaid;</script>
     <span class="c1"># checked before the provider is asked: a live provider shows the item to an examinee</span>
     <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked_item</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_id</span><span class="p">)</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">response_provider</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="p">,</span> <span class="n">item_id</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(),</span> <span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_response</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_id</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_response</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_id</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span></div>
 
 
   <span class="k">def</span><span class="w"> </span><span class="nf">_checked_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>

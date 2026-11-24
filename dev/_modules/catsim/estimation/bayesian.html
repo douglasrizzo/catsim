@@ -809,6 +809,7 @@ window.runMermaid = runMermaid;</script>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">minimize_scalar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimate</span>
@@ -1139,12 +1140,14 @@ window.runMermaid = runMermaid;</script>
     <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span> <span class="o">=</span> <span class="n">grid</span> <span class="k">if</span> <span class="n">grid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">QuadratureGrid</span><span class="o">.</span><span class="n">uniform</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span> <span class="o">=</span> <span class="n">log_prior</span> <span class="k">if</span> <span class="n">log_prior</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">normal_log_prior</span><span class="p">()</span>
 
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the estimator as a constructor call that names every argument, with None for a default."""</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(grid=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid_argument</span><span class="si">!r}</span><span class="s2">, log_prior=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_prior_argument</span><span class="si">!r}</span><span class="s2">)"</span>
 
 <div class="viewcode-block" id="EAPEstimator.estimate">
 <a class="viewcode-back" href="../../../api/techniques/estimation/eap-estimator.html#catsim.estimation.EAPEstimator.estimate">[docs]</a>
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Estimate</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Return the posterior mean and the posterior standard deviation.</span>
 
@@ -1224,6 +1227,7 @@ window.runMermaid = runMermaid;</script>
     <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_tol</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_bounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span>
 
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the estimator as a constructor call that names every argument, with None for a default prior."""</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(log_prior=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_prior_argument</span><span class="si">!r}</span><span class="s2">, tol=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_tol</span><span class="si">!r}</span><span class="s2">, bounds=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="si">!r}</span><span class="s2">)"</span>
@@ -1261,6 +1265,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="MAPEstimator.estimate">
 <a class="viewcode-back" href="../../../api/techniques/estimation/map-estimator.html#catsim.estimation.MAPEstimator.estimate">[docs]</a>
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Estimate</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Return the posterior mode within the search bounds, the prior mode when no item has been administered.</span>
 

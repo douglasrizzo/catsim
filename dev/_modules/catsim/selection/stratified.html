@@ -800,6 +800,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">abstractmethod</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoItemsAvailableError</span>
@@ -833,6 +834,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  For full family-level details, see :doc:`/api/techniques/selection/stratified-selector`.</span>
 <span class="sd">  """</span>
 
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the selector as a constructor call that names every argument."""</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(test_size=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="si">!r}</span><span class="s2">, n_strata=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_strata</span><span class="si">!r}</span><span class="s2">)"</span>
@@ -935,6 +937,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="StratifiedSelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/stratified-selector.html#catsim.selection.StratifiedSelector.select">[docs]</a>
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the available item of the current stage's stratum whose location is closest to the estimate.</span>
 
@@ -993,11 +996,13 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/a-strat-selector`.</span>
 <span class="sd">  """</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">_stratification_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>  <span class="c1"># noqa: PLR6301</span>
+  <span class="nd">@override</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_stratification_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Stratify by increasing discrimination."""</span>
     <span class="k">return</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">discrimination</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>  <span class="c1"># noqa: PLR6301</span>
+  <span class="nd">@override</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Match item difficulty to the ability estimate."""</span>
     <span class="k">return</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">difficulty</span></div>
 
@@ -1020,7 +1025,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/a-strat-b-block-selector`.</span>
 <span class="sd">  """</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">_blocking_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>  <span class="c1"># noqa: PLR6301</span>
+  <span class="nd">@override</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_blocking_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Block on item difficulty so every stratum spans the difficulty range."""</span>
     <span class="k">return</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">difficulty</span></div>
 
@@ -1043,11 +1049,13 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/max-info-strat-selector`.</span>
 <span class="sd">  """</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">_stratification_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>  <span class="c1"># noqa: PLR6301</span>
+  <span class="nd">@override</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_stratification_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Stratify by increasing maximum information."""</span>
     <span class="k">return</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">max_info_values</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>  <span class="c1"># noqa: PLR6301</span>
+  <span class="nd">@override</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Match the ability at which each item is most informative to the ability estimate."""</span>
     <span class="k">return</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">max_info_thetas</span></div>
 
@@ -1070,7 +1078,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/max-info-b-block-selector`.</span>
 <span class="sd">  """</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">_blocking_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>  <span class="c1"># noqa: PLR6301</span>
+  <span class="nd">@override</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_blocking_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Block on the ability of maximum information so every stratum spans the ability range."""</span>
     <span class="k">return</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">max_info_thetas</span></div>
 

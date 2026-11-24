@@ -797,6 +797,7 @@ window.runMermaid = runMermaid;</script>
 <span></span><span class="sd">"""Progressive and proportional selector implementations."""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span><span class="p">,</span> <span class="n">below_cap</span><span class="p">,</span> <span class="n">check_r_max</span><span class="p">,</span> <span class="n">check_test_size</span><span class="p">,</span> <span class="n">pick_best</span><span class="p">,</span> <span class="n">remaining</span>
@@ -900,6 +901,7 @@ window.runMermaid = runMermaid;</script>
     <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration</span> <span class="o">=</span> <span class="n">_check_acceleration</span><span class="p">(</span><span class="n">acceleration</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span> <span class="o">=</span> <span class="n">check_r_max</span><span class="p">(</span><span class="n">r_max</span><span class="p">)</span>
 
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the selector as a constructor call that names every argument."""</span>
     <span class="k">return</span> <span class="p">(</span>
@@ -924,6 +926,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="ProgressiveSelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/progressive-selector.html#catsim.selection.ProgressiveSelector.select">[docs]</a>
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the available item with the largest blend of a random draw and its scaled information.</span>
 
@@ -999,6 +1002,7 @@ window.runMermaid = runMermaid;</script>
     <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration</span> <span class="o">=</span> <span class="n">_check_acceleration</span><span class="p">(</span><span class="n">acceleration</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span> <span class="o">=</span> <span class="n">check_r_max</span><span class="p">(</span><span class="n">r_max</span><span class="p">)</span>
 
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the selector as a constructor call that names every argument."""</span>
     <span class="k">return</span> <span class="p">(</span>
@@ -1023,6 +1027,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="ProportionalSelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/proportional-selector.html#catsim.selection.ProportionalSelector.select">[docs]</a>
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return an available item drawn with probability proportional to its information raised to the schedule's power.</span>
 

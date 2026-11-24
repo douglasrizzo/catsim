@@ -801,6 +801,8 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseStopper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.length</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLengthStopper</span>
 
@@ -888,6 +890,7 @@ window.runMermaid = runMermaid;</script>
     <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"stoppers"</span><span class="p">,</span> <span class="n">stoppers</span><span class="p">)</span>
     <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"min_items"</span><span class="p">,</span> <span class="n">min_items</span><span class="p">)</span>
 
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the rule as the call that builds it."""</span>
     <span class="n">stoppers</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">stopper</span><span class="p">)</span> <span class="k">for</span> <span class="n">stopper</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stoppers</span><span class="p">)</span>
@@ -895,6 +898,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="StopRule.stop">
 <a class="viewcode-back" href="../../../api/techniques/stopping/index.html#catsim.stopping.StopRule.stop">[docs]</a>
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return whether the test has `min_items` items and any of the stoppers holds.</span>
 

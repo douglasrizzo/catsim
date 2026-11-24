@@ -806,6 +806,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.integrate</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrationWarning</span><span class="p">,</span> <span class="n">quad</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">brentq</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.special</span><span class="w"> </span><span class="kn">import</span> <span class="n">expit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimate</span>
@@ -813,7 +814,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-  <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
 
   <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">..typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
@@ -868,6 +869,7 @@ window.runMermaid = runMermaid;</script>
     <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_tol</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_bounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span>
 
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the estimator as a constructor call that names every argument."""</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(tol=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_tol</span><span class="si">!r}</span><span class="s2">, bounds=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="si">!r}</span><span class="s2">)"</span>
@@ -891,15 +893,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        The likelihood score plus :math:`J(\theta) / [2 I(\theta)]`, one value per ``theta``.</span>
 <span class="sd">    """</span>
     <span class="n">thetas</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))[:,</span> <span class="kc">None</span><span class="p">]</span>
-    <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="n">thetas</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
-    <span class="c1"># The logistic and its complement both come from the logit, so Q and P Q stay exact where P</span>
-    <span class="c1"># rounds to 1 instead of losing their digits to 1 - P</span>
-    <span class="n">logistic</span><span class="p">,</span> <span class="n">complement</span> <span class="o">=</span> <span class="n">expit</span><span class="p">(</span><span class="n">z</span><span class="p">),</span> <span class="n">expit</span><span class="p">(</span><span class="o">-</span><span class="n">z</span><span class="p">)</span>
-    <span class="n">p</span> <span class="o">=</span> <span class="n">c</span> <span class="o">+</span> <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span> <span class="o">*</span> <span class="n">logistic</span>
-    <span class="n">q</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">d</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span> <span class="o">*</span> <span class="n">complement</span>
-    <span class="n">dp</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span> <span class="o">*</span> <span class="n">logistic</span> <span class="o">*</span> <span class="n">complement</span>
-    <span class="n">d2p</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">dp</span> <span class="o">*</span> <span class="p">(</span><span class="n">complement</span> <span class="o">-</span> <span class="n">logistic</span><span class="p">)</span>
+    <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">dp</span><span class="p">,</span> <span class="n">d2p</span> <span class="o">=</span> <span class="n">_response_curves</span><span class="p">(</span><span class="n">thetas</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
     <span class="n">pq</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">p</span> <span class="o">*</span> <span class="n">q</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">tiny</span><span class="p">)</span>
 
     <span class="c1"># u - P is Q for a correct response and -P for an incorrect one</span>
@@ -912,6 +906,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="WarmLikelihoodEstimator.estimate">
 <a class="viewcode-back" href="../../../api/techniques/estimation/warm-wle.html#catsim.estimation.WarmLikelihoodEstimator.estimate">[docs]</a>
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Estimate</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Return the root of Warm's modified score equation, or ``context.theta`` when no item has been administered.</span>
 
@@ -966,22 +961,43 @@ window.runMermaid = runMermaid;</script>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
       <span class="n">theta_hat</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="c1"># The modified score is the derivative of the weighted log-likelihood, so integrating it</span>
-      <span class="c1"># from the lower bound ranks the candidates by weighted likelihood.</span>
-      <span class="n">heights</span> <span class="o">=</span> <span class="p">[]</span>
-      <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
-        <span class="c1"># With full_output, quad returns its convergence warning instead of raising it</span>
-        <span class="n">height</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="o">*</span><span class="n">message</span> <span class="o">=</span> <span class="n">quad</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">candidate</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">full_output</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">heights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
-        <span class="n">evaluations</span> <span class="o">+=</span> <span class="n">info</span><span class="p">[</span><span class="s2">"neval"</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">message</span><span class="p">:</span>
-          <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">IntegrationWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-      <span class="n">theta_hat</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">heights</span><span class="p">))]</span>
+      <span class="n">theta_hat</span><span class="p">,</span> <span class="n">ranking_evaluations</span> <span class="o">=</span> <span class="n">_most_likely</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">candidates</span><span class="p">)</span>
+      <span class="n">evaluations</span> <span class="o">+=</span> <span class="n">ranking_evaluations</span>
 
     <span class="n">theta_hat</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">theta_hat</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">Estimate</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="n">theta_hat</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="n">irt</span><span class="o">.</span><span class="n">see</span><span class="p">(</span><span class="n">theta_hat</span><span class="p">,</span> <span class="n">items</span><span class="p">),</span> <span class="n">evaluations</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">evaluations</span><span class="p">))</span></div>
 </div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_response_curves</span><span class="p">(</span><span class="n">thetas</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">FloatArray</span><span class="p">,</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">FloatArray</span><span class="p">]:</span>
+<span class="w">  </span><span class="sd">"""Return P, Q and the first and second derivatives of P, for every ability against every item."""</span>
+  <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+  <span class="n">z</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="n">thetas</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
+  <span class="c1"># The logistic and its complement both come from the logit, so Q and P Q stay exact where P</span>
+  <span class="c1"># rounds to 1 instead of losing their digits to 1 - P</span>
+  <span class="n">logistic</span><span class="p">,</span> <span class="n">complement</span> <span class="o">=</span> <span class="n">expit</span><span class="p">(</span><span class="n">z</span><span class="p">),</span> <span class="n">expit</span><span class="p">(</span><span class="o">-</span><span class="n">z</span><span class="p">)</span>
+  <span class="n">p</span> <span class="o">=</span> <span class="n">c</span> <span class="o">+</span> <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span> <span class="o">*</span> <span class="n">logistic</span>
+  <span class="n">q</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">d</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span> <span class="o">*</span> <span class="n">complement</span>
+  <span class="n">dp</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span> <span class="o">*</span> <span class="n">logistic</span> <span class="o">*</span> <span class="n">complement</span>
+  <span class="k">return</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">dp</span><span class="p">,</span> <span class="n">a</span> <span class="o">*</span> <span class="n">dp</span> <span class="o">*</span> <span class="p">(</span><span class="n">complement</span> <span class="o">-</span> <span class="n">logistic</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_most_likely</span><span class="p">(</span><span class="n">score</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span> <span class="n">low</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">candidates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">  </span><span class="sd">"""Return the candidate of highest weighted likelihood and the score evaluations spent ranking the candidates."""</span>
+  <span class="c1"># The modified score is the derivative of the weighted log-likelihood, so integrating it</span>
+  <span class="c1"># from the lower bound ranks the candidates by weighted likelihood.</span>
+  <span class="n">heights</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">evaluations</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+    <span class="c1"># With full_output, quad returns its convergence warning instead of raising it; stacklevel 3</span>
+    <span class="c1"># points the warning at the caller of WarmLikelihoodEstimator.estimate.</span>
+    <span class="n">height</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="o">*</span><span class="n">message</span> <span class="o">=</span> <span class="n">quad</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">candidate</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">full_output</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">heights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+    <span class="n">evaluations</span> <span class="o">+=</span> <span class="n">info</span><span class="p">[</span><span class="s2">"neval"</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">message</span><span class="p">:</span>
+      <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">IntegrationWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">candidates</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">heights</span><span class="p">))],</span> <span class="n">evaluations</span>
 </pre></div>
 
                 </article>

@@ -38,7 +38,7 @@ built-in stoppers checked bank exhaustion themselves, so a bank that really ran 
 
   ```python
   while (item_id := engine.select_next(state, context)) is not None:
-    engine.apply_response(state, item_id, response, context)
+    engine.apply_response(state, item_id, response=response, context=context)
   ```
 
   `step()` is the same three moves: select, get the response, apply it.

@@ -797,6 +797,7 @@ window.runMermaid = runMermaid;</script>
 <span></span><span class="sd">"""Information-based selectors: maximum information, Urry's rule and interval information."""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
@@ -835,6 +836,7 @@ window.runMermaid = runMermaid;</script>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span> <span class="o">=</span> <span class="n">check_r_max</span><span class="p">(</span><span class="n">r_max</span><span class="p">)</span>
 
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the selector as a constructor call that names every argument."""</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(r_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="si">!r}</span><span class="s2">)"</span>
@@ -852,6 +854,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="MaxInfoSelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/max-info-selector.html#catsim.selection.MaxInfoSelector.select">[docs]</a>
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the most informative remaining item at the current estimate, among those below ``r_max``.</span>
 
@@ -885,13 +888,15 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/urry-selector`.</span>
 <span class="sd">  """</span>
 
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the selector as a constructor call that names every argument."""</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">()"</span>
 
 <div class="viewcode-block" id="UrrySelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/urry-selector.html#catsim.selection.UrrySelector.select">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>  <span class="c1"># noqa: PLR6301</span>
+  <span class="nd">@override</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the remaining item whose difficulty is closest to the current estimate.</span>
 
 <span class="sd">    Parameters</span>
@@ -942,6 +947,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/interval-info-selector`.</span>
 <span class="sd">  """</span>
 
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the selector as a constructor call that names every argument."""</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(interval=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_interval</span><span class="si">!r}</span><span class="s2">, confidence=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_confidence</span><span class="si">!r}</span><span class="s2">)"</span>
@@ -985,6 +991,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="IntervalInfoSelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/interval-info-selector.html#catsim.selection.IntervalInfoSelector.select">[docs]</a>
+  <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the remaining item with the largest information integrated over the interval.</span>
 

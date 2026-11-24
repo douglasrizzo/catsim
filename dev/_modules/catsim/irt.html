@@ -1322,13 +1322,12 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      :caption: Item information curves for two distinct items. The point of maximum information denoted by a dot.</span>
 
 <span class="sd">      import matplotlib.pyplot as plt</span>
-<span class="sd">      from catsim.item_bank import ItemBank</span>
-<span class="sd">      from catsim.plot import item_curve, PlotType</span>
-<span class="sd">      n_items = 2</span>
-<span class="sd">      item_bank = ItemBank.generate(n_items)</span>
-<span class="sd">      fig, axes = plt.subplots(n_items, 1)</span>
-<span class="sd">      for idx, item in enumerate(item_bank.items):</span>
-<span class="sd">        item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.IIC, max_info=True, ax=axes[idx])</span>
+<span class="sd">      from catsim import ItemBank</span>
+<span class="sd">      from catsim.plot import PlotType, item_curve</span>
+<span class="sd">      item_bank = ItemBank.generate(2)</span>
+<span class="sd">      fig, axes = plt.subplots(2, 1, figsize=(6.4, 8))</span>
+<span class="sd">      for item, ax in zip(item_bank.items, axes):</span>
+<span class="sd">        item_curve(item, kind=PlotType.IIC, ax=ax)</span>
 <span class="sd">      plt.tight_layout()</span>
 <span class="sd">      plt.show()</span>
 
