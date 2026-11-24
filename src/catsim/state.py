@@ -35,20 +35,36 @@ class StopReason(StrEnum):
 class CatSessionState:
   """Mutable runtime state for a single examinee CAT session.
 
-  ``session_id`` is whatever hashable value the application identifies the session by, such as an
-  int, a str or a UUID. ``estimates`` starts with the initial estimate (which
-  :meth:`~catsim.CatEngine.start_session` records with an infinite standard error and no
-  evaluations) and gains the :class:`~catsim.Estimate` the estimator returned for each
-  response; its last entry is the current estimate. A restored session's estimates are trusted
-  as given. A session runs
-  while ``stop_reason`` is None.
+  :meth:`~catsim.CatEngine.start_session` creates a session and the engine advances it in place. An
+  application that saves a session restores it by passing the saved fields back; a restored
+  session's estimates are trusted as given. A session runs while ``stop_reason`` is None.
 
-  ``excluded_items`` holds the items the session must not be given although it has not had them.
-  An application may fill it before the first item, for example with the items the examinee saw in
-  an earlier attempt; during the test it only grows, as the engine adds the items its exposure
-  control declines. Removing an item from it during the test is not supported. The engine passes
-  the items to every strategy and raises :class:`~catsim.ExcludedItemError` for a
-  response to one. Their indices are checked against the item bank at the session's next step.
+  Parameters
+  ----------
+  session_id : Hashable
+      Whatever hashable value the application identifies the session by, such as an int, a str or
+      a UUID.
+  estimates : list of Estimate
+      The initial estimate, which :meth:`~catsim.CatEngine.start_session` records with an infinite
+      standard error and no evaluations, then the :class:`~catsim.Estimate` the estimator returned
+      for each response. The last entry is the current estimate.
+  true_theta : float or None, optional
+      True ability of a simulated examinee. Default is None.
+  administered_items : list of int, optional
+      Indices of the items given so far, in order. Default is an empty list.
+  responses : list of bool, optional
+      The responses to the administered items, in the same order. Default is an empty list.
+  stop_reason : StopReason or None, optional
+      Why the session ended, or None while it runs. The reason's string value, as a saved session
+      holds it, is accepted. Default is None.
+  excluded_items : list of int, optional
+      Items the session must not be given although it has not had them. An application may fill it
+      before the first item, for example with the items the examinee saw in an earlier attempt;
+      during the test it only grows, as the engine adds the items its exposure control declines.
+      Removing an item from it during the test is not supported. The engine passes the items to
+      every strategy and raises :class:`~catsim.ExcludedItemError` for a response to one. Their
+      indices are checked against the item bank at the session's next step. Default is an empty
+      list.
 
   Raises
   ------
@@ -145,7 +161,27 @@ class CatSessionState:
 
 @dataclass(slots=True, frozen=True)
 class CatSessionSnapshot:
-  """Immutable, hashable copy of a session at a specific point in time."""
+  """Immutable, hashable copy of a session at a specific point in time.
+
+  :meth:`CatSessionState.snapshot` builds one, with the session's lists as tuples.
+
+  Parameters
+  ----------
+  session_id : Hashable
+      The session's identifier.
+  estimates : tuple of Estimate
+      The estimates up to the snapshot, the initial one first.
+  true_theta : float or None
+      True ability of a simulated examinee, or None.
+  administered_items : tuple of int
+      Indices of the items given up to the snapshot, in order.
+  responses : tuple of bool
+      The responses to the administered items, in the same order.
+  stop_reason : StopReason or None
+      Why the session had ended, or None if it was running.
+  excluded_items : tuple of int, optional
+      Items the session must not be given although it has not had them. Default is an empty tuple.
+  """
 
   session_id: Hashable
   estimates: tuple[Estimate, ...]
@@ -180,8 +216,15 @@ class CatSessionSnapshot:
 class CatStepResult:
   """Result of one CAT step: the item administered, its response and the session as the step left it.
 
-  ``selected_item_id`` and ``response`` are None for a step that administered nothing because the
-  session had ended.
+  Parameters
+  ----------
+  session : CatSessionSnapshot
+      The session as the step left it.
+  selected_item_id : int or None
+      Index of the item the step administered, or None for a step that administered nothing because
+      the session had ended.
+  response : bool or None
+      The response to that item, or None when the step administered nothing.
   """
 
   session: CatSessionSnapshot
@@ -305,12 +348,24 @@ class ExposureTracker:
     self.n_sessions += 1
 
   def record(self, item_id: int) -> None:
-    """Record one administration for an item, which is also one proposal of it."""
+    """Record one administration for an item, which is also one proposal of it.
+
+    Parameters
+    ----------
+    item_id : int
+        Index of the administered item.
+    """
     self.counts[item_id] += 1
     self.proposals[item_id] += 1
 
   def record_decline(self, item_id: int) -> None:
-    """Record one proposal of an item that the exposure control declined; its administrations are unchanged."""
+    """Record one proposal of an item that the exposure control declined; its administrations are unchanged.
+
+    Parameters
+    ----------
+    item_id : int
+        Index of the declined item.
+    """
     self.proposals[item_id] += 1
 
   def rates(self) -> FloatArray:

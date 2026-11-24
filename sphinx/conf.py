@@ -132,3 +132,21 @@ nitpick_ignore = [
   ("py:class", "numpy._typing._array_like.ArrayLike"),
   ("py:class", "npt.ArrayLike"),
 ]
+
+# The build fails for a public callable whose docstring leaves out a parameter (numpydoc's PR01).
+# Ruff's DOC rules check the sections a docstring has against the code, not that they exist.
+numpydoc_validation_checks = {"PR01"}
+# A class documents its constructor's parameters; autodoc renders the class docstring alone, so
+# __init__ is never checked.
+numpydoc_validation_exclude = {
+  # numpydoc reads the call signature of an Enum's or a Protocol's metaclass as the class's
+  # parameters, and that of an array alias as the alias's.
+  r"^catsim\.(IrtModel|StopReason|ResponseProvider)$",
+  r"^catsim\.selection\.(CapFallback|ClusterMethod)$",
+  r"^catsim\.plot\.PlotType$",
+  r"^catsim\.typing\.(FloatArray|IntArray)$",
+  # Autodoc reads the docstrings of the names a module imports before it leaves them off the page.
+  r"^catsim\.irt\.overload$",
+  r"^catsim\.plot\.(Axes|MaxNLocator|StrEnum|assert_never)$",
+  r"^catsim\.typing\.Any$",
+}

@@ -30,9 +30,15 @@ if TYPE_CHECKING:
 class RunContext:
   """Runtime services shared by CAT sessions in one run.
 
-  ``exposure_tracker`` counts sessions, item administrations and proposals across the run and gives
-  selectors the exposure rates their ``r_max`` cap is checked against. Without one, selectors get no
-  rates and apply no cap.
+  Parameters
+  ----------
+  rng : numpy.random.Generator
+      The run's random generator, which the initializer, the selector, the exposure control and the
+      response provider draw from.
+  exposure_tracker : ExposureTracker or None, optional
+      Counts sessions, item administrations and proposals across the run and gives selectors the
+      exposure rates their ``r_max`` cap is checked against. Without one, selectors get no rates and
+      apply no cap. Default is None.
   """
 
   rng: numpy.random.Generator
@@ -443,7 +449,22 @@ class CatEngine:
     response_provider: ResponseProvider,
     context: RunContext,
   ) -> CatSessionState:
-    """Run a session until a stop condition is reached."""
+    """Step a session until it stops.
+
+    Parameters
+    ----------
+    state : CatSessionState
+        The session to run, which this call advances in place.
+    response_provider : ResponseProvider
+        Source of the examinee's responses.
+    context : RunContext
+        Runtime services of the run.
+
+    Returns
+    -------
+    CatSessionState
+        ``state``, stopped, with its ``stop_reason`` set.
+    """
     while not state.is_stopped:
       self.step(state, response_provider, context)
     return state
