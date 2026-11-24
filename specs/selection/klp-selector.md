@@ -2,7 +2,7 @@
 **Module:** `catsim.selection.kl.KLPSelector` (planned)
 **Reference:** Chang and Ying (1996)
 **Last validated:** 2026-11-23, against Chang & Ying (1996); Magis & Barrada (2017); catR 3.17 (`KL.R`, `nextItem.R`).
-**Implementation guidance:** not yet updated to the 1.0 strategy contract (M22).
+**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in) on 2026-11-24.
 
 # Posterior Kullback-Leibler Selector
 
@@ -106,8 +106,8 @@ Equation 9), not the window of catsim's KL selector.
 Any correct implementation must satisfy the following properties:
 
 1. KLP uses the posterior over theta, not a uniform window, as its integration weight.
-2. The KL kernel still depends on `est_theta` as the reference point inside the divergence.
-3. The full KL table cannot be precomputed across steps because it changes with `est_theta`.
+2. The KL kernel still depends on the current estimate, the context's `theta`, as the reference point inside the divergence.
+3. The full KL table cannot be precomputed across steps because it changes with the current estimate.
 4. With a diffuse prior and little response information, the selector behaves more globally; with a concentrated posterior, it becomes increasingly local.
 5. Exposure filtering applies before the final argmax, with fallback to the unrestricted remaining pool.
 
@@ -124,131 +124,142 @@ This section is for contributors and agents implementing this technique.
 It is removed when the spec is promoted to "Implemented" status.
 :::
 
-**Proposed location:** `src/catsim/selection/kl.py`
+**Proposed location:** `src/catsim/selection/kl.py`, next to `KLSelector`.
 
 **Mock implementation:**
 
 ```python
-# src/catsim/selection/kl.py  (alongside KLSelector from card 03)
-"""Posterior Kullback-Leibler selector."""
+# src/catsim/selection/kl.py (added to the existing module)
 
 import numpy
+from scipy.special import log_expit
 
-from .._typing import FloatArray
-from ..estimation.bayesian import (
-  LogPrior,
-  QuadratureGrid,
-  normal_log_prior,
-  posterior,
-)
-from ..exceptions import NoItemsAvailableError
-from ..item_bank import ItemBank
-from .base import BaseSelector
-from .kl import _kl_integrand  # reuse the kernel from card 03
+from ..context import StepContext
+from ..estimation.bayesian import LogPrior, QuadratureGrid, normal_log_prior, posterior
+from ..typing import FloatArray
+from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
+
+
+def _log_probabilities_hpc(theta: FloatArray, items: FloatArray) -> tuple[FloatArray, FloatArray]:
+  """Return the log-probabilities of a correct and an incorrect response, one row per ability and one column per item.
+
+  The vectorized form of ``_log_probabilities``: both come from the logit, so the log-probability of
+  an incorrect response stays exact where the probability of a correct one rounds to 1.
+
+  Returns
+  -------
+  tuple[numpy.ndarray, numpy.ndarray]
+      The log-probabilities of a correct and of an incorrect response.
+  """
+  a, b, c, d = items.T
+  z = a * (theta[:, numpy.newaxis] - b)
+  # c = 0 and d = 1 give log(0) = -inf, which logaddexp handles exactly
+  with numpy.errstate(divide="ignore"):
+    log_c, log_1md, log_dmc = numpy.log(c), numpy.log1p(-d), numpy.log(d - c)
+  return numpy.logaddexp(log_c, log_dmc + log_expit(z)), numpy.logaddexp(log_1md, log_dmc + log_expit(-z))
+
+
+def _kl_divergences(nodes: FloatArray, theta_hat: float, items: FloatArray) -> FloatArray:
+  """Return the divergence K_i(theta_q || theta_hat), one row per node and one column per item.
+
+  Returns
+  -------
+  numpy.ndarray
+      The divergences, of shape ``(len(nodes), len(items))``.
+  """
+  log_p_hat, log_q_hat = _log_probabilities_hpc(numpy.array([theta_hat]), items)
+  log_p, log_q = _log_probabilities_hpc(nodes, items)
+  return numpy.exp(log_p_hat) * (log_p_hat - log_p) + numpy.exp(log_q_hat) * (log_q_hat - log_q)
 
 
 class KLPSelector(BaseSelector):
-  """Posterior-weighted Kullback-Leibler selector.
+  """Posterior Kullback-Leibler item selector.
+
+  Each candidate's KL divergence from the current estimate is summed over a quadrature grid,
+  weighted by the posterior of the responses so far, and the item with the largest sum is selected.
 
   Parameters
   ----------
-  grid : QuadratureGrid or None
-      Quadrature grid. Defaults to ``QuadratureGrid.uniform()``.
-  log_prior : callable or None
-      Vectorized log-density of the prior. Defaults to N(0, 1).
-  r_max : float
-      Exposure cap.
+  grid : QuadratureGrid or None, optional
+      Grid on which the posterior is computed. Default is ``QuadratureGrid.uniform()``.
+  log_prior : LogPrior or None, optional
+      Vectorized log-density of the prior. Default is ``normal_log_prior()``, the standard normal.
+  r_max : float, optional
+      Maximum exposure rate for items. Items with exposure rates >= r_max are only selected when no
+      other item remains. Default is 1 (no restriction).
+
+  Raises
+  ------
+  ValueError
+      If r_max is not in (0, 1].
   """
 
-  def __init__(
-    self,
-    grid: QuadratureGrid | None = None,
-    log_prior: LogPrior | None = None,
-    r_max: float = 1.0,
-  ) -> None:
-    if not 0 <= r_max <= 1:
-      raise ValueError(f"r_max must be between 0 and 1, got {r_max}")
-    super().__init__()
+  def __init__(self, grid: QuadratureGrid | None = None, log_prior: LogPrior | None = None, r_max: float = 1.0) -> None:
+    # Kept as given for the repr, as EAPEstimator does: the default grid's repr would list every
+    # node, and a prior function has no source form.
+    self._grid_argument = grid
+    self._log_prior_argument = log_prior
     self._grid = grid if grid is not None else QuadratureGrid.uniform()
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
-    self._r_max = float(r_max)
+    self._r_max = check_r_max(r_max)
 
-  def __str__(self) -> str:
-    return "Posterior Kullback-Leibler Selector"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument, with None for a default."""
+    return (
+      f"{type(self).__name__}(grid={self._grid_argument!r}, log_prior={self._log_prior_argument!r}, "
+      f"r_max={self._r_max!r})"
+    )
 
-  # ---- core kernel ----
-  def _kl_table(self, item_bank: ItemBank, theta_hat: float) -> FloatArray:
-    """(n_items, Q) matrix of KL(theta || theta_hat) at every grid node.
+  def select(self, context: StepContext) -> int:
+    """Return the available item with the largest posterior-weighted KL divergence from the current estimate.
 
-    Unlike MPWI's info table, this matrix is theta-hat dependent, so it cannot
-    be precomputed once per item bank -- rebuild each step.
+    Parameters
+    ----------
+    context : StepContext
+        The session to select for.
+
+    Returns
+    -------
+    int
+        Index of the selected item.
     """
-    nodes = self._grid.nodes
-    out = numpy.empty((item_bank.n_items, nodes.size), dtype=float)
-    for i in range(item_bank.n_items):
-      a, b, c, d = item_bank.items[i, :4]
-      for q, t in enumerate(nodes):
-        out[i, q] = _kl_integrand(float(t), theta_hat, a, b, c, d)
-    return out
-
-  def _get_posterior(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    response_vector: list[bool],
-  ) -> FloatArray:
-    if not administered_items:
-      pp = self._log_prior(self._grid.nodes) + numpy.log(self._grid.weights)
-      pp -= pp.max()
-      pp = numpy.exp(pp)
-      return pp / pp.sum()
-    items = item_bank.items[administered_items, :4]
-    return posterior(response_vector, items, self._grid, self._log_prior)
-
-  def select(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    est_theta: float,
-    rng: numpy.random.Generator | None = None,  # noqa: ARG002
-    exposure_rates: FloatArray | None = None,
-    response_vector: list[bool] | None = None,
-  ) -> int | None:
-    if response_vector is None:
-      raise ValueError("KLPSelector requires the response_vector to compute the posterior.")
-
-    pp = self._get_posterior(item_bank, administered_items, response_vector)
-    kl_table = self._kl_table(item_bank, est_theta)
-    # KLP_i = sum_q KL(theta_q || theta_hat)_i * p(theta_q | u)
-    scores = kl_table @ pp
-
-    candidate_mask = numpy.ones(item_bank.n_items, dtype=bool)
-    candidate_mask[administered_items] = False
-    if exposure_rates is None:
-      exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
-    pool = candidate_mask & (exposure_rates < self._r_max)
-    if not pool.any():
-      pool = candidate_mask
-    if not pool.any():
-      raise NoItemsAvailableError("There are no more items to apply.")
-
-    candidates = numpy.flatnonzero(pool)
-    return int(candidates[int(scores[candidates].argmax())])
+    candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
+    item_bank = context.item_bank
+    post = posterior(context.responses, item_bank.get_items(context.administered_items), self._grid, self._log_prior)
+    divergences = _kl_divergences(self._grid.nodes, context.theta, item_bank.get_items(candidates))
+    return pick_best(candidates, post @ divergences, context.rng)
 ```
 
 **Implementation notes:**
 
-- Unlike MPWI, the per-step KL table depends on `est_theta` and cannot be cached once per bank.
-- This selector belongs with the KL selector because they share the KL kernel.
-- Compute the posterior from the session's responses with `posterior()`. Estimators keep no per-session posterior ({doc}`ADR-0003 </adr/0003-runtime-state-ownership>`), and one vectorized call over the grid is cheap.
-
-**Dependencies:**
-
-- Planned card 01 (`Bayesian Estimation Infrastructure`)
-- Planned card 03 (`KLSelector`) for kernel reuse
+- The posterior comes from the context's responses at every call: estimators keep no per-session
+  posterior ({doc}`ADR-0003 </adr/0003-runtime-state-ownership>`), and `posterior()` is one
+  vectorized pass over the grid. With no responses it is the prior on the grid.
+- The reference point of the divergence is the context's `theta`, the engine's current estimate
+  from whichever estimator it runs, not the posterior mean; the definition's $\hat\theta$ is the
+  current estimate.
+- The divergence table depends on the current estimate, so it is computed for the candidates at
+  every call and not cached (Contract 3).
+- `_log_probabilities_hpc` vectorizes `kl.py`'s `_log_probabilities`, the per-item terms of
+  `irt.log_likelihood_hpc`. Share one implementation among the three rather than adding a copy.
+- The selection and estimation layers do not import each other (`[tool.importlinter]` in
+  `pyproject.toml`). Add `"catsim.selection.kl -> catsim.estimation.bayesian"` to that contract's
+  `ignore_imports`, as `MEISelector` does for its estimator, or move the grid and posterior helpers
+  to a lower layer.
+- The default grid is catsim's (121 nodes on $[-6, 6]$, equal weights). catR's 33 nodes on
+  $[-4, 4]$ with the trapezoidal rule are a `QuadratureGrid` with trapezoid weights, for
+  comparisons with catR.
 
 **Testing notes:**
 
-- Compare against broad-window KL selection under diffuse priors.
-- Verify exposure-cap fallback behavior.
-- Confirm that the selector still uses `est_theta` as the KL reference point.
+- Compare one score with a brute-force reference: integrate $K_i(\theta \,\|\, \hat\theta)$ times the
+  normalized posterior density with `scipy.integrate.quad` for a short response pattern, and check
+  that the selected item is the one with the largest integral.
+- Contract 2: two contexts that differ only in `theta` select different items on a bank built for
+  it.
+- Contract 4: with a narrow posterior centered at the context's `theta` (a long response pattern),
+  the selection approaches `MaxInfoSelector`'s, because the divergence near $\hat\theta$ is about
+  $I_i(\hat\theta)(\theta - \hat\theta)^2/2$; with no responses it differs from it on a bank built
+  for it.
+- Contract 5: a cap that leaves some candidates, and one that leaves none, falling back to all
+  remaining items.
