@@ -254,41 +254,30 @@ class ItemBank:
     """
     return self._items[:, 3]
 
-  def get_item(self, index: int) -> FloatArray:
-    """Get parameters for a specific item.
-
-    Parameters
-    ----------
-    index : int
-        The index of the item (0-based).
-
-    Returns
-    -------
-    numpy.ndarray
-        Array containing [a, b, c, d] for the item.
-
-    Raises
-    ------
-    IndexError
-        If index is out of bounds.
-    """
-    if index < 0 or index >= self.n_items:
-      msg = f"Item index {index} out of bounds for bank with {self.n_items} items"
-      raise IndexError(msg)
-    return self._items[index]
-
   def get_items(self, indices: npt.ArrayLike) -> FloatArray:
-    """Get parameters for multiple items.
+    """Return the parameter rows of the given items, in the order of ``indices``.
+
+    Any sequence of item indices is read as a list of items, so a tuple such as a context's
+    ``administered_items`` gives its rows and an empty one gives no rows, whereas ``bank[(1, 2)]`` is
+    one parameter (row 1, column 2) and ``bank[()]`` is every item.
 
     Parameters
     ----------
-    indices : npt.ArrayLike
-        Array-like (list, tuple, or numpy array) of item indices (int type).
+    indices : array-like of int
+        Item indices: a list, tuple or integer array, possibly empty.
 
     Returns
     -------
     numpy.ndarray
-        Array of item parameters with shape (len(indices), 4).
+        A copy of the rows, shape ``(len(indices), 4)``.
+
+    Examples
+    --------
+    >>> bank = ItemBank.generate(5, rng=0)
+    >>> bank.get_items((1, 2)).shape
+    (2, 4)
+    >>> bank.get_items(()).shape
+    (0, 4)
     """
     return self._items[numpy.asarray(indices, dtype=int)]
 
@@ -454,7 +443,7 @@ class ItemBank:
         array.flags.writeable = False
 
   def __getitem__(self, index: int | slice | list[int] | IntArray) -> FloatArray:
-    """Get item(s) by index (allows bank[i] or bank[indices])."""
+    """Index the item matrix as NumPy does: ``bank[i]`` is item ``i``'s read-only row, ``bank[-1]`` the last item's."""
     return self._items[index]
 
 

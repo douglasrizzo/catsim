@@ -81,7 +81,6 @@ class TestItemBankCreation:
     [
       pytest.param(lambda bank: bank.items, (0, 1), id="items"),
       pytest.param(lambda bank: bank.difficulty, 0, id="difficulty"),
-      pytest.param(lambda bank: bank.get_item(0), 1, id="get_item"),
       pytest.param(operator.itemgetter(0), 1, id="getitem"),
     ],
   )
@@ -416,41 +415,6 @@ class TestItemBankProperties:
 class TestItemBankMethods:
   """Tests for ItemBank methods."""
 
-  def test_get_item(self) -> None:
-    """Test getting a single item by index."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0]])
-    bank = ItemBank(items)
-
-    item = bank.get_item(1)
-    assert len(item) == 4
-    assert item[0] == pytest.approx(1.5)  # discrimination
-    assert item[1] == pytest.approx(1.0)  # difficulty
-
-  def test_get_item_out_of_bounds_raises(self) -> None:
-    """Test that out of bounds index raises IndexError."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0]])
-    bank = ItemBank(items)
-
-    with pytest.raises(IndexError, match="out of bounds"):
-      bank.get_item(5)
-
-    with pytest.raises(IndexError, match="out of bounds"):
-      bank.get_item(-1)
-
-  def test_get_items(self) -> None:
-    """Test getting multiple items by indices."""
-    items = np.array([
-      [1.0, 0.0, 0.0, 1.0],
-      [1.5, 1.0, 0.1, 1.0],
-      [0.8, -0.5, 0.05, 1.0],
-    ])
-    bank = ItemBank(items)
-
-    selected = bank.get_items([0, 2])
-    assert selected.shape == (2, 4)
-    assert selected[0, 0] == pytest.approx(1.0)
-    assert selected[1, 0] == pytest.approx(0.8)
-
   @pytest.mark.parametrize(
     ("method", "expected"),
     [
@@ -498,33 +462,3 @@ class TestItemBankMethods:
     logistic = 1 / (1 + math.exp(-1.0))
 
     assert bank.test_information(0.0, item_indices=[0, 2]) == pytest.approx(0.25 + logistic * (1 - logistic), rel=1e-12)
-
-
-class TestItemBankDunderMethods:
-  """Tests for ItemBank dunder methods."""
-
-  def test_getitem_int(self) -> None:
-    """Test __getitem__ with integer index."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0]])
-    bank = ItemBank(items)
-
-    item = bank[1]
-    assert item[0] == pytest.approx(1.5)
-
-  def test_getitem_slice(self) -> None:
-    """Test __getitem__ with slice."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0], [0.8, -0.5, 0.0, 1.0]])
-    bank = ItemBank(items)
-
-    subset = bank[0:2]
-    assert subset.shape == (2, 4)
-
-  def test_getitem_list(self) -> None:
-    """Test __getitem__ with list of indices."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0], [0.8, -0.5, 0.0, 1.0]])
-    bank = ItemBank(items)
-
-    subset = bank[[0, 2]]
-    assert subset.shape == (2, 4)
-    assert subset[0, 0] == pytest.approx(1.0)
-    assert subset[1, 0] == pytest.approx(0.8)

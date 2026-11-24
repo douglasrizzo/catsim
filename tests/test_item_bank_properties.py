@@ -116,12 +116,16 @@ def test_test_information_sums_every_item_by_default(params: np.ndarray, theta: 
 
 @given(params=item_params_matrix(min_items=3, max_items=12), data=st.data())
 @BANK_SETTINGS
-def test_get_items_preserves_row_order(params: np.ndarray, data) -> None:
-  n = params.shape[0]
-  k = data.draw(st.integers(min_value=1, max_value=n))
-  indices = list(range(k))
-  bank = ItemBank(params, validate=True)
-  subset = bank.get_items(indices)
+def test_get_items_gives_one_row_per_index_in_order(params: np.ndarray, data: st.DataObject) -> None:
+  """A tuple of indices, in any order, repeated or empty, gives row k = the parameters of item indices[k].
+
+  Indexing the matrix with the tuple itself reads (1, 2) as one parameter and () as every item, and sorting or
+  deduplicating the indices reorders or drops rows.
+  """
+  indices = tuple(data.draw(st.lists(st.integers(0, params.shape[0] - 1), max_size=8)))
+
+  subset = ItemBank(params).get_items(indices)
+
   assert subset.shape == (len(indices), 4)
-  for row, idx in enumerate(indices):
-    assert np.allclose(subset[row], params[idx])
+  for row, index in zip(subset, indices, strict=True):
+    np.testing.assert_array_equal(row, params[index])
