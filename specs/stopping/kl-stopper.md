@@ -140,9 +140,12 @@ It is removed when the spec is promoted to "Implemented" status.
 
 import math
 
-from scipy.integrate import quad
+import numpy
 
-from ..selection.kl import _kl_integrand
+from .. import irt
+
+# KLSelector's 24-node Gauss-Legendre rule on [-1, 1]
+_NODES, _WEIGHTS = numpy.polynomial.legendre.leggauss(24)
 
 
 @dataclass(frozen=True)
@@ -199,11 +202,11 @@ class KLInfoStopper(BaseStopper):
       return True
     theta_hat = context.theta
     half_width = self.c / math.sqrt(max(1, len(context.administered_items)))
-    items = context.item_bank.items
-    largest = max(
-      quad(_kl_integrand, theta_hat - half_width, theta_hat + half_width, args=(theta_hat, *items[i].tolist()))[0]
-      for i in candidates
-    )
+    items = context.item_bank.get_items(candidates)
+    log_p_hat, log_q_hat = irt.log_response_probabilities(theta_hat, items)
+    log_p, log_q = irt.log_response_probabilities(theta_hat + half_width * _NODES, items)
+    divergence = numpy.exp(log_p_hat) * (log_p_hat - log_p) + numpy.exp(log_q_hat) * (log_q_hat - log_q)
+    largest = half_width * float(numpy.max((_WEIGHTS[:, None] * divergence).sum(axis=0)))
     # Open Question 1: a threshold that follows the window would compare with
     # self.min_kl * half_width**3 instead.
     return largest <= self.min_kl
@@ -214,17 +217,15 @@ class KLInfoStopper(BaseStopper):
 - The sketch shows the spec's current answer to Open Question 1, a fixed threshold; the last
   comparison is the only line the other answer changes.
 - Contract 3 asks for KLSelector's kernel, but the stopping layer may not import the selection
-  layer (`[tool.importlinter]` in `pyproject.toml`). Either move `_log_probabilities` and
-  `_kl_integrand` from `catsim/selection/kl.py` to a module both layers import, such as
-  `catsim.irt`, and import them from there in both, or add
-  `"catsim.stopping.bank -> catsim.selection.kl"` to the contract's `ignore_imports`. Moving the
-  kernel also removes the import of a private name.
+  layer (`[tool.importlinter]` in `pyproject.toml`). The log-probabilities come from
+  `irt.log_response_probabilities`, as in KLSelector, and the sketch repeats KLSelector's
+  Gauss-Legendre rule. To share the integral itself, move `KLSelector._kl_global` from
+  `catsim/selection/kl.py` to a module both layers import, such as `catsim.irt`, rather than
+  importing a private name across layers.
 - The window uses $n$ = 1 before the first item, as KLSelector does, so the stopper needs no
   minimum length of its own; a minimum and a cap come from `StopRule`, as in
   `StopRule(KLInfoStopper(0.01), MaxLengthStopper(30), min_items=5)`.
-- One `quad` per remaining item per check, the KL selector's cost. If profiling shows it is hot,
-  a fixed Gauss-Legendre rule over the window, vectorized over the items, is the first
-  simplification to try.
+- One vectorized pass over the remaining items per check, the KL selector's cost.
 - A stopper is pure (`BaseStopper`): the same context gives the same answer.
 
 **Testing notes:**
