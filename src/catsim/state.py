@@ -43,11 +43,12 @@ class CatSessionState:
   as given. A session runs
   while ``stop_reason`` is None.
 
-  ``excluded_items`` holds the items the session must not be given although it has not had them:
-  those its engine's exposure control declined, in the order it declined them, and any an
-  application adds, such as items the examinee saw in an earlier attempt. The engine passes them to
-  every strategy and raises :class:`~catsim.exceptions.ExcludedItemError` for a response to one.
-  Their indices are checked against the item bank at the session's next step.
+  ``excluded_items`` holds the items the session must not be given although it has not had them.
+  An application may fill it before the first item, for example with the items the examinee saw in
+  an earlier attempt; during the test it only grows, as the engine adds the items its exposure
+  control declines. Removing an item from it during the test is not supported. The engine passes
+  the items to every strategy and raises :class:`~catsim.exceptions.ExcludedItemError` for a
+  response to one. Their indices are checked against the item bank at the session's next step.
 
   Raises
   ------

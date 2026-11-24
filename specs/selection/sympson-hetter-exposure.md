@@ -293,6 +293,9 @@ def calibrate(
   layer.
 - The acceptance draw uses the context's `rng`, the run's generator (ADR-0013), and an item with
   $K_i = 1$ draws nothing.
+- One acceptance draw per proposal assumes that applications do not select again on a page reload:
+  a second `select_next` before the answer draws again, so the item on screen would pass with a
+  probability of about $K_i^2$.
 - Conditional SH (Stocking & Lewis, 1995) and content-balanced variants are later work.
 
 **Testing notes:**

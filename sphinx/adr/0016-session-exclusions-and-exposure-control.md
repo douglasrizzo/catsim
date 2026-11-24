@@ -17,9 +17,8 @@ nothing recorded declines or proposals from one step to the next.
 
 - A session owns its exclusions. `CatSessionState.excluded_items` holds the items the session must
   not be given although it has not had them, in the order they were excluded, with no repeat and no
-  administered item. It is persisted with the session like its responses, and snapshots copy it.
-  The engine passes it into every `StepContext`; a wrapper that passes a changed context on adds to
-  it, never replaces it.
+  administered item. It is saved with the session, and snapshots copy it. The engine passes it
+  into every `StepContext`; a wrapper that passes a changed context on adds to it, never replaces it.
 - An exposure control is an optional engine component, a strategy under ADR-0004:
 
   ```python
@@ -35,7 +34,6 @@ nothing recorded declines or proposals from one step to the next.
   proposal is checked first, so a selector that ignores the exclusions raises and the loop ends.
   The declines are committed once the selection ends; a selection that raises commits none.
 - A response to an excluded item, or a proposal of one, raises `ExcludedItemError`, a `ValueError`.
-  To give such an item, the application removes it from `excluded_items` first.
 - `ExposureTracker` counts proposals when an item is administered or declined: `record` adds an
   administration and a proposal, `record_decline` a proposal only, so declines never reach the
   rates an `r_max` cap is checked against (ADR-0003). `SimulationResult` reports
@@ -45,14 +43,15 @@ nothing recorded declines or proposals from one step to the next.
 
 - Sympson-Hetter is a control of a few lines. An item is proposed at most once per examinee, so
   `proposal_rates` is the share its calibration needs.
-- Without a control the selector is called once and nothing draws, so seeded runs give the same
-  tests with or without the mechanism. A control draws from the run's generator (ADR-0013).
+- Without a control nothing draws, so the mechanism leaves seeded runs as they are; a control
+  draws from the run's generator (ADR-0013).
 - `select_next` can change the session, so an application saves sessions after `select_next` too.
-  A second `select_next` before the answer, as on a page reload, asks again but counts nothing
-  twice.
+  Each call selects anew: a second call before the answer, as on a page reload, may decline the
+  item already shown, so an application keeps the item's id and shows it again.
+- Items may be added to `excluded_items` before the first item, never removed during the test:
+  each decline is already counted as a proposal.
 - A session whose remaining items are all declined ends early, with `NO_ITEMS`.
-- A tracker saved without proposals is rebuilt with one proposal per administration, as in a run
-  without a control.
+- A tracker rebuilt without proposals takes one per administration.
 
 ## Alternatives Considered
 

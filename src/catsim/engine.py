@@ -216,6 +216,11 @@ class CatEngine:
     exposure tracker's proposals, once the selection has ended, so an application that saves its
     sessions saves them after this call too. A selection that raises leaves both unchanged.
 
+    Each call selects anew, and the exposure control decides anew: a second call before the
+    response may decline the item the first returned, or end the session. An application that has
+    shown an item keeps its id, which :meth:`apply_response` needs, and shows it again rather than
+    calling this method again.
+
     Parameters
     ----------
     state : CatSessionState

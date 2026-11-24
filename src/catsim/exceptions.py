@@ -15,6 +15,5 @@ class ExcludedItemError(ValueError):
 
   A session's ``excluded_items`` are items it must not be given, such as those its engine's exposure
   control declined. ``CatEngine`` raises this error when a response is applied to one, or when the
-  selector proposes one. An application that means to give such an item anyway removes it from the
-  session's ``excluded_items`` first.
+  selector proposes one.
   """
