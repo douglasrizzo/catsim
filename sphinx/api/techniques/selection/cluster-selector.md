@@ -119,9 +119,9 @@ and 50, the second with k = 25.
      - ``1.0``
      - Soft maximum exposure rate for choosing an item inside the selected cluster.
    * - ``r_control``
-     - ``ExposureControl.PASSIVE``
+     - ``CapFallback.PASSIVE``
      - Fallback rule when every remaining item in the chosen cluster violates
-       the exposure cap, an ``ExposureControl`` or its string value
+       the exposure cap, a ``CapFallback`` or its string value
        (``"passive"`` or ``"aggressive"``).
 ```
 
@@ -157,6 +157,6 @@ Meneghetti, D. D. R., & Aquino Junior, P. T. (2018). *Application and simulation
 ```
 
 ```{eval-rst}
-.. autoclass:: catsim.selection.ExposureControl
+.. autoclass:: catsim.selection.CapFallback
    :members:
 ```

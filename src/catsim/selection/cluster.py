@@ -1,7 +1,7 @@
 """Cluster-based item selection (Meneghetti, 2015).
 
 :class:`ClusterSelector` chooses a cluster of items before it chooses an item. :class:`ClusterMethod`
-names the ways it can score a cluster, and :class:`ExposureControl` what it administers when the chosen
+names the ways it can score a cluster, and :class:`CapFallback` what it administers when the chosen
 cluster has no item below the exposure cap.
 """
 
@@ -36,7 +36,7 @@ class ClusterMethod(StrEnum):
   WEIGHTED_INFO = "weighted_info"
 
 
-class ExposureControl(StrEnum):
+class CapFallback(StrEnum):
   """What :class:`ClusterSelector` administers when no remaining item of the chosen cluster is below ``r_max``.
 
   Attributes
@@ -72,9 +72,9 @@ class ClusterSelector(BaseSelector):
       Exposure-rate cap for choosing an item inside the selected cluster: items at or above it are
       passed over unless no other item in the cluster remains. It does not affect which cluster is
       chosen. Default is 1 (no cap).
-  r_control : ExposureControl or str, optional
+  r_control : CapFallback or str, optional
       What to administer when every remaining item in the selected cluster is at or above ``r_max``; see
-      :class:`ExposureControl`. Default is ``ExposureControl.PASSIVE``.
+      :class:`CapFallback`. Default is ``CapFallback.PASSIVE``.
 
   Notes
   -----
@@ -94,7 +94,7 @@ class ClusterSelector(BaseSelector):
     """Return the selector as a constructor call that names every argument."""
     return (
       f"{type(self).__name__}(clusters={self.clusters!r}, method=ClusterMethod.{self._method.name}, "
-      f"r_max={self._r_max!r}, r_control=ExposureControl.{self._r_control.name})"
+      f"r_max={self._r_max!r}, r_control=CapFallback.{self._r_control.name})"
     )
 
   @property
@@ -113,8 +113,8 @@ class ClusterSelector(BaseSelector):
     return self._method
 
   @property
-  def r_control(self) -> ExposureControl:
-    """Return the item exposure control method."""
+  def r_control(self) -> CapFallback:
+    """Return what the selector administers when no remaining item of the chosen cluster is below ``r_max``."""
     return self._r_control
 
   def __init__(
@@ -122,7 +122,7 @@ class ClusterSelector(BaseSelector):
     clusters: list[int],
     method: ClusterMethod | str = ClusterMethod.ITEM_INFO,
     r_max: float = 1,
-    r_control: ExposureControl | str = ExposureControl.PASSIVE,
+    r_control: CapFallback | str = CapFallback.PASSIVE,
   ) -> None:
     """Initialize a ClusterSelector object.
 
@@ -134,8 +134,9 @@ class ClusterSelector(BaseSelector):
         Cluster-scoring method. Default is ``ClusterMethod.ITEM_INFO``.
     r_max : float, optional
         Exposure-rate cap for choosing an item inside the selected cluster. Default is 1.
-    r_control : ExposureControl or str, optional
-        Item exposure control method. Default is ``ExposureControl.PASSIVE``.
+    r_control : CapFallback or str, optional
+        What to administer when no remaining item of the chosen cluster is below ``r_max``. Default
+        is ``CapFallback.PASSIVE``.
 
     Raises
     ------
@@ -158,11 +159,9 @@ class ClusterSelector(BaseSelector):
       raise ValueError(msg) from None
 
     try:
-      r_control = ExposureControl(r_control)
+      r_control = CapFallback(r_control)
     except ValueError:
-      msg = (
-        f"{r_control} is not a valid item exposure control method; choose one from {list(map(str, ExposureControl))}"
-      )
+      msg = f"{r_control} is not a valid cap fallback; choose one from {list(map(str, CapFallback))}"
       raise ValueError(msg) from None
 
     super().__init__()
@@ -205,7 +204,7 @@ class ClusterSelector(BaseSelector):
     in_cluster = candidates[self._clusters[candidates] == cluster]
     # A cap of 1 is no cap (see below_cap), so the aggressive fallback never applies to it.
     if (
-      self._r_control is ExposureControl.AGGRESSIVE
+      self._r_control is CapFallback.AGGRESSIVE
       and exposure_rates is not None
       and self._r_max < 1
       and (exposure_rates[in_cluster] >= self._r_max).all()

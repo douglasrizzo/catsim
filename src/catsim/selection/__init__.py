@@ -1,7 +1,7 @@
 """Selection components for CAT."""
 
 from .base import BaseSelector, below_cap, best_pool, check_r_max, check_test_size, pick_best, remaining
-from .cluster import ClusterMethod, ClusterSelector, ExposureControl
+from .cluster import CapFallback, ClusterMethod, ClusterSelector
 from .expected_info import MEISelector
 from .information import IntervalInfoSelector, MaxInfoSelector, UrrySelector
 from .kl import KLSelector
@@ -21,9 +21,9 @@ __all__ = [
   "AStratBBlockSelector",
   "AStratSelector",
   "BaseSelector",
+  "CapFallback",
   "ClusterMethod",
   "ClusterSelector",
-  "ExposureControl",
   "IntervalInfoSelector",
   "KLSelector",
   "LinearSelector",
