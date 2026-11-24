@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+from typing_extensions import override
 
 from catsim import Estimate, StepContext
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
@@ -16,6 +17,7 @@ class RecordingEstimator(BaseEstimator):
   def __init__(self) -> None:
     self.records: list[tuple[tuple[int, ...], tuple[bool, ...], float]] = []
 
+  @override
   def estimate(self, context: StepContext) -> Estimate:
     self.records.append((context.administered_items, context.responses, context.theta))
     return Estimate(theta=float(len(context.responses)), se=1.0)
@@ -27,6 +29,7 @@ class RecordingEstimator(BaseEstimator):
 class ShiftEstimator(BaseEstimator):
   """Estimator stub that moves the estimate 0.5 toward the last response."""
 
+  @override
   def estimate(self, context: StepContext) -> Estimate:
     return Estimate(theta=context.theta + (0.5 if context.responses[-1] else -0.5), se=1.0)
 

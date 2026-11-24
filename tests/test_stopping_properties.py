@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 from hypothesis import assume, example, given, settings
 from hypothesis import strategies as st
+from typing_extensions import override
 
 from catsim.item_bank import ItemBank
 from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthStopper, StopRule
@@ -47,7 +48,8 @@ class FixedStopper(BaseStopper):
   holds: bool
   label: int
 
-  def stop(self, context) -> bool:  # noqa: ARG002
+  @override
+  def stop(self, context) -> bool:
     return self.holds
 
 

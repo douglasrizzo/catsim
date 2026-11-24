@@ -9,6 +9,7 @@ from dataclasses import dataclass
 
 import numpy as np
 import pytest
+from typing_extensions import override
 
 from catsim import Estimate, StepContext
 from catsim.engine import CatEngine
@@ -29,6 +30,7 @@ class FirstRemainingSelector(BaseSelector):
     super().__init__()
     self.seen_exposure_rates: list[np.ndarray] = []
 
+  @override
   def select(self, context: StepContext) -> int:
     assert context.exposure_rates is not None, "SimulationRunner should always pass exposure rates"
     self.seen_exposure_rates.append(context.exposure_rates.copy())
@@ -42,6 +44,7 @@ class RngRecordingSelector(BaseSelector):
     super().__init__()
     self.seen_rngs: list[np.random.Generator] = []
 
+  @override
   def select(self, context: StepContext) -> int:
     self.seen_rngs.append(context.rng)
     return next(i for i in range(context.item_bank.n_items) if i not in context.administered_items)
@@ -50,6 +53,7 @@ class RngRecordingSelector(BaseSelector):
 class AcceptingControl(BaseExposureControl):
   """Exposure control that accepts every proposal without drawing a random number."""
 
+  @override
   def accept(self, context: StepContext, item_id: int) -> bool:
     del context, item_id
     return True
@@ -58,6 +62,7 @@ class AcceptingControl(BaseExposureControl):
 class CoinControl(BaseExposureControl):
   """Exposure control that accepts each proposal with probability one half, drawn from the run's generator."""
 
+  @override
   def accept(self, context: StepContext, item_id: int) -> bool:
     del item_id
     return bool(context.rng.random() < 0.5)
@@ -478,6 +483,7 @@ class FakeRng:
   sample: float
 
   def uniform(self) -> float:
+    """Return the fixed sample."""
     return self.sample
 
 

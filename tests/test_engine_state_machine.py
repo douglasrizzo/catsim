@@ -14,6 +14,7 @@ from hypothesis.stateful import (
   rule,
   run_state_machine_as_test,
 )
+from typing_extensions import override
 
 from catsim import Estimate
 from catsim.engine import CatEngine, RunContext
@@ -34,6 +35,7 @@ class FixedResponseProvider:
   response: bool
 
   def answer(self, item_bank, item_id, session, rng) -> bool:  # noqa: ARG002
+    """Return the fixed response."""
     return self.response
 
 
@@ -44,6 +46,7 @@ class RecordingEstimator:
   theta: float
 
   def estimate(self, context) -> Estimate:  # noqa: ARG002
+    """Return the fixed theta with a standard error of 1."""
     return Estimate(theta=float(self.theta), se=1.0)
 
 
@@ -54,6 +57,7 @@ class QueueOrderSelector:
     self._order = tuple(order)
 
   def select(self, context):
+    """Return the first item of the permutation not yet administered, or else the lowest-index one."""
     administered_set = set(context.administered_items)
     n = context.item_bank.n_items
     for idx in self._order:
@@ -73,6 +77,7 @@ class AlternatingResponseProvider:
     self._count = 0
 
   def answer(self, item_bank, item_id, session, rng) -> bool:  # noqa: ARG002
+    """Answer incorrectly, then correctly, in turn."""
     self._count += 1
     return self._count % 2 == 0
 
@@ -83,7 +88,8 @@ class RandomlyDecliningControl(BaseExposureControl):
   def __init__(self, probability: float) -> None:
     self._probability = probability
 
-  def accept(self, context, item_id) -> bool:  # noqa: ARG002
+  @override
+  def accept(self, context, item_id) -> bool:
     return bool(context.rng.random() >= self._probability)
 
 
@@ -108,6 +114,7 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
     max_items=st.integers(min_value=4, max_value=7),
   )
   def init_engine(self, selection_order: tuple[int, ...], max_items: int) -> None:
+    """Start a session with stub strategies, which begins unstopped at the initializer's estimate."""
     self.item_bank = ItemBank.generate(8, rng=0)
     # max_items stays below the bank size, so only the stopper can end the session
     self.max_items = max_items
@@ -134,6 +141,12 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
 
   @rule()
   def step(self) -> None:
+    """Stepping a stopped session changes nothing; a live step records one item with its response and estimate.
+
+    Fails if a stopped session administers another item or changes its stop reason, if a step records an item
+    without its estimate or response, or if the session stops before max_items items or for a reason other than the
+    stopper.
+    """
     prev_hist = len(self.session.theta_history)
     prev_admin = len(self.session.administered_items)
     was_stopped = self.session.is_stopped
@@ -157,6 +170,11 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
 
   @invariant()
   def session_lists_consistent(self) -> None:
+    """The administered items are distinct items of the bank, each with one response and one estimate after the first.
+
+    Fails if a step administers an item twice or from outside the bank, or records an item without its response or
+    estimate, or if the session stops for a reason other than the stopper.
+    """
     s = self.session
     n = self.item_bank.n_items
     for i in s.administered_items:
@@ -175,6 +193,7 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
     max_items=st.integers(min_value=3, max_value=5),
   )
   def init_engine(self, bank_seed: int, max_items: int) -> None:
+    """Start a session with the maximum-information selector and the numerical estimator."""
     self.item_bank = ItemBank.generate(12, rng=bank_seed)
     # max_items stays below the bank size, so only the stopper can end the session
     self.max_items = max_items
@@ -196,6 +215,12 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
 
   @rule()
   def step(self) -> None:
+    """With the real strategies, a step behaves as with the stubs and leaves a finite estimate.
+
+    Fails if a stopped session administers another item or changes its stop reason, if a step records an item
+    without its estimate, if the estimator returns a non-finite estimate, or if the session stops before max_items
+    items or for a reason other than the stopper.
+    """
     prev_hist = len(self.session.theta_history)
     prev_admin = len(self.session.administered_items)
     was_stopped = self.session.is_stopped
@@ -218,6 +243,11 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
 
   @invariant()
   def session_lists_consistent(self) -> None:
+    """The administered items are distinct items of the bank, each with one response and one estimate after the first.
+
+    Fails if a step administers an item twice or from outside the bank, or records an item without its response or
+    estimate, or if the session stops for a reason other than the stopper.
+    """
     s = self.session
     n = self.item_bank.n_items
     for i in s.administered_items:
@@ -237,6 +267,7 @@ class ExposureControlMachine(RuleBasedStateMachine):
     max_items=st.integers(min_value=2, max_value=5),
   )
   def init_engine(self, probability: float, seed: int, max_items: int) -> None:
+    """Start one session of an engine whose exposure control declines each proposal with the drawn probability."""
     self.item_bank = ItemBank.generate(8, rng=0)
     self.engine = CatEngine(
       self.item_bank,
@@ -252,19 +283,26 @@ class ExposureControlMachine(RuleBasedStateMachine):
 
   @rule()
   def step(self) -> None:
+    """Step the newest session, whose control may decline proposals first."""
     self.engine.step(self.sessions[-1], FixedResponseProvider(True), self.context)
 
   @rule()
   def select_without_answering(self) -> None:
-    # as on a page reload: an item is selected, and its answer never comes
+    """Select an item for the newest session and never answer it, as on a page reload."""
     self.engine.select_next(self.sessions[-1], self.context)
 
   @rule()
   def start_another_session(self) -> None:
+    """Start another session on the shared exposure tracker."""
     self.sessions.append(self.engine.start_session(session_id=len(self.sessions), context=self.context))
 
   @invariant()
   def proposals_are_administrations_plus_declines(self) -> None:
+    """Each item's proposals are its administrations plus its declines, and no more than the sessions started.
+
+    Fails if a decline is not recorded as an exclusion of the session, or if a selection left unanswered is counted,
+    so that its reselection counts the item twice.
+    """
     declined = [item_id for session in self.sessions for item_id in session.excluded_items]
     declines = np.bincount(declined, minlength=self.item_bank.n_items)
     assert np.array_equal(self.tracker.proposals, self.tracker.counts + declines)
@@ -272,6 +310,10 @@ class ExposureControlMachine(RuleBasedStateMachine):
 
   @invariant()
   def no_item_is_both_administered_and_excluded(self) -> None:
+    """A session never administers an item its control declined, and records each decline once.
+
+    Fails if the engine hands a declined item back to the session, or excludes an item twice.
+    """
     for session in self.sessions:
       assert not set(session.administered_items) & set(session.excluded_items)
       assert len(set(session.excluded_items)) == len(session.excluded_items)
