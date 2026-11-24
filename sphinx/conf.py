@@ -33,6 +33,7 @@ myst_enable_extensions = [
   "colon_fence",
   "deflist",
   "dollarmath",
+  "fieldlist",
 ]
 
 # Mermaid diagrams are drawn in the reader's browser, and sphinxcontrib-mermaid redraws them
