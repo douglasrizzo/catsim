@@ -175,7 +175,7 @@ context = RunContext(rng=numpy.random.default_rng(), exposure_tracker=tracker)
 exposure control declined it, and `n_sessions` the sessions started. Save them whenever you save a
 session, in the same transaction if you can: a tracker saved only at shutdown is lost in a crash,
 and a tracker older than the sessions saved after it under-counts them, which no check detects. A session that starts and is abandoned still
-counts as a session, which lowers every rate a little. A tracker counts only the sessions that run
+counts as a session, as does a second session started for the same examinee; each lowers every rate a little. A tracker counts only the sessions that run
 on its context: processes with trackers of their own do not see each other's administrations.
 
 ## Decline Items with an Exposure Control
