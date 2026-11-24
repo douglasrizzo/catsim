@@ -34,9 +34,9 @@ informative item. `pick_best` and `best_pool` in `catsim.selection.base` impleme
 
 The rule is fixed. There is no parameter, enum or package setting to change it.
 
-When there is no tie, no random number is drawn. When items tie and no generator was passed, the
-selector raises `ValueError`, as the random selectors already do without a generator.
-`CatEngine` always passes the session generator.
+When there is no tie, no random number is drawn. The generator is the run's, which every step
+context carries (ADR-0004), so a selector called directly breaks ties the same way as under
+`CatEngine`.
 
 Ties are exact equality of each selector's own score, as in catR, so they depend on how the score
 rounds. Two items whose difficulties sit symmetrically around the estimate tie in information, but
@@ -57,7 +57,5 @@ information on every bank, 1PL included, as `MaxInfoSelector` does.
   this excludes items whose difficulties differ only by rounding, which now tie for
   `MaxInfoSelector` and the bins.
 - Exposure is shared evenly among duplicated items.
-- Callers that use a deterministic selector directly, without the engine, must pass `rng` when
-  their bank can hold ties.
 - `MaxInfoSelector` uses the shared exposure filter, which also makes it 15 to 50 times faster
   on banks of 500 to 50,000 items.

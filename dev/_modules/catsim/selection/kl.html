@@ -778,8 +778,8 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.integrate</span><span class="w"> </span><span class="kn">import</span> <span class="n">quad</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.special</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_expit</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span><span class="p">,</span> <span class="n">below_cap</span><span class="p">,</span> <span class="n">check_r_max</span><span class="p">,</span> <span class="n">pick_best</span><span class="p">,</span> <span class="n">remaining</span>
 
 
@@ -885,51 +885,25 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="KLSelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/kl-selector.html#catsim.selection.KLSelector.select">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the index of the next item to be administered.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the available item with the largest KL divergence integrated over the window.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        An ItemBank containing item parameters.</span>
-<span class="sd">    administered_items : list[int]</span>
-<span class="sd">        A list containing the indexes of items that were already administered.</span>
-<span class="sd">    est_theta : float</span>
-<span class="sd">        The current estimated ability, the center of the integration window.</span>
-<span class="sd">    rng : numpy.random.Generator or None, optional</span>
-<span class="sd">        Random number generator, used only to break ties between candidates with equal KL</span>
-<span class="sd">        divergence (ADR-0008).</span>
-<span class="sd">    exposure_rates : numpy.ndarray or None, optional</span>
-<span class="sd">        Current exposure rate of every item, compared against ``r_max``.</span>
-<span class="sd">    response_vector : list[bool] or None, optional</span>
-<span class="sd">        Unused; accepted for the engine's selector contract.</span>
+<span class="sd">    context : StepContext</span>
+<span class="sd">        The session to select for.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    int</span>
-<span class="sd">        Index of the item with the largest integrated KL divergence; ties are broken uniformly at</span>
-<span class="sd">        random (ADR-0008).</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If candidates tie for the largest divergence and ``rng`` is None.</span>
-<span class="sd">    NoItemsAvailableError</span>
-<span class="sd">        If every item has been administered.</span>
+<span class="sd">        Index of the selected item.</span>
 <span class="sd">    """</span>
-    <span class="n">candidates</span> <span class="o">=</span> <span class="n">below_cap</span><span class="p">(</span><span class="n">remaining</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">),</span> <span class="n">exposure_rates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="p">)</span>
-    <span class="n">half_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_window</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)))</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="n">below_cap</span><span class="p">(</span><span class="n">remaining</span><span class="p">(</span><span class="n">context</span><span class="p">),</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="p">)</span>
+    <span class="n">half_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_window</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)))</span>
 
-    <span class="n">kl_values</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_kl_global</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">idx</span><span class="p">)],</span> <span class="n">half_width</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">kl_values</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span></div>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">items</span>
+    <span class="n">kl_values</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_kl_global</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">idx</span><span class="p">)],</span> <span class="n">half_width</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">kl_values</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

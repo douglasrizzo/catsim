@@ -71,7 +71,7 @@ item anyway.
 
 Any correct implementation must satisfy the following properties:
 
-1. It orders candidate items by decreasing Fisher information at the current `est_theta`.
+1. It orders candidate items by decreasing Fisher information at the current estimate, the context's `theta`.
 2. It never returns an already administered item.
 3. If `r_max` is below 1 and at least one non-administered item has exposure rate below `r_max`, the returned item comes from that subset.
 4. If all remaining items violate the exposure cap, it still returns the highest-information remaining item.

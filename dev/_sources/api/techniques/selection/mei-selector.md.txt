@@ -87,7 +87,7 @@ branches from the first item.
 Any correct implementation must satisfy the following properties:
 
 1. The score for each candidate equals $P\,I_{\text{correct}} + (1-P)\,I_{\text{incorrect}}$ under the configured estimator.
-2. The selector requires the observed response vector so it can evaluate one-step-ahead updates from the actual response history.
+2. Each one-step-ahead update starts from the session's observed responses, which the selector reads from its context, plus one hypothetical response to the candidate.
 3. On at least some banks, MEI must differ from plain maximum-information selection; otherwise it is not implementing the forward-looking criterion.
 4. Both hypothetical response branches for every candidate item are evaluated before selection.
 5. Exposure filtering applies to the candidate set before the final argmax, with the same no-items behavior as other selectors.

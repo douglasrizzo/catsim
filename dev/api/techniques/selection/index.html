@@ -742,10 +742,12 @@ window.runMermaid = runMermaid;</script>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../state.html">Runtime State and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../typing.html">Array Type Aliases – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></a></li>
 </ul>
 </div>
 </nav></div>
@@ -814,6 +816,12 @@ window.runMermaid = runMermaid;</script>
 <p>Item selection techniques determine which item from the bank to administer at each
 step of an adaptive test. The choice of selector affects both measurement precision
 and practical properties such as item exposure and content coverage.</p>
+<p>A selector reads the session from a <a class="reference internal" href="../../context.html#catsim.context.StepContext" title="catsim.context.StepContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">StepContext</span></code></a>: the
+administered items and their responses, the current estimate <code class="docutils literal notranslate"><span class="pre">theta</span></code>, the run’s random
+generator and exposure rates, and <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code>, items it must pass over although they
+have not been administered. Where the pages below speak of non-administered items, they
+mean the items that are neither administered nor excluded. Excluded items do not count
+toward the test position, the number of administered items.</p>
 <section id="implemented">
 <h2>Implemented<a class="headerlink" href="#implemented" title="Link to this heading">#</a></h2>
 <div class="toctree-wrapper compound">
@@ -848,8 +856,7 @@ Ties are exact equality of the selector’s own score, so items that are equally
 arithmetic tie only if their scores also round to the same value.
 The Randomesque and 5-4-3-2-1 bins also take in every item tied with their least informative item.
 No random number is drawn when nothing ties, so seeded results on banks without ties do not depend
-on this rule. Selectors called without a generator raise <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> when items tie. See
-<a class="reference internal" href="../../../adr/0008-random-tie-breaking.html"><span class="doc">ADR-0008: Break Ties Between Items Uniformly at Random</span></a>.</p>
+on this rule. See <a class="reference internal" href="../../../adr/0008-random-tie-breaking.html"><span class="doc">ADR-0008: Break Ties Between Items Uniformly at Random</span></a>.</p>
 </section>
 <section id="class-hierarchy">
 <h2>Class Hierarchy<a class="headerlink" href="#class-hierarchy" title="Link to this heading">#</a></h2>

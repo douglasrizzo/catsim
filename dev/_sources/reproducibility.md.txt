@@ -1,28 +1,22 @@
 # Reproducibility
 
-Objects that use random number generation directly, mainly initializers and selectors, can have reproducible outputs by receiving a {py:class}`numpy.random.Generator` instance in the `rng` keyword argument of their main method.
+Objects that use random number generation directly, mainly initializers and selectors, can have reproducible outputs by receiving a {py:class}`numpy.random.Generator` instance: initializers take it as the `rng` keyword argument of `initialize`, and selectors read it from the `rng` field of the {py:class}`~catsim.context.StepContext` passed to `select`.
 
 In the snippet below, all selectors that have random behavior produce the same outputs, when given the same input arguments.
 
 ```{code-block} python
 :caption: Generating reproducible outputs from CAT components.
 
-from catsim import ItemBank
+from catsim import ItemBank, StepContext
 from catsim.selection import RandomesqueSelector, RandomSelector, The54321Selector
 from numpy.random import default_rng
 
 for _ in range(5):
     item_bank = ItemBank.generate_item_bank(5000, seed=42)
     print(
-        RandomSelector().select(
-            item_bank=item_bank, administered_items=[], rng=default_rng(42), est_theta=0
-        ),
-        The54321Selector().select(
-            item_bank=item_bank, administered_items=[], rng=default_rng(42), est_theta=0
-        ),
-        RandomesqueSelector(bin_size=10).select(
-            item_bank=item_bank, administered_items=[], rng=default_rng(42), est_theta=0
-        ),
+        RandomSelector().select(StepContext(item_bank=item_bank, rng=default_rng(42))),
+        The54321Selector().select(StepContext(item_bank=item_bank, rng=default_rng(42))),
+        RandomesqueSelector(bin_size=10).select(StepContext(item_bank=item_bank, rng=default_rng(42))),
     )
 ```
 

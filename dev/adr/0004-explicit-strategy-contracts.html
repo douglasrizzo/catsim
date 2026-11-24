@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ADR-0004: Use Explicit Strategy Contracts &#8212; catsim 0.21.0 documentation</title>
+    <title>ADR-0004: Give Every Per-Step Strategy One Step Context &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -378,7 +378,7 @@
 <li class="toctree-l1"><a class="reference internal" href="0001-explicit-cat-engine.html">ADR-0001: Adopt Explicit CAT Engine Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0002-remove-legacy-simulator-apis.html">ADR-0002: Remove Legacy Simulator APIs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0003-runtime-state-ownership.html">ADR-0003: Keep Runtime State Outside Domain Objects</a></li>
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0004: Use Explicit Strategy Contracts</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0004: Give Every Per-Step Strategy One Step Context</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0005-immutable-step-results.html">ADR-0005: Make Step Results Immutable Snapshots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0006-versioned-tutorial-notebooks.html">ADR-0006: Version Tutorial Notebooks as .ipynb Files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0007-release-gated-by-docs.html">ADR-0007: Gate Package Publication on Documentation Availability</a></li>
@@ -386,6 +386,7 @@
 <li class="toctree-l1"><a class="reference internal" href="0009-ability-scale-and-extreme-patterns.html">ADR-0009: Ability Scale and Extreme Response Patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0010-published-progressive-schedule.html">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0011-how-a-session-ends.html">ADR-0011: Decide in One Place How a Session Ends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
 </ul>
 </div>
 </nav></div>
@@ -429,7 +430,7 @@
     
     <li class="breadcrumb-item"><a href="../architecture_decisions.html" class="nav-link">Architecture Decision Records</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0004: Use Explicit Strategy Contracts</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0004: Give Every Per-Step Strategy One Step Context</span></li>
   </ul>
 </nav>
 </div>
@@ -446,38 +447,115 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="adr-0004-use-explicit-strategy-contracts">
-<h1>ADR-0004: Use Explicit Strategy Contracts<a class="headerlink" href="#adr-0004-use-explicit-strategy-contracts" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="adr-0004-give-every-per-step-strategy-one-step-context">
+<h1>ADR-0004: Give Every Per-Step Strategy One Step Context<a class="headerlink" href="#adr-0004-give-every-per-step-strategy-one-step-context" title="Link to this heading">#</a></h1>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
 <p>Accepted</p>
 </section>
 <section id="context">
 <h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
-<p>The refactor established an explicit engine boundary, but strategy interfaces still accepted
-engine-managed data through generic <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code>. That weakened the contract between the engine
-and concrete initializers, selectors, and stoppers.</p>
+<p>The strategy interfaces first took engine-managed data through generic <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code>, and this ADR
+replaced them with explicit typed parameters. That left four contracts that named and ordered the
+same session inputs differently:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Strategy</p></th>
+<th class="head"><p>Signature</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>initializer</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">initialize(item_bank,</span> <span class="pre">rng)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>selector</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">select(item_bank,</span> <span class="pre">administered_items,</span> <span class="pre">est_theta,</span> <span class="pre">rng=None,</span> <span class="pre">exposure_rates=None,</span> <span class="pre">response_vector=None)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>estimator</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">estimate(item_bank,</span> <span class="pre">administered_items,</span> <span class="pre">response_vector,</span> <span class="pre">est_theta)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>stopper</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">stop(item_bank,</span> <span class="pre">administered_items,</span> <span class="pre">theta)</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The estimate was <code class="docutils literal notranslate"><span class="pre">est_theta</span></code> in two of them and <code class="docutils literal notranslate"><span class="pre">theta</span></code> in the third, and the responses came before
+it in one and after it in another. <code class="docutils literal notranslate"><span class="pre">rng</span></code>, <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code> and <code class="docutils literal notranslate"><span class="pre">response_vector</span></code> were optional in
+<code class="docutils literal notranslate"><span class="pre">select</span></code> although the engine always passed them, so the selectors that need them checked for <code class="docutils literal notranslate"><span class="pre">None</span></code>,
+and a deterministic selector called directly without <code class="docutils literal notranslate"><span class="pre">rng</span></code> raised when items tied (ADR-0008).</p>
+<p>Every input added so far changed every strategy signature, so a custom strategy written against an
+older one constructed fine and failed at its first call. The planned techniques need more inputs:
+the responses in <code class="docutils literal notranslate"><span class="pre">stop</span></code> for SPRT, GLR and curtailment stoppers, a generator for curtailment’s Monte
+Carlo refinement, and a set of items to pass over for Sympson-Hetter exposure control. Passing over
+an item by adding it to the administered items would also move the test position, which several
+selectors read from the number of administered items. Some planned techniques also kept
+per-session state on the strategy object, such as a stopper’s last classification, which the next
+session on the same engine overwrites.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
-<p>Use explicit typed parameters for engine-managed strategy inputs:</p>
+<p>The three strategies the engine calls at every step take one argument, a frozen
+<code class="docutils literal notranslate"><span class="pre">catsim.StepContext</span></code> that the engine builds for each call:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">BaseSelector</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># raises NoItemsAvailableError</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseEstimator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span> <span class="o">...</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseStopper</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span> <span class="o">...</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseInitializer</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">Generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span> <span class="o">...</span>
+</pre></div>
+</div>
 <ul class="simple">
-<li><p>initializers receive an <code class="docutils literal notranslate"><span class="pre">ItemBank</span></code> and a <code class="docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></p></li>
-<li><p>selectors receive explicit session inputs such as administered items, theta, RNG,
-exposure-rate snapshots, and the session’s response history (needed by look-ahead
-selectors such as MEI and MLWI)</p></li>
-<li><p>stoppers receive explicit item-bank, administered-item, and theta inputs</p></li>
+<li><p>The context holds <code class="docutils literal notranslate"><span class="pre">item_bank</span></code>, <code class="docutils literal notranslate"><span class="pre">rng</span></code>, <code class="docutils literal notranslate"><span class="pre">administered_items</span></code>, <code class="docutils literal notranslate"><span class="pre">responses</span></code>, <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code>, <code class="docutils literal notranslate"><span class="pre">theta</span></code>
+and <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code>. Only the item bank and the generator are required; the other fields default
+to a session with no responses and no exposure tracking (<code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code> when the run
+has no tracker, and selectors then apply no cap). It checks that the responses hold one Boolean per
+administered item, so no strategy has to.</p></li>
+<li><p>The selector gets the session as it stands. The estimator gets the session with the newest item
+and response added, and <code class="docutils literal notranslate"><span class="pre">theta</span></code> still the previous estimate, its starting point. The stopper gets
+that same state with the new estimate. The engine builds the estimator’s and the stopper’s
+contexts before it changes the session (ADR-0011).</p></li>
+<li><p>The examinee’s true ability and the session’s bookkeeping are not in the context: strategies
+cannot see the simulated truth.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">excluded_items</span></code> holds items a selector must not choose although they have not been administered.
+The engine passes none; a wrapper such as Sympson-Hetter passes them on with
+<code class="docutils literal notranslate"><span class="pre">dataclasses.replace</span></code>. Selectors draw their candidates through <code class="docutils literal notranslate"><span class="pre">catsim.selection.base.remaining</span></code>,
+which leaves out both, and the test position stays <code class="docutils literal notranslate"><span class="pre">len(context.administered_items)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">select</span></code> returns an <code class="docutils literal notranslate"><span class="pre">int</span></code>. A selector with no item to offer raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>; <code class="docutils literal notranslate"><span class="pre">None</span></code>
+is not a return value.</p></li>
+<li><p>The initializer keeps its two arguments, keyword-only: it runs once per session, before any step
+state exists, so there is nothing else to pass.</p></li>
+<li><p>Strategies hold configuration and caches derived from the item bank, never per-session state.
+One strategy object serves every session of a run, an application may interleave the sessions of
+several examinees on one engine, and look-ahead selectors such as MEI call their estimator with
+hypothetical responses. A strategy that reports something about a session, such as a
+classification, computes it from the context with a pure method instead of storing it.</p></li>
+<li><p>Adding a field to the context is not a breaking change: a new field gets a default, and a
+strategy reads only the fields it needs. Removing or renaming a field is.</p></li>
 </ul>
 </section>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>Public contracts are clearer for users implementing custom strategies.</p></li>
-<li><p>Type checking can enforce the engine boundary more effectively.</p></li>
-<li><p>Some permissive legacy call patterns are removed intentionally.</p></li>
-<li><p>Adding an engine-managed input changes every strategy signature: custom selectors must
-accept <code class="docutils literal notranslate"><span class="pre">response_vector</span></code> (optional, defaulting to <code class="docutils literal notranslate"><span class="pre">None</span></code>) because the engine always passes it.
-Selectors that need the history, such as MEI and MLWI, raise <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> when it is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p>Custom strategies keep working when the context gains a field. The inputs have one name each,
+the context’s field names, in every contract.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rng</span></code> and <code class="docutils literal notranslate"><span class="pre">responses</span></code> are always present, so the <code class="docutils literal notranslate"><span class="pre">None</span></code> checks are gone, and a deterministic
+selector called directly breaks ties as it does under the engine.</p></li>
+<li><p>Direct calls, in tests, notebooks and custom code, build a context:
+<code class="docutils literal notranslate"><span class="pre">selector.select(StepContext(item_bank=bank,</span> <span class="pre">rng=numpy.random.default_rng(0)))</span></code>.</p></li>
+<li><p>ty, which CI runs on catsim’s own code, rejects a built-in strategy whose method does not match its
+base class’s signature, and an engine call that does not match it. A custom strategy is checked
+only by its author’s type checker; one with another signature fails at its first call.</p></li>
+<li><p>The context copies the session’s items and responses into tuples for every call, which is
+proportional to the test length; MEI makes two copies per candidate item. Both are small next to
+an estimate.</p></li>
+<li><p>Contexts compare equal only to themselves: a generated equality would compare the exposure-rate
+arrays elementwise and raise.</p></li>
 </ul>
 </section>
 </section>

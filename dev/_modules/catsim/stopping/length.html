@@ -780,7 +780,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseStopper</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-  <span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
 
 
 <div class="viewcode-block" id="MaxLengthStopper">
@@ -814,29 +814,20 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="MaxLengthStopper.stop">
 <a class="viewcode-back" href="../../../api/techniques/stopping/max-length-stopper.html#catsim.stopping.MaxLengthStopper.stop">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-    <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Check whether the test reached `max_items` administered items.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return whether at least `max_items` items have been administered.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        Item bank used by the session.</span>
-<span class="sd">    administered_items : list[int]</span>
-<span class="sd">        Item indices already administered in the session.</span>
-<span class="sd">    theta : float</span>
-<span class="sd">        Current ability estimate.</span>
+<span class="sd">    context : StepContext</span>
+<span class="sd">        The session to check.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    bool</span>
 <span class="sd">        True if at least `max_items` items were administered, False otherwise.</span>
 <span class="sd">    """</span>
-    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_items</span></div>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_items</span></div>
 </div>
 
 </pre></div>

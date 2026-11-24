@@ -787,8 +787,10 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-  <span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
-  <span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+
+  <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">..typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 
 <span class="c1"># Points on which the modified score is scanned to bracket its roots before Brent's method refines</span>
 <span class="c1"># them (0.1 apart on [-6, 6]).</span>
@@ -841,19 +843,19 @@ window.runMermaid = runMermaid;</script>
     <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_tol</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_bounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return a string representation of the estimator."""</span>
-    <span class="k">return</span> <span class="s2">"Warm Weighted Likelihood Estimator"</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the estimator as a constructor call that names every argument."""</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(tol=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_tol</span><span class="si">!r}</span><span class="s2">, bounds=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="si">!r}</span><span class="s2">)"</span>
 
   <span class="nd">@staticmethod</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">_modified_score</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_modified_score</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Return Warm's modified score at one or more ability values.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    theta : array_like</span>
 <span class="sd">        Ability value(s) at which to evaluate the modified score.</span>
-<span class="sd">    response_vector : list[bool]</span>
+<span class="sd">    response_vector : Sequence[bool]</span>
 <span class="sd">        Responses to the items, in the same order as ``items``.</span>
 <span class="sd">    items : numpy.ndarray</span>
 <span class="sd">        Item parameter matrix with columns ``a, b, c, d``.</span>
@@ -885,46 +887,27 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="WarmLikelihoodEstimator.estimate">
 <a class="viewcode-back" href="../../../api/techniques/estimation/warm-wle.html#catsim.estimation.WarmLikelihoodEstimator.estimate">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-    <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
-    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the root of Warm's modified score equation.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the root of Warm's modified score equation, or ``context.theta`` when no item has been administered.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        An ItemBank containing item parameters.</span>
-<span class="sd">    administered_items : list[int]</span>
-<span class="sd">        Indices of the administered items.</span>
-<span class="sd">    response_vector : list[bool]</span>
-<span class="sd">        The examinee's responses to the administered items.</span>
-<span class="sd">    est_theta : float</span>
-<span class="sd">        The current ability estimate, returned unchanged when no item has been administered.</span>
+<span class="sd">    context : StepContext</span>
+<span class="sd">        The session to estimate for.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    float</span>
 <span class="sd">        The weighted likelihood estimate, within ``bounds``.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If any argument is None, if ``response_vector`` and ``administered_items`` have different</span>
-<span class="sd">        lengths, or if ``response_vector`` contains non-Boolean elements.</span>
 <span class="sd">    """</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_require_inputs</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">)</span>
-
     <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">est_theta</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">:</span>
+      <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span>
 
-    <span class="n">items</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
+    <span class="n">response_vector</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">responses</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">score</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_modified_score</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>

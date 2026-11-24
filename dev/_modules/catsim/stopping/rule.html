@@ -781,7 +781,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.length</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLengthStopper</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-  <span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
 
 
 <span class="c1"># __init__ and __repr__ are hand-written because the stoppers are passed as *args, which a generated</span>
@@ -819,18 +819,22 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">  Examples</span>
 <span class="sd">  --------</span>
-<span class="sd">  &gt;&gt;&gt; from catsim import ItemBank</span>
+<span class="sd">  &gt;&gt;&gt; import numpy</span>
+<span class="sd">  &gt;&gt;&gt; from catsim import ItemBank, StepContext</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule</span>
 <span class="sd">  &gt;&gt;&gt; rule = StopRule(StandardErrorStopper(0.5), MaxLengthStopper(20), min_items=5)</span>
 <span class="sd">  &gt;&gt;&gt; rule</span>
 <span class="sd">  StopRule(StandardErrorStopper(max_se=0.5), MaxLengthStopper(max_items=20), min_items=5)</span>
 <span class="sd">  &gt;&gt;&gt; bank = ItemBank.generate_item_bank(100, seed=0)</span>
-<span class="sd">  &gt;&gt;&gt; rule.stop(bank, list(range(10)), theta=0.0)</span>
+<span class="sd">  &gt;&gt;&gt; rng = numpy.random.default_rng(0)</span>
+<span class="sd">  &gt;&gt;&gt; ten = StepContext(item_bank=bank, rng=rng, administered_items=tuple(range(10)), responses=(True,) * 10)</span>
+<span class="sd">  &gt;&gt;&gt; rule.stop(ten)</span>
 <span class="sd">  False</span>
 
 <span class="sd">  After 20 items the standard error is still above 0.5, so the length cap is what ends the test:</span>
 
-<span class="sd">  &gt;&gt;&gt; rule.satisfied(bank, list(range(20)), theta=0.0)</span>
+<span class="sd">  &gt;&gt;&gt; twenty = StepContext(item_bank=bank, rng=rng, administered_items=tuple(range(20)), responses=(True,) * 20)</span>
+<span class="sd">  &gt;&gt;&gt; rule.satisfied(twenty)</span>
 <span class="sd">  (MaxLengthStopper(max_items=20),)</span>
 <span class="sd">  """</span>
 
@@ -863,17 +867,13 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="StopRule.stop">
 <a class="viewcode-back" href="../../../api/techniques/stopping/index.html#catsim.stopping.StopRule.stop">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Check whether the test has `min_items` items and any of the stoppers holds.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return whether the test has `min_items` items and any of the stoppers holds.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        Item bank used by the session.</span>
-<span class="sd">    administered_items : list[int]</span>
-<span class="sd">        Item indices already administered in the session.</span>
-<span class="sd">    theta : float</span>
-<span class="sd">        Current ability estimate.</span>
+<span class="sd">    context : StepContext</span>
+<span class="sd">        The session to check.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -881,38 +881,30 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        True if at least `min_items` items were administered and any stopper holds, False</span>
 <span class="sd">        otherwise.</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_items</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_items</span><span class="p">:</span>
       <span class="k">return</span> <span class="kc">False</span>
-    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">satisfied</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">theta</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">satisfied</span><span class="p">(</span><span class="n">context</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="StopRule.satisfied">
 <a class="viewcode-back" href="../../../api/techniques/stopping/index.html#catsim.stopping.StopRule.satisfied">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">satisfied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">BaseStopper</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">"""Return the stoppers that hold for these inputs, regardless of `min_items`.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">satisfied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">BaseStopper</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Return the stoppers that hold for a session, regardless of `min_items`.</span>
 
 <span class="sd">    Called with a finished session's items and final estimate, it tells which criteria</span>
 <span class="sd">    ended the session, for example precision or the length cap.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        Item bank used by the session.</span>
-<span class="sd">    administered_items : list[int]</span>
-<span class="sd">        Item indices already administered in the session.</span>
-<span class="sd">    theta : float</span>
-<span class="sd">        Current ability estimate.</span>
+<span class="sd">    context : StepContext</span>
+<span class="sd">        The session to check.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tuple[BaseStopper, ...]</span>
 <span class="sd">        The stoppers whose criterion holds, in the order the rule was given them.</span>
 <span class="sd">    """</span>
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
-      <span class="n">stopper</span>
-      <span class="k">for</span> <span class="n">stopper</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stoppers</span>
-      <span class="k">if</span> <span class="n">stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">)</span>
-    <span class="p">)</span></div>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">stopper</span> <span class="k">for</span> <span class="n">stopper</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stoppers</span> <span class="k">if</span> <span class="n">stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">context</span><span class="p">))</span></div>
 </div>
 
 </pre></div>

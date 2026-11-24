@@ -48,7 +48,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Architecture Decision Records" href="architecture_decisions.html" />
-    <link rel="prev" title="Miscellaneous Plotting Functions – catsim.plot" href="api/plot.html" />
+    <link rel="prev" title="Array Type Aliases – catsim.typing" href="api/typing.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -432,26 +432,20 @@
                   
   <section class="tex2jax_ignore mathjax_ignore" id="reproducibility">
 <h1>Reproducibility<a class="headerlink" href="#reproducibility" title="Link to this heading">#</a></h1>
-<p>Objects that use random number generation directly, mainly initializers and selectors, can have reproducible outputs by receiving a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a> instance in the <code class="docutils literal notranslate"><span class="pre">rng</span></code> keyword argument of their main method.</p>
+<p>Objects that use random number generation directly, mainly initializers and selectors, can have reproducible outputs by receiving a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a> instance: initializers take it as the <code class="docutils literal notranslate"><span class="pre">rng</span></code> keyword argument of <code class="docutils literal notranslate"><span class="pre">initialize</span></code>, and selectors read it from the <code class="docutils literal notranslate"><span class="pre">rng</span></code> field of the <a class="reference internal" href="api/context.html#catsim.context.StepContext" title="catsim.context.StepContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">StepContext</span></code></a> passed to <code class="docutils literal notranslate"><span class="pre">select</span></code>.</p>
 <p>In the snippet below, all selectors that have random behavior produce the same outputs, when given the same input arguments.</p>
 <div class="literal-block-wrapper docutils container" id="id1">
 <div class="code-block-caption"><span class="caption-number">Listing 1 </span><span class="caption-text">Generating reproducible outputs from CAT components.</span><a class="headerlink" href="#id1" title="Link to this code">#</a></div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">StepContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomesqueSelector</span><span class="p">,</span> <span class="n">RandomSelector</span><span class="p">,</span> <span class="n">The54321Selector</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numpy.random</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_rng</span>
 
 <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
     <span class="n">item_bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5000</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span>
-        <span class="n">RandomSelector</span><span class="p">()</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-            <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="o">=</span><span class="p">[],</span> <span class="n">rng</span><span class="o">=</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">),</span> <span class="n">est_theta</span><span class="o">=</span><span class="mi">0</span>
-        <span class="p">),</span>
-        <span class="n">The54321Selector</span><span class="p">()</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-            <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="o">=</span><span class="p">[],</span> <span class="n">rng</span><span class="o">=</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">),</span> <span class="n">est_theta</span><span class="o">=</span><span class="mi">0</span>
-        <span class="p">),</span>
-        <span class="n">RandomesqueSelector</span><span class="p">(</span><span class="n">bin_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-            <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="o">=</span><span class="p">[],</span> <span class="n">rng</span><span class="o">=</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">),</span> <span class="n">est_theta</span><span class="o">=</span><span class="mi">0</span>
-        <span class="p">),</span>
+        <span class="n">RandomSelector</span><span class="p">()</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">StepContext</span><span class="p">(</span><span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">))),</span>
+        <span class="n">The54321Selector</span><span class="p">()</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">StepContext</span><span class="p">(</span><span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">))),</span>
+        <span class="n">RandomesqueSelector</span><span class="p">(</span><span class="n">bin_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">StepContext</span><span class="p">(</span><span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">))),</span>
     <span class="p">)</span>
 </pre></div>
 </div>
@@ -495,12 +489,12 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="api/plot.html"
+       href="api/typing.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></p>
+        <p class="prev-next-title">Array Type Aliases – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></p>
       </div>
     </a>
     <a class="right-next"

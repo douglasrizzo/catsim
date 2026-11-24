@@ -30,8 +30,7 @@ built-in stoppers checked bank exhaustion themselves, so a bank that really ran 
   session has ended: `is_stopped` reads it, and there is no separate status field. Lifecycle
   states such as paused or abandoned belong to the application.
 - A selector says that it has no item by raising `NoItemsAvailableError`. That is the single "no
-  item" signal. Until the selectors' return type is narrowed to `int`, the engine treats a `None`
-  from `select` the same way.
+  item" signal: `select` returns an `int` (ADR-0004).
 - `select_next` is the only place that decides whether a session continues. It returns `None` and
   records the reason when the stopper is satisfied or the selector has no item, and it returns
   `None` without changing anything for a session that has already stopped. A manual session is
@@ -53,9 +52,9 @@ built-in stoppers checked bank exhaustion themselves, so a bank that really ran 
   engine knows is that its stopper said stop.
 - `apply_response` applies a response atomically, and only to a running session. It raises
   `ValueError` for a stopped session and `TypeError` for an item index that is not an integer or a
-  response that is not a `bool` or `numpy.bool_`. It estimates and asks the stopper on copies of the
-  session's lists, and commits the item, the response, the estimate, the exposure count and the
-  stop decision only once both have succeeded.
+  response that is not a `bool` or `numpy.bool_`. It estimates and asks the stopper on step contexts
+  built from the session with the new item and response (ADR-0004), and commits the item, the
+  response, the estimate, the exposure count and the stop decision only once both have succeeded.
 
 ## Consequences
 

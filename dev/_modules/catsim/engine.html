@@ -774,12 +774,14 @@ window.runMermaid = runMermaid;</script>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">operator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Protocol</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoItemsAvailableError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.irt</span><span class="w"> </span><span class="kn">import</span> <span class="n">icc</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">CatStepResult</span><span class="p">,</span> <span class="n">ExposureTracker</span><span class="p">,</span> <span class="n">StopReason</span>
@@ -845,6 +847,34 @@ window.runMermaid = runMermaid;</script>
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_step_context</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StepContext</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""Return what a strategy may read about a session as it stands.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  state : CatSessionState</span>
+<span class="sd">      The session.</span>
+<span class="sd">  item_bank : ItemBank</span>
+<span class="sd">      Item bank used by the session.</span>
+<span class="sd">  context : RunContext</span>
+<span class="sd">      Runtime services of the run, which give the random generator and the exposure rates.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  StepContext</span>
+<span class="sd">      The session's items, responses and current estimate, with no excluded items.</span>
+<span class="sd">  """</span>
+  <span class="n">tracker</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span>
+  <span class="k">return</span> <span class="n">StepContext</span><span class="p">(</span>
+    <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span>
+    <span class="n">rng</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">),</span>
+    <span class="n">responses</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">responses</span><span class="p">),</span>
+    <span class="n">theta</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">current_theta</span><span class="p">,</span>
+    <span class="n">exposure_rates</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">tracker</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tracker</span><span class="o">.</span><span class="n">rates</span><span class="p">(),</span>
+  <span class="p">)</span>
+
+
 <div class="viewcode-block" id="CatEngine">
 <a class="viewcode-back" href="../../api/engine.html#catsim.engine.CatEngine">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CatEngine</span><span class="p">:</span>
@@ -900,13 +930,24 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="CatEngine.should_stop">
 <a class="viewcode-back" href="../../api/engine.html#catsim.engine.CatEngine.should_stop">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">should_stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return whether the session satisfies the stopping criterion."""</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span>
-      <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span>
-      <span class="n">administered_items</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">,</span>
-      <span class="n">theta</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">current_theta</span><span class="p">,</span>
-    <span class="p">)</span></div>
+  <span class="k">def</span><span class="w"> </span><span class="nf">should_stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return whether the session satisfies the stopping criterion.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    state : CatSessionState</span>
+<span class="sd">        The session to check.</span>
+<span class="sd">    item_bank : ItemBank</span>
+<span class="sd">        Item bank used by the session.</span>
+<span class="sd">    context : RunContext</span>
+<span class="sd">        Runtime services of the run.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        What the stopper says about the session as it stands.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">_step_context</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="n">context</span><span class="p">)))</span></div>
 
 
 <div class="viewcode-block" id="CatEngine.select_next">
@@ -941,24 +982,13 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">:</span>
       <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">administered_count</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_stop</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">administered_count</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_stop</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
       <span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">=</span> <span class="n">StopReason</span><span class="o">.</span><span class="n">STOPPER</span>
       <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="n">exposure_rates</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span><span class="o">.</span><span class="n">rates</span><span class="p">()</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-        <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span>
-        <span class="n">administered_items</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">,</span>
-        <span class="n">est_theta</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">current_theta</span><span class="p">,</span>
-        <span class="n">rng</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">,</span>
-        <span class="n">exposure_rates</span><span class="o">=</span><span class="n">exposure_rates</span><span class="p">,</span>
-        <span class="n">response_vector</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span>
-      <span class="p">)</span>
+      <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">_step_context</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="n">context</span><span class="p">))</span>
     <span class="k">except</span> <span class="n">NoItemsAvailableError</span><span class="p">:</span>
-      <span class="n">item_id</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="c1"># BaseSelector.select is typed int | None, so a custom selector may say "no item" with None.</span>
-    <span class="k">if</span> <span class="n">item_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">=</span> <span class="n">StopReason</span><span class="o">.</span><span class="n">NO_ITEMS</span>
       <span class="k">return</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span></div>
@@ -1027,16 +1057,15 @@ window.runMermaid = runMermaid;</script>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="n">response</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-    <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">state</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">,</span> <span class="n">item_id</span><span class="p">]</span>
-    <span class="n">updated_theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span>
-        <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span>
-        <span class="n">administered_items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
-        <span class="n">response_vector</span><span class="o">=</span><span class="p">[</span><span class="o">*</span><span class="n">state</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span> <span class="n">response</span><span class="p">],</span>
-        <span class="n">est_theta</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">current_theta</span><span class="p">,</span>
-      <span class="p">)</span>
+    <span class="n">current</span> <span class="o">=</span> <span class="n">_step_context</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+    <span class="c1"># The estimator starts from the previous estimate; the stopper judges the new one.</span>
+    <span class="n">answered</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+      <span class="n">current</span><span class="p">,</span>
+      <span class="n">administered_items</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="n">current</span><span class="o">.</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">item_id</span><span class="p">),</span>
+      <span class="n">responses</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="n">current</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span> <span class="n">response</span><span class="p">),</span>
     <span class="p">)</span>
-    <span class="n">stopped</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">updated_theta</span><span class="p">))</span>
+    <span class="n">updated_theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">answered</span><span class="p">))</span>
+    <span class="n">stopped</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">answered</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">updated_theta</span><span class="p">)))</span>
 
     <span class="n">state</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
     <span class="n">state</span><span class="o">.</span><span class="n">responses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>

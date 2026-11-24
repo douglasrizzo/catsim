@@ -774,9 +774,8 @@ window.runMermaid = runMermaid;</script>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span><span class="p">,</span> <span class="n">below_cap</span><span class="p">,</span> <span class="n">check_r_max</span><span class="p">,</span> <span class="n">check_test_size</span><span class="p">,</span> <span class="n">pick_best</span><span class="p">,</span> <span class="n">remaining</span><span class="p">,</span> <span class="n">require_rng</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span><span class="p">,</span> <span class="n">below_cap</span><span class="p">,</span> <span class="n">check_r_max</span><span class="p">,</span> <span class="n">check_test_size</span><span class="p">,</span> <span class="n">pick_best</span><span class="p">,</span> <span class="n">remaining</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_position_weight</span><span class="p">(</span><span class="n">position</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">acceleration</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -901,53 +900,26 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="ProgressiveSelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/progressive-selector.html#catsim.selection.ProgressiveSelector.select">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the next item using blended random and information-based scoring.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the available item with the largest blend of a random draw and its scaled information.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        An ItemBank containing item parameters.</span>
-<span class="sd">    administered_items : list[int]</span>
-<span class="sd">        A list containing the indexes of items that were already administered; their count sets</span>
-<span class="sd">        the test position.</span>
-<span class="sd">    est_theta : float</span>
-<span class="sd">        The current estimated ability.</span>
-<span class="sd">    rng : numpy.random.Generator or None, optional</span>
-<span class="sd">        Random number generator for the random component. Required.</span>
-<span class="sd">    exposure_rates : numpy.ndarray or None, optional</span>
-<span class="sd">        Current exposure rate of every item, compared against ``r_max``.</span>
-<span class="sd">    response_vector : list[bool] or None, optional</span>
-<span class="sd">        Unused; accepted for the engine's selector contract.</span>
+<span class="sd">    context : StepContext</span>
+<span class="sd">        The session to select for.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    int</span>
-<span class="sd">        Index of the selected item; ties are broken uniformly at random (ADR-0008).</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If ``rng`` is None.</span>
-<span class="sd">    NoItemsAvailableError</span>
-<span class="sd">        If every item has been administered.</span>
+<span class="sd">        Index of the selected item.</span>
 <span class="sd">    """</span>
-    <span class="n">rng</span> <span class="o">=</span> <span class="n">require_rng</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span>
-
-    <span class="n">candidates</span> <span class="o">=</span> <span class="n">below_cap</span><span class="p">(</span><span class="n">remaining</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">),</span> <span class="n">exposure_rates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="p">)</span>
-    <span class="n">weight</span> <span class="o">=</span> <span class="n">_position_weight</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration</span><span class="p">)</span>
+    <span class="n">item_bank</span><span class="p">,</span> <span class="n">rng</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">rng</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="n">below_cap</span><span class="p">(</span><span class="n">remaining</span><span class="p">(</span><span class="n">context</span><span class="p">),</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="p">)</span>
+    <span class="n">weight</span> <span class="o">=</span> <span class="n">_position_weight</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration</span><span class="p">)</span>
 
     <span class="c1"># Revuelta and Ponsoda (1998) draw the random component on [0, max information among the</span>
     <span class="c1"># available items]; dividing by that maximum puts both components on [0, 1].</span>
-    <span class="n">info</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">est_theta</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="n">info_max</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="n">candidates</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
     <span class="n">info_norm</span> <span class="o">=</span> <span class="n">info</span> <span class="o">/</span> <span class="n">info_max</span> <span class="k">if</span> <span class="n">info_max</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
 
@@ -1027,51 +999,24 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="ProportionalSelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/proportional-selector.html#catsim.selection.ProportionalSelector.select">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the next item using information-weighted sampling.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return an available item drawn with probability proportional to its information raised to the schedule's power.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        An ItemBank containing item parameters.</span>
-<span class="sd">    administered_items : list[int]</span>
-<span class="sd">        A list containing the indexes of items that were already administered; their count sets</span>
-<span class="sd">        the test position.</span>
-<span class="sd">    est_theta : float</span>
-<span class="sd">        The current estimated ability.</span>
-<span class="sd">    rng : numpy.random.Generator or None, optional</span>
-<span class="sd">        Random number generator used to draw the item. Required.</span>
-<span class="sd">    exposure_rates : numpy.ndarray or None, optional</span>
-<span class="sd">        Current exposure rate of every item, compared against ``r_max``.</span>
-<span class="sd">    response_vector : list[bool] or None, optional</span>
-<span class="sd">        Unused; accepted for the engine's selector contract.</span>
+<span class="sd">    context : StepContext</span>
+<span class="sd">        The session to select for.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    int</span>
 <span class="sd">        Index of the selected item.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If ``rng`` is None.</span>
-<span class="sd">    NoItemsAvailableError</span>
-<span class="sd">        If every item has been administered.</span>
 <span class="sd">    """</span>
-    <span class="n">rng</span> <span class="o">=</span> <span class="n">require_rng</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="n">below_cap</span><span class="p">(</span><span class="n">remaining</span><span class="p">(</span><span class="n">context</span><span class="p">),</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="p">)</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">exponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span> <span class="o">*</span> <span class="n">_position_weight</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration</span><span class="p">)</span>
 
-    <span class="n">candidates</span> <span class="o">=</span> <span class="n">below_cap</span><span class="p">(</span><span class="n">remaining</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">),</span> <span class="n">exposure_rates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="p">)</span>
-    <span class="n">exponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span> <span class="o">*</span> <span class="n">_position_weight</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration</span><span class="p">)</span>
-
-    <span class="n">info</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">est_theta</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[</span><span class="n">candidates</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[</span><span class="n">candidates</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)</span>
     <span class="n">info_max</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
     <span class="k">if</span> <span class="n">info_max</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
       <span class="n">probs</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">candidates</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">candidates</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -1081,7 +1026,7 @@ window.runMermaid = runMermaid;</script>
       <span class="n">weights</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">info</span> <span class="o">/</span> <span class="n">info_max</span><span class="p">,</span> <span class="n">exponent</span><span class="p">)</span>
       <span class="n">probs</span> <span class="o">=</span> <span class="n">weights</span> <span class="o">/</span> <span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">probs</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">probs</span><span class="p">))</span></div>
 </div>
 
 </pre></div>

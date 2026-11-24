@@ -774,11 +774,8 @@ window.runMermaid = runMermaid;</script>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">operator</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.random</span><span class="w"> </span><span class="kn">import</span> <span class="n">Generator</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span><span class="p">,</span> <span class="n">best_pool</span><span class="p">,</span> <span class="n">remaining</span><span class="p">,</span> <span class="n">require_rng</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span><span class="p">,</span> <span class="n">best_pool</span><span class="p">,</span> <span class="n">remaining</span>
 
 
 <div class="viewcode-block" id="RandomSelector">
@@ -796,46 +793,20 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="RandomSelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/random-selector.html#catsim.selection.RandomSelector.select">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>  <span class="c1"># noqa: PLR6301</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
-    <span class="n">rng</span><span class="p">:</span> <span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
-    <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the index of the next item to be administered.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>  <span class="c1"># noqa: PLR6301</span>
+<span class="w">    </span><span class="sd">"""Return a remaining item drawn uniformly at random.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        An ItemBank containing item parameters.</span>
-<span class="sd">    administered_items : list[int]</span>
-<span class="sd">        A list containing the indexes of items that were already administered.</span>
-<span class="sd">    est_theta : float</span>
-<span class="sd">        Current estimated ability. Unused by this selector.</span>
-<span class="sd">    rng : numpy.random.Generator or None, optional</span>
-<span class="sd">        Random number generator the item is drawn with. Required.</span>
-<span class="sd">    exposure_rates : numpy.ndarray or None, optional</span>
-<span class="sd">        Ignored: this selector applies no exposure cap.</span>
-<span class="sd">    response_vector : list[bool] or None, optional</span>
-<span class="sd">        Unused; accepted for the engine's selector contract.</span>
+<span class="sd">    context : StepContext</span>
+<span class="sd">        The session to select for.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    int</span>
-<span class="sd">        Index of the next item to be applied, drawn uniformly at random from the items not yet</span>
-<span class="sd">        administered.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If ``rng`` is None.</span>
-<span class="sd">    NoItemsAvailableError</span>
-<span class="sd">        If every item has already been administered.</span>
+<span class="sd">        Index of the selected item.</span>
 <span class="sd">    """</span>
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">require_rng</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">remaining</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)))</span></div>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">remaining</span><span class="p">(</span><span class="n">context</span><span class="p">)))</span></div>
 </div>
 
 
@@ -851,7 +822,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  otherwise share while :math:`\hat\theta` is still rough, reduces their exposure at little cost in</span>
 <span class="sd">  precision. Items tied with the least informative item of a bin also join it, so from the fifth</span>
 <span class="sd">  item on, ties for the most information are broken uniformly at random (ADR-0008). The selector</span>
-<span class="sd">  applies no exposure cap: ``exposure_rates`` is ignored.</span>
+<span class="sd">  applies no exposure cap: ``context.exposure_rates`` is ignored.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -897,52 +868,26 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="The54321Selector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/the-54321-selector.html#catsim.selection.The54321Selector.select">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">rng</span><span class="p">:</span> <span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
-    <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the index of the next item to be administered.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return an item drawn uniformly from the bin of the most informative remaining items.</span>
+
+<span class="sd">    The bin holds ``initial_bin_size`` items at the first position, one fewer at each following</span>
+<span class="sd">    position, and at least one, plus every item tied with its least informative item (ADR-0008).</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        An ItemBank containing item parameters.</span>
-<span class="sd">    administered_items : list[int]</span>
-<span class="sd">        A list containing the indexes of items that were already administered.</span>
-<span class="sd">    est_theta : float</span>
-<span class="sd">        The current estimated ability.</span>
-<span class="sd">    rng : numpy.random.Generator or None, optional</span>
-<span class="sd">        Random number generator the item is drawn from the bin with. Required.</span>
-<span class="sd">    exposure_rates : numpy.ndarray or None, optional</span>
-<span class="sd">        Ignored: this selector applies no exposure cap.</span>
-<span class="sd">    response_vector : list[bool] or None, optional</span>
-<span class="sd">        Unused; accepted for the engine's selector contract.</span>
+<span class="sd">    context : StepContext</span>
+<span class="sd">        The session to select for.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    int</span>
-<span class="sd">        Index of the next item to be applied, drawn uniformly from the bin, which also holds every</span>
-<span class="sd">        item tied with its least informative item (ADR-0008).</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If ``rng`` is None.</span>
-<span class="sd">    NoItemsAvailableError</span>
-<span class="sd">        If every item has already been administered.</span>
+<span class="sd">        Index of the selected item.</span>
 <span class="sd">    """</span>
-    <span class="n">rng</span> <span class="o">=</span> <span class="n">require_rng</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span>
-
-    <span class="n">candidates</span> <span class="o">=</span> <span class="n">remaining</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
-    <span class="n">bin_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_bin_size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">))</span>
-    <span class="c1"># items tied with the bin's least informative item join the bin (ADR-0008)</span>
-    <span class="n">pool</span> <span class="o">=</span> <span class="n">best_pool</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">est_theta</span><span class="p">)[</span><span class="n">candidates</span><span class="p">],</span> <span class="n">bin_size</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pool</span><span class="p">))</span></div>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="n">remaining</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+    <span class="n">bin_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_bin_size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">))</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">best_pool</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">)[</span><span class="n">candidates</span><span class="p">],</span> <span class="n">bin_size</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pool</span><span class="p">))</span></div>
 </div>
 
 
@@ -954,7 +899,7 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">  In this selector, at each step of the test, an item is randomly chosen from the :math:`n` most informative items in</span>
 <span class="sd">  the item bank, :math:`n` being a user-defined value. Items tied with the least informative of those :math:`n` also</span>
-<span class="sd">  join the bin (ADR-0008). The selector applies no exposure cap: ``exposure_rates`` is ignored.</span>
+<span class="sd">  join the bin (ADR-0008). The selector applies no exposure cap: ``context.exposure_rates`` is ignored.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -996,51 +941,24 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="RandomesqueSelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/randomesque-selector.html#catsim.selection.RandomesqueSelector.select">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">rng</span><span class="p">:</span> <span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
-    <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the index of the next item to be administered.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return an item drawn uniformly from the ``bin_size`` most informative remaining items.</span>
+
+<span class="sd">    The bin also holds every item tied with its least informative item (ADR-0008).</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        An ItemBank containing item parameters.</span>
-<span class="sd">    administered_items : list[int]</span>
-<span class="sd">        A list containing the indexes of items that were already administered.</span>
-<span class="sd">    est_theta : float</span>
-<span class="sd">        The current estimated ability.</span>
-<span class="sd">    rng : numpy.random.Generator or None, optional</span>
-<span class="sd">        Random number generator the item is drawn from the bin with. Required.</span>
-<span class="sd">    exposure_rates : numpy.ndarray or None, optional</span>
-<span class="sd">        Ignored: this selector applies no exposure cap.</span>
-<span class="sd">    response_vector : list[bool] or None, optional</span>
-<span class="sd">        Unused; accepted for the engine's selector contract.</span>
+<span class="sd">    context : StepContext</span>
+<span class="sd">        The session to select for.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    int</span>
-<span class="sd">        Index of the next item to be applied, drawn uniformly from the bin, which also holds every</span>
-<span class="sd">        item tied with its least informative item (ADR-0008).</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If ``rng`` is None.</span>
-<span class="sd">    NoItemsAvailableError</span>
-<span class="sd">        If every item has already been administered.</span>
+<span class="sd">        Index of the selected item.</span>
 <span class="sd">    """</span>
-    <span class="n">rng</span> <span class="o">=</span> <span class="n">require_rng</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span>
-
-    <span class="n">candidates</span> <span class="o">=</span> <span class="n">remaining</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
-    <span class="c1"># items tied with the bin's least informative item join the bin (ADR-0008)</span>
-    <span class="n">pool</span> <span class="o">=</span> <span class="n">best_pool</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">est_theta</span><span class="p">)[</span><span class="n">candidates</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bin_size</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pool</span><span class="p">))</span></div>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="n">remaining</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">best_pool</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">)[</span><span class="n">candidates</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bin_size</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pool</span><span class="p">))</span></div>
 </div>
 
 </pre></div>

@@ -4,6 +4,13 @@ Item selection techniques determine which item from the bank to administer at ea
 step of an adaptive test. The choice of selector affects both measurement precision
 and practical properties such as item exposure and content coverage.
 
+A selector reads the session from a {py:class}`~catsim.context.StepContext`: the
+administered items and their responses, the current estimate `theta`, the run's random
+generator and exposure rates, and `excluded_items`, items it must pass over although they
+have not been administered. Where the pages below speak of non-administered items, they
+mean the items that are neither administered nor excluded. Excluded items do not count
+toward the test position, the number of administered items.
+
 ## Implemented
 
 ```{toctree}
@@ -38,8 +45,7 @@ Ties are exact equality of the selector's own score, so items that are equally g
 arithmetic tie only if their scores also round to the same value.
 The Randomesque and 5-4-3-2-1 bins also take in every item tied with their least informative item.
 No random number is drawn when nothing ties, so seeded results on banks without ties do not depend
-on this rule. Selectors called without a generator raise `ValueError` when items tie. See
-{doc}`/adr/0008-random-tie-breaking`.
+on this rule. See {doc}`/adr/0008-random-tie-breaking`.
 
 ## Class Hierarchy
 

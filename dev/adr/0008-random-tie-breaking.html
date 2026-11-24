@@ -378,7 +378,7 @@
 <li class="toctree-l1"><a class="reference internal" href="0001-explicit-cat-engine.html">ADR-0001: Adopt Explicit CAT Engine Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0002-remove-legacy-simulator-apis.html">ADR-0002: Remove Legacy Simulator APIs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0003-runtime-state-ownership.html">ADR-0003: Keep Runtime State Outside Domain Objects</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0004-explicit-strategy-contracts.html">ADR-0004: Use Explicit Strategy Contracts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0004-explicit-strategy-contracts.html">ADR-0004: Give Every Per-Step Strategy One Step Context</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0005-immutable-step-results.html">ADR-0005: Make Step Results Immutable Snapshots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0006-versioned-tutorial-notebooks.html">ADR-0006: Version Tutorial Notebooks as .ipynb Files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0007-release-gated-by-docs.html">ADR-0007: Gate Package Publication on Documentation Availability</a></li>
@@ -386,6 +386,7 @@
 <li class="toctree-l1"><a class="reference internal" href="0009-ability-scale-and-extreme-patterns.html">ADR-0009: Ability Scale and Extreme Response Patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0010-published-progressive-schedule.html">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0011-how-a-session-ends.html">ADR-0011: Decide in One Place How a Session Ends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
 </ul>
 </div>
 </nav></div>
@@ -479,9 +480,9 @@ score equals the best score exactly are tied, and one of them is drawn uniformly
 random generator. Randomesque and 5-4-3-2-1 bins hold every candidate tied with the bin’s least
 informative item. <code class="docutils literal notranslate"><span class="pre">pick_best</span></code> and <code class="docutils literal notranslate"><span class="pre">best_pool</span></code> in <code class="docutils literal notranslate"><span class="pre">catsim.selection.base</span></code> implement the rule.</p>
 <p>The rule is fixed. There is no parameter, enum or package setting to change it.</p>
-<p>When there is no tie, no random number is drawn. When items tie and no generator was passed, the
-selector raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>, as the random selectors already do without a generator.
-<code class="docutils literal notranslate"><span class="pre">CatEngine</span></code> always passes the session generator.</p>
+<p>When there is no tie, no random number is drawn. The generator is the run’s, which every step
+context carries (ADR-0004), so a selector called directly breaks ties the same way as under
+<code class="docutils literal notranslate"><span class="pre">CatEngine</span></code>.</p>
 <p>Ties are exact equality of each selector’s own score, as in catR, so they depend on how the score
 rounds. Two items whose difficulties sit symmetrically around the estimate tie in information, but
 not always in distance: in floating point, |0.3 - 0.1| is 0.19999999999999998 and |-0.1 - 0.1| is
@@ -501,8 +502,6 @@ continuous parameters, picks and the random number stream are the same as before
 this excludes items whose difficulties differ only by rounding, which now tie for
 <code class="docutils literal notranslate"><span class="pre">MaxInfoSelector</span></code> and the bins.</p></li>
 <li><p>Exposure is shared evenly among duplicated items.</p></li>
-<li><p>Callers that use a deterministic selector directly, without the engine, must pass <code class="docutils literal notranslate"><span class="pre">rng</span></code> when
-their bank can hold ties.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">MaxInfoSelector</span></code> uses the shared exposure filter, which also makes it 15 to 50 times faster
 on banks of 500 to 50,000 items.</p></li>
 </ul>

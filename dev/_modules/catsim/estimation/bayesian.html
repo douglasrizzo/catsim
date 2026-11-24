@@ -779,7 +779,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -787,12 +787,12 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">minimize_scalar</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..irt</span><span class="w"> </span><span class="kn">import</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MIN_EXTENDED</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-  <span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
 
 <span class="n">LogPrior</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">FloatArray</span><span class="p">],</span> <span class="n">FloatArray</span><span class="p">]</span>
 <span class="n">_MIN_QUADRATURE_NODES</span> <span class="o">=</span> <span class="mi">2</span>
@@ -987,7 +987,7 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="posterior">
 <a class="viewcode-back" href="../../../api/techniques/estimation/bayesian-infrastructure.html#catsim.estimation.posterior">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">posterior</span><span class="p">(</span>
-  <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
+  <span class="n">response_vector</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
   <span class="n">administered_items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span>
   <span class="n">grid</span><span class="p">:</span> <span class="n">QuadratureGrid</span><span class="p">,</span>
   <span class="n">log_prior</span><span class="p">:</span> <span class="n">LogPrior</span><span class="p">,</span>
@@ -1000,7 +1000,7 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  response_vector : list[bool]</span>
+<span class="sd">  response_vector : Sequence[bool]</span>
 <span class="sd">      Responses to the administered items, in the same order as ``administered_items``.</span>
 <span class="sd">  administered_items : numpy.ndarray</span>
 <span class="sd">      Parameter matrix of the administered items, one row per item.</span>
@@ -1106,51 +1106,37 @@ window.runMermaid = runMermaid;</script>
     <span class="n">log_prior</span><span class="p">:</span> <span class="n">LogPrior</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="c1"># Kept as given for the repr, where a default shows as None: the default grid's repr would list every</span>
+    <span class="c1"># node, and a prior function has no source form.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_grid_argument</span> <span class="o">=</span> <span class="n">grid</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior_argument</span> <span class="o">=</span> <span class="n">log_prior</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span> <span class="o">=</span> <span class="n">grid</span> <span class="k">if</span> <span class="n">grid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">QuadratureGrid</span><span class="o">.</span><span class="n">uniform</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span> <span class="o">=</span> <span class="n">log_prior</span> <span class="k">if</span> <span class="n">log_prior</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">normal_log_prior</span><span class="p">()</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return a human-readable name for the estimator."""</span>
-    <span class="k">return</span> <span class="s2">"Expected a Posteriori Estimator"</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the estimator as a constructor call that names every argument, with None for a default."""</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(grid=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid_argument</span><span class="si">!r}</span><span class="s2">, log_prior=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_prior_argument</span><span class="si">!r}</span><span class="s2">)"</span>
 
 <div class="viewcode-block" id="EAPEstimator.estimate">
 <a class="viewcode-back" href="../../../api/techniques/estimation/eap-estimator.html#catsim.estimation.EAPEstimator.estimate">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-    <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
-    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""Return the posterior mean for the administered response pattern.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Return the posterior mean, the prior mean when no item has been administered.</span>
 
 <span class="sd">    Each call evaluates the likelihood once per grid node, which the ``evaluations`` counters</span>
 <span class="sd">    report.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        An ItemBank containing item parameters.</span>
-<span class="sd">    administered_items : list[int]</span>
-<span class="sd">        Indices of the items administered so far. With none, the estimate is the prior mean.</span>
-<span class="sd">    response_vector : list[bool]</span>
-<span class="sd">        The examinee's answers to the administered items, in the same order.</span>
-<span class="sd">    est_theta : float</span>
-<span class="sd">        Unused; the posterior mean does not depend on a previous estimate.</span>
+<span class="sd">    context : StepContext</span>
+<span class="sd">        The session to estimate for. Its ``theta`` is not used.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    float</span>
 <span class="sd">        The posterior mean of :math:`\theta`.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If any argument is None, if ``response_vector`` and ``administered_items`` have different</span>
-<span class="sd">        lengths, or if ``response_vector`` contains non-Boolean elements.</span>
 <span class="sd">    """</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_require_inputs</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">)</span>
-    <span class="n">post</span> <span class="o">=</span> <span class="n">posterior</span><span class="p">(</span><span class="n">response_vector</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span><span class="p">)</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span>
+    <span class="n">post</span> <span class="o">=</span> <span class="n">posterior</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">size</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_total_evaluations</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span>
@@ -1203,15 +1189,17 @@ window.runMermaid = runMermaid;</script>
     <span class="n">bounds</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">),</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="c1"># Kept as given for the repr, where the default shows as None: a prior function has no source form.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior_argument</span> <span class="o">=</span> <span class="n">log_prior</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span> <span class="o">=</span> <span class="n">log_prior</span> <span class="k">if</span> <span class="n">log_prior</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">normal_log_prior</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_tol</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_bounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return a human-readable estimator name."""</span>
-    <span class="k">return</span> <span class="s2">"Maximum a Posteriori Estimator"</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the estimator as a constructor call that names every argument, with None for a default prior."""</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(log_prior=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_prior_argument</span><span class="si">!r}</span><span class="s2">, tol=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_tol</span><span class="si">!r}</span><span class="s2">, bounds=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="si">!r}</span><span class="s2">)"</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">_negative_log_posterior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_negative_log_posterior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the negative log-posterior at a candidate theta."""</span>
     <span class="n">log_lik</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
     <span class="n">log_pr</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">theta</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))[</span><span class="mi">0</span><span class="p">])</span>
@@ -1219,25 +1207,14 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="MAPEstimator.estimate">
 <a class="viewcode-back" href="../../../api/techniques/estimation/map-estimator.html#catsim.estimation.MAPEstimator.estimate">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-    <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
-    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>  <span class="c1"># noqa: ARG002 - required by the estimator contract</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""Estimate ability by maximizing the posterior density.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Return the posterior mode within the search bounds, the prior mode when no item has been administered.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        An ItemBank containing item parameters.</span>
-<span class="sd">    administered_items : list[int]</span>
-<span class="sd">        Indices of the items administered so far. With none, the estimate is the prior mode.</span>
-<span class="sd">    response_vector : list[bool]</span>
-<span class="sd">        The examinee's answers to the administered items, in the same order.</span>
-<span class="sd">    est_theta : float</span>
-<span class="sd">        Unused; the search covers the whole bounds on every call.</span>
+<span class="sd">    context : StepContext</span>
+<span class="sd">        The session to estimate for. Its ``theta`` is not used: the search covers the whole bounds</span>
+<span class="sd">        on every call.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1247,17 +1224,14 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        If any argument is None, if ``response_vector`` and ``administered_items`` have different</span>
-<span class="sd">        lengths or ``response_vector`` contains non-Boolean elements, or if the log-posterior has</span>
-<span class="sd">        no finite maximum within the search bounds.</span>
+<span class="sd">        If the log-posterior has no finite maximum within the search bounds.</span>
 <span class="sd">    """</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_require_inputs</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">)</span>
-
     <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">+=</span> <span class="mi">1</span>
 
-    <span class="n">items</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
+    <span class="n">responses</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">responses</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span>
     <span class="n">nodes</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">_MODE_SEARCH_POINTS</span><span class="p">)</span>
-    <span class="n">log_post</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood_hpc</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+    <span class="n">log_post</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood_hpc</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">responses</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">size</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_total_evaluations</span> <span class="o">+=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">size</span>
     <span class="n">peak</span> <span class="o">=</span> <span class="n">log_post</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
@@ -1279,7 +1253,7 @@ window.runMermaid = runMermaid;</script>
     <span class="k">with</span> <span class="n">numpy</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">):</span>
       <span class="n">result</span> <span class="o">=</span> <span class="n">minimize_scalar</span><span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_negative_log_posterior</span><span class="p">,</span>
-        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">),</span>
+        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">responses</span><span class="p">,</span> <span class="n">items</span><span class="p">),</span>
         <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">best</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span> <span class="n">nodes</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">best</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nodes</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]),</span>
         <span class="n">method</span><span class="o">=</span><span class="s2">"bounded"</span><span class="p">,</span>
         <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">"xatol"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span><span class="p">},</span>

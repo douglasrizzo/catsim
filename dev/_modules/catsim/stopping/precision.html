@@ -784,7 +784,7 @@ window.runMermaid = runMermaid;</script>
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
 
-  <span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
 
 
 <div class="viewcode-block" id="StandardErrorStopper">
@@ -823,24 +823,20 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="StandardErrorStopper.stop">
 <a class="viewcode-back" href="../../../api/techniques/stopping/standard-error-stopper.html#catsim.stopping.StandardErrorStopper.stop">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Check whether the standard error at `theta` is at most `max_se`.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return whether the standard error at the current estimate is at most `max_se`.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        Item bank used by the session.</span>
-<span class="sd">    administered_items : list[int]</span>
-<span class="sd">        Item indices already administered in the session.</span>
-<span class="sd">    theta : float</span>
-<span class="sd">        Current ability estimate.</span>
+<span class="sd">    context : StepContext</span>
+<span class="sd">        The session to check.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    bool</span>
 <span class="sd">        True if the standard error of the estimate is at most `max_se`, False otherwise.</span>
 <span class="sd">    """</span>
-    <span class="k">return</span> <span class="n">irt</span><span class="o">.</span><span class="n">see</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_se</span></div>
+    <span class="k">return</span> <span class="n">irt</span><span class="o">.</span><span class="n">see</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_se</span></div>
 </div>
 
 
@@ -896,24 +892,21 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="ConfidenceIntervalStopper.stop">
 <a class="viewcode-back" href="../../../api/techniques/stopping/confidence-interval-stopper.html#catsim.stopping.ConfidenceIntervalStopper.stop">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Check whether the confidence interval at `theta` lies within one ability band.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return whether the confidence interval at the current estimate lies within one ability band.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        Item bank used by the session.</span>
-<span class="sd">    administered_items : list[int]</span>
-<span class="sd">        Item indices already administered in the session.</span>
-<span class="sd">    theta : float</span>
-<span class="sd">        Current ability estimate.</span>
+<span class="sd">    context : StepContext</span>
+<span class="sd">        The session to check.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    bool</span>
 <span class="sd">        True if no bound lies strictly inside the confidence interval, False otherwise.</span>
 <span class="sd">    """</span>
-    <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">confidence_interval</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence</span><span class="p">)</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span>
+    <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">confidence_interval</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence</span><span class="p">)</span>
     <span class="k">return</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">lower</span> <span class="o">&lt;</span> <span class="n">bound</span> <span class="o">&lt;</span> <span class="n">upper</span> <span class="k">for</span> <span class="n">bound</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval_bounds</span><span class="p">)</span></div>
 </div>
 

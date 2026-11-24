@@ -781,8 +781,9 @@ window.runMermaid = runMermaid;</script>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">IntArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">IntArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span><span class="p">,</span> <span class="n">below_cap</span><span class="p">,</span> <span class="n">check_r_max</span><span class="p">,</span> <span class="n">pick_best</span><span class="p">,</span> <span class="n">remaining</span>
 
 
@@ -953,53 +954,32 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="ClusterSelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector.select">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the index of the next item to be administered.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the most informative available item of the best-scoring cluster that has an item left.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        An ItemBank containing item parameters, one per cluster label.</span>
-<span class="sd">    administered_items : list[int]</span>
-<span class="sd">        A list containing the indexes of items that were already administered.</span>
-<span class="sd">    est_theta : float</span>
-<span class="sd">        The current estimated ability.</span>
-<span class="sd">    rng : numpy.random.Generator or None, optional</span>
-<span class="sd">        Random number generator, used only to break exact ties between clusters and between items in the</span>
-<span class="sd">        chosen cluster.</span>
-<span class="sd">    exposure_rates : numpy.ndarray or None, optional</span>
-<span class="sd">        Run-level exposure-rate snapshot. ``None`` treats every item as unexposed.</span>
-<span class="sd">    response_vector : list[bool] or None, optional</span>
-<span class="sd">        Responses observed so far. Not used by this selector.</span>
+<span class="sd">    context : StepContext</span>
+<span class="sd">        The session to select for.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    int</span>
-<span class="sd">        Index of the next item to be applied.</span>
+<span class="sd">        Index of the selected item.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        If ``clusters`` does not hold one label per item of ``item_bank``, or if clusters or items in the</span>
-<span class="sd">        chosen cluster tie and ``rng`` is None.</span>
-<span class="sd">    NoItemsAvailableError</span>
-<span class="sd">        If every item has already been administered.</span>
+<span class="sd">        If ``clusters`` does not hold one label per item of ``context.item_bank``.</span>
 <span class="sd">    """</span>
+    <span class="n">item_bank</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">exposure_rates</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_rates</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"clusters holds </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_clusters</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2"> labels, but the item bank has </span><span class="si">{</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="si">}</span><span class="s2"> items"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-    <span class="n">candidates</span> <span class="o">=</span> <span class="n">remaining</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="n">remaining</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
     <span class="n">open_clusters</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_clusters</span><span class="p">[</span><span class="n">candidates</span><span class="p">])</span>
-    <span class="n">cluster</span> <span class="o">=</span> <span class="n">pick_best</span><span class="p">(</span><span class="n">open_clusters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="n">open_clusters</span><span class="p">),</span> <span class="n">rng</span><span class="p">)</span>
+    <span class="n">cluster</span> <span class="o">=</span> <span class="n">pick_best</span><span class="p">(</span><span class="n">open_clusters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="n">open_clusters</span><span class="p">),</span> <span class="n">rng</span><span class="p">)</span>
 
     <span class="n">in_cluster</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_clusters</span><span class="p">[</span><span class="n">candidates</span><span class="p">]</span> <span class="o">==</span> <span class="n">cluster</span><span class="p">]</span>
     <span class="c1"># A cap of 1 is no cap (see below_cap), so the aggressive fallback never applies to it.</span>
@@ -1011,7 +991,7 @@ window.runMermaid = runMermaid;</script>
     <span class="p">):</span>
       <span class="k">return</span> <span class="n">pick_best</span><span class="p">(</span><span class="n">in_cluster</span><span class="p">,</span> <span class="o">-</span><span class="n">exposure_rates</span><span class="p">[</span><span class="n">in_cluster</span><span class="p">],</span> <span class="n">rng</span><span class="p">)</span>
     <span class="n">allowed</span> <span class="o">=</span> <span class="n">below_cap</span><span class="p">(</span><span class="n">in_cluster</span><span class="p">,</span> <span class="n">exposure_rates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">pick_best</span><span class="p">(</span><span class="n">allowed</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">est_theta</span><span class="p">)[</span><span class="n">allowed</span><span class="p">],</span> <span class="n">rng</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">pick_best</span><span class="p">(</span><span class="n">allowed</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">theta</span><span class="p">)[</span><span class="n">allowed</span><span class="p">],</span> <span class="n">rng</span><span class="p">)</span></div>
 
 
   <span class="k">def</span><span class="w"> </span><span class="nf">_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">open_clusters</span><span class="p">:</span> <span class="n">IntArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
