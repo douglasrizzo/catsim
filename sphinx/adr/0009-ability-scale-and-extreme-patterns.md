@@ -8,11 +8,8 @@ Accepted
 
 `catsim.irt` defines two ability ranges: `THETA_MIN_TYPICAL` and `THETA_MAX_TYPICAL` (±4) and
 `THETA_MIN_EXTENDED` and `THETA_MAX_EXTENDED` (±6). Every search and grid in the package defaults to
-the extended range, but the estimators used it differently:
-
-- `NumericalSearchEstimator` and `WarmLikelihoodEstimator` searched [-6, 6], with no way to change it.
-- `MAPEstimator` searched its `bounds` parameter, [-6, 6] by default.
-- `EAPEstimator` averaged over its quadrature grid, by default 121 nodes on [-6, 6].
+the extended range, but only `MAPEstimator` let its range be changed: `NumericalSearchEstimator` and
+`WarmLikelihoodEstimator` searched [-6, 6], and `EAPEstimator` averaged over its quadrature grid.
 
 After an all-correct or all-incorrect response pattern the likelihood keeps rising toward one end of
 the scale, and the maximum likelihood estimate is infinite. `NumericalSearchEstimator(dodd=False)`
@@ -35,9 +32,7 @@ whatever the response pattern. `BaseEstimator.estimate` states this as the contr
 and the selectors rely on it. The estimators that search the scale, `NumericalSearchEstimator`,
 `MAPEstimator` and `WarmLikelihoodEstimator`, take the same `bounds` parameter, by default
 `(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)`, and reject bounds that are not finite with the lower one
-below the upper. `EAPEstimator`'s range is its quadrature grid. With no administered item,
-`NumericalSearchEstimator` and `WarmLikelihoodEstimator` return the estimate they were given, and
-`EAPEstimator` and `MAPEstimator` the prior's mean and mode.
+below the upper. `EAPEstimator`'s range is its quadrature grid.
 
 What each estimator does with an all-correct or all-incorrect pattern:
 
@@ -59,13 +54,16 @@ What each estimator does with an all-correct or all-incorrect pattern:
 ## Consequences
 
 - No estimator returns an infinite estimate, so session histories, simulation results and the
-  scores selectors compute are always finite. `MEISelector` no longer special-cases infinite
-  look-ahead estimates.
-- The `dodd` parameter of `NumericalSearchEstimator` and `catsim.cat.dodd` are removed. Users who
-  want the bounded maximum likelihood estimate for constant patterns use
+  scores selectors compute are always finite, and a look-ahead selector such as MEI needs no special
+  case for an infinite estimate.
+- The bounded maximum likelihood estimate for constant patterns is
   `MAPEstimator(log_prior=uniform_log_prior())`, which returns -6 or 6 to within its `tol`.
-- Seeded results change only where Dodd's step changed: sessions whose estimate starts beyond the
-  bank's easiest or hardest item, and banks whose extreme difficulties lie beyond the bounds.
 - Narrower `bounds` restrict mixed response patterns too: their estimate is then the bound when the
   likelihood's maximum lies beyond it.
 - A custom estimator must keep the contract; nothing downstream checks it.
+
+## Alternatives Considered
+
+- Returning the infinite maximum likelihood estimate: every item has zero information at it, so
+  selection becomes uniform over the bank, and every consumer of the estimate needs a special case.
+- Dodd's step as an option that can be turned off: turning it off returns the infinite estimate.
