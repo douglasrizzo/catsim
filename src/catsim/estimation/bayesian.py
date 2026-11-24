@@ -237,8 +237,9 @@ def posterior(
   ------
   ValueError
       If the log-prior or log-likelihood is NaN or :math:`+\infty` at any node, if every node has
-      zero posterior mass, if ``responses`` and ``items`` differ in length, or if ``responses``
-      contains non-Boolean elements.
+      zero posterior mass, or if ``responses`` and ``items`` differ in length.
+  TypeError
+      If a response is not a ``bool`` or ``numpy.bool_``.
   """
   log_lik = irt.log_likelihood(grid.nodes, responses, items)
   log_post = log_prior(grid.nodes) + log_lik + numpy.log(grid.weights)

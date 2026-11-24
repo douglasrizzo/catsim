@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 
 import numpy as np
 import numpy.typing as npt
@@ -37,6 +38,41 @@ def test_session_state_rejects_a_history_that_does_not_match_its_responses(
       administered_items=items,
       responses=responses,
     )
+
+
+@pytest.mark.parametrize(
+  ("responses", "offender"),
+  [pytest.param([1, 0], "int 1", id="ints"), pytest.param([1.0, 0.0], "float 1.0", id="floats")],
+)
+def test_session_state_rejects_responses_that_are_not_booleans(responses: list[bool], offender: str) -> None:
+  """A session restored with 1 and 0, or 1.0 and 0.0, raises when it is built, as a live response of 1 does.
+
+  Fails if such a session is accepted because they compare equal to True and False: its responses would not be the
+  Booleans a session holds, and the engine's next step would reject them, far from where they came from.
+  """
+  with pytest.raises(TypeError, match=f"got {re.escape(offender)}$"):
+    CatSessionState(
+      session_id=0,
+      estimates=[Estimate(0.0, math.inf), Estimate(0.5, 1.0), Estimate(0.3, 0.8)],
+      administered_items=[0, 1],
+      responses=responses,
+    )
+
+
+def test_session_state_restored_from_numpy_booleans_holds_python_bools() -> None:
+  """A session restored with NumPy Booleans holds Python bools, like the responses the engine appends.
+
+  Fails if it keeps the ``numpy.bool_`` entries: its responses would mix two types, and ``json.dumps`` of them, the
+  way an application saves a session, would raise.
+  """
+  state = CatSessionState(
+    session_id=0,
+    estimates=[Estimate(0.0, math.inf), Estimate(0.5, 1.0), Estimate(0.3, 0.8)],
+    administered_items=[0, 1],
+    responses=list(np.array([True, False])),
+  )
+  assert [type(response) for response in state.responses] == [bool, bool]
+  assert json.dumps(state.responses) == "[true, false]"
 
 
 @pytest.mark.parametrize(

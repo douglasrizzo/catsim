@@ -74,8 +74,10 @@ class StepContext:
   Raises
   ------
   ValueError
-      If ``responses`` does not hold one Boolean response per administered item, or an index in
+      If ``responses`` does not hold one response per administered item, or an index in
       ``administered_items`` or ``excluded_items`` is outside the item bank.
+  TypeError
+      If a response is not a ``bool`` or ``numpy.bool_``.
 
   Notes
   -----
