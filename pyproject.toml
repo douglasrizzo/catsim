@@ -79,6 +79,7 @@ select = [
     "EM",
     "ERA",
     "EXE",
+    "FBT",  # a boolean flag is keyword-only, so a call reads flag=True rather than a bare True
     "G",
     "PIE",
     "Q",
@@ -148,6 +149,7 @@ ignore-one-line-docstrings = true
   "ARG005",   # Mocked call signatures often intentionally ignore parameters
   "D",        # Test docstrings name what the test checks (AGENTS.md), with no numpydoc sections
   "DOC",      # Test and fixture docstrings have no Returns or Raises sections
+  "FBT",      # Test helpers and parametrized tests take booleans positionally
   "PLC0415",  # Local imports in tests are acceptable when improving isolation
   "PLR6301",  # Test methods don't need to use self
   "PLR2004",  # Magic values are fine in tests - they're explicit test expectations

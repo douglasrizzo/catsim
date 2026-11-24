@@ -198,7 +198,7 @@ class CatEngine:
     other check::
 
       while (item_id := engine.select_next(state, context)) is not None:
-        engine.apply_response(state, item_id, ask_examinee(item_id), context)
+        engine.apply_response(state, item_id, response=ask_examinee(item_id), context=context)
 
     The stopper is consulted here only for a session that has no responses yet. After that,
     :meth:`apply_response` evaluates it once for every new state, and what it records is final.
@@ -234,6 +234,7 @@ class CatEngine:
     self,
     state: CatSessionState,
     item_id: int,
+    *,
     response: bool,
     context: RunContext,
   ) -> CatStepResult:
@@ -339,7 +340,7 @@ class CatEngine:
     # checked before the provider is asked: a live provider shows the item to an examinee
     item_id = self._checked_item(state, item_id)
     response = response_provider.answer(self._item_bank, item_id, state.snapshot(), context.rng)
-    return self.apply_response(state, item_id, response, context)
+    return self.apply_response(state, item_id, response=response, context=context)
 
   def _checked_item(self, state: CatSessionState, item_id: int) -> int:
     """Return ``item_id`` as an int, raising unless it is an item of the bank the session has not had.

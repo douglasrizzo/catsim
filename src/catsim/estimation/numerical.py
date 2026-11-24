@@ -10,7 +10,7 @@ from ..item_bank import ItemBank
 from .base import BaseEstimator
 
 
-def _dodd(theta: float, item_bank: ItemBank, correct: bool, bounds: tuple[float, float]) -> float:
+def _dodd(theta: float, item_bank: ItemBank, *, correct: bool, bounds: tuple[float, float]) -> float:
   r"""Return Dodd's estimate after a response pattern that is all correct or all incorrect.
 
   Dodd's variable step size :cite:p:`Dod90` moves the estimate half the distance to the bank's
@@ -123,7 +123,7 @@ class NumericalSearchEstimator(BaseEstimator):
 
     items = context.item_bank.get_items(context.administered_items)
     if len(set(responses)) == 1:
-      theta = _dodd(context.theta, context.item_bank, responses[0], self._bounds)
+      theta = _dodd(context.theta, context.item_bank, correct=responses[0], bounds=self._bounds)
       return Estimate(theta=theta, se=irt.see(theta, items), evaluations=0)
 
     def negative_log_likelihood(theta: float) -> float:
