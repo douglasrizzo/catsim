@@ -13,8 +13,8 @@ from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 # The integrand's complex singularities lie about pi / a from the real axis, so the Gauss-Legendre
 # error falls like exp(-2 pi n / (a h)) for n nodes, discrimination a and half-width h. Four nodes
 # per unit of a * h, for the steepest item, keep every integral within a relative 1e-10 of
-# adaptive quadrature up to a * h = 60 (a = 10 over theta_hat +- 6); integrals below about 1e-6 are
-# limited by rounding in the integrand instead. Past a * h = 60 the count stays at the cap and the
+# adaptive quadrature up to a * h = 60 (a = 10 over theta_hat +- 6), for integrals above 1e-5; smaller
+# ones are limited by rounding in the integrand instead. Past a * h = 60 the count stays at the cap and the
 # error grows: about 3e-9 at a * h = 90 and 2e-7 at 120.
 _NODES_PER_UNIT = 4.0
 _MIN_NODES = 24

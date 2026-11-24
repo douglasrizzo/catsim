@@ -939,10 +939,12 @@ class TestKLSelector:
 
     A fixed 24-node rule errs by more than that margin on them and selects the other item.
     """
+    # the second discrimination is tuned so that the two integrals differ by a relative 4e-6
     items = np.array([[6.0, -0.6, 0.0, 1.0], [5.011988691929875, 0.3, 0.0, 1.0]])
     reference = _kl_reference(items, 0.0, 3.0)
 
-    assert KLSelector().select(make_context(ItemBank(items))) == int(np.argmax(reference)) == 0
+    assert reference[0] > reference[1]
+    assert KLSelector().select(make_context(ItemBank(items))) == 0
 
   @pytest.mark.parametrize("n_administered", [0, 1, 4, 9])
   def test_select_maximizes_kl_over_a_window_shrinking_with_the_test(self, n_administered: int) -> None:
