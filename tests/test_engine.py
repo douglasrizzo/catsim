@@ -16,10 +16,11 @@ from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
 from catsim.initialization import BaseInitializer
 from catsim.item_bank import ItemBank
-from catsim.selection import BaseSelector, MaxInfoSelector, RandomSelector
+from catsim.selection import BaseSelector, LinearSelector, MaxInfoSelector, MEISelector, RandomSelector
 from catsim.selection.base import remaining
 from catsim.state import CatSessionState, ExposureTracker, StopReason
 from catsim.stopping import BaseStopper, MaxLengthStopper
+from tests.contexts import make_context
 
 
 @dataclass
@@ -30,6 +31,16 @@ class FixedResponseProvider:
 
   def answer(self, state, item_bank, item_id, context) -> bool:  # noqa: ARG002
     return self.response
+
+
+@dataclass
+class ScriptedResponseProvider:
+  """Response provider that gives the n-th scripted response to the n-th item, whichever item it is."""
+
+  responses: list[bool]
+
+  def answer(self, state, item_bank, item_id, context) -> bool:  # noqa: ARG002
+    return self.responses[len(state.responses)]
 
 
 class ExhaustedSelector:
@@ -804,3 +815,54 @@ def test_custom_strategies_written_against_the_base_classes_run_a_session(item_b
   assert session.administered_item_ids == [0, 1, 2]
   assert session.theta_history == (0.5, 1.0, 2.0, 3.0)
   assert session.stop_reason is StopReason.STOPPER
+
+
+MIXED_PATTERN = [True, False, False, True, True, False]
+
+
+def _run_scripted_session(item_bank: ItemBank, selector: BaseSelector, estimator: BaseEstimator) -> CatSessionState:
+  """Return a session that answered MIXED_PATTERN to the items the selector chose, from an initial estimate of 0."""
+  engine = CatEngine(RecordingInitializer(0.0), selector, estimator, MaxLengthStopper(len(MIXED_PATTERN)))
+  context = RunContext(rng=np.random.default_rng(0))
+  session = engine.start_session(0, item_bank, context)
+  return engine.run_session(session, item_bank, ScriptedResponseProvider(MIXED_PATTERN), context)
+
+
+def test_a_session_records_the_estimate_the_estimator_returns_for_each_step(item_bank) -> None:
+  """Each recorded Estimate, evaluation count included, is what the estimator returns for that step's context.
+
+  The context of step k is rebuilt here from the session's first k items and responses and its estimate k - 1, and
+  the estimator called on it directly. Fails if the engine records a count of its own, such as a running total over
+  the session or the estimator's lifetime, or another theta or SE than the estimator's. The first answer alone takes
+  Dodd's step, which evaluates nothing; every later step searches, so its count is not 0.
+  """
+  estimator = NumericalSearchEstimator()
+  session = _run_scripted_session(item_bank, MaxInfoSelector(), estimator)
+  items, responses, estimates = session.administered_item_ids, session.responses, session.estimates
+
+  direct = [
+    estimator.estimate(
+      make_context(item_bank, items[:k], responses[:k], theta=estimates[k - 1].theta, se=estimates[k - 1].se)
+    )
+    for k in range(1, len(responses) + 1)
+  ]
+
+  assert estimates[0] == Estimate(0.0, math.inf, 0)
+  assert estimates[1:] == direct
+  assert all(estimate.evaluations for estimate in direct[1:])
+
+
+def test_mei_look_ahead_adds_nothing_to_the_recorded_estimates(item_bank) -> None:
+  """A session selected by MEISelector records what a session given the same items without look-ahead records.
+
+  MEISelector estimates twice per candidate item with the engine's own estimator here. Fails if those look-ahead
+  estimates add to the evaluation counts the session records, as they did to the estimator's shared counters, or
+  change the recorded estimates.
+  """
+  estimator = NumericalSearchEstimator()
+  mei = _run_scripted_session(item_bank, MEISelector(estimator=estimator), estimator)
+
+  replay = _run_scripted_session(item_bank, LinearSelector(mei.administered_item_ids), estimator)
+
+  assert replay.administered_item_ids == mei.administered_item_ids
+  assert replay.estimates == mei.estimates
