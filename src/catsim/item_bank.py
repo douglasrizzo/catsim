@@ -143,7 +143,7 @@ class ItemBank:
         Read-only array of theta values, one per item.
     """
     if self._max_info_thetas is None:
-      thetas = irt.max_info_hpc(self._items)
+      thetas = irt.max_info_theta(self._items)
       thetas.flags.writeable = False
       self._max_info_thetas = thetas
     return self._max_info_thetas
@@ -158,8 +158,12 @@ class ItemBank:
         Read-only array of maximum information values, one per item.
     """
     if self._max_info_values is None:
-      # Ensure max_info_thetas is computed first
-      values = irt.inf_hpc(self.max_info_thetas, self._items)
+      # Information depends on theta only through theta - b, so each item's information at its own
+      # peak is its information at 0 once its difficulty is moved to b - peak. Passing the peaks
+      # to irt.information would evaluate every peak against every item instead.
+      shifted = self._items.copy()
+      shifted[:, 1] -= self.max_info_thetas
+      values = irt.information(0.0, shifted)
       values.flags.writeable = False
       self._max_info_values = values
     return self._max_info_values
@@ -261,52 +265,34 @@ class ItemBank:
     return self._items[numpy.asarray(indices, dtype=int)]
 
   def icc(self, theta: float | FloatArray) -> FloatArray:
-    """Compute item characteristic curves for all items.
+    """Return the probability of a correct response to every item, as :py:func:`catsim.irt.icc` gives it.
 
     Parameters
     ----------
     theta : float or numpy.ndarray
-        Ability value(s).
+        An ability, or an array of abilities.
 
     Returns
     -------
     numpy.ndarray
-        Array of probabilities for correct response. If theta is a scalar,
-        returns array of length n_items. If theta is an array, returns
-        array of shape (len(theta), n_items).
+        Shape ``(n_items,)`` for a float ``theta`` and ``(k, n_items)`` for ``k`` abilities.
     """
-    if isinstance(theta, (int, float)):
-      return irt.icc_hpc(theta, self._items)
-
-    # Handle array of thetas
-    result = numpy.zeros((len(theta), self.n_items))
-    for i, t in enumerate(theta):
-      result[i, :] = irt.icc_hpc(t, self._items)
-    return result
+    return irt.icc(theta, self._items)
 
   def information(self, theta: float | FloatArray) -> FloatArray:
-    """Compute item information values for all items.
+    """Return the information of every item, as :py:func:`catsim.irt.information` gives it.
 
     Parameters
     ----------
     theta : float or numpy.ndarray
-        Ability value(s).
+        An ability, or an array of abilities.
 
     Returns
     -------
     numpy.ndarray
-        Array of information values. If theta is a scalar, returns array
-        of length n_items. If theta is an array, returns array of shape
-        (len(theta), n_items).
+        Shape ``(n_items,)`` for a float ``theta`` and ``(k, n_items)`` for ``k`` abilities.
     """
-    if isinstance(theta, (int, float)):
-      return irt.inf_hpc(theta, self._items)
-
-    # Handle array of thetas
-    result = numpy.zeros((len(theta), self.n_items))
-    for i, t in enumerate(theta):
-      result[i, :] = irt.inf_hpc(t, self._items)
-    return result
+    return irt.information(theta, self._items)
 
   def test_information(self, theta: float, item_indices: npt.ArrayLike | None = None) -> float:
     """Compute test information at a given theta.
@@ -325,7 +311,7 @@ class ItemBank:
         Test information (sum of item information values).
     """
     items_to_use = self._items if item_indices is None else self._items[numpy.asarray(item_indices, dtype=int)]
-    return irt.test_info(theta, items_to_use)
+    return irt.total_information(theta, items_to_use)
 
   @classmethod
   def generate_item_bank(

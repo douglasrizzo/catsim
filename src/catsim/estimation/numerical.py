@@ -126,11 +126,13 @@ class NumericalSearchEstimator(BaseEstimator):
       theta = _dodd(context.theta, context.item_bank, responses[0], self._bounds)
       return Estimate(theta=theta, se=irt.see(theta, items), evaluations=0)
 
+    def negative_log_likelihood(theta: float) -> float:
+      return -irt.log_likelihood(theta, responses, items)
+
     res = minimize_scalar(
-      irt.negative_log_likelihood,
+      negative_log_likelihood,
       bounds=self._bounds,
       method="bounded",
-      args=(responses, items),
       # SciPy's bounded method takes its absolute tolerance only through options
       options={"xatol": self._tol},
     )

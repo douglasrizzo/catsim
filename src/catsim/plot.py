@@ -92,12 +92,10 @@ def item_curve(
   if ax is None:
     _, ax = plt.subplots(figsize=figsize)
 
+  item = numpy.array([a, b, c, d])
   thetas = numpy.arange(b - 4, b + 4, 0.1)
-  p_thetas = []
-  i_thetas = []
-  for theta in thetas:
-    p_thetas.append(irt.icc(theta, a, b, c, d))
-    i_thetas.append(irt.inf(theta, a, b, c, d))
+  p_thetas = irt.icc(thetas, item)
+  i_thetas = irt.information(thetas, item)
 
   if ptype in {PlotType.ICC, PlotType.IIC}:
     if title is not None:
@@ -115,8 +113,8 @@ def item_curve(
       ax.set_ylabel(r"$I(\theta)$")
       ax.plot(thetas, i_thetas, label=r"$I(\theta)$")
       if max_info:
-        aux = irt.max_info(a, b, c, d)
-        ax.plot(aux, irt.inf(aux, a, b, c, d), "o")
+        aux = irt.max_info_theta(item)
+        ax.plot(aux, irt.information(aux, item), "o")
 
   elif ptype == PlotType.BOTH:
     ax.set_xlabel(r"$\theta$", size=16)
@@ -133,8 +131,8 @@ def item_curve(
       tl.set_color("r")
 
     if max_info:
-      aux = irt.max_info(a, b, c, d)
-      ax2.plot(aux, irt.inf(aux, a, b, c, d), "o")
+      aux = irt.max_info_theta(item)
+      ax2.plot(aux, irt.information(aux, item), "o")
 
     if title is not None:
       ax.set_title(title, size=18)
@@ -507,7 +505,7 @@ def test_progress(
   # with no items the information is 0 and the variance, SEE and reliability are infinite.
   quality_xs = xs[1:]
   for enabled, measure, label in (
-    (info, irt.test_info, r"$I(\theta)$"),
+    (info, irt.total_information, r"$I(\theta)$"),
     (var, irt.var, r"$Var$"),
     (see, irt.see, r"$SEE$"),
     (reliability, irt.reliability, "Reliability"),

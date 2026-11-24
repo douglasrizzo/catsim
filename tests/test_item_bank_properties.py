@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from itertools import starmap
+
 import numpy as np
 import pytest
 from hypothesis import given, settings
@@ -23,12 +25,16 @@ def test_item_bank_model_matches_detect_model(params: np.ndarray) -> None:
 
 @given(params=item_params_matrix())
 @BANK_SETTINGS
-def test_max_info_cache_matches_direct_irt(params: np.ndarray) -> None:
+def test_max_info_values_are_each_items_information_at_its_own_peak(params: np.ndarray) -> None:
+  """Item i's cached value is its information at max_info_thetas[i].
+
+  Passing every peak to irt.information evaluates each peak against every item, an n x n matrix.
+  """
   bank = ItemBank(params, validate=True)
-  expected_thetas = irt.max_info_hpc(params)
-  expected_values = irt.inf_hpc(expected_thetas, params)
-  assert np.allclose(bank.max_info_thetas, expected_thetas, rtol=1e-9, atol=1e-9)
-  assert np.allclose(bank.max_info_values, expected_values, rtol=1e-9, atol=1e-9)
+  expected = list(starmap(irt.information, zip(irt.max_info_theta(params), params, strict=True)))
+
+  np.testing.assert_allclose(bank.max_info_thetas, irt.max_info_theta(params), rtol=1e-12)
+  np.testing.assert_allclose(bank.max_info_values, expected, rtol=1e-12)
 
 
 @given(params=item_params_matrix())
@@ -57,7 +63,7 @@ def test_generate_item_bank_respects_count_and_validates(n: int, seed: int, item
 @BANK_SETTINGS
 def test_test_information_matches_irt_helper(params: np.ndarray, theta: float) -> None:
   bank = ItemBank(params, validate=True)
-  assert bank.test_information(theta) == pytest.approx(irt.test_info(theta, params), rel=1e-9, abs=1e-9)
+  assert bank.test_information(theta) == pytest.approx(irt.total_information(theta, params), rel=1e-9, abs=1e-9)
 
 
 @given(params=item_params_matrix(min_items=3, max_items=12), data=st.data())

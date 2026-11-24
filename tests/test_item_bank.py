@@ -1,6 +1,7 @@
 """Tests for the ItemBank class."""
 
 import copy
+import math
 import operator
 import pickle
 from collections.abc import Callable
@@ -316,32 +317,6 @@ class TestItemBankProperties:
     assert ItemBank(items_4pl).model == 4
 
 
-class TestItemBankCachedValues:
-  """Tests for cached/precomputed values."""
-
-  def test_max_info_thetas_cached(self) -> None:
-    """Test that max_info_thetas are precomputed and cached."""
-    items = np.array([[1.0, 0.5, 0.0, 1.0], [1.2, -0.3, 0.1, 1.0]])
-    bank = ItemBank(items)
-
-    # Should be cached
-    assert bank.max_info_thetas is not None
-    assert len(bank.max_info_thetas) == 2
-
-    # For 2PL item (c=0, d=1), max info theta should equal b
-    assert abs(bank.max_info_thetas[0] - 0.5) < 0.01
-
-  def test_max_info_values_cached(self) -> None:
-    """Test that max_info_values are precomputed and cached."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0]])
-    bank = ItemBank(items)
-
-    assert bank.max_info_values is not None
-    assert len(bank.max_info_values) == 1
-    # For a=1, b=0, c=0, d=1, max info should be 0.25
-    assert abs(bank.max_info_values[0] - 0.25) < 0.01
-
-
 class TestItemBankMethods:
   """Tests for ItemBank methods."""
 
@@ -380,58 +355,53 @@ class TestItemBankMethods:
     assert selected[0, 0] == pytest.approx(1.0)
     assert selected[1, 0] == pytest.approx(0.8)
 
-  def test_icc_scalar_theta(self) -> None:
-    """Test computing ICC for a scalar theta."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0]])
-    bank = ItemBank(items)
+  @pytest.mark.parametrize(
+    ("method", "expected"),
+    [
+      pytest.param(ItemBank.icc, [1 / (1 + math.exp(-0.5)), 0.5], id="icc"),
+      pytest.param(ItemBank.information, [math.exp(-0.5) / (1 + math.exp(-0.5)) ** 2, 1.0], id="information"),
+    ],
+  )
+  @pytest.mark.parametrize("theta", [np.float32(0.5), np.array(0.5), 0.5], ids=["float32", "0-d array", "float"])
+  def test_a_scalar_theta_of_any_type_gives_one_value_per_item(
+    self, method: Callable[[ItemBank, object], np.ndarray], expected: list[float], theta: object
+  ) -> None:
+    """A NumPy float32 or a 0-d array is one ability, like a float.
 
-    probs = bank.icc(0.0)
-    assert len(probs) == 2
-    assert 0 <= probs[0] <= 1
-    assert 0 <= probs[1] <= 1
+    An isinstance check for int and float sends them down the path for arrays of abilities, where len() raises
+    TypeError. At theta = 0.5 the 1PL item at b = 0 has P = 1 / (1 + e^-0.5) and P (1 - P), the 2PL item with a = 2
+    at its difficulty has P = 1/2 and a^2 / 4 = 1.
+    """
+    bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [2.0, 0.5, 0.0, 1.0]]))
 
-  def test_icc_array_theta(self) -> None:
-    """Test computing ICC for an array of thetas."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0]])
-    bank = ItemBank(items)
+    values = method(bank, theta)
 
+    assert values.shape == (2,)
+    np.testing.assert_allclose(values, expected, rtol=1e-12)
+
+  @pytest.mark.parametrize("method", [ItemBank.icc, ItemBank.information], ids=["icc", "information"])
+  def test_k_abilities_give_one_row_per_ability(self, method: Callable[[ItemBank, object], np.ndarray]) -> None:
+    """Three abilities and two items give a 3 x 2 array whose row j holds the values at ability j.
+
+    Pairing ability j with item j element-wise raises for three abilities and two items.
+    """
+    bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0]]))
     thetas = np.array([-1.0, 0.0, 1.0])
-    probs = bank.icc(thetas)
-    assert probs.shape == (3, 1)
-    # Probabilities should increase with theta for items with b=0
-    assert probs[0, 0] < probs[1, 0] < probs[2, 0]
 
-  def test_information_scalar_theta(self) -> None:
-    """Test computing information for a scalar theta."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0]])
-    bank = ItemBank(items)
+    values = method(bank, thetas)
 
-    info = bank.information(0.0)
-    assert len(info) == 2
-    assert info[0] > 0
-    assert info[1] > 0
-
-  def test_information_array_theta(self) -> None:
-    """Test computing information for an array of thetas."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0]])
-    bank = ItemBank(items)
-
-    thetas = np.array([-1.0, 0.0, 1.0])
-    info = bank.information(thetas)
-    assert info.shape == (3, 1)
-    # Information should be highest at theta=b=0
-    assert info[1, 0] > info[0, 0]
-    assert info[1, 0] > info[2, 0]
+    assert values.shape == (3, 2)
+    np.testing.assert_allclose(values, [method(bank, float(theta)) for theta in thetas], rtol=1e-12)
 
   def test_test_information_subset_items(self) -> None:
-    """Test computing test information using subset of items."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0], [1.0, -1.0, 0.0, 1.0]])
-    bank = ItemBank(items)
+    """Only the listed items count: items 0 and 2 give 1/4 + L (1 - L) at theta = 0, with L = 1 / (1 + e^-1).
 
-    test_info = bank.test_information(0.0, item_indices=[0, 2])
-    # Should only use items 0 and 2
-    expected = irt.test_info(0.0, items[[0, 2], :])
-    assert abs(test_info - expected) < 0.001
+    Summing every item adds another L (1 - L), for item 1.
+    """
+    bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0], [1.0, -1.0, 0.0, 1.0]]))
+    logistic = 1 / (1 + math.exp(-1.0))
+
+    assert bank.test_information(0.0, item_indices=[0, 2]) == pytest.approx(0.25 + logistic * (1 - logistic), rel=1e-12)
 
 
 class TestItemBankDunderMethods:

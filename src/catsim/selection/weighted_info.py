@@ -86,7 +86,7 @@ class MLWISelector(BaseSelector):
     response_vector: Sequence[bool],
     administered_items: FloatArray,
   ) -> FloatArray:
-    log_likelihood = irt.log_likelihood_hpc(self._nodes, response_vector, administered_items)
+    log_likelihood = irt.log_likelihood(self._nodes, response_vector, administered_items)
     log_likelihood -= float(numpy.max(log_likelihood))
     return numpy.exp(log_likelihood)
 
@@ -112,6 +112,6 @@ class MLWISelector(BaseSelector):
       weights = numpy.ones_like(self._nodes, dtype=float)
 
     # information of every candidate at every node, one row per node
-    info = irt.inf_hpc(self._nodes[:, None], item_bank.get_items(candidates))
+    info = irt.information(self._nodes, item_bank.get_items(candidates))
     scores = (weights @ info) * self._delta
     return pick_best(candidates, scores, context.rng)

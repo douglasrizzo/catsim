@@ -238,7 +238,7 @@ def posterior(
       zero posterior mass, if ``response_vector`` and ``administered_items`` differ in length, or
       if ``response_vector`` contains non-Boolean elements.
   """
-  log_lik = irt.log_likelihood_hpc(grid.nodes, response_vector, administered_items)
+  log_lik = irt.log_likelihood(grid.nodes, response_vector, administered_items)
   log_post = log_prior(grid.nodes) + log_lik + numpy.log(grid.weights)
   if numpy.isnan(log_post).any() or numpy.isposinf(log_post).any():
     msg = "posterior is undefined: the log-prior or log-likelihood is NaN or +inf at some node"
@@ -431,7 +431,7 @@ class MAPEstimator(BaseEstimator):
     h = _CURVATURE_STEP
     below, at, above = self._log_prior(numpy.array([theta - h, theta, theta + h], dtype=float))
     curvature = float((above - 2.0 * at + below) / h**2)
-    precision = irt.test_info(theta, items) - (curvature if math.isfinite(curvature) else 0.0)
+    precision = irt.total_information(theta, items) - (curvature if math.isfinite(curvature) else 0.0)
     return 1.0 / math.sqrt(precision) if precision > 0.0 and math.isfinite(precision) else math.inf
 
   def estimate(self, context: StepContext) -> Estimate:
@@ -464,7 +464,7 @@ class MAPEstimator(BaseEstimator):
     responses = context.responses
     items = context.item_bank.get_items(context.administered_items)
     nodes = numpy.linspace(self._bounds[0], self._bounds[1], _MODE_SEARCH_POINTS)
-    log_post = irt.log_likelihood_hpc(nodes, responses, items) + self._log_prior(nodes)
+    log_post = irt.log_likelihood(nodes, responses, items) + self._log_prior(nodes)
     peak = log_post.max()
     if not numpy.isfinite(peak):
       msg = (
