@@ -102,7 +102,7 @@ bank. And because the cluster
 is chosen without looking at exposure rates, `r_max` only applies inside the
 chosen cluster; it does not cap exposure across the bank.
 
-Simulations run while preparing catsim 1.0 measured those consequences. They
+catsim's own simulations measured those consequences. They
 used two 500-item 3PL banks, clusters from k-means on the standardized item
 parameters, 1,000 examinees drawn from N(0, 1) and 20-item tests, and compared
 the selector with `MaxInfoSelector` and `RandomesqueSelector`. Test information

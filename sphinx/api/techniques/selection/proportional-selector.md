@@ -102,8 +102,8 @@ At the last item of a 20-item test at $\theta = 0$, over 20 simulated 500-item
 ## Guarantees
 
 1. It never returns an item that was already administered or excluded.
-2. At the first position every available item is equally likely, whatever the
-   acceleration.
+2. When `test_size` is above 1, every available item is equally likely at the first
+   position, whatever the acceleration.
 3. When every available item gives zero information at the estimate, it draws
    uniformly among them.
 4. When every remaining item is at or above the exposure cap, it samples from all

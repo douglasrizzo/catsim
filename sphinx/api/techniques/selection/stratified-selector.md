@@ -61,6 +61,8 @@ $$
 I_i^{\max} = I_i(\theta_i^{\max}).
 $$
 
+{py:func}`catsim.irt.max_info_theta` computes $\theta_i^{\max}$.
+
 Barrada et al. (2006, p. 157, Equations 1 and 2) give $I_i^{\max}$ and
 $\theta_i^{\max}$ in closed form for the 3PL model, with the scaling constant
 $D = 1.7$; catsim's IRT functions use no scaling constant.
@@ -93,8 +95,8 @@ blocks of $S$ items. Each block is sorted by increasing $k_i$; its first item
 joins the first stratum, its second item the second stratum, and so on. Every
 full block therefore gives one item to every
 stratum, so each stratum spans the locations those blocks cover, while the
-strata still ascend in $k_i$. A trailing block of fewer than $S$ items, those of
-highest location, gives its items, in the same order, to the first strata, so
+strata still ascend in $k_i$. A trailing block of $r < S$ items, those of
+highest location, gives its items, in the same order, to the first $r$ strata, so
 the strata have the sizes they would have without blocking.
 
 ```{figure} /b-blocking.svg
@@ -185,10 +187,10 @@ MIS-B whenever a stratified method is used.
 
 ## Guarantees
 
-1. The strata partition the bank and ascend in the stratification key; with
-   blocking, every block of `n_strata` items ordered by location gives its
-   items, in order of key, one to each stratum, so every stratum spans the bank's
-   range of locations.
+1. The strata, which `strata(item_bank)` returns, partition the bank and ascend
+   in the stratification key; with blocking, every block of `n_strata` items
+   ordered by location gives its items, in order of key, one to each stratum, so
+   every stratum spans the bank's range of locations.
 2. Each item comes from the stratum of its stage, which depends only on the
    number of administered items, `test_size` and `n_strata`: the first stages
    draw from the strata of lowest key, the last stage from the highest.

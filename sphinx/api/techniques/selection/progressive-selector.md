@@ -105,9 +105,9 @@ not test it separately, since it differs little from Equation 12 with $t = 0$
 ## Guarantees
 
 1. It never returns an item that was already administered or excluded.
-2. At the first position the choice does not depend on item information: every
-   available item is equally likely.
-3. From position `test_size` on, it returns the most informative available item.
+2. When `test_size` is above 1, the choice at the first position does not depend on item
+   information: every available item is equally likely.
+3. From the `test_size`-th item on, it returns the most informative available item.
 4. When every remaining item is at or above the exposure cap, it chooses among all
    the remaining items.
 5. It draws with the session's random generator, so a run with the same seed
