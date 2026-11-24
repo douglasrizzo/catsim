@@ -275,6 +275,12 @@ class CatEngine:
       # An estimator written for the float-returning contract would otherwise fail on .theta.
       msg = f"{type(self._estimator).__name__}.estimate must return an Estimate, got {type(estimate).__name__}"
       raise TypeError(msg)
+    # The session holds Python scalars, whatever NumPy types a custom estimator puts in its Estimate.
+    estimate = Estimate(
+      theta=float(estimate.theta),
+      se=float(estimate.se),
+      evaluations=None if estimate.evaluations is None else int(estimate.evaluations),
+    )
     stopped = bool(self._stopper.stop(dataclasses.replace(answered, theta=estimate.theta, se=estimate.se)))
 
     state.administered_item_ids.append(item_id)

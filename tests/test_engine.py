@@ -73,11 +73,12 @@ class RecordingEstimator:
 
   theta: float
   se: float = 0.5
+  evaluations: int | None = None
   seen: StepContext | None = None
 
   def estimate(self, context: StepContext) -> Estimate:
     self.seen = context
-    return Estimate(theta=self.theta, se=self.se)
+    return Estimate(theta=self.theta, se=self.se, evaluations=self.evaluations)
 
 
 class FailingEstimator:
@@ -438,14 +439,14 @@ def test_apply_response_rejects_a_stopped_session(item_bank) -> None:
 def test_session_state_holds_builtin_python_values(item_bank) -> None:
   """The engine stores Python scalars whatever numeric types the strategies and the examinee return.
 
-  Fails if an int initial theta, a ``numpy.int64`` item index (from the selector, or passed to
-  apply_response by the caller), a ``numpy.bool_`` response or a ``numpy.bool_`` stop decision is
-  stored as given.
+  Fails if an int initial theta, an estimate whose theta, standard error or evaluation count is a NumPy scalar, a
+  ``numpy.int64`` item index (from the selector, or passed to apply_response by the caller), a ``numpy.bool_``
+  response or a ``numpy.bool_`` stop decision is stored as given.
   """
   engine = CatEngine(
     RecordingInitializer(theta=0),
     RecordingSelector(item_id=np.int64(3)),
-    RecordingEstimator(theta=0.25),
+    RecordingEstimator(theta=np.float64(0.25), se=np.float64(0.4), evaluations=np.int64(7)),
     RecordingStopper(np.False_),
   )
   context = RunContext(rng=np.random.default_rng(42))
@@ -457,6 +458,8 @@ def test_session_state_holds_builtin_python_values(item_bank) -> None:
   assert session.theta_history == (0.0, 0.25, 0.25)
   assert [type(theta) for theta in session.theta_history] == [float, float, float]
   assert type(session.current_theta) is float
+  assert session.estimates[1:] == [Estimate(0.25, 0.4, 7)] * 2
+  assert [(type(e.theta), type(e.se), type(e.evaluations)) for e in session.estimates[1:]] == [(float, float, int)] * 2
   assert session.administered_item_ids == [3, 5]
   assert [type(item) for item in session.administered_item_ids] == [int, int]
   assert session.responses == [True, False]
