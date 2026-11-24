@@ -113,14 +113,20 @@ class StratifiedSelector(BaseSelector):
     for start in range(0, item_bank.n_items, self._n_strata):
       block = by_block_key[start : start + self._n_strata]
       block = block[numpy.argsort(key[block], kind="stable")]
-      # a trailing block smaller than n_strata is spread evenly across the strata
+      # a trailing block smaller than n_strata fills the first strata, so the strata are sized like array_split's
       for rank, item in enumerate(block):
-        members[rank * self._n_strata // len(block)].append(int(item))
+        members[rank].append(int(item))
     return [numpy.array(stratum, dtype=numpy.intp) for stratum in members]
 
   def _stage(self, position: int) -> int:
     """Return the 0-indexed stage of a 0-indexed test position below ``test_size``."""
-    return position * self._n_strata // self._test_size
+    # the first test_size % n_strata stages get a position more, like the first n_items % n_strata strata get an item
+    # more, so no stage of a test of at most n_items items needs more items than its stratum holds
+    short, n_long = divmod(self._test_size, self._n_strata)
+    long_positions = n_long * (short + 1)
+    if position < long_positions:
+      return position // (short + 1)
+    return n_long + (position - long_positions) // short
 
   @override
   def select(self, context: StepContext) -> int:
