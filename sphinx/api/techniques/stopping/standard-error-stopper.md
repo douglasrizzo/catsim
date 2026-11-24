@@ -18,26 +18,29 @@ criterion (Magis and Raîche, 2012, p. 10).
 
 ## Definition
 
-Let $I(\hat{\theta})$ be the information of the administered test at the
-current estimate. The standard error of estimation is
+The stopper judges the standard error the estimator reported with the current
+estimate, the context's `se`
+({doc}`ADR-0004 </adr/0004-explicit-strategy-contracts>`). It stops when
 
 $$
-SEE(\hat{\theta})
-=
-\sqrt{\frac{1}{I(\hat{\theta})}}.
+SE(\hat{\theta}) \le \tau,
 $$
 
-The stopper stops when
-
-$$
-SEE(\hat{\theta}) \le \tau,
-$$
-
-where $\tau$ is the configured `max_se`. With no administered items the
-information is zero and the standard error infinite, so the test does not stop.
+where $\tau$ is the configured `max_se`. Each estimator computes that error by
+its own formula, as catR does (Magis and Raîche, 2012, pp. 4-6). For
+{doc}`maximum likelihood </api/techniques/estimation/numerical-search-estimator>`
+and the {doc}`WLE </api/techniques/estimation/warm-wle>` it is the Fisher
+standard error, $1/\sqrt{I(\hat{\theta})}$, with $I(\hat{\theta})$ the
+information of the administered test at the current estimate. For
+{doc}`EAP </api/techniques/estimation/eap-estimator>` it is the posterior
+standard deviation, and for
+{doc}`MAP </api/techniques/estimation/map-estimator>` the information plus the
+prior's negative curvature. Those two are usually smaller than the Fisher error
+at the same estimate, so the same threshold ends EAP and MAP tests sooner.
+Before any response the standard error is infinite, so the test does not stop.
 As in catR, items are administered "until the standard error of the provisional
-ability estimate gets smaller than or equal to that threshold" (Magis and Raîche,
-2012, p. 11).
+ability estimate gets smaller than or equal to that threshold" (Magis and
+Raîche, 2012, p. 11).
 
 Samejima (1977, p. 238) suggests terminating an adaptive test when the test
 information function reaches a criterion value, or equivalently when the
@@ -70,8 +73,8 @@ in a {class}`~catsim.stopping.StopRule` (see {ref}`combining-stopping-rules`).
 
 Any correct implementation must satisfy the following properties:
 
-1. The stopper returns `True` exactly when the standard error at the current estimate is at most `max_se`.
-2. If no items have been administered, the stopper returns `False`.
+1. The stopper returns `True` exactly when the context's standard error, the one the estimator reported, is at most `max_se`.
+2. Before any response the standard error is infinite, so the stopper returns `False`.
 3. A `max_se` of zero or less raises `ValueError`.
 
 ## References

@@ -46,8 +46,8 @@ though the stopping rule is not yet satisfied" (Magis and Raîche, 2012, p. 18).
 
 Stoppers are pure, so a rule can be asked again after a run.
 {meth}`~catsim.stopping.StopRule.satisfied` returns the stoppers that hold for a
-session's final items and estimate, which tells, for example, whether a session
-met its precision target or ran to the cap.
+session's final items, estimate and standard error, which tells, for example,
+whether a session met its precision target or ran to the cap.
 
 No stopper checks whether the item bank is exhausted: when the selector has no
 item left to give, the engine ends the session itself.

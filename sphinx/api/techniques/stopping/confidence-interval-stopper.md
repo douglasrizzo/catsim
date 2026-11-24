@@ -25,13 +25,21 @@ $$
 CI(\hat{\theta})
 =
 \left[
-  \hat{\theta} - z_{(1+\gamma)/2} \, SEE(\hat{\theta}),
-  \hat{\theta} + z_{(1+\gamma)/2} \, SEE(\hat{\theta})
+  \hat{\theta} - z_{(1+\gamma)/2} \, SE(\hat{\theta}),
+  \hat{\theta} + z_{(1+\gamma)/2} \, SE(\hat{\theta})
 \right],
 $$
 
-where $\gamma$ is the configured confidence level and
-$SEE(\hat{\theta}) = \sqrt{1 / I(\hat{\theta})}$.
+where $\gamma$ is the configured confidence level, $z_{(1+\gamma)/2}$ the
+standard normal quantile, and $SE(\hat{\theta})$ the standard error the
+estimator reported with the current estimate, the context's `se`
+({doc}`ADR-0004 </adr/0004-explicit-strategy-contracts>`). Each estimator
+computes it by its own formula: the Fisher standard error
+$1/\sqrt{I(\hat{\theta})}$ for maximum likelihood and the WLE, the posterior
+standard deviation for EAP, and for MAP the information plus the prior's
+negative curvature (see {doc}`/api/techniques/stopping/standard-error-stopper`).
+A smaller standard error narrows the interval, so EAP and MAP sessions are
+usually classified sooner than they would be on the Fisher error.
 
 Given sorted boundary points $b_1 < \dots < b_m$, the rule stops when the
 entire confidence interval falls within one interval induced by those boundaries:
@@ -41,8 +49,9 @@ $$
 $$
 
 Equivalently, the interval lies within one band exactly when no boundary lies
-strictly inside it, which is what the implementation checks. With no administered
-items the interval is infinite, so the test does not stop.
+strictly inside it, which is what the implementation checks. Before any
+response the standard error is infinite, and so is the interval, so the test
+does not stop.
 
 Magis and Raîche (2012, p. 11) describe the classification criterion with a
 single ability threshold: a confidence interval for ability is built after every
@@ -74,7 +83,7 @@ Any correct implementation must satisfy the following properties:
 1. `interval_bounds` must be nonempty and strictly increasing, and `confidence` must lie strictly between 0 and 1; otherwise the constructor raises `ValueError`.
 2. The stopper returns `True` exactly when the full confidence interval lies within a single induced classification interval.
 3. If the confidence interval crosses any configured boundary, the stopper returns `False`.
-4. If no items have been administered, the stopper returns `False`.
+4. Before any response the standard error is infinite, so the stopper returns `False`.
 
 ## References
 
