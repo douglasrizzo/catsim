@@ -3,15 +3,19 @@
 import math
 from abc import ABC, abstractmethod
 
-from .. import irt
-from ..item_bank import ItemBank
+from ..context import StepContext
 
 
 class BaseEstimator(ABC):
   """Base class for ability estimators.
 
-  Estimators are responsible for computing ability estimates based on examinees'
-  responses to administered items.
+  An estimator updates the ability estimate from the responses a
+  :class:`~catsim.context.StepContext` holds, the newest one included.
+
+  An estimator holds its configuration and caches derived from the item bank, never per-session
+  state: one estimator serves every session of a run, an application may interleave the sessions
+  of several examinees on it, and look-ahead selectors such as MEI call it with hypothetical
+  responses.
   """
 
   def __init__(self) -> None:
@@ -21,13 +25,7 @@ class BaseEstimator(ABC):
     self._total_evaluations = 0
 
   @abstractmethod
-  def estimate(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    response_vector: list[bool],
-    est_theta: float,
-  ) -> float:
+  def estimate(self, context: StepContext) -> float:
     r"""Return the updated ability estimate given the responses so far.
 
     Once an item has been administered, the estimate is finite and lies within the estimator's
@@ -35,14 +33,9 @@ class BaseEstimator(ABC):
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    administered_items : list[int]
-        A list containing the indexes of items that were already administered.
-    response_vector : list[bool]
-        A boolean list containing the examinee's answers to the administered items.
-    est_theta : float
-        The current estimated ability.
+    context : StepContext
+        The session to estimate for, with the newest item and response, and with ``theta`` the
+        estimate before them.
 
     Returns
     -------
@@ -98,33 +91,6 @@ class BaseEstimator(ABC):
       msg = f"bounds must be finite with low < high, got {bounds}"
       raise ValueError(msg)
     return float(low), float(high)
-
-  @staticmethod
-  def _require_inputs(
-    item_bank: ItemBank | None,
-    administered_items: list[int] | None,
-    response_vector: list[bool] | None,
-  ) -> None:
-    """Raise ``ValueError`` if an estimation input is missing or the responses do not fit the items.
-
-    Every estimator calls this first, so a response vector that is too short, too long or not
-    Boolean fails the same way everywhere, before any estimator-specific shortcut runs.
-
-    Raises
-    ------
-    ValueError
-        If an input is None, or the response vector does not fit the administered items.
-    """
-    if item_bank is None:
-      msg = "item_bank parameter cannot be None"
-      raise ValueError(msg)
-    if administered_items is None:
-      msg = "administered_items parameter cannot be None"
-      raise ValueError(msg)
-    if response_vector is None:
-      msg = "response_vector parameter cannot be None"
-      raise ValueError(msg)
-    irt.validate_response_vector(response_vector, len(administered_items))
 
   @property
   def calls(self) -> int:

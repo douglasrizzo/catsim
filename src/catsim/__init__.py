@@ -2,6 +2,7 @@
 
 import importlib.metadata
 
+from .context import StepContext
 from .engine import CatEngine, RunContext, SimulatedResponseProvider
 from .exceptions import NoItemsAvailableError
 from .item_bank import ItemBank
@@ -26,5 +27,6 @@ __all__ = [
   "SimulatedResponseProvider",
   "SimulationResult",
   "SimulationRunner",
+  "StepContext",
   "StopReason",
 ]

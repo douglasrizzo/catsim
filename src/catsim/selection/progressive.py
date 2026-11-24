@@ -2,9 +2,8 @@
 
 import numpy
 
-from .._typing import FloatArray
-from ..item_bank import ItemBank
-from .base import BaseSelector, below_cap, check_r_max, check_test_size, pick_best, remaining, require_rng
+from ..context import StepContext
+from .base import BaseSelector, below_cap, check_r_max, check_test_size, pick_best, remaining
 
 
 def _position_weight(position: int, test_size: int, acceleration: float) -> float:
@@ -125,53 +124,26 @@ class ProgressiveSelector(BaseSelector):
     """Return the maximum exposure rate accepted by the selector."""
     return self._r_max
 
-  def select(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    est_theta: float,
-    rng: numpy.random.Generator | None = None,
-    exposure_rates: FloatArray | None = None,
-    response_vector: list[bool] | None = None,  # noqa: ARG002
-  ) -> int | None:
-    """Return the next item using blended random and information-based scoring.
+  def select(self, context: StepContext) -> int:
+    """Return the available item with the largest blend of a random draw and its scaled information.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    administered_items : list[int]
-        A list containing the indexes of items that were already administered; their count sets
-        the test position.
-    est_theta : float
-        The current estimated ability.
-    rng : numpy.random.Generator or None, optional
-        Random number generator for the random component. Required.
-    exposure_rates : numpy.ndarray or None, optional
-        Current exposure rate of every item, compared against ``r_max``.
-    response_vector : list[bool] or None, optional
-        Unused; accepted for the engine's selector contract.
+    context : StepContext
+        The session to select for.
 
     Returns
     -------
     int
-        Index of the selected item; ties are broken uniformly at random (ADR-0008).
-
-    Raises
-    ------
-    ValueError
-        If ``rng`` is None.
-    NoItemsAvailableError
-        If every item has been administered.
+        Index of the selected item.
     """
-    rng = require_rng(rng)
-
-    candidates = below_cap(remaining(item_bank.n_items, administered_items), exposure_rates, self._r_max)
-    weight = _position_weight(len(administered_items) + 1, self._test_size, self._acceleration)
+    item_bank, rng = context.item_bank, context.rng
+    candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
+    weight = _position_weight(len(context.administered_items) + 1, self._test_size, self._acceleration)
 
     # Revuelta and Ponsoda (1998) draw the random component on [0, max information among the
     # available items]; dividing by that maximum puts both components on [0, 1].
-    info = numpy.asarray(item_bank.information(est_theta), dtype=float)
+    info = numpy.asarray(item_bank.information(context.theta), dtype=float)
     info_max = float(info[candidates].max())
     info_norm = info / info_max if info_max > 0 else numpy.zeros_like(info)
 
@@ -245,51 +217,24 @@ class ProportionalSelector(BaseSelector):
     """Return the maximum exposure rate accepted by the selector."""
     return self._r_max
 
-  def select(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    est_theta: float,
-    rng: numpy.random.Generator | None = None,
-    exposure_rates: FloatArray | None = None,
-    response_vector: list[bool] | None = None,  # noqa: ARG002
-  ) -> int | None:
-    """Return the next item using information-weighted sampling.
+  def select(self, context: StepContext) -> int:
+    """Return an available item drawn with probability proportional to its information raised to the schedule's power.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    administered_items : list[int]
-        A list containing the indexes of items that were already administered; their count sets
-        the test position.
-    est_theta : float
-        The current estimated ability.
-    rng : numpy.random.Generator or None, optional
-        Random number generator used to draw the item. Required.
-    exposure_rates : numpy.ndarray or None, optional
-        Current exposure rate of every item, compared against ``r_max``.
-    response_vector : list[bool] or None, optional
-        Unused; accepted for the engine's selector contract.
+    context : StepContext
+        The session to select for.
 
     Returns
     -------
     int
         Index of the selected item.
-
-    Raises
-    ------
-    ValueError
-        If ``rng`` is None.
-    NoItemsAvailableError
-        If every item has been administered.
     """
-    rng = require_rng(rng)
+    candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
+    position = len(context.administered_items) + 1
+    exponent = self._test_size * _position_weight(position, self._test_size, self._acceleration)
 
-    candidates = below_cap(remaining(item_bank.n_items, administered_items), exposure_rates, self._r_max)
-    exponent = self._test_size * _position_weight(len(administered_items) + 1, self._test_size, self._acceleration)
-
-    info = numpy.maximum(numpy.asarray(item_bank.information(est_theta), dtype=float)[candidates], 0.0)
+    info = numpy.maximum(numpy.asarray(context.item_bank.information(context.theta), dtype=float)[candidates], 0.0)
     info_max = float(info.max())
     if info_max <= 0:
       probs = numpy.full(candidates.size, 1.0 / candidates.size, dtype=float)
@@ -299,4 +244,4 @@ class ProportionalSelector(BaseSelector):
       weights = numpy.power(info / info_max, exponent)
       probs = weights / weights.sum()
 
-    return int(rng.choice(candidates, p=probs))
+    return int(context.rng.choice(candidates, p=probs))

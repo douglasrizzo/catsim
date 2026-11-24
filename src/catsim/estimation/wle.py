@@ -15,8 +15,10 @@ from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from .base import BaseEstimator
 
 if TYPE_CHECKING:
-  from .._typing import FloatArray
-  from ..item_bank import ItemBank
+  from collections.abc import Sequence
+
+  from ..context import StepContext
+  from ..typing import FloatArray
 
 # Points on which the modified score is scanned to bracket its roots before Brent's method refines
 # them (0.1 apart on [-6, 6]).
@@ -67,19 +69,19 @@ class WarmLikelihoodEstimator(BaseEstimator):
     self._tol = self._check_tol(tol)
     self._bounds = self._check_bounds(bounds)
 
-  def __str__(self) -> str:
-    """Return a string representation of the estimator."""
-    return "Warm Weighted Likelihood Estimator"
+  def __repr__(self) -> str:
+    """Return the estimator as a constructor call that names every argument."""
+    return f"{type(self).__name__}(tol={self._tol!r}, bounds={self._bounds!r})"
 
   @staticmethod
-  def _modified_score(theta: npt.ArrayLike, response_vector: list[bool], items: FloatArray) -> FloatArray:
+  def _modified_score(theta: npt.ArrayLike, response_vector: Sequence[bool], items: FloatArray) -> FloatArray:
     r"""Return Warm's modified score at one or more ability values.
 
     Parameters
     ----------
     theta : array_like
         Ability value(s) at which to evaluate the modified score.
-    response_vector : list[bool]
+    response_vector : Sequence[bool]
         Responses to the items, in the same order as ``items``.
     items : numpy.ndarray
         Item parameter matrix with columns ``a, b, c, d``.
@@ -109,46 +111,27 @@ class WarmLikelihoodEstimator(BaseEstimator):
     correction = numpy.divide(j, 2.0 * info, out=numpy.zeros_like(j), where=info > 0.0)
     return score + correction
 
-  def estimate(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    response_vector: list[bool],
-    est_theta: float,
-  ) -> float:
-    """Return the root of Warm's modified score equation.
+  def estimate(self, context: StepContext) -> float:
+    """Return the root of Warm's modified score equation, or ``context.theta`` when no item has been administered.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    administered_items : list[int]
-        Indices of the administered items.
-    response_vector : list[bool]
-        The examinee's responses to the administered items.
-    est_theta : float
-        The current ability estimate, returned unchanged when no item has been administered.
+    context : StepContext
+        The session to estimate for.
 
     Returns
     -------
     float
         The weighted likelihood estimate, within ``bounds``.
-
-    Raises
-    ------
-    ValueError
-        If any argument is None, if ``response_vector`` and ``administered_items`` have different
-        lengths, or if ``response_vector`` contains non-Boolean elements.
     """
-    self._require_inputs(item_bank, administered_items, response_vector)
-
     self._calls += 1
     self._last_evaluations = 0
 
-    if len(administered_items) == 0:
-      return float(est_theta)
+    if not context.administered_items:
+      return float(context.theta)
 
-    items = item_bank.get_items(administered_items)
+    response_vector = context.responses
+    items = context.item_bank.get_items(context.administered_items)
 
     def score(theta: float) -> float:
       return float(self._modified_score(theta, response_vector, items)[0])

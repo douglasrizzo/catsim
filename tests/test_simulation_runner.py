@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from catsim import StepContext
 from catsim.estimation import NumericalSearchEstimator
 from catsim.initialization import FixedPointInitializer
 from catsim.item_bank import ItemBank
@@ -21,19 +22,10 @@ class FirstRemainingSelector(BaseSelector):
     super().__init__()
     self.seen_exposure_rates: list[np.ndarray] = []
 
-  def select(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    est_theta: float,
-    rng: np.random.Generator | None = None,
-    exposure_rates: np.ndarray | None = None,
-    response_vector: list[bool] | None = None,
-  ) -> int:
-    del est_theta, rng, response_vector
-    assert exposure_rates is not None, "SimulationRunner should always pass exposure rates"
-    self.seen_exposure_rates.append(exposure_rates.copy())
-    return next(i for i in range(item_bank.n_items) if i not in administered_items)
+  def select(self, context: StepContext) -> int:
+    assert context.exposure_rates is not None, "SimulationRunner should always pass exposure rates"
+    self.seen_exposure_rates.append(context.exposure_rates.copy())
+    return next(i for i in range(context.item_bank.n_items) if i not in context.administered_items)
 
 
 class TestSimulationRunnerInit:

@@ -2,11 +2,8 @@
 
 import operator
 
-from numpy.random import Generator
-
-from .._typing import FloatArray
-from ..item_bank import ItemBank
-from .base import BaseSelector, best_pool, remaining, require_rng
+from ..context import StepContext
+from .base import BaseSelector, best_pool, remaining
 
 
 class RandomSelector(BaseSelector):
@@ -20,46 +17,20 @@ class RandomSelector(BaseSelector):
     """Return the selector as a constructor call that names every argument."""
     return f"{type(self).__name__}()"
 
-  def select(  # noqa: PLR6301
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    est_theta: float,  # noqa: ARG002
-    rng: Generator | None = None,
-    exposure_rates: FloatArray | None = None,  # noqa: ARG002
-    response_vector: list[bool] | None = None,  # noqa: ARG002
-  ) -> int | None:
-    """Return the index of the next item to be administered.
+  def select(self, context: StepContext) -> int:  # noqa: PLR6301
+    """Return a remaining item drawn uniformly at random.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    administered_items : list[int]
-        A list containing the indexes of items that were already administered.
-    est_theta : float
-        Current estimated ability. Unused by this selector.
-    rng : numpy.random.Generator or None, optional
-        Random number generator the item is drawn with. Required.
-    exposure_rates : numpy.ndarray or None, optional
-        Ignored: this selector applies no exposure cap.
-    response_vector : list[bool] or None, optional
-        Unused; accepted for the engine's selector contract.
+    context : StepContext
+        The session to select for.
 
     Returns
     -------
     int
-        Index of the next item to be applied, drawn uniformly at random from the items not yet
-        administered.
-
-    Raises
-    ------
-    ValueError
-        If ``rng`` is None.
-    NoItemsAvailableError
-        If every item has already been administered.
+        Index of the selected item.
     """
-    return int(require_rng(rng).choice(remaining(item_bank.n_items, administered_items)))
+    return int(context.rng.choice(remaining(context)))
 
 
 class The54321Selector(BaseSelector):
@@ -71,7 +42,7 @@ class The54321Selector(BaseSelector):
   otherwise share while :math:`\hat\theta` is still rough, reduces their exposure at little cost in
   precision. Items tied with the least informative item of a bin also join it, so from the fifth
   item on, ties for the most information are broken uniformly at random (ADR-0008). The selector
-  applies no exposure cap: ``exposure_rates`` is ignored.
+  applies no exposure cap: ``context.exposure_rates`` is ignored.
 
   Parameters
   ----------
@@ -115,52 +86,26 @@ class The54321Selector(BaseSelector):
     """Get the number of most informative items the first item is drawn from."""
     return self._initial_bin_size
 
-  def select(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    est_theta: float,
-    rng: Generator | None = None,
-    exposure_rates: FloatArray | None = None,  # noqa: ARG002
-    response_vector: list[bool] | None = None,  # noqa: ARG002
-  ) -> int | None:
-    """Return the index of the next item to be administered.
+  def select(self, context: StepContext) -> int:
+    """Return an item drawn uniformly from the bin of the most informative remaining items.
+
+    The bin holds ``initial_bin_size`` items at the first position, one fewer at each following
+    position, and at least one, plus every item tied with its least informative item (ADR-0008).
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    administered_items : list[int]
-        A list containing the indexes of items that were already administered.
-    est_theta : float
-        The current estimated ability.
-    rng : numpy.random.Generator or None, optional
-        Random number generator the item is drawn from the bin with. Required.
-    exposure_rates : numpy.ndarray or None, optional
-        Ignored: this selector applies no exposure cap.
-    response_vector : list[bool] or None, optional
-        Unused; accepted for the engine's selector contract.
+    context : StepContext
+        The session to select for.
 
     Returns
     -------
     int
-        Index of the next item to be applied, drawn uniformly from the bin, which also holds every
-        item tied with its least informative item (ADR-0008).
-
-    Raises
-    ------
-    ValueError
-        If ``rng`` is None.
-    NoItemsAvailableError
-        If every item has already been administered.
+        Index of the selected item.
     """
-    rng = require_rng(rng)
-
-    candidates = remaining(item_bank.n_items, administered_items)
-    bin_size = max(1, self._initial_bin_size - len(administered_items))
-    # items tied with the bin's least informative item join the bin (ADR-0008)
-    pool = best_pool(candidates, item_bank.information(est_theta)[candidates], bin_size)
-    return int(rng.choice(pool))
+    candidates = remaining(context)
+    bin_size = max(1, self._initial_bin_size - len(context.administered_items))
+    pool = best_pool(candidates, context.item_bank.information(context.theta)[candidates], bin_size)
+    return int(context.rng.choice(pool))
 
 
 class RandomesqueSelector(BaseSelector):
@@ -168,7 +113,7 @@ class RandomesqueSelector(BaseSelector):
 
   In this selector, at each step of the test, an item is randomly chosen from the :math:`n` most informative items in
   the item bank, :math:`n` being a user-defined value. Items tied with the least informative of those :math:`n` also
-  join the bin (ADR-0008). The selector applies no exposure cap: ``exposure_rates`` is ignored.
+  join the bin (ADR-0008). The selector applies no exposure cap: ``context.exposure_rates`` is ignored.
 
   Parameters
   ----------
@@ -208,48 +153,21 @@ class RandomesqueSelector(BaseSelector):
     """Get the bin size."""
     return self._bin_size
 
-  def select(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    est_theta: float,
-    rng: Generator | None = None,
-    exposure_rates: FloatArray | None = None,  # noqa: ARG002
-    response_vector: list[bool] | None = None,  # noqa: ARG002
-  ) -> int | None:
-    """Return the index of the next item to be administered.
+  def select(self, context: StepContext) -> int:
+    """Return an item drawn uniformly from the ``bin_size`` most informative remaining items.
+
+    The bin also holds every item tied with its least informative item (ADR-0008).
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    administered_items : list[int]
-        A list containing the indexes of items that were already administered.
-    est_theta : float
-        The current estimated ability.
-    rng : numpy.random.Generator or None, optional
-        Random number generator the item is drawn from the bin with. Required.
-    exposure_rates : numpy.ndarray or None, optional
-        Ignored: this selector applies no exposure cap.
-    response_vector : list[bool] or None, optional
-        Unused; accepted for the engine's selector contract.
+    context : StepContext
+        The session to select for.
 
     Returns
     -------
     int
-        Index of the next item to be applied, drawn uniformly from the bin, which also holds every
-        item tied with its least informative item (ADR-0008).
-
-    Raises
-    ------
-    ValueError
-        If ``rng`` is None.
-    NoItemsAvailableError
-        If every item has already been administered.
+        Index of the selected item.
     """
-    rng = require_rng(rng)
-
-    candidates = remaining(item_bank.n_items, administered_items)
-    # items tied with the bin's least informative item join the bin (ADR-0008)
-    pool = best_pool(candidates, item_bank.information(est_theta)[candidates], self._bin_size)
-    return int(rng.choice(pool))
+    candidates = remaining(context)
+    pool = best_pool(candidates, context.item_bank.information(context.theta)[candidates], self._bin_size)
+    return int(context.rng.choice(pool))

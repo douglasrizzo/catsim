@@ -22,6 +22,7 @@ from catsim.selection import (
   UrrySelector,
 )
 from catsim.selection.base import best_pool, pick_best
+from tests.contexts import make_context
 
 _N_COPIES = 6
 _ITEM = [1.4, 0.3, 0.15, 0.98]
@@ -66,14 +67,13 @@ class TestPickBest:
 
     assert picks == again
 
-  def test_tie_without_rng_raises(self) -> None:
-    """A tie cannot be broken without a generator."""
-    with pytest.raises(ValueError, match="rng parameter cannot be None"):
-      pick_best(np.arange(3), np.array([1.0, 1.0, 0.5]), None)
+  def test_untied_pick_draws_no_random_number(self) -> None:
+    """Breaking ties with a draw on every pick, such as jittering the scores, would change seeded runs without ties."""
+    rng = np.random.default_rng(0)
+    state = rng.bit_generator.state
 
-  def test_untied_pick_works_without_rng(self) -> None:
-    """Deterministic selectors keep working without a generator when nothing ties."""
-    assert pick_best(np.arange(3), np.array([1.0, 2.0, 0.5]), None) == 1
+    assert pick_best(np.arange(3), np.array([1.0, 2.0, 0.5]), rng) == 1
+    assert rng.bit_generator.state == state
 
   def test_nan_scores_raise(self) -> None:
     """A NaN score would make every comparison false; it should raise instead of picking silently."""
@@ -137,11 +137,7 @@ def test_selectors_break_ties_at_random(name: str) -> None:
 
   picks = {
     SELECTOR_FACTORIES[name]().select(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      est_theta=0.3,
-      rng=np.random.default_rng(seed),
-      response_vector=response_vector,
+      make_context(item_bank, administered_items, response_vector, theta=0.3, rng=np.random.default_rng(seed))
     )
     for seed in range(60)
   }
@@ -156,7 +152,7 @@ def test_progressive_breaks_ties_at_random_once_fully_information_based() -> Non
 
   picks = {
     ProgressiveSelector(test_size=_N_COPIES).select(
-      item_bank=item_bank, administered_items=administered_items, est_theta=0.3, rng=np.random.default_rng(seed)
+      make_context(item_bank, administered_items, theta=0.3, rng=np.random.default_rng(seed))
     )
     for seed in range(60)
   }
@@ -170,9 +166,7 @@ def test_54321_breaks_ties_at_random_once_the_bin_has_one_item() -> None:
   administered_items = [0, 1, 2, 3, 4]
 
   picks = {
-    The54321Selector().select(
-      item_bank=item_bank, administered_items=administered_items, est_theta=0.3, rng=np.random.default_rng(seed)
-    )
+    The54321Selector().select(make_context(item_bank, administered_items, theta=0.3, rng=np.random.default_rng(seed)))
     for seed in range(60)
   }
 
@@ -192,18 +186,10 @@ def test_cluster_selector_draws_tied_clusters_uniformly(method: str) -> None:
   rng = np.random.default_rng(3)
 
   # inside each cluster the first item is the more informative, so the pick names the chosen cluster
-  counts = Counter(
-    selector.select(item_bank=item_bank, administered_items=[], est_theta=0.3, rng=rng) for _ in range(3000)
-  )
+  counts = Counter(selector.select(make_context(item_bank, [], theta=0.3, rng=rng)) for _ in range(3000))
 
   assert set(counts) == {0, 2, 4}
   assert all(abs(count / 3000 - 1 / 3) < 0.03 for count in counts.values())
-
-
-def test_tie_without_rng_raises_in_a_deterministic_selector() -> None:
-  """A deterministic selector called without a generator raises only when items actually tie."""
-  with pytest.raises(ValueError, match="rng parameter cannot be None"):
-    MaxInfoSelector().select(item_bank=_identical_bank(), administered_items=[], est_theta=0.3)
 
 
 def _old_max_info(item_bank: ItemBank, administered_items: list[int], est_theta: float, rates, r_max: float) -> int:
@@ -238,18 +224,16 @@ def test_untied_banks_give_the_same_picks_as_before(itemtype: str) -> None:
     seed = int(rng.integers(1_000_000))
 
     assert MaxInfoSelector(r_max=0.3).select(
-      item_bank=item_bank, administered_items=administered_items, est_theta=est_theta, exposure_rates=rates
+      make_context(item_bank, administered_items, theta=est_theta, exposure_rates=rates)
     ) == _old_max_info(item_bank, administered_items, est_theta, rates, 0.3)
 
     closest = next(idx for idx in np.abs(item_bank.difficulty - est_theta).argsort() if idx not in administered_items)
-    assert UrrySelector().select(item_bank=item_bank, administered_items=administered_items, est_theta=est_theta) == (
-      closest
-    )
+    assert UrrySelector().select(make_context(item_bank, administered_items, theta=est_theta)) == closest
 
     old_randomesque = int(np.random.default_rng(seed).choice(_old_bin(item_bank, administered_items, est_theta, 4)))
     assert (
       RandomesqueSelector(bin_size=4).select(
-        item_bank=item_bank, administered_items=administered_items, est_theta=est_theta, rng=np.random.default_rng(seed)
+        make_context(item_bank, administered_items, theta=est_theta, rng=np.random.default_rng(seed))
       )
       == old_randomesque
     )
@@ -258,7 +242,7 @@ def test_untied_banks_give_the_same_picks_as_before(itemtype: str) -> None:
     old_54321 = int(np.random.default_rng(seed).choice(_old_bin(item_bank, administered_items, est_theta, bin_size)))
     assert (
       The54321Selector().select(
-        item_bank=item_bank, administered_items=administered_items, est_theta=est_theta, rng=np.random.default_rng(seed)
+        make_context(item_bank, administered_items, theta=est_theta, rng=np.random.default_rng(seed))
       )
       == old_54321
     )

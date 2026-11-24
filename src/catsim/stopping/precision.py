@@ -12,7 +12,7 @@ from .base import BaseStopper
 if TYPE_CHECKING:
   from collections.abc import Sequence
 
-  from ..item_bank import ItemBank
+  from ..context import StepContext
 
 
 @dataclass(frozen=True)
@@ -47,24 +47,20 @@ class StandardErrorStopper(BaseStopper):
       msg = f"max_se must be positive, got {self.max_se}"
       raise ValueError(msg)
 
-  def stop(self, item_bank: ItemBank, administered_items: list[int], theta: float) -> bool:
-    """Check whether the standard error at `theta` is at most `max_se`.
+  def stop(self, context: StepContext) -> bool:
+    """Return whether the standard error at the current estimate is at most `max_se`.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        Item bank used by the session.
-    administered_items : list[int]
-        Item indices already administered in the session.
-    theta : float
-        Current ability estimate.
+    context : StepContext
+        The session to check.
 
     Returns
     -------
     bool
         True if the standard error of the estimate is at most `max_se`, False otherwise.
     """
-    return irt.see(theta, item_bank.get_items(administered_items)) <= self.max_se
+    return irt.see(context.theta, context.item_bank.get_items(context.administered_items)) <= self.max_se
 
 
 @dataclass(frozen=True)
@@ -114,22 +110,19 @@ class ConfidenceIntervalStopper(BaseStopper):
     # a tuple keeps the frozen stopper hashable and its bands unchangeable
     object.__setattr__(self, "interval_bounds", bounds)
 
-  def stop(self, item_bank: ItemBank, administered_items: list[int], theta: float) -> bool:
-    """Check whether the confidence interval at `theta` lies within one ability band.
+  def stop(self, context: StepContext) -> bool:
+    """Return whether the confidence interval at the current estimate lies within one ability band.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        Item bank used by the session.
-    administered_items : list[int]
-        Item indices already administered in the session.
-    theta : float
-        Current ability estimate.
+    context : StepContext
+        The session to check.
 
     Returns
     -------
     bool
         True if no bound lies strictly inside the confidence interval, False otherwise.
     """
-    lower, upper = irt.confidence_interval(theta, item_bank.get_items(administered_items), self.confidence)
+    items = context.item_bank.get_items(context.administered_items)
+    lower, upper = irt.confidence_interval(context.theta, items, self.confidence)
     return not any(lower < bound < upper for bound in self.interval_bounds)

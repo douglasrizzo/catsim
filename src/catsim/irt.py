@@ -6,6 +6,7 @@ and scale transformations.
 """
 
 import math
+from collections.abc import Sequence
 from enum import Enum
 from typing import Any
 
@@ -14,7 +15,7 @@ import numpy
 from scipy import stats
 from scipy.special import expit, log_expit
 
-from ._typing import FloatArray
+from .typing import FloatArray
 
 THETA_MIN_TYPICAL = -4.0
 """Typical lower bound for ability (theta) estimation.
@@ -793,7 +794,7 @@ def inf_integral(lower: float, upper: float, items: FloatArray) -> FloatArray:
 
 def log_likelihood_hpc(
   theta: float | FloatArray,
-  response_vector: list[bool],
+  response_vector: Sequence[bool],
   administered_items: FloatArray,
 ) -> FloatArray:
   r"""Compute the log-likelihood of many ability values at once.
@@ -818,7 +819,7 @@ def log_likelihood_hpc(
   ----------
   theta : float or numpy.ndarray
       An ability value, or a 1-D array of ability values.
-  response_vector : list[bool]
+  response_vector : Sequence[bool]
       A boolean list containing the response vector, where True indicates a correct
       response and False indicates an incorrect response.
   administered_items : numpy.ndarray
@@ -856,7 +857,7 @@ def log_likelihood_hpc(
 
 def log_likelihood(
   est_theta: float,
-  response_vector: list[bool],
+  response_vector: Sequence[bool],
   administered_items: FloatArray,
 ) -> float:
   r"""Compute the log-likelihood of an ability, given a response vector and the parameters of the answered items.
@@ -884,7 +885,7 @@ def log_likelihood(
   ----------
   est_theta : float
       Estimated ability value.
-  response_vector : list[bool]
+  response_vector : Sequence[bool]
       A boolean list containing the response vector, where True indicates a correct
       response and False indicates an incorrect response.
   administered_items : numpy.ndarray
@@ -970,12 +971,12 @@ def normalize_item_bank(items: FloatArray) -> FloatArray:
   return items
 
 
-def validate_response_vector(response_vector: list[bool], n_items: int) -> None:
+def validate_response_vector(response_vector: Sequence[bool], n_items: int) -> None:
   """Check that a response vector holds one Boolean answer per administered item.
 
   Parameters
   ----------
-  response_vector : list[bool]
+  response_vector : Sequence[bool]
       The examinee's answers, where True indicates a correct response.
   n_items : int
       Number of administered items the answers belong to.

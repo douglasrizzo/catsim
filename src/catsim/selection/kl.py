@@ -6,8 +6,8 @@ import numpy
 from scipy.integrate import quad
 from scipy.special import log_expit
 
-from .._typing import FloatArray
-from ..item_bank import ItemBank
+from ..context import StepContext
+from ..typing import FloatArray
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 
@@ -109,48 +109,22 @@ class KLSelector(BaseSelector):
     )
     return float(val)
 
-  def select(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    est_theta: float,
-    rng: numpy.random.Generator | None = None,
-    exposure_rates: FloatArray | None = None,
-    response_vector: list[bool] | None = None,  # noqa: ARG002
-  ) -> int | None:
-    """Return the index of the next item to be administered.
+  def select(self, context: StepContext) -> int:
+    """Return the available item with the largest KL divergence integrated over the window.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    administered_items : list[int]
-        A list containing the indexes of items that were already administered.
-    est_theta : float
-        The current estimated ability, the center of the integration window.
-    rng : numpy.random.Generator or None, optional
-        Random number generator, used only to break ties between candidates with equal KL
-        divergence (ADR-0008).
-    exposure_rates : numpy.ndarray or None, optional
-        Current exposure rate of every item, compared against ``r_max``.
-    response_vector : list[bool] or None, optional
-        Unused; accepted for the engine's selector contract.
+    context : StepContext
+        The session to select for.
 
     Returns
     -------
     int
-        Index of the item with the largest integrated KL divergence; ties are broken uniformly at
-        random (ADR-0008).
-
-    Raises
-    ------
-    ValueError
-        If candidates tie for the largest divergence and ``rng`` is None.
-    NoItemsAvailableError
-        If every item has been administered.
+        Index of the selected item.
     """
-    candidates = below_cap(remaining(item_bank.n_items, administered_items), exposure_rates, self._r_max)
-    half_width = self._window / numpy.sqrt(max(1, len(administered_items)))
+    candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
+    half_width = self._window / numpy.sqrt(max(1, len(context.administered_items)))
 
-    kl_values = numpy.array([self._kl_global(est_theta, item_bank.items[int(idx)], half_width) for idx in candidates])
-    return pick_best(candidates, kl_values, rng)
+    items = context.item_bank.items
+    kl_values = numpy.array([self._kl_global(context.theta, items[int(idx)], half_width) for idx in candidates])
+    return pick_best(candidates, kl_values, context.rng)

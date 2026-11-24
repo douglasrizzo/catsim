@@ -4,6 +4,7 @@ import numpy
 from scipy.optimize import minimize_scalar
 
 from .. import irt
+from ..context import StepContext
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from ..item_bank import ItemBank
 from .base import BaseEstimator
@@ -70,10 +71,6 @@ class NumericalSearchEstimator(BaseEstimator):
   For full algorithmic details, see :doc:`/api/techniques/estimation/numerical-search-estimator`.
   """
 
-  def __str__(self) -> str:
-    """Return a string representation of the estimator."""
-    return "Numerical Search Estimator"
-
   def __init__(
     self,
     tol: float = 1e-6,
@@ -97,54 +94,40 @@ class NumericalSearchEstimator(BaseEstimator):
     self._tol = self._check_tol(tol)
     self._bounds = self._check_bounds(bounds)
 
-  def estimate(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    response_vector: list[bool],
-    est_theta: float,
-  ) -> float:
-    r"""Return the maximum likelihood estimate, or Dodd's step while every response is the same.
+  def __repr__(self) -> str:
+    """Return the estimator as a constructor call that names every argument."""
+    return f"{type(self).__name__}(tol={self._tol!r}, bounds={self._bounds!r})"
+
+  def estimate(self, context: StepContext) -> float:
+    r"""Return the maximum likelihood estimate, or Dodd's step from ``context.theta`` while every response is the same.
+
+    With no administered item, the estimate is ``context.theta``, unchanged.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    administered_items : list[int]
-        A list containing the indexes of items that were already administered.
-    response_vector : list[bool]
-        A boolean list containing the examinee's answers to the administered items.
-    est_theta : float
-        The current estimated ability: the start of Dodd's step, and the estimate returned
-        unchanged when no item has been administered.
+    context : StepContext
+        The session to estimate for.
 
     Returns
     -------
     float
         The updated ability estimate :math:`\hat\theta`, inside ``bounds``.
-
-    Raises
-    ------
-    ValueError
-        If required parameters are missing, if ``response_vector`` and ``administered_items`` have
-        different lengths, or if ``response_vector`` contains non-Boolean elements.
     """
-    self._require_inputs(item_bank, administered_items, response_vector)
-
     self._calls += 1
     self._last_evaluations = 0
 
-    if len(administered_items) == 0:
-      return float(est_theta)
+    responses = context.responses
+    if not responses:
+      return float(context.theta)
 
-    if len(set(response_vector)) == 1:
-      return _dodd(est_theta, item_bank, response_vector[0], self._bounds)
+    if len(set(responses)) == 1:
+      return _dodd(context.theta, context.item_bank, responses[0], self._bounds)
 
     res = minimize_scalar(
       irt.negative_log_likelihood,
       bounds=self._bounds,
       method="bounded",
-      args=(response_vector, item_bank.get_items(administered_items)),
+      args=(responses, context.item_bank.get_items(context.administered_items)),
       # SciPy's bounded method takes its absolute tolerance only through options
       options={"xatol": self._tol},
     )

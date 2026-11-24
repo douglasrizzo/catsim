@@ -11,7 +11,7 @@ import numpy.typing as npt
 from numpy.random import Generator
 
 from . import irt
-from ._typing import FloatArray, IntArray
+from .typing import FloatArray, IntArray
 
 
 class ItemBank:

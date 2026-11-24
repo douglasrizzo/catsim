@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import dataclasses
 import operator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
 import numpy
 
+from .context import StepContext
 from .exceptions import NoItemsAvailableError
 from .irt import icc
 from .state import CatSessionState, CatStepResult, ExposureTracker, StopReason
@@ -58,6 +60,34 @@ class SimulatedResponseProvider:
     return bool(probability >= context.rng.uniform())
 
 
+def _step_context(state: CatSessionState, item_bank: ItemBank, context: RunContext) -> StepContext:
+  """Return what a strategy may read about a session as it stands.
+
+  Parameters
+  ----------
+  state : CatSessionState
+      The session.
+  item_bank : ItemBank
+      Item bank used by the session.
+  context : RunContext
+      Runtime services of the run, which give the random generator and the exposure rates.
+
+  Returns
+  -------
+  StepContext
+      The session's items, responses and current estimate, with no excluded items.
+  """
+  tracker = context.exposure_tracker
+  return StepContext(
+    item_bank=item_bank,
+    rng=context.rng,
+    administered_items=tuple(state.administered_item_ids),
+    responses=tuple(state.responses),
+    theta=state.current_theta,
+    exposure_rates=None if tracker is None else tracker.rates(),
+  )
+
+
 class CatEngine:
   """Engine for stepwise CAT execution."""
 
@@ -106,13 +136,24 @@ class CatEngine:
       context.exposure_tracker.start_session()
     return CatSessionState(session_id=session_id, theta_history=[initial_theta], true_theta=true_theta)
 
-  def should_stop(self, state: CatSessionState, item_bank: ItemBank) -> bool:
-    """Return whether the session satisfies the stopping criterion."""
-    return self._stopper.stop(
-      item_bank=item_bank,
-      administered_items=state.administered_item_ids,
-      theta=state.current_theta,
-    )
+  def should_stop(self, state: CatSessionState, item_bank: ItemBank, context: RunContext) -> bool:
+    """Return whether the session satisfies the stopping criterion.
+
+    Parameters
+    ----------
+    state : CatSessionState
+        The session to check.
+    item_bank : ItemBank
+        Item bank used by the session.
+    context : RunContext
+        Runtime services of the run.
+
+    Returns
+    -------
+    bool
+        What the stopper says about the session as it stands.
+    """
+    return bool(self._stopper.stop(_step_context(state, item_bank, context)))
 
   def select_next(self, state: CatSessionState, item_bank: ItemBank, context: RunContext) -> int | None:
     """Select the next item to administer, or end the session.
@@ -144,24 +185,13 @@ class CatEngine:
     """
     if state.is_stopped:
       return None
-    if state.administered_count == 0 and self.should_stop(state, item_bank):
+    if state.administered_count == 0 and self.should_stop(state, item_bank, context):
       state.stop_reason = StopReason.STOPPER
       return None
 
-    exposure_rates = None if context.exposure_tracker is None else context.exposure_tracker.rates()
     try:
-      item_id = self._selector.select(
-        item_bank=item_bank,
-        administered_items=state.administered_item_ids,
-        est_theta=state.current_theta,
-        rng=context.rng,
-        exposure_rates=exposure_rates,
-        response_vector=state.responses,
-      )
+      item_id = self._selector.select(_step_context(state, item_bank, context))
     except NoItemsAvailableError:
-      item_id = None
-    # BaseSelector.select is typed int | None, so a custom selector may say "no item" with None.
-    if item_id is None:
       state.stop_reason = StopReason.NO_ITEMS
       return None
     return int(item_id)
@@ -227,16 +257,15 @@ class CatEngine:
       raise ValueError(msg)
 
     response = bool(response)
-    items = [*state.administered_item_ids, item_id]
-    updated_theta = float(
-      self._estimator.estimate(
-        item_bank=item_bank,
-        administered_items=items,
-        response_vector=[*state.responses, response],
-        est_theta=state.current_theta,
-      )
+    current = _step_context(state, item_bank, context)
+    # The estimator starts from the previous estimate; the stopper judges the new one.
+    answered = dataclasses.replace(
+      current,
+      administered_items=(*current.administered_items, item_id),
+      responses=(*current.responses, response),
     )
-    stopped = bool(self._stopper.stop(item_bank=item_bank, administered_items=items, theta=updated_theta))
+    updated_theta = float(self._estimator.estimate(answered))
+    stopped = bool(self._stopper.stop(dataclasses.replace(answered, theta=updated_theta)))
 
     state.administered_item_ids.append(item_id)
     state.responses.append(response)

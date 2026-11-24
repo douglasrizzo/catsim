@@ -9,8 +9,9 @@ from enum import StrEnum
 
 import numpy
 
-from .._typing import FloatArray, IntArray
+from ..context import StepContext
 from ..item_bank import ItemBank
+from ..typing import FloatArray, IntArray
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 
@@ -171,53 +172,32 @@ class ClusterSelector(BaseSelector):
     self._r_max = check_r_max(r_max)
     self._r_control = r_control
 
-  def select(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    est_theta: float,
-    rng: numpy.random.Generator | None = None,
-    exposure_rates: FloatArray | None = None,
-    response_vector: list[bool] | None = None,  # noqa: ARG002
-  ) -> int | None:
-    """Return the index of the next item to be administered.
+  def select(self, context: StepContext) -> int:
+    """Return the most informative available item of the best-scoring cluster that has an item left.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters, one per cluster label.
-    administered_items : list[int]
-        A list containing the indexes of items that were already administered.
-    est_theta : float
-        The current estimated ability.
-    rng : numpy.random.Generator or None, optional
-        Random number generator, used only to break exact ties between clusters and between items in the
-        chosen cluster.
-    exposure_rates : numpy.ndarray or None, optional
-        Run-level exposure-rate snapshot. ``None`` treats every item as unexposed.
-    response_vector : list[bool] or None, optional
-        Responses observed so far. Not used by this selector.
+    context : StepContext
+        The session to select for.
 
     Returns
     -------
     int
-        Index of the next item to be applied.
+        Index of the selected item.
 
     Raises
     ------
     ValueError
-        If ``clusters`` does not hold one label per item of ``item_bank``, or if clusters or items in the
-        chosen cluster tie and ``rng`` is None.
-    NoItemsAvailableError
-        If every item has already been administered.
+        If ``clusters`` does not hold one label per item of ``context.item_bank``.
     """
+    item_bank, theta, rng, exposure_rates = context.item_bank, context.theta, context.rng, context.exposure_rates
     if self._clusters.size != item_bank.n_items:
       msg = f"clusters holds {self._clusters.size} labels, but the item bank has {item_bank.n_items} items"
       raise ValueError(msg)
 
-    candidates = remaining(item_bank.n_items, administered_items)
+    candidates = remaining(context)
     open_clusters = numpy.unique(self._clusters[candidates])
-    cluster = pick_best(open_clusters, self._score(est_theta, item_bank, open_clusters), rng)
+    cluster = pick_best(open_clusters, self._score(theta, item_bank, open_clusters), rng)
 
     in_cluster = candidates[self._clusters[candidates] == cluster]
     # A cap of 1 is no cap (see below_cap), so the aggressive fallback never applies to it.
@@ -229,7 +209,7 @@ class ClusterSelector(BaseSelector):
     ):
       return pick_best(in_cluster, -exposure_rates[in_cluster], rng)
     allowed = below_cap(in_cluster, exposure_rates, self._r_max)
-    return pick_best(allowed, item_bank.information(est_theta)[allowed], rng)
+    return pick_best(allowed, item_bank.information(theta)[allowed], rng)
 
   def _score(self, theta: float, item_bank: ItemBank, open_clusters: IntArray) -> FloatArray:
     """Return the score of each cluster in ``open_clusters`` under the selector's method.

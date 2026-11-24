@@ -17,6 +17,7 @@ from catsim.selection import (
   MaxInfoBBlockSelector,
   MaxInfoStratSelector,
 )
+from tests.contexts import make_context
 from tests.hypothesis_strategies import item_params_matrix
 
 LINEAR_SETTINGS = settings(max_examples=40, deadline=None)
@@ -75,7 +76,7 @@ def test_linear_selector_returns_first_non_administered_in_order(
   rng = np.random.default_rng(seed)
   selector = LinearSelector(indexes)
   administered = indexes[:administered_count]
-  item_id = selector.select(item_bank=bank, administered_items=administered, est_theta=0.0, rng=rng)
+  item_id = selector.select(make_context(bank, administered, theta=0.0, rng=rng))
   assert item_id is not None
   assert type(item_id) is int
   assert int(item_id) not in administered
@@ -99,7 +100,7 @@ def test_linear_selector_raises_when_all_indexes_administered(
   import pytest
 
   with pytest.raises(NoItemsAvailableError):
-    selector.select(item_bank=bank, administered_items=indexes, est_theta=0.0, rng=rng)
+    selector.select(make_context(bank, indexes, theta=0.0, rng=rng))
 
 
 # ---------------------------------------------------------------------------
@@ -130,12 +131,7 @@ def test_cluster_selector_returns_valid_unseen_item(
   administered = list(range(administered_count))
   selector = ClusterSelector(clusters=clusters, method=method)
   # generated banks can hold tied items, which are broken at random (ADR-0008)
-  item_id = selector.select(
-    item_bank=bank,
-    administered_items=administered,
-    est_theta=est_theta,
-    rng=np.random.default_rng(0),
-  )
+  item_id = selector.select(make_context(bank, administered, theta=est_theta, rng=np.random.default_rng(0)))
   assert type(item_id) is int
   assert 0 <= int(item_id) < n
   assert int(item_id) not in administered
@@ -159,7 +155,7 @@ def _strat_simulate_steps(selector_cls, bank: ItemBank, test_size: int, steps: i
   rng = np.random.default_rng(0)
   administered: list[int] = []
   for _ in range(steps):
-    item_id = selector.select(item_bank=bank, administered_items=administered, est_theta=theta, rng=rng)
+    item_id = selector.select(make_context(bank, administered, theta=theta, rng=rng))
     assert item_id is not None
     assert type(item_id) is int
     assert 0 <= int(item_id) < n

@@ -5,9 +5,10 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from catsim import stopping
+from catsim import StepContext, stopping
 from catsim.item_bank import ItemBank
-from catsim.stopping import ConfidenceIntervalStopper, MaxLengthStopper, StandardErrorStopper, StopRule
+from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthStopper, StandardErrorStopper, StopRule
+from tests.contexts import make_context
 
 
 def identical_1pl_bank(n_items: int, difficulty: float) -> ItemBank:
@@ -43,7 +44,7 @@ class TestStandardErrorStopper:
     item_bank = identical_1pl_bank(20, difficulty=theta)
     stopper = StandardErrorStopper(0.5)
 
-    stops = [stopper.stop(item_bank=item_bank, administered_items=list(range(n)), theta=theta) for n in range(21)]
+    stops = [stopper.stop(make_context(item_bank, list(range(n)), theta=theta)) for n in range(21)]
 
     assert stops == [n >= 16 for n in range(21)]
 
@@ -80,7 +81,7 @@ class TestConfidenceIntervalStopper:
     item_bank = identical_1pl_bank(20, difficulty=theta)
     stopper = ConfidenceIntervalStopper([-3.0, -1.0, 1.0, 3.0])
 
-    stops = [stopper.stop(item_bank=item_bank, administered_items=list(range(n)), theta=theta) for n in range(21)]
+    stops = [stopper.stop(make_context(item_bank, list(range(n)), theta=theta)) for n in range(21)]
 
     assert stops == [n >= 16 for n in range(21)]
 
@@ -94,7 +95,7 @@ class TestConfidenceIntervalStopper:
     item_bank = identical_1pl_bank(20, difficulty=theta)
     stopper = ConfidenceIntervalStopper([-3.0, -1.0, 1.0, 3.0])
 
-    stops = [stopper.stop(item_bank=item_bank, administered_items=list(range(n)), theta=theta) for n in range(21)]
+    stops = [stopper.stop(make_context(item_bank, list(range(n)), theta=theta)) for n in range(21)]
 
     assert not any(stops)
 
@@ -125,7 +126,7 @@ class TestStopRule:
     rule = StopRule(StandardErrorStopper(0.01), MaxLengthStopper(20), min_items=20)
     bank = identical_1pl_bank(30, 0.0)
 
-    assert [rule.stop(bank, list(range(n)), 0.0) for n in (19, 20)] == [False, True]
+    assert [rule.stop(make_context(bank, list(range(n)), theta=0.0)) for n in (19, 20)] == [False, True]
 
   def test_rejects_a_child_that_is_not_a_stopper(self) -> None:
     """A number passed where a stopper belongs, as in StopRule(StandardErrorStopper(0.3), 40), is accepted.
@@ -134,6 +135,28 @@ class TestStopRule:
     """
     with pytest.raises(TypeError, match="got int"):
       StopRule(StandardErrorStopper(0.3), 40)
+
+
+@pytest.mark.parametrize(
+  "stopper",
+  [
+    MaxLengthStopper(1),
+    StandardErrorStopper(0.5),
+    ConfidenceIntervalStopper([0.0]),
+    StopRule(StandardErrorStopper(0.5), MaxLengthStopper(1)),
+  ],
+  ids=repr,
+)
+def test_stop_takes_a_minimal_context(stopper: BaseStopper) -> None:
+  """Given only an item bank and a generator, every stopper returns False, as a builtin bool.
+
+  With no item administered, no length cap of at least one item is reached, and the standard error and the confidence
+  interval are infinite. A stopper that still took the old arguments, or that needs a field the minimal context
+  leaves at its default, fails here.
+  """
+  context = StepContext(item_bank=identical_1pl_bank(5, difficulty=0.0), rng=np.random.default_rng(0))
+
+  assert stopper.stop(context) is False
 
 
 def test_importing_every_public_stopper_collects_no_test_class(pytester: pytest.Pytester) -> None:

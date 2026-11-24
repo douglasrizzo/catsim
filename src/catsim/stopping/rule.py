@@ -9,7 +9,7 @@ from .base import BaseStopper
 from .length import MaxLengthStopper
 
 if TYPE_CHECKING:
-  from ..item_bank import ItemBank
+  from ..context import StepContext
 
 
 # __init__ and __repr__ are hand-written because the stoppers are passed as *args, which a generated
@@ -45,18 +45,22 @@ class StopRule(BaseStopper):
 
   Examples
   --------
-  >>> from catsim import ItemBank
+  >>> import numpy
+  >>> from catsim import ItemBank, StepContext
   >>> from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
   >>> rule = StopRule(StandardErrorStopper(0.5), MaxLengthStopper(20), min_items=5)
   >>> rule
   StopRule(StandardErrorStopper(max_se=0.5), MaxLengthStopper(max_items=20), min_items=5)
   >>> bank = ItemBank.generate_item_bank(100, seed=0)
-  >>> rule.stop(bank, list(range(10)), theta=0.0)
+  >>> rng = numpy.random.default_rng(0)
+  >>> ten = StepContext(item_bank=bank, rng=rng, administered_items=tuple(range(10)), responses=(True,) * 10)
+  >>> rule.stop(ten)
   False
 
   After 20 items the standard error is still above 0.5, so the length cap is what ends the test:
 
-  >>> rule.satisfied(bank, list(range(20)), theta=0.0)
+  >>> twenty = StepContext(item_bank=bank, rng=rng, administered_items=tuple(range(20)), responses=(True,) * 20)
+  >>> rule.satisfied(twenty)
   (MaxLengthStopper(max_items=20),)
   """
 
@@ -87,17 +91,13 @@ class StopRule(BaseStopper):
     stoppers = ", ".join(repr(stopper) for stopper in self.stoppers)
     return f"StopRule({stoppers}, min_items={self.min_items})"
 
-  def stop(self, item_bank: ItemBank, administered_items: list[int], theta: float) -> bool:
-    """Check whether the test has `min_items` items and any of the stoppers holds.
+  def stop(self, context: StepContext) -> bool:
+    """Return whether the test has `min_items` items and any of the stoppers holds.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        Item bank used by the session.
-    administered_items : list[int]
-        Item indices already administered in the session.
-    theta : float
-        Current ability estimate.
+    context : StepContext
+        The session to check.
 
     Returns
     -------
@@ -105,32 +105,24 @@ class StopRule(BaseStopper):
         True if at least `min_items` items were administered and any stopper holds, False
         otherwise.
     """
-    if len(administered_items) < self.min_items:
+    if len(context.administered_items) < self.min_items:
       return False
-    return bool(self.satisfied(item_bank, administered_items, theta))
+    return bool(self.satisfied(context))
 
-  def satisfied(self, item_bank: ItemBank, administered_items: list[int], theta: float) -> tuple[BaseStopper, ...]:
-    """Return the stoppers that hold for these inputs, regardless of `min_items`.
+  def satisfied(self, context: StepContext) -> tuple[BaseStopper, ...]:
+    """Return the stoppers that hold for a session, regardless of `min_items`.
 
     Called with a finished session's items and final estimate, it tells which criteria
     ended the session, for example precision or the length cap.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        Item bank used by the session.
-    administered_items : list[int]
-        Item indices already administered in the session.
-    theta : float
-        Current ability estimate.
+    context : StepContext
+        The session to check.
 
     Returns
     -------
     tuple[BaseStopper, ...]
         The stoppers whose criterion holds, in the order the rule was given them.
     """
-    return tuple(
-      stopper
-      for stopper in self.stoppers
-      if stopper.stop(item_bank=item_bank, administered_items=administered_items, theta=theta)
-    )
+    return tuple(stopper for stopper in self.stoppers if stopper.stop(context))

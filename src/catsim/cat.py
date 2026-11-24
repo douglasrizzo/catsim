@@ -3,7 +3,7 @@
 import numpy
 import numpy.typing as npt
 
-from ._typing import FloatArray
+from .typing import FloatArray
 
 
 def bias(

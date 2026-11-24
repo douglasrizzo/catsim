@@ -10,6 +10,7 @@ from hypothesis import strategies as st
 from catsim.exceptions import NoItemsAvailableError
 from catsim.item_bank import ItemBank
 from catsim.selection import MaxInfoSelector, RandomSelector
+from tests.contexts import make_context
 from tests.hypothesis_strategies import item_params_matrix
 
 SEL_SETTINGS = settings(max_examples=25, deadline=None)
@@ -34,12 +35,7 @@ def test_max_info_selector_returns_valid_unseen_item(
   bank = ItemBank(params, validate=True)
   rng = np.random.default_rng(seed)
   selector = MaxInfoSelector()
-  item_id = selector.select(
-    item_bank=bank,
-    administered_items=administered,
-    est_theta=est_theta,
-    rng=rng,
-  )
+  item_id = selector.select(make_context(bank, administered, theta=est_theta, rng=rng))
   assert type(item_id) is int
   assert 0 <= int(item_id) < n
   assert item_id not in administered
@@ -56,12 +52,7 @@ def test_max_info_selector_raises_when_bank_exhausted(params: np.ndarray, seed: 
   rng = np.random.default_rng(seed)
   selector = MaxInfoSelector()
   with pytest.raises(NoItemsAvailableError):
-    selector.select(
-      item_bank=bank,
-      administered_items=list(range(n)),
-      est_theta=0.0,
-      rng=rng,
-    )
+    selector.select(make_context(bank, list(range(n)), theta=0.0, rng=rng))
 
 
 @given(
@@ -75,10 +66,7 @@ def test_random_selector_returns_valid_unseen_item(params: np.ndarray, data: st.
   n = params.shape[0]
   administered = data.draw(st.lists(st.integers(0, n - 1), unique=True, max_size=n - 1))
   item_id = RandomSelector().select(
-    item_bank=ItemBank(params, validate=True),
-    administered_items=administered,
-    est_theta=0.0,
-    rng=np.random.default_rng(seed),
+    make_context(ItemBank(params, validate=True), administered, theta=0.0, rng=np.random.default_rng(seed))
   )
   assert type(item_id) is int
   assert 0 <= item_id < n

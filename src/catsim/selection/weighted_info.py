@@ -1,12 +1,14 @@
 """Likelihood-weighted information selector implementations."""
 
+from collections.abc import Sequence
+
 import numpy
 
 from .. import irt
-from .._typing import FloatArray
+from ..context import StepContext
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
-from ..item_bank import ItemBank
-from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining, require_responses
+from ..typing import FloatArray
+from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 _MIN_NODES = 5
 
@@ -81,62 +83,35 @@ class MLWISelector(BaseSelector):
 
   def _likelihood_weights(
     self,
-    response_vector: list[bool],
+    response_vector: Sequence[bool],
     administered_items: FloatArray,
   ) -> FloatArray:
     log_likelihood = irt.log_likelihood_hpc(self._nodes, response_vector, administered_items)
     log_likelihood -= float(numpy.max(log_likelihood))
     return numpy.exp(log_likelihood)
 
-  def select(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    est_theta: float,  # noqa: ARG002
-    rng: numpy.random.Generator | None = None,
-    exposure_rates: FloatArray | None = None,
-    response_vector: list[bool] | None = None,
-  ) -> int | None:
-    """Return the index of the item with the highest likelihood-weighted information.
+  def select(self, context: StepContext) -> int:
+    """Return the available item with the largest information integrated against the likelihood of the responses.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    administered_items : list[int]
-        A list containing the indexes of items that were already administered.
-    est_theta : float
-        Unused; MLWI weights by the whole likelihood rather than a point estimate.
-    rng : numpy.random.Generator or None, optional
-        Random number generator, used only to break ties between candidates with equal scores
-        (ADR-0008).
-    exposure_rates : numpy.ndarray or None, optional
-        Run-level exposure-rate snapshot. ``None`` treats every item as unexposed.
-    response_vector : list[bool] or None, optional
-        Responses to the administered items. Required.
+    context : StepContext
+        The session to select for.
 
     Returns
     -------
     int
-        Index of the next item to be applied.
-
-    Raises
-    ------
-    ValueError
-        If ``response_vector`` is None, or if candidates tie for the best score and ``rng`` is None.
-    NoItemsAvailableError
-        If every item has already been administered.
+        Index of the selected item.
     """
-    response_vector = require_responses(response_vector)
+    item_bank = context.item_bank
+    candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
 
-    candidates = below_cap(remaining(item_bank.n_items, administered_items), exposure_rates, self._r_max)
-
-    if administered_items:
-      weights = self._likelihood_weights(response_vector, item_bank.get_items(administered_items))
+    if context.administered_items:
+      weights = self._likelihood_weights(context.responses, item_bank.get_items(context.administered_items))
     else:
       weights = numpy.ones_like(self._nodes, dtype=float)
 
     # information of every candidate at every node, one row per node
     info = irt.inf_hpc(self._nodes[:, None], item_bank.get_items(candidates))
     scores = (weights @ info) * self._delta
-    return pick_best(candidates, scores, rng)
+    return pick_best(candidates, scores, context.rng)

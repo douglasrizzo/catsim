@@ -1,6 +1,7 @@
 """Tests for catsim.estimation module."""
 
 import importlib
+import inspect
 from collections.abc import Callable
 from functools import partial
 from itertools import pairwise, product
@@ -12,7 +13,7 @@ from scipy.integrate import IntegrationWarning
 from scipy.optimize import brentq, minimize_scalar
 from scipy.special import expit
 
-from catsim import irt
+from catsim import StepContext, irt
 from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,
@@ -28,6 +29,7 @@ from catsim.estimation import (
 )
 from catsim.estimation.bayesian import LogPrior
 from catsim.item_bank import ItemBank
+from tests.contexts import make_context
 
 
 class TestNumericalSearchEstimatorEstimate:
@@ -51,7 +53,7 @@ class TestNumericalSearchEstimatorEstimate:
     log_lik = np.sum(np.where(np.array(response_vector)[:, None], np.log(p), np.log1p(-p)), axis=0)
     reference = grid[np.argmax(log_lik)]
 
-    theta = NumericalSearchEstimator().estimate(item_bank, administered_items, response_vector, 0.0)
+    theta = NumericalSearchEstimator().estimate(make_context(item_bank, administered_items, response_vector, theta=0.0))
 
     assert reference == pytest.approx(0.5816, abs=1e-4)
     assert theta == pytest.approx(reference, abs=1e-4)
@@ -63,7 +65,7 @@ class TestNumericalSearchEstimatorEstimate:
     """
     item_bank = ItemBank.generate_item_bank(10, seed=42)
 
-    theta = NumericalSearchEstimator().estimate(item_bank, [], [], 1.7)
+    theta = NumericalSearchEstimator().estimate(make_context(item_bank, [], [], theta=1.7))
 
     assert theta == 1.7
 
@@ -88,7 +90,7 @@ class TestNumericalSearchEstimatorEstimate:
     """
     item_bank = ItemBank(np.array([[1.0, -3.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 2.0, 0.0, 1.0]]))
 
-    theta = NumericalSearchEstimator().estimate(item_bank, [1], [correct], est_theta)
+    theta = NumericalSearchEstimator().estimate(make_context(item_bank, [1], [correct], theta=est_theta))
 
     assert theta == expected
 
@@ -112,7 +114,7 @@ class TestNumericalSearchEstimatorEstimate:
     """
     item_bank = ItemBank(np.array([[1.0, -3.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 2.0, 0.0, 1.0]]))
 
-    theta = NumericalSearchEstimator(bounds=bounds).estimate(item_bank, [1], [correct], est_theta)
+    theta = NumericalSearchEstimator(bounds=bounds).estimate(make_context(item_bank, [1], [correct], theta=est_theta))
 
     assert theta == expected
 
@@ -123,21 +125,11 @@ class TestNumericalSearchEstimatorEstimate:
 
     assert estimator.calls == 0
 
-    estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[0, 1],
-      response_vector=[True, False],
-      est_theta=0.0,
-    )
+    estimator.estimate(make_context(item_bank, [0, 1], [True, False], theta=0.0))
 
     assert estimator.calls == 1
 
-    estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[0, 1, 2],
-      response_vector=[True, False, True],
-      est_theta=0.0,
-    )
+    estimator.estimate(make_context(item_bank, [0, 1, 2], [True, False, True], theta=0.0))
 
     assert estimator.calls == 2
 
@@ -148,12 +140,7 @@ class TestNumericalSearchEstimatorEstimate:
 
     assert estimator.evaluations == 0
 
-    estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[0, 1],
-      response_vector=[True, False],
-      est_theta=0.0,
-    )
+    estimator.estimate(make_context(item_bank, [0, 1], [True, False], theta=0.0))
 
     # Evaluations should be > 0 after estimation
     assert estimator.evaluations > 0
@@ -167,10 +154,7 @@ class TestNumericalSearchEstimatorEstimate:
     for i in range(5):
       n_items = i + 2
       estimator.estimate(
-        item_bank=item_bank,
-        administered_items=list(range(n_items)),
-        response_vector=([True, False] * (n_items // 2 + 1))[:n_items],
-        est_theta=0.0,
+        make_context(item_bank, list(range(n_items)), ([True, False] * (n_items // 2 + 1))[:n_items], theta=0.0)
       )
 
     avg = estimator.avg_evaluations
@@ -192,9 +176,7 @@ class TestNumericalSearchEstimatorEstimate:
     coarse, fine = NumericalSearchEstimator(tol=1e-2), NumericalSearchEstimator(tol=1e-10)
 
     estimates = [
-      estimator.estimate(
-        item_bank=item_bank, administered_items=administered_items, response_vector=response_vector, est_theta=0.0
-      )
+      estimator.estimate(make_context(item_bank, administered_items, response_vector, theta=0.0))
       for estimator in (coarse, fine)
     ]
 
@@ -211,46 +193,59 @@ ESTIMATORS = [
 
 
 @pytest.mark.parametrize("make_estimator", ESTIMATORS)
-@pytest.mark.parametrize(
-  ("administered_items", "response_vector", "match"),
-  [
-    pytest.param([0, 1, 2], [True], "same length", id="too_short"),
-    pytest.param([0, 1, 2], [True, True, True, False], "same length", id="too_long"),
-    pytest.param([], [True], "same length", id="responses_without_items"),
-    pytest.param([0, 1, 2], [1.0, 0.5, 0.0], "only Boolean", id="not_boolean"),
-  ],
-)
-def test_estimators_reject_responses_that_do_not_fit_the_items(
-  make_estimator: Callable[[], BaseEstimator], administered_items: list[int], response_vector: list[bool], match: str
-) -> None:
-  """Every estimator rejects a response vector that does not hold one Boolean per item, uncounted.
+def test_estimate_takes_a_minimal_context(make_estimator: Callable[[], BaseEstimator]) -> None:
+  """Given only an item bank and a generator, every estimator returns 0.0 as a builtin float.
 
-  WLE used to spread a one-element vector over all three items and MLE took its all-correct
-  shortcut on it, both returning an estimate for answers that were never given. With no items,
-  the no-data shortcuts returned the prior or est_theta, and EAP counted calls it then rejected.
+  With no response, MLE and WLE keep the context's theta, 0 by default, and EAP and MAP give the mean and the mode of
+  their standard normal prior, 0 too. An estimator that still took the old arguments, or that needs a field the
+  minimal context leaves at its default, fails here.
   """
-  item_bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0], [1.0, -1.0, 0.0, 1.0]]))
-  estimator = make_estimator()
+  context = StepContext(item_bank=ItemBank.generate_item_bank(5, seed=0), rng=np.random.default_rng(0))
 
-  with pytest.raises(ValueError, match=match):
-    estimator.estimate(item_bank, administered_items, response_vector, 0.0)
+  theta = make_estimator().estimate(context)
 
-  assert (estimator.calls, estimator.evaluations, estimator.total_evaluations) == (0, 0, 0)
+  assert type(theta) is float
+  assert theta == pytest.approx(0.0, abs=1e-6)
 
 
-@pytest.mark.parametrize("make_estimator", ESTIMATORS)
-@pytest.mark.parametrize("missing", ["item_bank", "administered_items", "response_vector"])
-def test_estimators_reject_missing_inputs(make_estimator: Callable[[], BaseEstimator], missing: str) -> None:
-  """None inputs raise the shared estimator error instead of failing inside NumPy."""
-  kwargs: dict[str, Any] = {
-    "item_bank": ItemBank.generate_item_bank(5, seed=1),
-    "administered_items": [0],
-    "response_vector": [True],
+ESTIMATOR_REPRS = {
+  "NumericalSearchEstimator": "NumericalSearchEstimator(tol=0.001, bounds=(-4.0, 4.0))",
+  "EAPEstimator": "EAPEstimator(grid=None, log_prior=None)",
+  "MAPEstimator": "MAPEstimator(log_prior=None, tol=0.001, bounds=(-4.0, 4.0))",
+  "WarmLikelihoodEstimator": "WarmLikelihoodEstimator(tol=0.001, bounds=(-4.0, 4.0))",
+}
+
+
+@pytest.mark.parametrize("source", ESTIMATOR_REPRS.values(), ids=ESTIMATOR_REPRS.keys())
+def test_repr_is_the_constructor_call(source: str) -> None:
+  """An estimator's repr names every constructor argument with its value, so evaluating it rebuilds the estimator.
+
+  Estimators printed a display name without their tolerance or bounds, and MEISelector's repr showed its estimator
+  as an object address that does not evaluate.
+  """
+  namespace = vars(importlib.import_module("catsim.estimation"))
+
+  assert repr(eval(source, namespace)) == source
+
+
+def test_repr_shows_a_given_grid_and_prior_rather_than_none() -> None:
+  """A repr that always printed None for the grid and prior would claim the defaults for an estimator with others."""
+  grid = QuadratureGrid.uniform(n_nodes=3)
+  prior = normal_log_prior(0.0, 2.0)
+
+  assert repr(EAPEstimator(grid=grid, log_prior=prior)) == f"EAPEstimator(grid={grid!r}, log_prior={prior!r})"
+  assert repr(MAPEstimator(log_prior=prior)) == f"MAPEstimator(log_prior={prior!r}, tol=1e-06, bounds=(-6.0, 6.0))"
+
+
+def test_repr_table_covers_every_exported_estimator() -> None:
+  """An estimator left out of ESTIMATOR_REPRS could hide an argument from its repr without any test noticing."""
+  exported = {
+    name
+    for name, cls in vars(importlib.import_module("catsim.estimation")).items()
+    if isinstance(cls, type) and issubclass(cls, BaseEstimator) and not inspect.isabstract(cls)
   }
-  kwargs[missing] = None
 
-  with pytest.raises(ValueError, match=f"{missing} parameter cannot be None"):
-    make_estimator().estimate(**kwargs, est_theta=0.0)
+  assert exported == set(ESTIMATOR_REPRS)
 
 
 @pytest.mark.parametrize("make_estimator", ESTIMATORS)
@@ -268,8 +263,10 @@ def test_estimators_accept_numpy_item_indices(
   """
   item_bank = ItemBank.generate_item_bank(10, seed=42)
 
-  from_list = make_estimator().estimate(item_bank, administered_items, response_vector, 0.7)
-  from_array = make_estimator().estimate(item_bank, np.array(administered_items), response_vector, 0.7)
+  from_list = make_estimator().estimate(make_context(item_bank, administered_items, response_vector, theta=0.7))
+  from_array = make_estimator().estimate(
+    make_context(item_bank, np.array(administered_items), response_vector, theta=0.7)
+  )
 
   assert from_array == pytest.approx(from_list, abs=1e-15)
 
@@ -318,7 +315,7 @@ def test_estimators_search_only_inside_their_bounds(make_estimator: Callable[[],
   """
   item_bank = ItemBank(np.array([[1.0, 1.0, 0.0, 1.0], [1.0, -1.0, 0.0, 1.0]]))
 
-  theta = make_estimator().estimate(item_bank, [0, 1], [True, False], 0.0)
+  theta = make_estimator().estimate(make_context(item_bank, [0, 1], [True, False], theta=0.0))
 
   assert theta == pytest.approx(0.5, abs=1e-5)
 
@@ -352,7 +349,7 @@ def test_estimators_give_a_constant_pattern_a_finite_estimate_inside_their_bound
   """
   item_bank = ItemBank(np.array([[1.0, -4.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 4.0, 0.0, 1.0]]))
 
-  theta = make_estimator().estimate(item_bank, [1], [correct], 0.0)
+  theta = make_estimator().estimate(make_context(item_bank, [1], [correct], theta=0.0))
 
   assert theta == pytest.approx(expected if correct else -expected, abs=1e-5)
 
@@ -622,7 +619,7 @@ class TestEAPEstimator:
     """
     estimator = EAPEstimator(log_prior=log_prior)
 
-    theta = estimator.estimate(ItemBank.generate_item_bank(10, seed=42), [], [], 0.7)
+    theta = estimator.estimate(make_context(ItemBank.generate_item_bank(10, seed=42), [], [], theta=0.7))
 
     assert theta == pytest.approx(expected, abs=1e-12)
 
@@ -637,7 +634,7 @@ class TestEAPEstimator:
     item_bank = ItemBank(np.array([[1.0, 3.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0]]))
     estimator = EAPEstimator(grid=QuadratureGrid.uniform(n_nodes=3, low=-1.0, high=1.0), log_prior=uniform_log_prior())
 
-    theta = estimator.estimate(item_bank, [1], [True], 0.0)
+    theta = estimator.estimate(make_context(item_bank, [1], [True], theta=0.0))
 
     assert theta == pytest.approx(np.tanh(0.5) / 1.5, rel=1e-12)
 
@@ -664,20 +661,10 @@ class TestEAPEstimator:
     response_vector = [sign > 0] * 3
 
     normal_estimator = EAPEstimator(log_prior=normal_log_prior(mean=0.0, sd=1.0))
-    normal_theta = normal_estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
+    normal_theta = normal_estimator.estimate(make_context(item_bank, administered_items, response_vector, theta=0.0))
 
     flat_estimator = EAPEstimator(log_prior=uniform_log_prior())
-    flat_theta = flat_estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
+    flat_theta = flat_estimator.estimate(make_context(item_bank, administered_items, response_vector, theta=0.0))
 
     assert 0.0 < sign * normal_theta < 5.0
     assert abs(normal_theta) < abs(flat_theta)
@@ -687,8 +674,8 @@ class TestEAPEstimator:
     item_bank = ItemBank.generate_item_bank(10, seed=42)
     estimator = EAPEstimator(grid=QuadratureGrid.uniform(n_nodes=31))
 
-    estimator.estimate(item_bank=item_bank, administered_items=[0], response_vector=[True], est_theta=0.0)
-    estimator.estimate(item_bank=item_bank, administered_items=[0, 1], response_vector=[True, False], est_theta=0.0)
+    estimator.estimate(make_context(item_bank, [0], [True], theta=0.0))
+    estimator.estimate(make_context(item_bank, [0, 1], [True, False], theta=0.0))
 
     assert estimator.calls == 2
     assert estimator.evaluations == 31
@@ -703,12 +690,7 @@ class TestMAPEstimator:
     item_bank = ItemBank.generate_item_bank(10, seed=42)
     estimator = MAPEstimator()
 
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[],
-      response_vector=[],
-      est_theta=1.7,
-    )
+    theta = estimator.estimate(make_context(item_bank, [], [], theta=1.7))
 
     assert theta == pytest.approx(0.0, abs=1e-6)
 
@@ -731,7 +713,7 @@ class TestMAPEstimator:
       log_likelihood = np.sum(np.where(np.array(pattern)[:, None], np.log(p), np.log1p(-p)), axis=0)
       reference = fine[np.argmax(log_likelihood + log_prior)]
 
-      theta = estimator.estimate(ItemBank(items), list(range(len(items))), list(pattern), 0.0)
+      theta = estimator.estimate(make_context(ItemBank(items), list(range(len(items))), list(pattern), theta=0.0))
 
       assert theta == pytest.approx(reference, abs=1e-4), pattern
 
@@ -740,9 +722,9 @@ class TestMAPEstimator:
     item_bank = ItemBank.generate_item_bank(20, seed=7)
     estimator = MAPEstimator()
 
-    estimator.estimate(item_bank, [0, 1, 2, 3], [True, False, True, True], 0.0)
+    estimator.estimate(make_context(item_bank, [0, 1, 2, 3], [True, False, True, True], theta=0.0))
     first = estimator.evaluations
-    estimator.estimate(item_bank, [0, 1, 2, 3, 4], [True, False, True, True, False], 0.0)
+    estimator.estimate(make_context(item_bank, [0, 1, 2, 3, 4], [True, False, True, True, False], theta=0.0))
 
     assert first > 201
     assert estimator.evaluations > 201
@@ -771,7 +753,7 @@ class TestMAPEstimator:
     """
     estimator = MAPEstimator(log_prior=uniform_log_prior(low, high))
 
-    theta = estimator.estimate(self._hard_items(), [0, 1, 2], response_vector, 0.0)
+    theta = estimator.estimate(make_context(self._hard_items(), [0, 1, 2], response_vector, theta=0.0))
 
     assert theta == pytest.approx(expected, abs=1e-5)
 
@@ -783,7 +765,7 @@ class TestMAPEstimator:
     """
     estimator = MAPEstimator(log_prior=uniform_log_prior(-0.01, 0.01))
 
-    theta = estimator.estimate(self._hard_items(), [0, 1, 2], [True, False, True], 0.0)
+    theta = estimator.estimate(make_context(self._hard_items(), [0, 1, 2], [True, False, True], theta=0.0))
 
     assert -0.01 <= theta <= 0.01
 
@@ -792,13 +774,13 @@ class TestMAPEstimator:
     estimator = MAPEstimator(log_prior=uniform_log_prior(7.0, 8.0))
 
     with pytest.raises(ValueError, match="not finite at any"):
-      estimator.estimate(self._hard_items(), [0], [True], 0.0)
+      estimator.estimate(make_context(self._hard_items(), [0], [True], theta=0.0))
 
   def test_estimate_locates_an_off_grid_prior_mode_within_tol(self) -> None:
     """With no responses the estimate is the prior mode to within tol, not to the grid's 0.06."""
     estimator = MAPEstimator(log_prior=normal_log_prior(mean=0.5, sd=1.0), tol=1e-8)
 
-    theta = estimator.estimate(self._hard_items(), [], [], 0.0)
+    theta = estimator.estimate(make_context(self._hard_items(), [], [], theta=0.0))
 
     assert theta == pytest.approx(0.5, abs=1e-6)
 
@@ -810,7 +792,7 @@ class TestMAPEstimator:
     """
     estimator = MAPEstimator(log_prior=normal_log_prior(mean=0.03, sd=1.0), tol=1e-8)
 
-    theta = estimator.estimate(self._hard_items(), [], [], 0.0)
+    theta = estimator.estimate(make_context(self._hard_items(), [], [], theta=0.0))
 
     assert theta == pytest.approx(0.03, abs=1e-6)
 
@@ -819,7 +801,7 @@ class TestMAPEstimator:
     estimator = MAPEstimator(log_prior=uniform_log_prior(0.01, 0.05))
 
     with pytest.raises(ValueError, match="must contain at least one"):
-      estimator.estimate(self._hard_items(), [0], [True], 0.0)
+      estimator.estimate(make_context(self._hard_items(), [0], [True], theta=0.0))
 
   def test_estimate_finds_the_global_mode_of_a_bimodal_prior(self) -> None:
     """The grid search picks the taller of two separated modes, wherever a local search would stop."""
@@ -831,7 +813,7 @@ class TestMAPEstimator:
 
     estimator = MAPEstimator(log_prior=log_prior)
 
-    theta = estimator.estimate(self._hard_items(), [], [], 0.0)
+    theta = estimator.estimate(make_context(self._hard_items(), [], [], theta=0.0))
 
     assert theta == pytest.approx(2.0, abs=1e-5)
 
@@ -839,7 +821,7 @@ class TestMAPEstimator:
     """A uniform prior with no responses has no unique mode, so the middle of the bounds is returned."""
     estimator = MAPEstimator(log_prior=uniform_log_prior())
 
-    theta = estimator.estimate(self._hard_items(), [], [], 0.0)
+    theta = estimator.estimate(make_context(self._hard_items(), [], [], theta=0.0))
 
     assert theta == pytest.approx(0.0, abs=1e-12)
 
@@ -852,12 +834,7 @@ class TestWarmLikelihoodEstimator:
     item_bank = ItemBank.generate_item_bank(10, seed=42)
     estimator = WarmLikelihoodEstimator()
 
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[],
-      response_vector=[],
-      est_theta=1.25,
-    )
+    theta = estimator.estimate(make_context(item_bank, [], [], theta=1.25))
 
     assert theta == pytest.approx(1.25)
     assert estimator.calls == 1
@@ -876,9 +853,9 @@ class TestWarmLikelihoodEstimator:
     estimator = WarmLikelihoodEstimator()
     single_bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.2, 0.5, 0.0, 1.0]]))
 
-    estimator.estimate(single_bank, [0, 1], [True, False], 0.0)
+    estimator.estimate(make_context(single_bank, [0, 1], [True, False], theta=0.0))
     single = estimator.evaluations
-    estimator.estimate(self._two_candidate_bank(), [0, 1], [True, True], 0.0)
+    estimator.estimate(make_context(self._two_candidate_bank(), [0, 1], [True, True], theta=0.0))
     ranked = estimator.evaluations
 
     assert 121 < single < 121 + 50
@@ -896,7 +873,7 @@ class TestWarmLikelihoodEstimator:
     monkeypatch.setattr(wle_module, "quad", quad_with_warning)
 
     with pytest.warns(IntegrationWarning, match="subdivisions"):
-      WarmLikelihoodEstimator().estimate(self._two_candidate_bank(), [0, 1], [True, True], 0.0)
+      WarmLikelihoodEstimator().estimate(make_context(self._two_candidate_bank(), [0, 1], [True, True], theta=0.0))
 
   @pytest.mark.parametrize(
     ("b", "correct", "expected"),
@@ -913,7 +890,7 @@ class TestWarmLikelihoodEstimator:
     """
     estimator = WarmLikelihoodEstimator()
 
-    theta = estimator.estimate(ItemBank(np.array([[1.0, b, 0.0, 1.0]])), [0], [correct], 0.0)
+    theta = estimator.estimate(make_context(ItemBank(np.array([[1.0, b, 0.0, 1.0]])), [0], [correct], theta=0.0))
 
     assert theta == expected
 
@@ -935,7 +912,9 @@ class TestWarmLikelihoodEstimator:
     steps = (fine_scores[1:] + fine_scores[:-1]) / 2 * np.diff(fine)
     weighted_log_likelihood = np.concatenate([[0.0], np.cumsum(steps)])
 
-    theta = WarmLikelihoodEstimator().estimate(self._two_candidate_bank(), [0, 1], response_vector, 0.0)
+    theta = WarmLikelihoodEstimator().estimate(
+      make_context(self._two_candidate_bank(), [0, 1], response_vector, theta=0.0)
+    )
 
     assert theta == pytest.approx(fine[int(np.argmax(weighted_log_likelihood))], abs=1e-3)
 
@@ -982,12 +961,7 @@ class TestWarmLikelihoodEstimator:
 
     for pattern in product([False, True], repeat=len(administered_items)):
       response_vector = list(pattern)
-      theta = estimator.estimate(
-        item_bank=item_bank,
-        administered_items=administered_items,
-        response_vector=response_vector,
-        est_theta=0.0,
-      )
+      theta = estimator.estimate(make_context(item_bank, administered_items, response_vector, theta=0.0))
 
       assert irt.THETA_MIN_EXTENDED < theta < irt.THETA_MAX_EXTENDED
       assert _warm_modified_score(theta, response_vector, items) == pytest.approx(0.0, abs=1e-4)
@@ -1009,12 +983,7 @@ class TestWarmLikelihoodEstimator:
       log_lik = np.sum(np.where(responses, np.log(p), np.log1p(-p)), axis=1)
       reference = grid[np.argmax(log_lik + 0.5 * log_info)]
 
-      theta = estimator.estimate(
-        item_bank=item_bank,
-        administered_items=list(range(len(items))),
-        response_vector=list(pattern),
-        est_theta=0.0,
-      )
+      theta = estimator.estimate(make_context(item_bank, list(range(len(items))), list(pattern), theta=0.0))
 
       assert theta == pytest.approx(reference, abs=2e-3)
 
@@ -1032,13 +1001,7 @@ class TestWarmLikelihoodEstimator:
     patterns = [list(pattern) for pattern in product([False, True], repeat=len(items))]
     estimator = WarmLikelihoodEstimator()
     estimates = np.array([
-      estimator.estimate(
-        item_bank=item_bank,
-        administered_items=list(range(len(items))),
-        response_vector=pattern,
-        est_theta=0.0,
-      )
-      for pattern in patterns
+      estimator.estimate(make_context(item_bank, list(range(len(items))), pattern, theta=0.0)) for pattern in patterns
     ])
 
     for theta in (-2.0, -1.0, 0.0, 1.0, 2.0):

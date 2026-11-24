@@ -49,8 +49,8 @@ hidden runtime coupling.
 - Prefer small, explicit changes over broad implicit behavior.
 - Preserve public API clarity over convenience wrappers that obscure state ownership.
 - Keep type annotations accurate; this repository uses `ty` as part of its quality gates.
-- Annotate NumPy arrays with the aliases in `catsim._typing` (`FloatArray`, `IntArray`). Ruff bans
-  `numpy.typing.NDArray` elsewhere; for another dtype, add an alias there.
+- Annotate NumPy arrays with the public aliases in `catsim.typing` (`FloatArray`, `IntArray`).
+  Ruff bans `numpy.typing.NDArray` elsewhere; for another dtype, add an alias there.
 - When changing architecture-level behavior, update or add an ADR in `sphinx/adr/`.
 - Follow existing naming and module boundaries unless there is a strong reason to change them.
 - A new top-level module in `src/catsim/` must be placed in the import-linter `layers` contract in

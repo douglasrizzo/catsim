@@ -136,11 +136,11 @@ convention = "numpy"
 ignore-one-line-docstrings = true
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
-"numpy.typing.NDArray".msg = "Use FloatArray or IntArray from catsim._typing; add an alias there for other dtypes."
+"numpy.typing.NDArray".msg = "Use FloatArray or IntArray from catsim.typing; add an alias there for other dtypes."
 "random".msg = "Take a numpy.random.Generator from the caller (ADR-0008); the global random module cannot be seeded per session."
 
 [tool.ruff.lint.per-file-ignores]
-"src/catsim/_typing.py" = ["TID251"]  # the one place that defines the NDArray aliases
+"src/catsim/typing.py" = ["TID251"]  # the one place that defines the NDArray aliases
 "notebooks/*" = ["T20"]  # tutorials print their results
 "src/**" = ["PT"]  # pytest style; PT reads plot.test_progress as a test
 "tests/*" = [
@@ -331,10 +331,11 @@ layers = [
   "engine",
   "selection | estimation | initialization | stopping",  # "|": siblings that never import each other
   "state",
+  "context",  # StepContext: below state and the strategies, which read it, and above the domain
   "cat",
   "item_bank",
   "irt",
-  "_typing : exceptions",
+  "typing : exceptions",
 ]
 ignore_imports = [
   # MEISelector runs one-step-ahead ability updates with an estimator.
@@ -362,11 +363,12 @@ id = "plot-only-matplotlib"
 name = "only catsim.plot imports matplotlib"
 type = "forbidden"
 source_modules = [
-  "catsim._typing",
+  "catsim.typing",
   "catsim.exceptions",
   "catsim.irt",
   "catsim.item_bank",
   "catsim.cat",
+  "catsim.context",
   "catsim.state",
   "catsim.engine",
   "catsim.simulation",

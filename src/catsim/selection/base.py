@@ -1,10 +1,9 @@
-"""Base classes for CAT selectors, and the rules the built-in selectors share.
+"""Base class for CAT selectors, and the rules the built-in selectors share.
 
 The module functions are what makes the built-in selectors behave alike, and custom selectors can
 use them too: :func:`remaining` and :func:`below_cap` give the items a selector may choose from,
 :func:`pick_best` and :func:`best_pool` choose among them under the package's tie-breaking rule
-(ADR-0008), and :func:`check_r_max`, :func:`check_test_size`, :func:`require_rng` and
-:func:`require_responses` check arguments.
+(ADR-0008), and :func:`check_r_max` and :func:`check_test_size` check constructor arguments.
 """
 
 import operator
@@ -13,36 +12,37 @@ from abc import ABC, abstractmethod
 import numpy
 from numpy.random import Generator
 
-from .._typing import FloatArray, IntArray
+from ..context import StepContext
 from ..exceptions import NoItemsAvailableError
-from ..item_bank import ItemBank
+from ..typing import FloatArray, IntArray
 
 
-def remaining(n_items: int, administered_items: list[int]) -> IntArray:
-  """Return the indices of the items not yet administered, in ascending order.
+def remaining(context: StepContext) -> IntArray:
+  """Return the indices of the items a selector may choose from, in ascending order.
 
   Parameters
   ----------
-  n_items : int
-      Number of items in the bank.
-  administered_items : list[int]
-      Indices of the items already administered in the session.
+  context : StepContext
+      The session to select for.
 
   Returns
   -------
   numpy.ndarray
-      Indices of the items of the bank that are not in ``administered_items``, in ascending order.
+      Indices of the items of the bank that are neither administered nor excluded, in ascending
+      order.
 
   Raises
   ------
   NoItemsAvailableError
-      If every item has already been administered.
+      If every item has been administered or excluded.
   """
-  mask = numpy.ones(n_items, dtype=bool)
-  mask[administered_items] = False
+  mask = numpy.ones(context.item_bank.n_items, dtype=bool)
+  # numpy reads a tuple index as one index per axis, so the tuples go in as arrays
+  mask[numpy.asarray(context.administered_items, dtype=numpy.intp)] = False
+  mask[numpy.asarray(context.excluded_items, dtype=numpy.intp)] = False
   candidates = numpy.flatnonzero(mask)
   if candidates.size == 0:
-    msg = "There are no more items to administer: every item in the bank has been administered."
+    msg = "There are no more items to administer: every item in the bank has been administered or excluded."
     raise NoItemsAvailableError(msg)
   return candidates
 
@@ -74,7 +74,7 @@ def below_cap(candidates: IntArray, exposure_rates: FloatArray | None, r_max: fl
   return allowed if allowed.size > 0 else candidates
 
 
-def pick_best(candidates: IntArray, scores: FloatArray, rng: Generator | None) -> int:
+def pick_best(candidates: IntArray, scores: FloatArray, rng: Generator) -> int:
   """Return the candidate with the highest score, breaking exact ties uniformly at random.
 
   This is the package's single tie-breaking rule (ADR-0008), the one catR uses: the candidates
@@ -89,7 +89,7 @@ def pick_best(candidates: IntArray, scores: FloatArray, rng: Generator | None) -
   scores : numpy.ndarray
       One score per candidate; higher is better. Selectors that minimize a quantity, such as the
       distance to the ability estimate, pass its negation.
-  rng : numpy.random.Generator or None
+  rng : numpy.random.Generator
       Random number generator used to break ties.
 
   Returns
@@ -100,7 +100,7 @@ def pick_best(candidates: IntArray, scores: FloatArray, rng: Generator | None) -
   Raises
   ------
   ValueError
-      If any score is NaN, or if several candidates tie for the best score and ``rng`` is None.
+      If any score is NaN.
   """
   if numpy.isnan(scores).any():
     msg = "item scores contain NaN"
@@ -108,9 +108,6 @@ def pick_best(candidates: IntArray, scores: FloatArray, rng: Generator | None) -
   best = candidates[scores == numpy.max(scores)]
   if best.size == 1:
     return int(best[0])
-  if rng is None:
-    msg = "rng parameter cannot be None: it is needed to break a tie between equally good candidates"
-    raise ValueError(msg)
   return int(rng.choice(best))
 
 
@@ -205,100 +202,38 @@ def check_test_size(test_size: int) -> int:
   return test_size
 
 
-def require_rng(rng: Generator | None) -> Generator:
-  """Return ``rng``, checking that a selector that draws random numbers was given one.
-
-  Parameters
-  ----------
-  rng : numpy.random.Generator or None
-      Random number generator passed to ``select``.
-
-  Returns
-  -------
-  numpy.random.Generator
-      ``rng``.
-
-  Raises
-  ------
-  ValueError
-      If ``rng`` is None.
-  """
-  if rng is None:
-    msg = "rng parameter cannot be None: this selector draws random numbers"
-    raise ValueError(msg)
-  return rng
-
-
-def require_responses(response_vector: list[bool] | None) -> list[bool]:
-  """Return ``response_vector``, checking that a selector that scores items by the responses was given them.
-
-  Parameters
-  ----------
-  response_vector : list[bool] or None
-      Responses passed to ``select``.
-
-  Returns
-  -------
-  list[bool]
-      ``response_vector``.
-
-  Raises
-  ------
-  ValueError
-      If ``response_vector`` is None.
-  """
-  if response_vector is None:
-    msg = "response_vector cannot be None: this selector scores items by the responses observed so far"
-    raise ValueError(msg)
-  return response_vector
-
-
 class BaseSelector(ABC):
-  """Base class representing a CAT item selector.
+  """Base class for item selectors.
 
-  Selectors are responsible for choosing which item to administer next to an
-  examinee based on their current estimated ability and test progress.
+  A selector chooses the next item to administer from what a
+  :class:`~catsim.context.StepContext` tells it about the session. A custom selector behaves like
+  the built-in ones when it draws its candidates with :func:`remaining`, which leaves out the
+  administered and the excluded items, applies its exposure cap with :func:`below_cap`, and
+  chooses with :func:`pick_best` or :func:`best_pool`, which apply the package's tie-breaking rule
+  (ADR-0008). The test position is ``len(context.administered_items)``.
+
+  A selector holds its configuration and caches derived from the item bank, never per-session
+  state: one selector serves every session of a run, and an application may interleave the
+  sessions of several examinees on it.
   """
 
   @abstractmethod
-  def select(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    est_theta: float,
-    rng: Generator | None = None,
-    exposure_rates: FloatArray | None = None,
-    response_vector: list[bool] | None = None,
-  ) -> int | None:
-    """Return the index of the next item to be administered.
+  def select(self, context: StepContext) -> int:
+    """Return the index of the next item to administer.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    administered_items : list[int]
-        A list containing the indexes of items that were already administered.
-    est_theta : float
-        The current estimated ability.
-    rng : numpy.random.Generator or None, optional
-        Random number generator for selectors that rely on randomness.
-    exposure_rates : numpy.ndarray or None, optional
-        Explicit run-level exposure-rate snapshot.
-    response_vector : list[bool] or None, optional
-        Responses observed so far in the current session. The engine always passes
-        it, so selectors can use the response history without relying on hidden
-        engine state. Selectors that need it, such as MEISelector and MLWISelector,
-        raise ValueError when it is None.
+    context : StepContext
+        The session to select for.
 
     Returns
     -------
-    int or None
-        Index of the next item to be applied. The engine treats None like
-        ``NoItemsAvailableError``; no built-in selector returns it.
+    int
+        Index of an item of ``context.item_bank`` that is neither administered nor excluded.
 
     Raises
     ------
     NoItemsAvailableError
-        If no item can be administered, for example because every item has already been
-        administered. The engine then ends the session with ``StopReason.NO_ITEMS``.
+        If no item can be administered, for example because every item has been administered or
+        excluded. The engine then ends the session with ``StopReason.NO_ITEMS``.
     """

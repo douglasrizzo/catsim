@@ -9,8 +9,10 @@ algorithmic specifications, behavioral contracts, and class-level API details.
 techniques/index
 engine
 state
+context
 simulation
 cat
 irt
 plot
+typing
 ```
