@@ -57,7 +57,7 @@ built-in stoppers checked bank exhaustion themselves, so a bank that really ran 
 - A session of n items makes n + 1 stopper calls, which matters for stoppers that are costly to
   evaluate.
 - A state whose items were appended by hand, outside `apply_response`, is not re-evaluated by the
-  stopper, so a restored session keeps its stop reason.
+  stopper, so an application that persists sessions restores their stop reason with them.
 
 ## Alternatives Considered
 

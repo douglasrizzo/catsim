@@ -65,11 +65,8 @@ class BaseInitializer(ABC):
   every contract.
 - `rng` and `responses` are always present, so a deterministic selector called directly, with a
   context it builds ({doc}`/extending`), breaks ties as under the engine.
-- ty checks the built-in strategies' signatures against their base classes; a custom strategy's
-  is checked only by its author's type checker.
 - A precision stopper's decision depends on the estimator: the Bayesian standard errors are usually
   below the Fisher one ({doc}`/api/techniques/estimation/index` compares them).
-- An estimator with no standard error formula of its own reports `irt.see`, the Fisher one.
 - An estimator's cost is the sum of a session's recorded `evaluations`. Look-ahead estimates are
   never recorded, so MEI may share the engine's estimator.
 

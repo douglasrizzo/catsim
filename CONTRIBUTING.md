@@ -36,7 +36,7 @@ uv run pylint src/catsim
 uv run ty check
 ```
 
-The tutorials are `.ipynb` files in `notebooks/`, versioned with the package so that they open from GitHub and Colab and are checked as the API changes. Commit them without outputs: pre-commit strips the outputs (nbstripout) and runs every notebook (nbmake), so a notebook that no longer runs fails the gate like a failing test. If you change a notebook, run the notebooks too:
+The tutorials are `.ipynb` files in `notebooks/`, versioned with the package so that they open from GitHub and Colab and are checked as the API changes. Commit them without outputs: pre-commit strips the outputs (nbstripout) and runs the notebooks a commit changes (nbmake), and CI runs every notebook, so a notebook that no longer runs fails the gate like a failing test. If you change a notebook, run the notebooks too:
 
 ```bash
 uv run pytest --nbmake --nbmake-timeout=300 notebooks/*.ipynb

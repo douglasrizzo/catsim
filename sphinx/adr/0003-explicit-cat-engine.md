@@ -29,8 +29,8 @@ receives what it needs as arguments.
 
 - A live CAT session is a first-class use: an application drives the engine one item at a time,
   through the same methods the runner calls.
-- Simulation reuses the engine's execution path instead of owning a separate lifecycle, so a
-  simulated session and a live one behave alike.
+- Simulation runs on the engine's execution path, with no lifecycle of its own, so a simulated
+  session and a live one behave alike.
 - Each state transition can be tested through the engine alone, without a batch around it.
 - The documentation and tutorials teach the engine, session and result objects directly, and
   catsim is a CAT toolkit of which simulation is one use.
