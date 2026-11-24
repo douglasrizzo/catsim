@@ -10,7 +10,7 @@ from typing import Any
 
 import numpy as np
 import pytest
-from scipy.integrate import IntegrationWarning
+from scipy.integrate import IntegrationWarning, quad
 from scipy.optimize import brentq, minimize_scalar
 from scipy.special import expit
 
@@ -914,13 +914,16 @@ class TestWarmLikelihoodEstimator:
   """Tests for WarmLikelihoodEstimator."""
 
   def test_estimate_empty_response_returns_input_theta(self) -> None:
-    """No administered items should return the input estimate unchanged."""
+    """No administered items return the input estimate and standard error unchanged, after no evaluation.
+
+    An estimator that scanned the empty score, or took the SE from the information of no items (infinite), fails.
+    """
     item_bank = ItemBank.generate_item_bank(10, seed=42)
     estimator = WarmLikelihoodEstimator()
 
-    theta = estimator.estimate(make_context(item_bank, [], [], theta=1.25)).theta
+    estimate = estimator.estimate(make_context(item_bank, [], [], theta=1.25, se=0.8))
 
-    assert theta == pytest.approx(1.25)
+    assert estimate == Estimate(theta=1.25, se=0.8, evaluations=0)
 
   @staticmethod
   def _two_candidate_bank() -> ItemBank:
@@ -930,19 +933,42 @@ class TestWarmLikelihoodEstimator:
   def test_evaluations_count_the_scan_the_root_search_and_the_ranking(self) -> None:
     """The evaluation count includes every modified-score evaluation, including the ranking integrals.
 
-    A single root costs the 121-point scan plus a few Brent steps; ranking two candidates adds
-    two integrals of at least 21 evaluations each.
+    The reference counts SciPy's own evaluations on the score written out in this module: the 121-point scan, Brent's
+    search in each scan interval where the score turns from + to -, and, with several maxima candidates, the integral
+    from the lower bound to each. A count that left out the Brent steps or the integrals fails.
     """
-    estimator = WarmLikelihoodEstimator()
     single_bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.2, 0.5, 0.0, 1.0]]))
+    cases = [(single_bank, [True, False], 1), (self._two_candidate_bank(), [True, True], 2)]
 
-    single = estimator.estimate(make_context(single_bank, [0, 1], [True, False], theta=0.0)).evaluations
-    ranked = estimator.estimate(make_context(self._two_candidate_bank(), [0, 1], [True, True], theta=0.0)).evaluations
+    for item_bank, response_vector, n_candidates in cases:
+      score = partial(_warm_modified_score, response_vector=response_vector, items=item_bank.items)
+      scan = np.linspace(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED, 121)
+      values = np.array([score(theta) for theta in scan])
+      brackets = np.flatnonzero((values[:-1] > 0) & (values[1:] <= 0))
+      searches = [brentq(score, scan[k], scan[k + 1], xtol=1e-6, full_output=True) for k in brackets]
+      expected = 121 + sum(result.function_calls for _, result in searches)
+      if len(searches) > 1:
+        expected += sum(
+          quad(score, irt.THETA_MIN_EXTENDED, root, limit=200, full_output=1)[2]["neval"] for root, _ in searches
+        )
 
-    assert single is not None
-    assert ranked is not None
-    assert 121 < single < 121 + 50
-    assert ranked >= 121 + 2 * 21
+      estimate = WarmLikelihoodEstimator(tol=1e-6).estimate(make_context(item_bank, [0, 1], response_vector))
+
+      assert len(searches) == n_candidates
+      assert estimate.evaluations == expected
+
+  def test_standard_error_is_the_inverse_root_of_the_information_at_the_estimate(self) -> None:
+    """The SE is 1 / sqrt(I) at the WLE, as catR computes it, with I written out in this module.
+
+    The items guess and slip, so the WLE is not the MLE. An SE taken at the MLE or the previous estimate, the variance
+    1 / I, or one with Magis' extra term (I'J - IJ') / (2 I^2) added to the information, fails.
+    """
+    items = np.array([[1.2, -1.0, 0.2, 1.0], [0.8, 0.0, 0.1, 0.95], [1.6, 0.7, 0.25, 1.0], [1.0, 1.5, 0.0, 0.9]])
+    response_vector = [True, True, False, True]
+
+    estimate = WarmLikelihoodEstimator().estimate(make_context(ItemBank(items), range(4), response_vector, theta=-1.0))
+
+    assert estimate.se == pytest.approx(1.0 / math.sqrt(_information(estimate.theta, items)), rel=1e-12)
 
   def test_ranking_integral_warnings_reach_the_caller(self, monkeypatch: pytest.MonkeyPatch) -> None:
     """A ranking integral that does not converge still warns, although quad returns the message."""
