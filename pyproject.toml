@@ -296,6 +296,8 @@ unused-type-ignore-comment = "error"
 # A function tested for truth instead of called; both rules only warn by default.
 redundant-condition = "error"
 truthiness-test-of-callable = "error"
+# A condition always true or always false: a dead branch, or an exhaustive check written as an elif.
+redundant-condition-strict = "error"
 # Every override carries @override, so a base-class rename fails the check at each orphaned override.
 missing-override-decorator = "error"
 
