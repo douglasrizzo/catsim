@@ -209,7 +209,7 @@ class OwenEstimator(BaseEstimator):
   The estimator keeps no moments between calls. Each call replays the context's responses in
   administration order, starting from the prior, so one instance serves every session of a run and
   look-ahead selectors can call it with hypothetical responses. The reported estimate is clipped to
-  ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``, the package's ability scale (ADR-0009).
+  ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``, the package's ability scale (ADR-0012).
 
   Parameters
   ----------
@@ -276,7 +276,7 @@ class OwenEstimator(BaseEstimator):
 
 **Implementation notes:**
 
-- Replay is the price of keeping no per-session state on the estimator (ADR-0004): a session of
+- Replay is the price of keeping no per-session state on the estimator (ADR-0005): a session of
   $n$ items costs $n(n+1)/2$ updates in all, $21 \cdot 465 \approx 10^4$ node evaluations of a
   single item for a 30-item test, each far cheaper than an EAP node, which sums the log-likelihood
   of every administered item.
@@ -287,7 +287,7 @@ class OwenEstimator(BaseEstimator):
 - The update follows the spec's departure from Owen's normal-ogive model: catsim's four-parameter
   logistic curve, with the moments summed on the local grid. `irt.log_likelihood` evaluates
   the log-likelihood from the logit, so no clipping of $P$ is needed.
-- Every estimator returns an estimate inside its bounds (ADR-0009), and Owen's procedure has none:
+- Every estimator returns an estimate inside its bounds (ADR-0012), and Owen's procedure has none:
   a correct response to a hard, discriminating item can move the mean by several standard
   deviations, and a run of them can carry it past 6. The sketch clips only the reported estimate
   to the package's scale, so the moments it replays follow the definition; truncating the local

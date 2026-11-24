@@ -36,7 +36,7 @@ uv run pylint src/catsim
 uv run ty check
 ```
 
-If you change a tutorial notebook in `notebooks/`, run the notebooks too:
+The tutorials are `.ipynb` files in `notebooks/`, versioned with the package so that they open from GitHub and Colab and are checked as the API changes. Commit them without outputs: pre-commit strips the outputs (nbstripout) and runs the notebooks a commit changes (nbmake), and CI runs every notebook, so a notebook that no longer runs fails the gate like a failing test. If you change a notebook, run the notebooks too:
 
 ```bash
 uv run pytest --nbmake --nbmake-timeout=300 notebooks/*.ipynb
@@ -51,6 +51,8 @@ uv run --group docs sphinx-build -b html -W --keep-going sphinx sphinx/_build/ht
 ```
 
 `-W` turns warnings into errors. The build also regenerates `README.md` from `sphinx/readme_head.md` and `sphinx/readme_body.md`, so edit those two files instead of `README.md`.
+
+A release is ready only when its documentation is online, so a documentation deployment gates every publication, in the same workflow run as the publication (a job cannot wait for a job in another run): the `dev` → `main` pull request deploys the dev documentation and then publishes a release candidate to TestPyPI, and a GitHub release deploys the production documentation and then publishes to PyPI. These are the only two publishing paths; there is no manual publish. The production documentation goes live before the PyPI upload waits for the maintainer's approval in the `pypi` environment, so a rejected upload leaves documentation online for a version that is not on PyPI until the next deployment.
 
 ## Adding a technique
 

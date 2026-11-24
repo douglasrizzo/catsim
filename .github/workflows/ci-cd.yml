@@ -352,7 +352,8 @@ jobs:
   deploy-docs-dev:
     name: Deploy documentation (dev preview)
     # Deploy preview docs on pushes to dev, and on the same-repository PR from dev to main,
-    # whose TestPyPI upload waits for this job in the same run (ADR-0007)
+    # whose TestPyPI upload waits for this job in the same run (CONTRIBUTING.md, "Building the
+    # documentation")
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
       (github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev' &&
@@ -399,7 +400,7 @@ jobs:
   deploy-docs-production:
     name: Deploy documentation (production)
     # Deploy production docs on pushes to main, and on releases, whose PyPI upload waits for this
-    # job in the same run (ADR-0007)
+    # job in the same run (CONTRIBUTING.md, "Building the documentation")
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
       github.event_name == 'release'

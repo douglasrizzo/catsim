@@ -69,7 +69,7 @@ fields, helpers, validation rules, invariants, how the random generator reaches 
 ### One home per topic
 
 Each topic has one home. Other documents say what they need in a sentence and link the home; they
-do not re-explain it. The map names ADRs by topic, because the set is renumbered before 1.0.0.
+do not re-explain it. The map names ADRs by topic.
 
 | Topic | Home | Related documents |
 |---|---|---|
@@ -233,9 +233,8 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
   - Write in a timeless voice. Only Context may describe the code before the decision.
   - The Status line is dated: "Accepted 2026-11-24".
   - Show code only to state an interface, in a few lines.
-  - Before 1.0.0 the set is consolidated and renumbered into a continuous sequence. From 1.0.0 on,
-    an accepted ADR is not rewritten: a changed decision gets a new ADR that supersedes it, and the
-    old one's Status becomes "Superseded YYYY-MM-DD by ADR-NNNN".
+  - From 1.0.0 on, an accepted ADR is not rewritten: a changed decision gets a new ADR that
+    supersedes it, and the old one's Status becomes "Superseded YYYY-MM-DD by ADR-NNNN".
 - **Length:** 300-600 words.
 - **Review:**
   - Does it record a decision, or does it describe code?
@@ -259,8 +258,8 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
   API or record the gap, do not teach the internal.
 - **Length:** about 25 cells or fewer; each notebook runs in under a minute on Colab.
 - **Rules:** edit the `.ipynb` file itself and commit it without outputs (nbstripout); pre-commit
-  executes every notebook (nbmake). A notebook is the hands-on version of a guide and does not
-  repeat it paragraph by paragraph.
+  runs the notebooks a commit changes and CI runs them all (nbmake). A notebook is the hands-on
+  version of a guide and does not repeat it paragraph by paragraph.
 - **Review:**
   - Does each figure come with a sentence on what to read from it?
   - Does every number in the prose follow from the code shown?
