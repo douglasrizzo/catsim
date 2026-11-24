@@ -2,7 +2,7 @@
 **Module:** `catsim.stopping.classification.GLRStopper` (planned)
 **Reference:** Bartroff, Finkelman, and Lai (2008)
 **Last validated:** 2026-11-23, against Bartroff, Finkelman & Lai (2008, arXiv copy), Magis & Raîche (2012) and catR 3.17.
-**Implementation guidance:** not yet updated to the 1.0 strategy contract (M22).
+**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in, a pure `classify(context)`, a single criterion for `StopRule`) on 2026-11-24.
 
 # Generalized Likelihood Ratio Stopper
 
@@ -95,12 +95,6 @@ rule (`checkStopRule.R`, `rule = "classification"`, catR 3.17; Magis & Raîche,
    * - ``threshold``
      - ``None``
      - Explicit stopping threshold; overrides the alpha-based default if provided.
-   * - ``min_items``
-     - ``None``
-     - Minimum length before classification can be declared.
-   * - ``max_items``
-     - ``None``
-     - Hard maximum length before fallback classification.
 ```
 
 ## Behavioral Contracts
@@ -110,8 +104,8 @@ Any correct implementation must satisfy the following properties:
 1. The statistic for classifying above the cut is defined only when the current estimate exceeds $\theta_c - \delta$, and the one for classifying below only when it is under $\theta_c + \delta$; inside the indifference region both are defined, and either can stop the test.
 2. A statistic reaching its threshold classifies on its side of the cut; when both reach their thresholds, the rule classifies above the cut.
 3. The statistic is computed from the current estimate plus boundary-point likelihoods, not from two fixed-point likelihoods as in SPRT.
-4. The stopper exposes the last statistic value and the last classification outcome.
-5. Like SPRT, the rule requires response-vector access through the stopping API.
+4. The stopper reports the statistics and the classification of any session from that session's context, through pure methods; it keeps neither between calls.
+5. Like SPRT, the rule reads the responses from the context; unlike it, it also reads the current estimate, the context's `theta`.
 
 ## References
 
@@ -126,133 +120,166 @@ This section is for contributors and agents implementing this technique.
 It is removed when the spec is promoted to "Implemented" status.
 :::
 
-**Proposed location:** `src/catsim/stopping/classification.py`
+**Proposed location:** `src/catsim/stopping/classification.py`, next to `SPRTStopper` and the
+`Classification` enum its spec defines.
 
 **Mock implementation:**
 
 ```python
-# src/catsim/stopping/classification.py  (alongside SPRTStopper)
-"""Generalized Likelihood Ratio classification stopper (Bartroff, Finkelman & Lai, 2008)."""
-
-import numpy
-
-from .. import irt
-from .._typing import FloatArray
-from ..item_bank import ItemBank
-from .classification import Classification
-from .stopping import TestLengthStopper
+# src/catsim/stopping/classification.py (added to the module)
 
 
-class GLRStopper(TestLengthStopper):
-  """Generalized Likelihood Ratio classification stopper.
+@dataclass(frozen=True)
+class GLRStopper(BaseStopper):
+  r"""Stop once a generalized likelihood ratio places the current estimate on one side of a cut score.
+
+  The statistic for classifying above the cut compares the likelihood at the current estimate with
+  the likelihood at :math:`\theta_c - \delta`, and the one for classifying below compares it with
+  the likelihood at :math:`\theta_c + \delta` (Bartroff et al., 2008, Section 2.1).
 
   Parameters
   ----------
   cut_score : float
-      Ability threshold :math:`\\theta_c`.
-  indifference : float
-      Half-width :math:`\\delta` of the indifference region.
-  alpha : float
-      Nominal Type I error rate. The stopping threshold is ``log(1/alpha)``
-      (Bartroff et al. 2008 recommend slight inflation; exposed as ``threshold``).
-  threshold : float or None
-      Explicit stopping threshold on the GLR statistic. Overrides ``alpha`` if given.
-  min_items : int or None
-      Minimum items before a classification can be declared.
-  max_items : int or None
-      Maximum items before forced classification.
+      Classification cut point :math:`\theta_c`.
+  indifference : float, optional
+      Half-width :math:`\delta` of the indifference region. Must be positive. Default is 0.2.
+  alpha : float, optional
+      Nominal Type I error rate, from which the default threshold ``log(1 / alpha)`` comes. Default
+      is 0.05.
+  threshold : float or None, optional
+      Threshold of both statistics, overriding the one from `alpha`. Must be positive. Default is
+      None.
+
+  Raises
+  ------
+  ValueError
+      If `indifference` or `threshold` is not positive, or `alpha` is not in (0, 1).
   """
 
-  def __init__(
-    self,
-    cut_score: float,
-    indifference: float = 0.2,
-    alpha: float = 0.05,
-    threshold: float | None = None,
-    min_items: int | None = None,
-    max_items: int | None = None,
-  ) -> None:
-    if indifference <= 0:
-      raise ValueError(f"indifference must be positive, got {indifference}")
-    if not 0 < alpha < 1:
-      raise ValueError(f"alpha must be in (0, 1), got {alpha}")
-    super().__init__(min_items=min_items, max_items=max_items)
-    self._theta_low = cut_score - indifference
-    self._theta_high = cut_score + indifference
-    self._threshold = float(threshold) if threshold is not None else float(numpy.log(1.0 / alpha))
-    self._last_classification = Classification.UNDECIDED
-    self._last_statistic = 0.0
+  cut_score: float
+  indifference: float = 0.2
+  alpha: float = 0.05
+  threshold: float | None = None
 
-  def __str__(self) -> str:
-    return f"GLRStopper(threshold={self._threshold:.3f})"
+  def __post_init__(self) -> None:
+    """Validate the indifference region, the error rate and the threshold."""
+    # written so that NaN fails the checks too
+    if not self.indifference > 0:
+      msg = f"indifference must be positive, got {self.indifference}"
+      raise ValueError(msg)
+    if not 0 < self.alpha < 1:
+      msg = f"alpha must be in (0, 1), got {self.alpha}"
+      raise ValueError(msg)
+    if self.threshold is not None and not self.threshold > 0:
+      msg = f"threshold must be positive, got {self.threshold}"
+      raise ValueError(msg)
 
   @property
-  def last_classification(self) -> Classification:
-    return self._last_classification
+  def stopping_threshold(self) -> float:
+    """Return the threshold both statistics are compared with: `threshold`, or log(1 / alpha)."""
+    return self.threshold if self.threshold is not None else math.log(1 / self.alpha)
 
-  # ---- core kernel ----
-  def _glr_statistic(
-    self,
-    theta_hat: float,
-    response_vector: list[bool],
-    administered_items: FloatArray,
-  ) -> tuple[float, Classification]:
-    """Return (statistic, proposed_decision)."""
-    if self._theta_low < theta_hat < self._theta_high:
-      return 0.0, Classification.UNDECIDED
+  def statistics(self, context: StepContext) -> tuple[float, float]:
+    """Return the statistics for classifying above and below the cut, -inf where one is not defined.
 
-    ll_hat = irt.log_likelihood(theta_hat, response_vector, administered_items)
-    if theta_hat >= self._theta_high:
-      ll_boundary = irt.log_likelihood(self._theta_low, response_vector, administered_items)
-      return ll_hat - ll_boundary, Classification.ABOVE_CUT
+    Both are defined, and can be positive, while the estimate lies inside the indifference region.
 
-    ll_boundary = irt.log_likelihood(self._theta_high, response_vector, administered_items)
-    return ll_hat - ll_boundary, Classification.BELOW_CUT
-
-  def stop(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    theta: float,
-  ) -> bool:
-    base_decision = super().stop(item_bank, administered_items, theta)
-    if not administered_items:
-      return base_decision
-
-    # Requires response_vector through the stopper API (see card 16 for the API change).
-    raise NotImplementedError(
-      "Wire response_vector through the stopping API before using GLRStopper."
+    Returns
+    -------
+    tuple[float, float]
+        The log-likelihood at ``context.theta`` minus that at the lower point, if the estimate
+        is above the lower point, and minus that at the upper point, if it is below the upper one.
+    """
+    theta_hat = context.theta
+    lower, upper = self.cut_score - self.indifference, self.cut_score + self.indifference
+    items = context.item_bank.get_items(context.administered_items)
+    at_hat, at_lower, at_upper = irt.log_likelihood_hpc(
+      numpy.array([theta_hat, lower, upper]), context.responses, items
     )
+    above = float(at_hat - at_lower) if theta_hat > lower else -math.inf
+    below = float(at_hat - at_upper) if theta_hat < upper else -math.inf
+    return above, below
 
-  # Final body once the API change from card 16 is in place:
-  #
-  #   administered_arr = item_bank.get_items(administered_items)
-  #   stat, decision = self._glr_statistic(theta, response_vector, administered_arr)
-  #   self._last_statistic = stat
-  #   if stat >= self._threshold:
-  #     self._last_classification = decision
-  #     return True
-  #   if base_decision and self._last_classification is Classification.UNDECIDED:
-  #     self._last_classification = (
-  #       Classification.ABOVE_CUT if theta > (self._theta_low + self._theta_high) / 2
-  #       else Classification.BELOW_CUT
-  #     )
-  #   return base_decision
+  def _decision(self, context: StepContext) -> Classification | None:
+    """Return the side whose statistic reaches the threshold, above the cut if both do, or None."""
+    above, below = self.statistics(context)
+    if above >= self.stopping_threshold:
+      return Classification.ABOVE_CUT
+    if below >= self.stopping_threshold:
+      return Classification.BELOW_CUT
+    return None
+
+  def stop(self, context: StepContext) -> bool:
+    """Return whether either statistic has reached the threshold.
+
+    Parameters
+    ----------
+    context : StepContext
+        The session to check.
+
+    Returns
+    -------
+    bool
+        True if a statistic is at least the threshold, False otherwise.
+    """
+    return self._decision(context) is not None
+
+  def classify(self, context: StepContext) -> Classification:
+    """Return the side of the cut score on which the session is classified.
+
+    Once a statistic reaches the threshold, it is that statistic's side, above the cut if both do.
+    For a test that ends with neither, as at a length cap, it is the side of the cut on which the
+    current estimate lies, the spec's fallback in place of Bartroff et al.'s Equation 10.
+
+    Parameters
+    ----------
+    context : StepContext
+        The session to classify.
+
+    Returns
+    -------
+    Classification
+        The classification.
+    """
+    decision = self._decision(context)
+    if decision is not None:
+      return decision
+    return Classification.ABOVE_CUT if context.theta > self.cut_score else Classification.BELOW_CUT
 ```
 
 **Implementation notes:**
 
-- The main approximation choice is the threshold calibration; the naive `log(1/alpha)` threshold is acceptable for a first pass.
-- This family should be implemented alongside SPRT so the classification enums and API extensions are shared.
-- The statistic reuses the current estimate, so it naturally depends on an estimator that remains stable under the classification regime.
-
-**Dependencies:**
-
-- Requires the same response-vector stopper API extension as SPRT.
-- Pairs naturally with the existing numerical MLE estimator.
+- No per-session state: `stop` and `classify` compute the statistics from the context each time
+  instead of storing the last classification or statistic. An application classifies a finished
+  session from its context, built as the SPRT spec shows; it must carry
+  `theta=session.current_theta`, because the statistics and the fallback read it, and a context
+  built without it has `theta = 0` and classifies wrongly without an error. `StopRule.satisfied`
+  on the same context tells whether this stopper or the length cap ended the test.
+- The statistics are not set to 0 inside the indifference region: the definition keeps both
+  defined there, and the test can stop there (Contract 1).
+- $\hat\theta$ is the context's `theta`, the engine's current estimate. The definition's
+  $\hat\theta_n$ is the maximum-likelihood estimate, so pair the stopper with
+  `NumericalSearchEstimator`; with EAP or MAP the estimate is drawn toward the prior, its
+  log-likelihood is below the maximum, and both statistics are smaller than the GLR's.
+- The default threshold, $\log(1/\alpha)$ for both decisions, is the spec's uncalibrated choice;
+  Bartroff et al. calibrate separate thresholds by simulation or normal approximation (Section
+  2.1). Pass `threshold` to use a calibrated value.
+- The stopper is one criterion: `StopRule(GLRStopper(cut_score=0.0), MaxLengthStopper(50),
+  min_items=5)` gives Bartroff et al.'s minimum of 5 items and maximum of 50 (Section 3.1).
+- `irt.log_likelihood_hpc` evaluates the three points in one call and works from the logits.
 
 **Testing notes:**
 
-- Compare average test length against SPRT at matched nominal error settings.
-- Verify behavior inside the indifference region and at both tails.
-- Validate explicit-threshold override behavior.
+- Hand-worked statistic: 20 two-parameter logistic items with $a = 1$ and $b = \theta_c = 0$, 15
+  answered correctly, have their maximum-likelihood estimate at $\log 3 \approx 1.099$, where the
+  log-likelihood is $15 \log 0.75 + 5 \log 0.25 \approx -11.247$; at $-0.2$ it is about
+  $-14.963$. The statistic for classifying above is about $3.716$, above the default threshold
+  $\log 20 \approx 2.996$, so a context with `theta = log(3)` stops the test above the cut.
+- Contract 1: on the same items, 210 correct responses of 400 put the estimate at
+  $\operatorname{logit}(0.525) \approx 0.100$, inside the region, where the statistic for
+  classifying above still exceeds the threshold; a stopper that zeroed the statistics inside the
+  region would never stop there.
+- Contract 2: thresholds small enough for both statistics classify above the cut.
+- Contract 4 and 5: classifying two sessions alternately on one stopper gives what classifying
+  each alone gives, and the same responses with another `theta` give other statistics.
+- `threshold` overrides `alpha`, and an invalid `threshold` is rejected.

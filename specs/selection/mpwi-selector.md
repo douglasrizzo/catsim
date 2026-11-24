@@ -2,7 +2,7 @@
 **Module:** `catsim.selection.weighted_info.MPWISelector` (planned)
 **Reference:** van der Linden (1998)
 **Last validated:** 2026-11-23, against van der Linden (1996, RR 96-01); Choi & Swartz (2009); Magis & Raîche (2012); catR 3.17 (`MWI.R`, `nextItem.R`).
-**Implementation guidance:** not yet updated to the 1.0 strategy contract (M22).
+**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in) on 2026-11-24.
 
 # Maximum Posterior Weighted Information Selector
 
@@ -94,7 +94,7 @@ Any correct implementation must satisfy the following properties:
 
 1. Scores are posterior-weighted expected item information values, not likelihood-weighted values.
 2. With an empty response vector, the selector reduces to prior-weighted expected information.
-3. The selector requires the response vector.
+3. The scores depend on the context's responses, through the posterior, and not on its `theta`.
 4. Exposure filtering applies before the final argmax, with fallback to the unrestricted remaining pool if every constrained candidate is excluded.
 
 ## References
@@ -114,131 +114,134 @@ This section is for contributors and agents implementing this technique.
 It is removed when the spec is promoted to "Implemented" status.
 :::
 
-**Proposed location:** `src/catsim/selection/weighted_info.py`
+**Proposed location:** `src/catsim/selection/weighted_info.py`, next to `MLWISelector`.
 
 **Mock implementation:**
 
 ```python
-# src/catsim/selection/weighted_info.py  (alongside MLWISelector from card 09)
-"""Posterior-weighted information selector (van der Linden, 1998)."""
+# src/catsim/selection/weighted_info.py (added to the existing module)
+
+from collections.abc import Callable
 
 import numpy
 
 from .. import irt
-from .._typing import FloatArray
-from ..estimation.bayesian import (
-  LogPrior,
-  QuadratureGrid,
-  normal_log_prior,
-  posterior,
-)
-from ..exceptions import NoItemsAvailableError
+from ..context import StepContext
+from ..estimation.bayesian import LogPrior, QuadratureGrid, normal_log_prior, posterior
 from ..item_bank import ItemBank
-from .base import BaseSelector
+from ..typing import FloatArray
+from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
+
+
+def _table_at_nodes(
+  item_bank: ItemBank, nodes: FloatArray, function: Callable[[FloatArray, FloatArray], FloatArray]
+) -> FloatArray:
+  """Return ``function`` of every item at every node, one row per node, cached in the item bank.
+
+  The table depends only on the bank's parameters, which are read-only, and on the nodes, so one
+  table serves every session and every selector that uses the same nodes.
+
+  Returns
+  -------
+  numpy.ndarray
+      The read-only table, of shape ``(len(nodes), item_bank.n_items)``.
+  """
+  cache = item_bank._selector_cache  # noqa: SLF001 - the cache ItemBank keeps for selectors
+  key = f"{function.__name__}:{nodes.tobytes().hex()}"
+  if key not in cache:
+    table = function(nodes[:, numpy.newaxis], item_bank.items)
+    table.flags.writeable = False
+    cache[key] = table
+  return cache[key]
 
 
 class MPWISelector(BaseSelector):
-  """Posterior-weighted information selector.
+  """Maximum Posterior Weighted Information selector.
+
+  Scores each candidate item by its information summed over a quadrature grid, weighted by the
+  posterior of the responses so far, and selects the highest score.
 
   Parameters
   ----------
-  grid : QuadratureGrid or None
-      Quadrature grid. Defaults to ``QuadratureGrid.uniform()`` (matches EAPEstimator).
-  log_prior : callable or None
-      Vectorized log-density of the prior. Defaults to N(0, 1).
-  r_max : float
-      Exposure cap.
+  grid : QuadratureGrid or None, optional
+      Grid on which the posterior is computed. Default is ``QuadratureGrid.uniform()``.
+  log_prior : LogPrior or None, optional
+      Vectorized log-density of the prior. Default is ``normal_log_prior()``, the standard normal.
+  r_max : float, optional
+      Maximum exposure rate for items. Items with exposure rates >= r_max are only selected when no
+      other item remains. Default is 1 (no restriction).
+
+  Raises
+  ------
+  ValueError
+      If r_max is not in (0, 1].
   """
 
-  def __init__(
-    self,
-    grid: QuadratureGrid | None = None,
-    log_prior: LogPrior | None = None,
-    r_max: float = 1.0,
-  ) -> None:
-    if not 0 <= r_max <= 1:
-      raise ValueError(f"r_max must be between 0 and 1, got {r_max}")
-    super().__init__()
+  def __init__(self, grid: QuadratureGrid | None = None, log_prior: LogPrior | None = None, r_max: float = 1.0) -> None:
+    # Kept as given for the repr, as EAPEstimator does: the default grid's repr would list every
+    # node, and a prior function has no source form.
+    self._grid_argument = grid
+    self._log_prior_argument = log_prior
     self._grid = grid if grid is not None else QuadratureGrid.uniform()
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
-    self._r_max = float(r_max)
-    # Pre-compute item information at grid nodes lazily, cached in item_bank._selector_cache.
+    self._r_max = check_r_max(r_max)
 
-  def __str__(self) -> str:
-    return "Maximum Posterior Weighted Information Selector"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument, with None for a default."""
+    return (
+      f"{type(self).__name__}(grid={self._grid_argument!r}, log_prior={self._log_prior_argument!r}, "
+      f"r_max={self._r_max!r})"
+    )
 
-  # ---- core kernel ----
-  def _info_table(self, item_bank: ItemBank) -> FloatArray:
-    """(n_items, Q) matrix of item information evaluated at every quadrature node."""
-    cache_key = f"mpwi:info_table:{id(self._grid)}"
-    cached = item_bank._selector_cache.get(cache_key)
-    if cached is not None:
-      return cached
-    nodes = self._grid.nodes
-    table = numpy.array([
-      [irt.inf(float(t), *item_bank.items[i, :4]) for t in nodes]
-      for i in range(item_bank.n_items)
-    ])
-    item_bank._selector_cache[cache_key] = table
-    return table
+  def select(self, context: StepContext) -> int:
+    """Return the available item with the largest information weighted by the posterior of the responses.
 
-  def _get_posterior(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    response_vector: list[bool],
-  ) -> FloatArray:
-    """Compute the posterior from the session's responses."""
-    if not administered_items:
-      pp = self._log_prior(self._grid.nodes) + numpy.log(self._grid.weights)
-      pp -= pp.max()
-      pp = numpy.exp(pp)
-      return pp / pp.sum()
-    items = item_bank.items[administered_items, :4]
-    return posterior(response_vector, items, self._grid, self._log_prior)
+    Parameters
+    ----------
+    context : StepContext
+        The session to select for. Its ``theta`` is not used: the posterior carries what the
+        responses say about the ability.
 
-  def select(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    est_theta: float,  # noqa: ARG002 -- unused; the posterior owns the theta info
-    rng: numpy.random.Generator | None = None,  # noqa: ARG002
-    exposure_rates: FloatArray | None = None,
-    response_vector: list[bool] | None = None,
-  ) -> int | None:
-    if response_vector is None:
-      raise ValueError("MPWISelector requires the response_vector to compute the posterior.")
-
-    pp = self._get_posterior(item_bank, administered_items, response_vector)
-    info_table = self._info_table(item_bank)
-    # MPWI_i = sum_q I_i(theta_q) * p(theta_q | u)
-    scores = info_table @ pp
-
-    candidate_mask = numpy.ones(item_bank.n_items, dtype=bool)
-    candidate_mask[administered_items] = False
-    if exposure_rates is None:
-      exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
-    pool = candidate_mask & (exposure_rates < self._r_max)
-    if not pool.any():
-      pool = candidate_mask
-    if not pool.any():
-      raise NoItemsAvailableError("There are no more items to apply.")
-
-    candidates = numpy.flatnonzero(pool)
-    return int(candidates[int(scores[candidates].argmax())])
+    Returns
+    -------
+    int
+        Index of the selected item.
+    """
+    candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
+    item_bank = context.item_bank
+    post = posterior(context.responses, item_bank.get_items(context.administered_items), self._grid, self._log_prior)
+    information = _table_at_nodes(item_bank, self._grid.nodes, irt.inf_hpc)
+    return pick_best(candidates, post @ information[:, candidates], context.rng)
 ```
 
 **Implementation notes:**
 
-- Cache the information table per item bank and grid because it is bank-static.
-- Compute the posterior from the session's responses with `posterior()`. Estimators keep no per-session posterior ({doc}`ADR-0003 </adr/0003-runtime-state-ownership>`), and one vectorized call over the grid is cheap.
-- This selector shares most of its structure with MLWI and should be implemented in the same module.
-
-**Dependencies:**
-
-- Planned card 01 (`Bayesian Estimation Infrastructure`)
+- The information table depends only on the item bank and the grid's nodes, so it is computed
+  once per bank and node set and cached in `ItemBank._selector_cache`, which exists for this
+  selector and MEPV; the bank's parameters are read-only, so the table cannot go stale. The key
+  holds the node values themselves, not `id(grid)`, which Python reuses once a grid is garbage
+  collected. MEPV caches its probability table through the same helper, with `irt.icc_hpc`.
+- `_selector_cache` is private to `ItemBank`, so Ruff's SLF001 flags the access from a selector;
+  the sketch exempts that one line.
+- The posterior comes from the context's responses at every call: estimators keep no per-session
+  posterior ({doc}`ADR-0003 </adr/0003-runtime-state-ownership>`), and `posterior()` is one
+  vectorized pass over the grid. With no responses it is the prior on the grid (Contract 2).
+- The selection and estimation layers do not import each other (`[tool.importlinter]` in
+  `pyproject.toml`). Add `"catsim.selection.weighted_info -> catsim.estimation.bayesian"` to that
+  contract's `ignore_imports`, as `MEISelector` does for its estimator, or move the grid and
+  posterior helpers to a lower layer.
+- catR's 33 nodes on $[-4, 4]$ with the trapezoidal rule are a `QuadratureGrid` with trapezoid
+  weights, for comparisons with catR; the normalizing constant does not change the ranking.
 
 **Testing notes:**
 
-- With no responses and a standard normal prior, scores should match prior-weighted information.
-- Validate exposure-cap fallback behavior.
+- Contract 2: with no responses and a standard normal prior, the selected item is the one with
+  the largest information integrated against the standard normal density, computed independently
+  with `scipy.integrate.quad`.
+- Contract 1 and 3: on a bank built for it, MPWI and MLWI select different items for the same
+  responses under an informative prior, and the same items with different responses select
+  different items.
+- The cache: a second selector with an equal grid reuses the table, and a grid with other nodes
+  gets its own.
+- Contract 4: a cap that leaves some candidates, and one that leaves none, falling back to all
+  remaining items.

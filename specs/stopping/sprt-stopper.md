@@ -2,7 +2,7 @@
 **Module:** `catsim.stopping.classification.SPRTStopper` (planned)
 **Reference:** Reckase (1983); Wald (1947)
 **Last validated:** 2026-11-23, against Reckase (1981), Bartroff, Finkelman & Lai (2008, arXiv copy), Magis & Raîche (2012) and catR 3.17.
-**Implementation guidance:** not yet updated to the 1.0 strategy contract (M22).
+**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in, a pure `classify(context)`, a single criterion for `StopRule`) on 2026-11-24.
 
 # Sequential Probability Ratio Test Stopper
 
@@ -116,12 +116,6 @@ and it needs an indifference region, which catR's rule does not have.
    * - ``beta``
      - ``0.05``
      - Nominal Type II error rate.
-   * - ``min_items``
-     - ``None``
-     - Minimum test length before classification may be declared.
-   * - ``max_items``
-     - ``None``
-     - Hard maximum test length; if reached, the implementation guidance uses the sign of the current statistic for fallback classification.
 ```
 
 ## Behavioral Contracts
@@ -130,9 +124,9 @@ Any correct implementation must satisfy the following properties:
 
 1. The stopper uses the response vector directly through a log-likelihood ratio; `theta` itself is not the primary decision statistic.
 2. Crossing the upper bound classifies above the cut and crossing the lower bound classifies below the cut.
-3. If neither bound is crossed, the test continues unless a shared hard-stop condition fires.
-4. The stopper exposes the last classification decision and the last log-likelihood-ratio value for downstream reporting.
-5. The rule requires a response-vector-aware stopping API extension; without it, it cannot be implemented correctly.
+3. If neither bound is crossed, the stopper does not stop the test; another stopper of its `StopRule`, such as a `MaxLengthStopper`, can, and the classification then falls back to the sign of the statistic.
+4. The stopper reports the classification and the log-likelihood ratio of any session from that session's context, through pure methods; it keeps neither between calls.
+5. The decision depends only on the context's administered items and responses; the context's `theta` and `se` are not read.
 
 ## References
 
@@ -155,144 +149,168 @@ This section is for contributors and agents implementing this technique.
 It is removed when the spec is promoted to "Implemented" status.
 :::
 
-**Proposed location:** `src/catsim/stopping/classification.py`
+**Proposed location:** `src/catsim/stopping/classification.py`, a new module for the
+classification stoppers (this one, GLR and stochastic curtailment).
 
 **Mock implementation:**
 
 ```python
 # src/catsim/stopping/classification.py
-"""Sequential Probability Ratio Test stopping rule for classification CATs."""
+"""Stop a classification test once the responses place the examinee on one side of a cut score."""
 
+from __future__ import annotations
+
+import math
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
+from typing import TYPE_CHECKING
 
 import numpy
 
 from .. import irt
-from .._typing import FloatArray
-from ..item_bank import ItemBank
-from .stopping import TestLengthStopper
+from .base import BaseStopper
+
+if TYPE_CHECKING:
+  from ..context import StepContext
 
 
-class Classification(Enum):
-  UNDECIDED = 0
-  BELOW_CUT = 1
-  ABOVE_CUT = 2
+class Classification(StrEnum):
+  """The side of the cut score on which a classification stopper places the examinee."""
+
+  BELOW_CUT = "below_cut"
+  ABOVE_CUT = "above_cut"
 
 
-class SPRTStopper(TestLengthStopper):
-  """Wald-style SPRT stopping rule for classification CATs.
+@dataclass(frozen=True)
+class SPRTStopper(BaseStopper):
+  r"""Stop once the sequential probability ratio test decides on which side of a cut score the examinee lies.
+
+  The statistic is the log-likelihood ratio of the responses at :math:`\theta_c + \delta` and
+  :math:`\theta_c - \delta`, and Wald's bounds come from the two error rates.
 
   Parameters
   ----------
   cut_score : float
-      Target ability threshold :math:`\\theta_c`.
-  indifference : float
-      Half-width :math:`\\delta` of the indifference region around ``cut_score``.
-      Typical values are 0.1-0.3 on the logit scale.
-  alpha : float
-      Nominal Type I error rate (probability of classifying above cut when below).
-  beta : float
-      Nominal Type II error rate (probability of classifying below cut when above).
-  min_items : int or None
-      Minimum items before a classification can be declared.
-  max_items : int or None
-      Maximum items; if reached, classification is made by the sign of :math:`\\Lambda_n`.
+      Classification cut point :math:`\theta_c`.
+  indifference : float, optional
+      Half-width :math:`\delta` of the indifference region. Must be positive. Default is 0.2.
+  alpha : float, optional
+      Nominal probability of classifying above the cut an examinee at :math:`\theta_c - \delta`.
+      Default is 0.05.
+  beta : float, optional
+      Nominal probability of classifying below the cut an examinee at :math:`\theta_c + \delta`.
+      Default is 0.05.
+
+  Raises
+  ------
+  ValueError
+      If `indifference` is not positive, or `alpha` and `beta` are not positive with a sum below 1,
+      which puts the bounds on either side of 0.
   """
 
-  def __init__(
-    self,
-    cut_score: float,
-    indifference: float = 0.2,
-    alpha: float = 0.05,
-    beta: float = 0.05,
-    min_items: int | None = None,
-    max_items: int | None = None,
-  ) -> None:
-    if indifference <= 0:
-      raise ValueError(f"indifference must be positive, got {indifference}")
-    if not 0 < alpha < 1:
-      raise ValueError(f"alpha must be in (0, 1), got {alpha}")
-    if not 0 < beta < 1:
-      raise ValueError(f"beta must be in (0, 1), got {beta}")
-    super().__init__(min_items=min_items, max_items=max_items)
-    self._theta_low = cut_score - indifference
-    self._theta_high = cut_score + indifference
-    self._log_A = float(numpy.log((1 - beta) / alpha))
-    self._log_B = float(numpy.log(beta / (1 - alpha)))
-    self._last_classification = Classification.UNDECIDED
-    self._last_llr = 0.0
+  cut_score: float
+  indifference: float = 0.2
+  alpha: float = 0.05
+  beta: float = 0.05
 
-  def __str__(self) -> str:
-    return f"SPRTStopper(cut={self._theta_low + (self._theta_high - self._theta_low) / 2})"
+  def __post_init__(self) -> None:
+    """Validate the indifference region and the error rates."""
+    # written so that NaN fails the checks too
+    if not self.indifference > 0:
+      msg = f"indifference must be positive, got {self.indifference}"
+      raise ValueError(msg)
+    if not (self.alpha > 0 and self.beta > 0 and self.alpha + self.beta < 1):
+      msg = f"alpha and beta must be positive with a sum below 1, got {self.alpha} and {self.beta}"
+      raise ValueError(msg)
 
   @property
-  def last_classification(self) -> Classification:
-    return self._last_classification
+  def upper(self) -> float:
+    """Return Wald's upper bound, log((1 - beta) / alpha), at which the test classifies above the cut."""
+    return math.log((1 - self.beta) / self.alpha)
 
   @property
-  def last_log_likelihood_ratio(self) -> float:
-    return self._last_llr
+  def lower(self) -> float:
+    """Return Wald's lower bound, log(beta / (1 - alpha)), at which the test classifies below the cut."""
+    return math.log(self.beta / (1 - self.alpha))
 
-  # ---- core kernel ----
-  def _log_likelihood_ratio(
-    self,
-    response_vector: list[bool],
-    administered_items: FloatArray,
-  ) -> float:
-    """Compute :math:`\\log L(u | theta_high) - \\log L(u | theta_low)`."""
-    ll_high = irt.log_likelihood(self._theta_high, response_vector, administered_items)
-    ll_low = irt.log_likelihood(self._theta_low, response_vector, administered_items)
-    return ll_high - ll_low
+  def log_likelihood_ratio(self, context: StepContext) -> float:
+    r"""Return the log-likelihood ratio of the responses at the upper and the lower point, 0 before any response.
 
-  def stop(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    theta: float,  # noqa: ARG002 -- SPRT does not use the ability estimate
-  ) -> bool:
-    base_decision = super().stop(item_bank, administered_items, theta)
-    if not administered_items:
-      return base_decision
+    Returns
+    -------
+    float
+        The statistic :math:`\Lambda_n`.
+    """
+    points = numpy.array([self.cut_score - self.indifference, self.cut_score + self.indifference])
+    items = context.item_bank.get_items(context.administered_items)
+    at_lower, at_upper = irt.log_likelihood_hpc(points, context.responses, items)
+    return float(at_upper - at_lower)
 
-    # SPRTStopper needs the response vector, which the current BaseStopper signature
-    # does not expose. This stopper requires the same `response_vector` signature
-    # extension as the MEI/MLWI selectors -- see "Notes".
-    raise NotImplementedError(
-      "Wire response_vector through the stopping API before using SPRTStopper."
-    )
+  def stop(self, context: StepContext) -> bool:
+    """Return whether the statistic has reached either bound.
 
-  # NOTE: once `BaseStopper.stop` accepts `response_vector`, the body of `stop`
-  # becomes:
-  #
-  #   administered_arr = item_bank.get_items(administered_items)
-  #   llr = self._log_likelihood_ratio(response_vector, administered_arr)
-  #   self._last_llr = llr
-  #   if llr >= self._log_A:
-  #     self._last_classification = Classification.ABOVE_CUT
-  #     return True
-  #   if llr <= self._log_B:
-  #     self._last_classification = Classification.BELOW_CUT
-  #     return True
-  #   if base_decision and self._last_classification is Classification.UNDECIDED:
-  #     self._last_classification = (
-  #       Classification.ABOVE_CUT if llr > 0 else Classification.BELOW_CUT
-  #     )
-  #   return base_decision
+    Parameters
+    ----------
+    context : StepContext
+        The session to check.
+
+    Returns
+    -------
+    bool
+        True if the log-likelihood ratio is at least the upper bound or at most the lower one.
+    """
+    statistic = self.log_likelihood_ratio(context)
+    return statistic >= self.upper or statistic <= self.lower
+
+  def classify(self, context: StepContext) -> Classification:
+    """Return the side of the cut score that the responses favor.
+
+    Once a bound is reached, it is the side that bound decides. For a test that ends with neither
+    reached, as at a length cap, it is Reckase's (1981, p. 4) fallback: above the cut if the
+    likelihood ratio exceeds 1. The bounds lie on either side of 0, so both come down to the sign
+    of the statistic.
+
+    Parameters
+    ----------
+    context : StepContext
+        The session to classify.
+
+    Returns
+    -------
+    Classification
+        ``ABOVE_CUT`` if the log-likelihood ratio is positive, ``BELOW_CUT`` otherwise.
+    """
+    return Classification.ABOVE_CUT if self.log_likelihood_ratio(context) > 0 else Classification.BELOW_CUT
 ```
 
 **Implementation notes:**
 
-- The critical dependency is a response-vector-aware `BaseStopper.stop` contract.
-- The classification result should be exposed separately from the boolean stop signal.
-- This family belongs in a dedicated `classification.py` module rather than the precision-stopper module.
-
-**Dependencies:**
-
-- Requires a stopper API extension to pass `response_vector` through the engine path.
+- No per-session state: one stopper serves every session of a run, so `stop` and `classify`
+  compute the statistic from the context each time instead of storing the last classification
+  or statistic. An application classifies a finished session by building its context, the kind
+  `StopRule.satisfied` takes: `StepContext(item_bank=bank, rng=rng,
+  administered_items=tuple(session.administered_item_ids), responses=tuple(session.responses),
+  theta=session.current_theta, se=session.current_se)`. The SPRT reads only the items and
+  responses, but the other stoppers of a rule, and the GLR and curtailment stoppers, read the
+  estimate and its error, which default to 0 and infinity. `classify` is the decision whether the
+  SPRT or the cap ended the test; `StopRule.satisfied` on the same context tells which.
+- The stopper is one criterion. A minimum length and the cap at which the fallback applies come
+  from the rule: `StopRule(SPRTStopper(cut_score=0.0), MaxLengthStopper(20), min_items=5)`.
+- The statistic needs no ability estimate, so the stopper works with any estimator.
+- `irt.log_likelihood_hpc` evaluates both points in one call and works from the logits.
+- The stochastic-curtailment stopper extends this class and forces its decision at the midpoint
+  of the bounds, as its spec says; with `alpha == beta` the midpoint is 0 and the two agree except
+  for a statistic of exactly 0.
 
 **Testing notes:**
 
-- Simulate examinees above and below the cut score and check empirical error rates against nominal `alpha` and `beta`.
-- Verify correct upper-bound/lower-bound classification.
-- Verify fallback classification behavior when `max_items` is reached before a bound crossing.
+- Hand-worked statistic: for a two-parameter logistic item with $b = \theta_c$, a correct
+  response adds $\log[\sigma(a\delta)/\sigma(-a\delta)] = a\delta$ to the statistic and an
+  incorrect one subtracts it. With $a = 1$, $\delta = 0.2$ and the default error rates
+  ($A = \log 19 \approx 2.944$), 15 more correct than incorrect responses stop the test above the
+  cut, and 14 do not (Contract 2); 15 more incorrect ones stop it below.
+- Contract 3: undecided at a length cap, `classify` follows the sign of the statistic.
+- Contract 4 and 5: classifying two sessions alternately on one stopper gives what classifying
+  each alone gives, and the same responses with another `theta` or `se` give the same decision.
+- Simulated examinees at $\theta_c - \delta$ and $\theta_c + \delta$, with a cap far beyond the
+  usual length, are misclassified at about the nominal rates or less.

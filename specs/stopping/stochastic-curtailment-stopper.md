@@ -2,7 +2,7 @@
 **Module:** `catsim.stopping.classification.StochasticCurtailmentStopper` (planned)
 **Reference:** Finkelman (2008, 2010)
 **Last validated:** 2026-11-23, against Huebner & Finkelman (2016) and Sie, Finkelman, Bartroff & Thompson (2015) (PubMed Central full texts), the abstracts of Finkelman (2008, 2010) and catR 3.17.
-**Implementation guidance:** not yet updated to the 1.0 strategy contract (M22).
+**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in, a pure `classify(context)`, a single criterion for `StopRule`) on 2026-11-24.
 
 # Stochastic Curtailment Stopper
 
@@ -121,9 +121,6 @@ stochastic curtailment to that rule as well.
      - Curtailment threshold: the test stops when the probability that the decision forced at
        ``max_items`` equals the interim decision is at least ``gamma``. Higher values are more
        conservative; Finkelman (2008, 2010) used 0.95.
-   * - ``min_items``
-     - ``None``
-     - Minimum length before curtailment may occur.
    * - ``max_items``
      - required
      - Maximum test length :math:`J`; the decision is forced there, and the key probability looks
@@ -139,7 +136,7 @@ Any correct implementation must satisfy the following properties:
 3. If that probability is at least `gamma`, the rule stops and emits the interim decision: above the cut if the log-likelihood ratio is at least the midpoint of the SPRT bounds, below otherwise.
 4. The rule never administers more items than the SPRT with the same bounds and maximum length.
 5. Invalid `gamma` values and a missing `max_items` are rejected at construction time.
-6. The rule inherits the response-vector dependency of the SPRT family.
+6. Like the SPRT, the rule reads the responses from the context; it reads the context's `theta` only to choose the representative items still to come.
 
 ## References
 
@@ -172,168 +169,169 @@ This section is for contributors and agents implementing this technique.
 It is removed when the spec is promoted to "Implemented" status.
 :::
 
-**Proposed location:** `src/catsim/stopping/classification.py`
+**Proposed location:** `src/catsim/stopping/classification.py`, next to `SPRTStopper`, which it
+extends.
 
 **Mock implementation:**
 
 ```python
-# src/catsim/stopping/classification.py  (alongside SPRTStopper/GLRStopper)
-"""Stochastic curtailment for classification CATs (Finkelman 2008)."""
+# src/catsim/stopping/classification.py (added to the module; the imports are those it does not have yet)
 
-import numpy
+from scipy import stats
 
-from .. import irt
-from .._typing import FloatArray
-from ..item_bank import ItemBank
-from .classification import Classification, SPRTStopper
+from .bank import _remaining
 
 
+@dataclass(frozen=True, kw_only=True)
 class StochasticCurtailmentStopper(SPRTStopper):
-  """SPRT with stochastic curtailment. Inherits Wald logic from SPRTStopper.
+  r"""Stop the SPRT early once its decision at the maximum length is unlikely to differ from the interim one.
 
-  At each step, if the base SPRT stops, use its decision. Otherwise, estimate
-  the probability that the SPRT will still be undecided by ``horizon`` items
-  under the plug-in MLE :math:`\\hat\\theta_n`. If below ``gamma``, curtail.
+  The interim decision is the one the truncated SPRT would force now: above the cut if the
+  log-likelihood ratio is at least the midpoint of the bounds. The stopper stops when the SPRT
+  does, or when the probability that the decision forced after `max_items` items agrees with the
+  interim decision is at least `gamma`, evaluated at the boundary point least favorable to it.
 
   Parameters
   ----------
-  cut_score : float
-      Ability threshold.
-  indifference : float
-      Indifference half-width.
-  alpha, beta : float
-      SPRT error rates.
-  gamma : float
-      Curtailment threshold. Lower = more conservative.
-  horizon : int
-      Number of additional items to consider in the forward projection.
-  min_items, max_items : int or None
-      Usual bounds.
+  cut_score, indifference, alpha, beta
+      As for :class:`SPRTStopper`.
+  max_items : int
+      Maximum test length :math:`J`, at which the decision is forced. Keyword-only and required.
+  gamma : float, optional
+      Agreement probability at which the test is curtailed, in (0, 1). Default is 0.95.
+
+  Raises
+  ------
+  ValueError
+      If `max_items` is below 1 or `gamma` is not in (0, 1), or as for :class:`SPRTStopper`.
   """
 
-  def __init__(
-    self,
-    cut_score: float,
-    indifference: float = 0.2,
-    alpha: float = 0.05,
-    beta: float = 0.05,
-    gamma: float = 0.05,
-    horizon: int = 20,
-    min_items: int | None = None,
-    max_items: int | None = None,
-  ) -> None:
-    if not 0 < gamma < 1:
-      raise ValueError(f"gamma must be in (0, 1), got {gamma}")
-    if horizon < 1:
-      raise ValueError(f"horizon must be positive, got {horizon}")
-    super().__init__(
-      cut_score=cut_score,
-      indifference=indifference,
-      alpha=alpha,
-      beta=beta,
-      min_items=min_items,
-      max_items=max_items,
-    )
-    self._gamma = float(gamma)
-    self._horizon = int(horizon)
+  max_items: int
+  gamma: float = 0.95
 
-  def __str__(self) -> str:
-    return f"StochasticCurtailmentStopper(gamma={self._gamma}, horizon={self._horizon})"
+  def __post_init__(self) -> None:
+    """Validate the SPRT's parameters, the maximum length and the curtailment threshold."""
+    super().__post_init__()
+    if self.max_items < 1:
+      msg = f"max_items must be at least 1, got {self.max_items}"
+      raise ValueError(msg)
+    # written so that NaN fails the check too
+    if not 0 < self.gamma < 1:
+      msg = f"gamma must be in (0, 1), got {self.gamma}"
+      raise ValueError(msg)
 
-  # ---- core kernel ----
-  def _curtailment_probability(
-    self,
-    theta_hat: float,
-    remaining_items: FloatArray,
-    current_llr: float,
-  ) -> tuple[float, Classification]:
-    """Normal-approximation forward projection of the LLR over the horizon.
+  @property
+  def midpoint(self) -> float:
+    """Return the midpoint of the SPRT's bounds, which decides the interim and the forced classification."""
+    return (self.upper + self.lower) / 2
 
-    Returns (undecided_probability, tentative_decision).
+  def classify(self, context: StepContext) -> Classification:
+    """Return the interim decision, which is also the decision forced after `max_items` items.
+
+    Parameters
+    ----------
+    context : StepContext
+        The session to classify.
+
+    Returns
+    -------
+    Classification
+        ``ABOVE_CUT`` if the log-likelihood ratio is at least the midpoint of the bounds,
+        ``BELOW_CUT`` otherwise.
     """
-    if remaining_items.shape[0] == 0:
-      decision = Classification.ABOVE_CUT if current_llr > 0 else Classification.BELOW_CUT
-      return 0.0, decision
+    above = self.log_likelihood_ratio(context) >= self.midpoint
+    return Classification.ABOVE_CUT if above else Classification.BELOW_CUT
 
-    # Per-item LLR contribution under the plug-in theta_hat:
-    #   mean = P(theta_hat) * log(P_high/P_low) + (1 - P(theta_hat)) * log(Q_high/Q_low)
-    a = remaining_items[:, 0]
-    b = remaining_items[:, 1]
-    c = remaining_items[:, 2]
-    d = remaining_items[:, 3]
+  def agreement_probability(self, context: StepContext) -> float:
+    """Return the normal approximation of the probability that the forced decision agrees with the interim one.
 
-    p_hat = numpy.array([irt.icc(theta_hat, ai, bi, ci, di) for ai, bi, ci, di in zip(a, b, c, d)])
-    p_high = numpy.array([irt.icc(self._theta_high, ai, bi, ci, di) for ai, bi, ci, di in zip(a, b, c, d)])
-    p_low = numpy.array([irt.icc(self._theta_low, ai, bi, ci, di) for ai, bi, ci, di in zip(a, b, c, d)])
+    Returns
+    -------
+    float
+        The probability :math:`p_k`, 1 once no item is to come.
+    """
+    candidates = _remaining(context)
+    to_come = self.max_items - len(context.administered_items)
+    if to_come <= 0 or candidates.size == 0:
+      return 1.0
+    statistic = self.log_likelihood_ratio(context)
+    above = statistic >= self.midpoint
+    item_bank = context.item_bank
+    # The representative items to come: the most informative remaining ones at the current
+    # estimate, as Finkelman (2008) chose them.
+    information = irt.inf_hpc(context.theta, item_bank.get_items(candidates))
+    items = item_bank.get_items(candidates[numpy.argsort(-information, kind="stable")[:to_come]])
+    lower, upper = self.cut_score - self.indifference, self.cut_score + self.indifference
+    # The boundary point least favorable to the interim decision. Open Question 1: the plug-in
+    # variant would evaluate at context.theta instead.
+    theta_star = lower if above else upper
+    p_star, p_upper, p_lower = (irt.icc_hpc(theta, items) for theta in (theta_star, upper, lower))
+    log_ratio_correct = numpy.log(p_upper) - numpy.log(p_lower)
+    log_ratio_incorrect = numpy.log1p(-p_upper) - numpy.log1p(-p_lower)
+    means = p_star * log_ratio_correct + (1 - p_star) * log_ratio_incorrect
+    variances = p_star * log_ratio_correct**2 + (1 - p_star) * log_ratio_incorrect**2 - means**2
+    mean = statistic + float(means.sum())
+    sd = math.sqrt(max(float(variances.sum()), 0.0))
+    if sd == 0:
+      return 1.0 if (mean >= self.midpoint) == above else 0.0
+    z = (self.midpoint - mean) / sd
+    return float(stats.norm.sf(z) if above else stats.norm.cdf(z))
 
-    eps = 1e-12
-    log_ratio_correct = numpy.log(numpy.clip(p_high, eps, 1) / numpy.clip(p_low, eps, 1))
-    log_ratio_wrong = numpy.log(numpy.clip(1 - p_high, eps, 1) / numpy.clip(1 - p_low, eps, 1))
+  def stop(self, context: StepContext) -> bool:
+    """Return whether the SPRT stops, or the forced decision is likely enough to agree with the interim one.
 
-    per_item_mean = p_hat * log_ratio_correct + (1 - p_hat) * log_ratio_wrong
-    per_item_var = p_hat * log_ratio_correct**2 + (1 - p_hat) * log_ratio_wrong**2 - per_item_mean**2
+    Parameters
+    ----------
+    context : StepContext
+        The session to check.
 
-    # Take the first `horizon` *best* items by information at theta_hat.
-    k = min(self._horizon, remaining_items.shape[0])
-    selected = numpy.argsort(-per_item_mean * numpy.sign(per_item_mean))[:k]
-    mu = float(per_item_mean[selected].sum())
-    sigma = float(numpy.sqrt(numpy.maximum(per_item_var[selected].sum(), 0.0)))
-
-    if sigma == 0:
-      final = current_llr + mu
-      if final >= self._log_A:
-        return 0.0, Classification.ABOVE_CUT
-      if final <= self._log_B:
-        return 0.0, Classification.BELOW_CUT
-      return 1.0, Classification.UNDECIDED
-
-    # P[B < Lambda_final < A] under N(current + mu, sigma^2)
-    from scipy.stats import norm
-
-    upper = (self._log_A - (current_llr + mu)) / sigma
-    lower = (self._log_B - (current_llr + mu)) / sigma
-    undecided = float(norm.cdf(upper) - norm.cdf(lower))
-
-    # Tentative decision: lean in the direction of the expected final LLR.
-    expected_final = current_llr + mu
-    if expected_final >= 0:
-      decision = Classification.ABOVE_CUT
-    else:
-      decision = Classification.BELOW_CUT
-    return undecided, decision
-
-  # The full stop() is built on top of SPRTStopper.stop() -- see card 16 for the
-  # API change and the base implementation. Pseudocode:
-  #
-  #   sprt_stop = super().stop(item_bank, administered_items, theta)
-  #   if sprt_stop:
-  #     return True  # last_classification already set by SPRT
-  #
-  #   remaining = mask out administered items
-  #   undecided_p, tentative = self._curtailment_probability(
-  #     theta,
-  #     item_bank.items[remaining, :4],
-  #     self.last_log_likelihood_ratio,
-  #   )
-  #   if undecided_p <= self._gamma:
-  #     self._last_classification = tentative
-  #     return True
-  #   return False
+    Returns
+    -------
+    bool
+        True if the log-likelihood ratio has reached a bound or the agreement probability is at
+        least `gamma`, False otherwise.
+    """
+    return super().stop(context) or self.agreement_probability(context) >= self.gamma
 ```
 
 **Implementation notes:**
 
-- This rule should inherit from the implemented SPRT stopper rather than duplicate its stopping logic.
-- The normal approximation is the first practical implementation; a Monte Carlo forward projection can be a later refinement.
-- Curtailment assumptions depend on the future selector being reasonably informative.
-
-**Dependencies:**
-
-- Depends on planned card 16 (`SPRTStopper`).
-- Requires the same response-vector stopper API extension.
+- The sketch implements the spec's definition: the agreement probability at the boundary point
+  least favorable to the interim decision, the interim and forced decisions by the midpoint of
+  the bounds, the representative set of the $J - k$ most informative remaining items at the
+  current estimate, and Finkelman's $\gamma = 0.95$. It shows the standard form, the spec's
+  current answer to Open Question 1; the plug-in variant changes only the `theta_star` line.
+- It extends `SPRTStopper`: it stops whenever the SPRT does (Contract 1, hence Contract 4), and
+  overrides `classify` with the midpoint decision. With `alpha == beta` the midpoint is 0 and the
+  two classifications differ only for a statistic of exactly 0. `kw_only=True` lets the new
+  required `max_items` follow the SPRT's fields that have defaults.
+- No per-session state: the probability and the classification are computed from the context.
+  The stopper reads `theta` only to rank the items to come.
+- `max_items` belongs to the stopper because the look-ahead needs it. The stopper stops at that
+  length by itself, since no item is left to come, so a `MaxLengthStopper` is optional; if a rule
+  has one, give it the same length:
+  `StopRule(StochasticCurtailmentStopper(0.0, max_items=30), MaxLengthStopper(30), min_items=5)`.
+- `_remaining` is the bank stoppers' helper (the minimum-information spec). Once two modules use
+  it, move it to `stopping/base.py`.
+- `numpy.log1p(-p)` is $-\infty$ for an item whose probability rounds to 1 at both boundary
+  points, and the difference of two such values is NaN, which the comparison with `gamma` would
+  silently read as False. Compute the log-probabilities from the logits instead, with the
+  per-item helper the KL specs propose to move into `catsim.irt`, before banks with such items
+  can reach the stopper.
+- The look-ahead assumes the items to come are about as informative as the representative set,
+  which holds for an information-based selector and less for an exposure-controlled one.
 
 **Testing notes:**
 
-- Compare mean test length with and without curtailment on examinees far from the cut.
-- Verify that very small `gamma` reproduces plain SPRT behavior.
-- Validate that invalid parameter settings are rejected.
+- Hand-worked approximation: on a bank of two-parameter logistic items with $a = 1$ and
+  $b = \theta_c = 0$, $\delta = 0.2$, each item to come adds $\pm 0.2$; at $\theta^* = -0.2$ its
+  mean is $0.2\,(2\sigma(-0.2) - 1) \approx -0.019934$ and its variance about $0.039603$. With
+  $J - k = 10$ and $\Lambda_k = 1.0$, the agreement probability is
+  $\Phi(0.80066 / 0.62931) \approx 0.8984$, so the test continues; with $\Lambda_k = 2.0$ it is
+  about $0.9979$ and the test stops above the cut (Contract 3).
+- Contract 1: a statistic at a bound stops the test whatever the agreement probability.
+- Contract 4: a seeded session with the curtailed stopper is a prefix of the session with the
+  plain SPRT and the same seed, since `stop` draws no random numbers.
+- Contract 5: `gamma` outside (0, 1), NaN, `max_items` below 1 and a missing `max_items` are
+  rejected at construction.
+- At $k = J$ the agreement probability is 1, so the stopper stops with the forced decision.

@@ -1,8 +1,8 @@
 **Status:** Planned
-**Module:** `catsim.stopping.stopping.MinInfoInBankStopper` (planned)
+**Module:** `catsim.stopping.bank.MinInfoInBankStopper` (planned)
 **Reference:** Dodd, Koch, and De Ayala (1989); Choi, Grady, and Dodd (2011)
 **Last validated:** 2026-11-23, against Dodd, Koch & De Ayala (1989), Choi, Grady & Dodd (2011, PubMed Central author manuscript) and catR 3.17.
-**Implementation guidance:** not yet updated to the 1.0 strategy contract (M22).
+**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in, a single criterion for `StopRule`) on 2026-11-24.
 
 # Minimum Information in Bank Stopper
 
@@ -59,12 +59,6 @@ bank is exhausted.
    * - ``min_info``
      - required
      - Information threshold :math:`\epsilon`.
-   * - ``min_items``
-     - ``None``
-     - Minimum number of items before stopping is allowed.
-   * - ``max_items``
-     - ``None``
-     - Hard maximum test length.
 ```
 
 ## Behavioral Contracts
@@ -75,7 +69,7 @@ Any correct implementation must satisfy the following properties:
 2. The rule depends on the remaining item bank, so it must inspect non-administered items directly.
 3. If no items remain, the stopper terminates.
 4. Nonnegative thresholds are valid; negative ones are rejected.
-5. The inherited minimum-length and maximum-length checks still take precedence.
+5. The stopper is a single criterion: the minimum test length and the length cap come from `StopRule`'s `min_items` and a `MaxLengthStopper` it is combined with.
 
 ## References
 
@@ -90,84 +84,115 @@ This section is for contributors and agents implementing this technique.
 It is removed when the spec is promoted to "Implemented" status.
 :::
 
-**Proposed location:** `src/catsim/stopping/stopping.py`
+**Proposed location:** `src/catsim/stopping/bank.py`, a new module for the stoppers that judge
+what the remaining items can still add (this one, the KL stopper and the predicted-SEM stopper).
 
 **Mock implementation:**
 
 ```python
-# src/catsim/stopping/stopping.py  (alongside MinErrorStopper and PredictedSEMStopper)
-"""Minimum-information-in-bank stopper (Choi, Grady & Dodd, 2011)."""
+# src/catsim/stopping/bank.py
+"""Stop a test once the remaining items have too little left to add."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import numpy
 
-from .._typing import FloatArray
-from ..item_bank import ItemBank
-from .stopping import TestLengthStopper
+from .. import irt
+from .base import BaseStopper
+
+if TYPE_CHECKING:
+  from ..context import StepContext
+  from ..typing import IntArray
 
 
-class MinInfoInBankStopper(TestLengthStopper):
-  """Stop when no remaining item provides at least ``min_info`` information at theta.
+def _remaining(context: StepContext) -> IntArray:
+  """Return the indices of the items neither administered nor excluded, in ascending order.
+
+  ``catsim.selection.base.remaining`` does the same for selectors, but the stopping layer may not
+  import the selection layer, and a stopper needs an empty result where a selector raises.
+
+  Returns
+  -------
+  numpy.ndarray
+      The remaining item indices, possibly none.
+  """
+  mask = numpy.ones(context.item_bank.n_items, dtype=bool)
+  mask[numpy.asarray(context.administered_items, dtype=numpy.intp)] = False
+  mask[numpy.asarray(context.excluded_items, dtype=numpy.intp)] = False
+  return numpy.flatnonzero(mask)
+
+
+@dataclass(frozen=True)
+class MinInfoInBankStopper(BaseStopper):
+  """Stop once no remaining item has more than a minimum information at the current estimate.
 
   Parameters
   ----------
   min_info : float
-      Information threshold. The test stops when ``max_remaining_info <= min_info``.
-  min_items : int or None
-      Minimum number of items before the test can stop.
-  max_items : int or None
-      Maximum number of items before the test must stop.
+      Information threshold. The test stops once the most informative remaining item has at most
+      this much information. Must not be negative.
+
+  Raises
+  ------
+  ValueError
+      If `min_info` is negative or NaN.
   """
 
-  def __init__(
-    self,
-    min_info: float,
-    min_items: int | None = None,
-    max_items: int | None = None,
-  ) -> None:
-    if min_info < 0:
-      raise ValueError(f"min_info must be non-negative, got {min_info}")
-    super().__init__(min_items=min_items, max_items=max_items)
-    self._min_info = float(min_info)
+  min_info: float
 
-  def __str__(self) -> str:
-    return f"MinInfoInBankStopper(min_info={self._min_info})"
+  def __post_init__(self) -> None:
+    """Validate the threshold."""
+    # written so that NaN fails the check too
+    if not self.min_info >= 0:
+      msg = f"min_info must not be negative, got {self.min_info}"
+      raise ValueError(msg)
 
-  def stop(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    theta: float,
-  ) -> bool:
-    base_decision = super().stop(item_bank, administered_items, theta)
-    if base_decision is True:
+  def stop(self, context: StepContext) -> bool:
+    """Return whether no remaining item has more than `min_info` information at the current estimate.
+
+    Parameters
+    ----------
+    context : StepContext
+        The session to check.
+
+    Returns
+    -------
+    bool
+        True if every remaining item has at most `min_info` information at ``context.theta``, or no
+        item remains; False otherwise.
+    """
+    candidates = _remaining(context)
+    if candidates.size == 0:
       return True
-
-    remaining_mask = numpy.ones(item_bank.n_items, dtype=bool)
-    remaining_mask[administered_items] = False
-    if not remaining_mask.any():
-      return True
-
-    remaining_info = item_bank.information(theta)[remaining_mask]
-    return float(remaining_info.max()) <= self._min_info
-
-  def _check_stopping_criterion(  # noqa: PLR6301
-    self,
-    administered_items: FloatArray,  # noqa: ARG002
-    theta: float,  # noqa: ARG002
-  ) -> bool:
-    return False
+    information = irt.inf_hpc(context.theta, context.item_bank.get_items(candidates))
+    return float(information.max()) <= self.min_info
 ```
 
 **Implementation notes:**
 
-- This rule is most useful as a complement to `MinErrorStopper` or `PredictedSEMStopper`.
-- A future `CompositeStopper` helper may be useful if chaining multiple stopping criteria becomes common.
-- No extra dependencies are needed.
-
-**Dependencies:** none
+- The stopper is one criterion. Choi et al. (2011) combined it with the minimum-error rule, which
+  in catsim is a rule of several stoppers:
+  `StopRule(MinInfoInBankStopper(0.5), StandardErrorStopper(0.3), MaxLengthStopper(30), min_items=5)`.
+  `StopRule` applies `min_items` to every stopper, the length cap included.
+- The information is Fisher information at the context's `theta`, the current estimate, as in
+  the definition and catR; it does not read the estimator's standard error.
+- A stopper is pure (`BaseStopper`): the same context gives the same answer, and no state is kept
+  between calls.
+- The stopping layer may not import the selection layer (`[tool.importlinter]` in
+  `pyproject.toml`), hence `_remaining` here; the KL and predicted-SEM stoppers in the same module
+  share it.
 
 **Testing notes:**
 
-- A bank with uniformly weak remaining items should trigger the stopper immediately once `min_items` is satisfied.
-- A well-targeted bank should not trigger this rule early.
-- Exhausted-bank handling and parameter validation should be covered.
+- Hand-worked thresholds: a two-parameter logistic item with $b = \hat\theta$ has information
+  $a^2/4$ at $\hat\theta$. With `min_info = 0.25`, remaining items with $a = 1$ (information
+  exactly $0.25$, the equality case of Contract 1) and $a = 0.5$ stop the test, and one more
+  remaining item with $a = 2$ (information $1$) keeps it going. Pick values whose information is
+  exact in floating point: $a = \sqrt{2}$ gives $0.5000000000000001$, not $0.5$.
+- Contract 2: administering the one informative item makes the stopper stop at the next check.
+- Contract 3: with every item administered, it stops.
+- Contract 4: negative and NaN thresholds are rejected; 0 is accepted.
+- Contract 5: inside `StopRule(..., min_items=k)` it does not stop before $k$ items.
