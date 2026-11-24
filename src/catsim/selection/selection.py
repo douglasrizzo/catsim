@@ -195,5 +195,5 @@ class IntervalInfoSelector(BaseSelector):
     else:
       lower, upper = theta - self._interval, theta + self._interval
 
-    information_integral = irt.inf_integral(lower, upper, item_bank.items[candidates])
+    information_integral = irt.info_integral(lower, upper, item_bank.items[candidates])
     return pick_best(candidates, information_integral, context.rng)

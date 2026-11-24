@@ -149,7 +149,7 @@ def _table_at_nodes(
   cache = item_bank._selector_cache  # noqa: SLF001 - the cache ItemBank keeps for selectors
   key = f"{function.__name__}:{nodes.tobytes().hex()}"
   if key not in cache:
-    table = function(nodes[:, numpy.newaxis], item_bank.items)
+    table = function(nodes, item_bank.items)
     table.flags.writeable = False
     cache[key] = table
   return cache[key]
@@ -210,7 +210,7 @@ class MPWISelector(BaseSelector):
     candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
     item_bank = context.item_bank
     post = posterior(context.responses, item_bank.get_items(context.administered_items), self._grid, self._log_prior)
-    information = _table_at_nodes(item_bank, self._grid.nodes, irt.inf_hpc)
+    information = _table_at_nodes(item_bank, self._grid.nodes, irt.information)
     return pick_best(candidates, post @ information[:, candidates], context.rng)
 ```
 
@@ -220,7 +220,7 @@ class MPWISelector(BaseSelector):
   once per bank and node set and cached in `ItemBank._selector_cache`, which exists for this
   selector and MEPV; the bank's parameters are read-only, so the table cannot go stale. The key
   holds the node values themselves, not `id(grid)`, which Python reuses once a grid is garbage
-  collected. MEPV caches its probability table through the same helper, with `irt.icc_hpc`.
+  collected. MEPV caches its probability table through the same helper, with `irt.icc`.
 - `_selector_cache` is private to `ItemBank`, so Ruff's SLF001 flags the access from a selector;
   the sketch exempts that one line.
 - The posterior comes from the context's responses at every call: estimators keep no per-session

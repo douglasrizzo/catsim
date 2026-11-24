@@ -243,7 +243,7 @@ class SPRTStopper(BaseStopper):
     """
     points = numpy.array([self.cut_score - self.indifference, self.cut_score + self.indifference])
     items = context.item_bank.get_items(context.administered_items)
-    at_lower, at_upper = irt.log_likelihood_hpc(points, context.responses, items)
+    at_lower, at_upper = irt.log_likelihood(points, context.responses, items)
     return float(at_upper - at_lower)
 
   def stop(self, context: StepContext) -> bool:
@@ -297,7 +297,7 @@ class SPRTStopper(BaseStopper):
 - The stopper is one criterion. A minimum length and the cap at which the fallback applies come
   from the rule: `StopRule(SPRTStopper(cut_score=0.0), MaxLengthStopper(20), min_items=5)`.
 - The statistic needs no ability estimate, so the stopper works with any estimator.
-- `irt.log_likelihood_hpc` evaluates both points in one call and works from the logits.
+- `irt.log_likelihood` evaluates both points in one call and works from the logits.
 - The stochastic-curtailment stopper extends this class and forces its decision at the midpoint
   of the bounds, as its spec says; with `alpha == beta` the midpoint is 0 and the two agree except
   for a statistic of exactly 0.

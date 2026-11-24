@@ -4,7 +4,8 @@ This module provides the ItemBank class for managing calibrated item parameters
 and precomputing derived values that depend only on static item content.
 """
 
-from typing import Any, Literal, Self
+from enum import StrEnum
+from typing import Any, Self
 
 import numpy
 import numpy.typing as npt
@@ -12,6 +13,30 @@ from numpy.random import Generator
 
 from . import irt
 from .typing import FloatArray, IntArray
+
+_N_PARAMS = 4
+"""Columns of a complete item matrix: a, b, c and d."""
+
+
+class IrtModel(StrEnum):
+  """The logistic model of an item bank, named after the number of parameters its items vary.
+
+  A member equals its name, so ``IrtModel("3PL")`` is ``IrtModel.PL3`` and either can be passed where
+  a model is expected. Each model is a special case of the next: a 1PL (Rasch) bank has one
+  discrimination for every item, no pseudo-guessing (:math:`c = 0`) and no upper asymptote below 1
+  (:math:`d = 1`); a 2PL bank varies the discrimination, a 3PL bank adds pseudo-guessing, and a 4PL
+  bank adds upper asymptotes below 1.
+
+  Examples
+  --------
+  >>> IrtModel("3PL") is IrtModel.PL3
+  True
+  """
+
+  PL1 = "1PL"
+  PL2 = "2PL"
+  PL3 = "3PL"
+  PL4 = "4PL"
 
 
 class ItemBank:
@@ -25,8 +50,9 @@ class ItemBank:
   Parameters
   ----------
   items : numpy.ndarray
-      Item parameter matrix with columns [a, b, c, d] or fewer (will be
-      normalized to 4 parameters). See :py:func:`catsim.irt.normalize_item_bank`.
+      Item parameter matrix, one row per item, with columns [a, b, c, d]. A matrix with one column
+      is read as [b], two as [a, b] and three as [a, b, c], filled with :math:`a = 1`, :math:`c = 0`
+      and :math:`d = 1`; a 1-D array is one item.
   validate : bool, optional
       Whether to validate the item parameters. Default is True.
 
@@ -47,8 +73,8 @@ class ItemBank:
   Raises
   ------
   ValueError
-      If the matrix does not have 1 to 4 columns, or if validate=True and item
-      parameters are invalid (see :py:func:`catsim.irt.validate_item_bank`).
+      If the matrix does not have 1 to 4 columns, or if validate=True and the matrix has no items or a
+      parameter that is NaN, infinite or outside a > 0 and 0 <= c < d <= 1.
   TypeError
       If items is not a numpy.ndarray.
 
@@ -79,23 +105,25 @@ class ItemBank:
 
     Raises
     ------
+    TypeError
+        If ``items`` is not a numpy.ndarray.
     ValueError
         If ``items`` does not have 1 to 4 columns, or ``validate`` is True and a parameter is invalid.
     """
-    # Normalize to 4PL format, in a float copy the caller cannot change afterwards
-    self._items = numpy.array(irt.normalize_item_bank(items), dtype=float)
+    # a float copy the caller cannot change afterwards
+    self._items = _normalize(items)
     n_columns = self._items.shape[1]
-    if n_columns != irt.NumParams.PL4.value:
+    if n_columns != _N_PARAMS:
       msg = (
         f"Item matrix has {n_columns} columns; ItemBank takes 1 to 4, read as [b], [a, b], [a, b, c] or [a, b, c, d]."
       )
-      if n_columns > irt.NumParams.PL4.value:
+      if n_columns > _N_PARAMS:
         msg += " Earlier versions of catsim kept exposure rates in a fifth column; drop it with items[:, :4]."
       raise ValueError(msg)
 
     # Validate if requested
     if validate:
-      irt.validate_item_bank(self._items)
+      _validate(self._items)
     # Read-only, together with the column views below, so the cached values derived from the
     # parameters cannot go stale
     self._items.flags.writeable = False
@@ -103,7 +131,7 @@ class ItemBank:
     # Lazy-loaded cached values (computed on first access)
     self._max_info_thetas: FloatArray | None = None
     self._max_info_values: FloatArray | None = None
-    self._model: int | None = None
+    self._model: IrtModel | None = None
 
     # Cache for selector-specific data derived from this item bank. Nothing in catsim fills it
     # yet; the planned MPWI and MEPV selectors cache their per-node tables here (see
@@ -143,7 +171,7 @@ class ItemBank:
         Read-only array of theta values, one per item.
     """
     if self._max_info_thetas is None:
-      thetas = irt.max_info_hpc(self._items)
+      thetas = irt.max_info_theta(self._items)
       thetas.flags.writeable = False
       self._max_info_thetas = thetas
     return self._max_info_thetas
@@ -158,24 +186,28 @@ class ItemBank:
         Read-only array of maximum information values, one per item.
     """
     if self._max_info_values is None:
-      # Ensure max_info_thetas is computed first
-      values = irt.inf_hpc(self.max_info_thetas, self._items)
+      # Information depends on theta only through theta - b, so each item's information at its own
+      # peak is its information at 0 once its difficulty is moved to b - peak. Passing the peaks
+      # to irt.information would evaluate every peak against every item instead.
+      shifted = self._items.copy()
+      shifted[:, 1] -= self.max_info_thetas
+      values = irt.information(0.0, shifted)
       values.flags.writeable = False
       self._max_info_values = values
     return self._max_info_values
 
   @property
-  def model(self) -> int:
-    """Get the detected IRT model type (lazy-loaded).
+  def model(self) -> IrtModel:
+    """Get the simplest logistic model that fits every item of the bank.
 
     Returns
     -------
-    int
-        Integer between 1 and 4 denoting the logistic model:
-        1 for 1PL (Rasch), 2 for 2PL, 3 for 3PL, 4 for 4PL.
+    IrtModel
+        ``PL4`` if an upper asymptote is below 1, else ``PL3`` if a pseudo-guessing parameter is above
+        0, else ``PL2`` if the discriminations differ, else ``PL1``.
     """
     if self._model is None:
-      self._model = irt.detect_model(self._items)
+      self._model = _detect_model(self._items)
     return self._model
 
   @property
@@ -261,52 +293,34 @@ class ItemBank:
     return self._items[numpy.asarray(indices, dtype=int)]
 
   def icc(self, theta: float | FloatArray) -> FloatArray:
-    """Compute item characteristic curves for all items.
+    """Return the probability of a correct response to every item, as :py:func:`catsim.irt.icc` gives it.
 
     Parameters
     ----------
     theta : float or numpy.ndarray
-        Ability value(s).
+        An ability, or an array of abilities.
 
     Returns
     -------
     numpy.ndarray
-        Array of probabilities for correct response. If theta is a scalar,
-        returns array of length n_items. If theta is an array, returns
-        array of shape (len(theta), n_items).
+        Shape ``(n_items,)`` for a float ``theta`` and ``(k, n_items)`` for ``k`` abilities.
     """
-    if isinstance(theta, (int, float)):
-      return irt.icc_hpc(theta, self._items)
-
-    # Handle array of thetas
-    result = numpy.zeros((len(theta), self.n_items))
-    for i, t in enumerate(theta):
-      result[i, :] = irt.icc_hpc(t, self._items)
-    return result
+    return irt.icc(theta, self._items)
 
   def information(self, theta: float | FloatArray) -> FloatArray:
-    """Compute item information values for all items.
+    """Return the information of every item, as :py:func:`catsim.irt.information` gives it.
 
     Parameters
     ----------
     theta : float or numpy.ndarray
-        Ability value(s).
+        An ability, or an array of abilities.
 
     Returns
     -------
     numpy.ndarray
-        Array of information values. If theta is a scalar, returns array
-        of length n_items. If theta is an array, returns array of shape
-        (len(theta), n_items).
+        Shape ``(n_items,)`` for a float ``theta`` and ``(k, n_items)`` for ``k`` abilities.
     """
-    if isinstance(theta, (int, float)):
-      return irt.inf_hpc(theta, self._items)
-
-    # Handle array of thetas
-    result = numpy.zeros((len(theta), self.n_items))
-    for i, t in enumerate(theta):
-      result[i, :] = irt.inf_hpc(t, self._items)
-    return result
+    return irt.information(theta, self._items)
 
   def test_information(self, theta: float, item_indices: npt.ArrayLike | None = None) -> float:
     """Compute test information at a given theta.
@@ -325,13 +339,13 @@ class ItemBank:
         Test information (sum of item information values).
     """
     items_to_use = self._items if item_indices is None else self._items[numpy.asarray(item_indices, dtype=int)]
-    return irt.test_info(theta, items_to_use)
+    return irt.total_information(theta, items_to_use)
 
   @classmethod
   def generate_item_bank(
     cls,
     n: int,
-    itemtype: irt.NumParams | Literal["1PL", "2PL", "3PL", "4PL"] = irt.NumParams.PL4,
+    itemtype: IrtModel | str = IrtModel.PL4,
     corr: float = 0,
     rng: Generator | None = None,
     seed: int = 0,
@@ -354,13 +368,12 @@ class ItemBank:
     ----------
     n : int
         Number of items to be generated.
-    itemtype : irt.NumParams or str, optional
-        The logistic model to use: ``irt.NumParams.PL1`` (or "1PL"), ``irt.NumParams.PL2`` (or "2PL"),
-        ``irt.NumParams.PL3`` (or "3PL"), or ``irt.NumParams.PL4`` (or "4PL") for the one-, two-, three-,
-        or four-parameter logistic models respectively. Default is PL4.
+    itemtype : IrtModel or str, optional
+        The logistic model of the items, an :py:class:`IrtModel` or its name in any case ("3pl").
+        Default is ``IrtModel.PL4``.
     corr : float, optional
-        The correlation between item discrimination and difficulty. If
-        ``itemtype == irt.NumParams.PL1``, this parameter is ignored. Default is 0.
+        The correlation between item discrimination and difficulty, ignored for ``IrtModel.PL1``.
+        Default is 0.
     rng : numpy.random.Generator or None, optional
         Optional random number generator to generate the item bank. If not passed,
         one will be created using the seed parameter. Default is None.
@@ -378,7 +391,7 @@ class ItemBank:
     Raises
     ------
     ValueError
-        If ``itemtype`` is a string other than "1PL", "2PL", "3PL" or "4PL" (in any case).
+        If ``itemtype`` is not "1PL", "2PL", "3PL" or "4PL", in any case.
 
     Examples
     --------
@@ -386,21 +399,9 @@ class ItemBank:
     >>> bank.n_items
     100
     >>> bank.model
-    3
+    <IrtModel.PL3: '3PL'>
     """
-    # Convert string to NumParams if needed
-    if isinstance(itemtype, str):
-      type_map = {
-        "1PL": irt.NumParams.PL1,
-        "2PL": irt.NumParams.PL2,
-        "3PL": irt.NumParams.PL3,
-        "4PL": irt.NumParams.PL4,
-      }
-      itemtype_upper = itemtype.upper()
-      if itemtype_upper not in type_map:
-        msg = f"Invalid itemtype '{itemtype}'. Must be one of: 1PL, 2PL, 3PL, 4PL"
-        raise ValueError(msg)
-      itemtype = type_map[itemtype_upper]
+    model = IrtModel(itemtype.upper())
 
     # Generate parameters following standard distributions
     means = [0, 1.2]
@@ -415,7 +416,7 @@ class ItemBank:
 
     b, a = rng.multivariate_normal(means, covs, n).T
 
-    if itemtype == irt.NumParams.PL1:
+    if model == IrtModel.PL1:
       a = numpy.ones(n)
     else:
       # redraw the rare non-positive discriminations, together with their difficulties, which samples
@@ -425,11 +426,10 @@ class ItemBank:
         b[invalid], a[invalid] = rng.multivariate_normal(means, covs, int(invalid.sum())).T
         invalid = a <= 0
 
-    c = rng.normal(0.25, 0.02, n).clip(min=0) if itemtype in {irt.NumParams.PL3, irt.NumParams.PL4} else numpy.zeros(n)
-    d = rng.uniform(0.94, 1, n) if itemtype == irt.NumParams.PL4 else numpy.ones(n)
+    c = rng.normal(0.25, 0.02, n).clip(min=0) if model in {IrtModel.PL3, IrtModel.PL4} else numpy.zeros(n)
+    d = rng.uniform(0.94, 1, n) if model == IrtModel.PL4 else numpy.ones(n)
 
-    # Create ItemBank with normalized parameters
-    return cls(irt.normalize_item_bank(numpy.array([a, b, c, d]).T), validate=validate)
+    return cls(numpy.array([a, b, c, d]).T, validate=validate)
 
   @classmethod
   def generate(cls, *args: Any, **kwargs: Any) -> Self:  # noqa: ANN401 (forwards to generate_item_bank)
@@ -451,7 +451,7 @@ class ItemBank:
 
   def __repr__(self) -> str:
     """Get string representation of the ItemBank."""
-    return f"ItemBank(n_items={self.n_items}, model={self.model}PL)"
+    return f"ItemBank(n_items={self.n_items}, model={self.model})"
 
   def __len__(self) -> int:
     """Get number of items (allows len(bank))."""
@@ -470,3 +470,112 @@ class ItemBank:
   def __getitem__(self, index: int | slice | list[int] | IntArray) -> FloatArray:
     """Get item(s) by index (allows bank[i] or bank[indices])."""
     return self._items[index]
+
+
+def _normalize(items: FloatArray) -> FloatArray:
+  r"""Return a float copy of an item matrix, with the parameters a 1PL, 2PL or 3PL matrix leaves out.
+
+  One column is read as [b], two as [a, b] and three as [a, b, c]; the missing discrimination is 1,
+  pseudo-guessing 0 and upper asymptote 1. A 1-D array is one item. A matrix with no column or more
+  than four is returned as it is, for :py:class:`ItemBank` to reject.
+
+  Parameters
+  ----------
+  items : numpy.ndarray
+      The item matrix.
+
+  Returns
+  -------
+  numpy.ndarray
+      A new float matrix, :math:`n \times 4` unless ``items`` has no column or more than four.
+
+  Raises
+  ------
+  TypeError
+      If ``items`` is not a numpy.ndarray.
+  ValueError
+      If ``items`` is neither 1-D nor 2-D.
+  """
+  if not isinstance(items, numpy.ndarray):
+    msg = "Item matrix is not of type numpy.ndarray"
+    raise TypeError(msg)
+  if items.ndim not in {1, 2}:
+    msg = f"Item matrix has shape {items.shape}; it must be one item (1-D) or a matrix of items (2-D)"
+    raise ValueError(msg)
+  matrix = numpy.array(numpy.atleast_2d(items), dtype=float)
+  n_columns = matrix.shape[1]
+  if not 0 < n_columns < _N_PARAMS:
+    return matrix
+  complete = numpy.tile([1.0, 0.0, 0.0, 1.0], (matrix.shape[0], 1))
+  if n_columns == 1:
+    complete[:, 1] = matrix[:, 0]
+  else:
+    complete[:, :n_columns] = matrix
+  return complete
+
+
+def _validate(items: FloatArray) -> None:
+  r"""Check that an item matrix is :math:`n \times 4` with at least one item and valid parameters.
+
+  Every parameter must be finite, with :math:`a > 0` and :math:`0 \leq c < d \leq 1`.
+
+  Parameters
+  ----------
+  items : numpy.ndarray
+      The item matrix to validate.
+
+  Raises
+  ------
+  ValueError
+      If the item matrix is not :math:`n \times 4`, has no items, or has a parameter that is NaN,
+      infinite or out of its range. The message lists every parameter violation found, separated by
+      ``"; "``.
+  """
+  if items.shape[1:] != (_N_PARAMS,):
+    msg = f"Item matrix has shape {items.shape}; it must be 2-D with exactly 4 columns: a, b, c and d"
+    raise ValueError(msg)
+  if items.shape[0] == 0:
+    msg = "Item matrix has no items"
+    raise ValueError(msg)
+
+  errors: list[str] = []
+  if not numpy.isfinite(items).all():
+    errors.append("There are items with NaN or infinite parameters")
+  if any(items[:, 0] <= 0):
+    errors.append("There are items with discrimination <= 0")
+  if any(items[:, 2] < 0):
+    errors.append("There are items with pseudo-guessing < 0")
+  if any(items[:, 2] > 1):
+    errors.append("There are items with pseudo-guessing > 1")
+  if any(items[:, 3] > 1):
+    errors.append("There are items with upper asymptote > 1")
+  if any(items[:, 3] < 0):
+    errors.append("There are items with upper asymptote < 0")
+  if any(items[:, 2] >= items[:, 3]):
+    errors.append("There are items with pseudo-guessing >= upper asymptote")
+
+  if errors:
+    raise ValueError("; ".join(errors))
+
+
+def _detect_model(items: FloatArray) -> IrtModel:
+  """Return the simplest logistic model that fits every item of an n x 4 matrix.
+
+  Parameters
+  ----------
+  items : numpy.ndarray
+      The item matrix.
+
+  Returns
+  -------
+  IrtModel
+      ``PL4`` if an upper asymptote is not 1, else ``PL3`` if a pseudo-guessing parameter is not 0,
+      else ``PL2`` if the discriminations differ, else ``PL1``.
+  """
+  if any(items[:, 3] != 1):
+    return IrtModel.PL4
+  if any(items[:, 2] != 0):
+    return IrtModel.PL3
+  if len(set(items[:, 0])) > 1:
+    return IrtModel.PL2
+  return IrtModel.PL1

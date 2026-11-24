@@ -214,7 +214,7 @@ class MEPVSelector(BaseSelector):
     candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
     item_bank = context.item_bank
     post = posterior(context.responses, item_bank.get_items(context.administered_items), self._grid, self._log_prior)
-    probabilities = _table_at_nodes(item_bank, self._grid.nodes, irt.icc_hpc)[:, candidates]
+    probabilities = _table_at_nodes(item_bank, self._grid.nodes, irt.icc)[:, candidates]
     expected = _expected_posterior_variance(post, self._grid.nodes, probabilities)
     # pick_best takes the highest score, and the smallest variance wins
     return pick_best(candidates, -expected, context.rng)
@@ -228,7 +228,7 @@ class MEPVSelector(BaseSelector):
 - The branch weights are the posterior-predictive probabilities, as the definition requires, so
   the selector does not read the context's `theta`. catR's weights, $P_i(\hat\theta)$ and
   $1 - P_i(\hat\theta)$ at the current estimate, would be
-  `irt.icc_hpc(context.theta, item_bank.get_items(candidates))`; a comparison with catR needs that
+  `irt.icc(context.theta, item_bank.get_items(candidates))`; a comparison with catR needs that
   variant, and its rankings can differ.
 - The posterior comes from the context's responses at every call, as in MPWI; estimators keep no
   per-session posterior ({doc}`ADR-0003 </adr/0003-runtime-state-ownership>`). Each call costs two

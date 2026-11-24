@@ -1,70 +1,51 @@
 """Tests for the ItemBank class."""
 
 import copy
+import math
 import operator
 import pickle
+import re
 from collections.abc import Callable
 
 import numpy as np
 import pytest
 
-from catsim import ItemBank, irt
+from catsim import IrtModel, ItemBank
+from catsim import item_bank as item_bank_module
 
 
 class TestItemBankCreation:
   """Tests for ItemBank initialization and creation."""
 
-  def test_create_from_4pl_params(self) -> None:
-    """Test creating ItemBank from 4PL parameters."""
-    items = np.array([
-      [1.0, 0.0, 0.0, 1.0],
-      [1.2, -0.5, 0.1, 1.0],
-      [0.8, 1.0, 0.05, 0.95],
-    ])
-    bank = ItemBank(items)
+  @pytest.mark.parametrize(
+    ("items", "expected"),
+    [
+      pytest.param([0.5], [[1.0, 0.5, 0.0, 1.0]], id="difficulty"),
+      pytest.param([1.2, -0.3, 0.1, 0.9], [[1.2, -0.3, 0.1, 0.9]], id="four parameters"),
+    ],
+  )
+  def test_a_one_dimensional_array_is_one_item(self, items: list[float], expected: list[list[float]]) -> None:
+    """A 1-D array is one item's parameters; reading it as a column would make one item per value."""
+    np.testing.assert_array_equal(ItemBank(np.array(items)).items, expected)
 
-    assert bank.n_items == 3
-    assert bank.items.shape == (3, 4)
-    assert bank.model == 4  # 4PL due to d parameter != 1 in third item
+  def test_a_nested_list_raises_type_error(self) -> None:
+    """A nested list is not an item matrix; without the type check it fails later with an unrelated AttributeError."""
+    with pytest.raises(TypeError, match=r"not of type numpy\.ndarray"):
+      ItemBank([[1.0, 0.0, 0.1, 0.95]])  # type: ignore[arg-type]
 
-  def test_create_from_3pl_params(self) -> None:
-    """Test creating ItemBank from 3PL parameters."""
-    items = np.array([
-      [1.0, 0.0, 0.0],
-      [1.2, -0.5, 0.1],
-    ])
-    bank = ItemBank(items)
+  @pytest.mark.parametrize(
+    "shape", [pytest.param((), id="0-d"), pytest.param((2, 2, 4), id="3-D"), pytest.param((2, 5, 4), id="3-D, 5 deep")]
+  )
+  def test_rejects_an_array_that_is_neither_one_item_nor_a_matrix(self, shape: tuple[int, ...]) -> None:
+    """A 0-d array is not a one-item bank, and a 3-D array is not a matrix of items.
 
-    assert bank.n_items == 2
-    assert bank.items.shape == (2, 4)
-    # d should be added as 1.0
-    assert np.allclose(bank.upper_asymptote, 1.0)
-
-  def test_create_from_2pl_params(self) -> None:
-    """Test creating ItemBank from 2PL parameters."""
-    items = np.array([
-      [1.0, 0.0],
-      [1.2, -0.5],
-    ])
-    bank = ItemBank(items)
-
-    assert bank.n_items == 2
-    assert bank.model == 2  # 2PL
-    # c should be 0, d should be 1
-    assert np.allclose(bank.pseudo_guessing, 0.0)
-    assert np.allclose(bank.upper_asymptote, 1.0)
-
-  def test_create_from_1pl_params(self) -> None:
-    """Test creating ItemBank from 1PL (difficulty only) parameters."""
-    items = np.array([[0.0], [-0.5], [1.0]])
-    bank = ItemBank(items)
-
-    assert bank.n_items == 3
-    assert bank.model == 1  # 1PL (Rasch)
-    # a should be 1, c should be 0, d should be 1
-    assert np.allclose(bank.discrimination, 1.0)
-    assert np.allclose(bank.pseudo_guessing, 0.0)
-    assert np.allclose(bank.upper_asymptote, 1.0)
+    Without the dimension check a scalar becomes one 1PL item of that difficulty, and a 3-D array fails with numpy's
+    broadcast error or is reported as a matrix with the wrong number of columns.
+    """
+    with pytest.raises(
+      ValueError, match=re.escape(f"shape {shape}; it must be one item (1-D) or a matrix of items (2-D)")
+    ):
+      ItemBank(np.ones(shape))
 
   @pytest.mark.parametrize("validate", [True, False])
   def test_rejects_a_matrix_with_more_than_four_columns(self, validate: bool) -> None:
@@ -187,6 +168,95 @@ class TestItemBankCreation:
     assert bank.n_items == 1
 
 
+class TestItemBankValidation:
+  """Tests for the parameter checks a bank runs when validate is True."""
+
+  def test_accepts_parameters_on_the_edges_of_their_ranges(self) -> None:
+    """A small positive a, c = 0 and d = 1 are valid; a strict comparison in the wrong place would reject them."""
+    items = np.array([[1e-3, -5.0, 0.0, 1.0], [1.2, 0.5, 0.15, 0.98]])
+
+    np.testing.assert_array_equal(ItemBank(items).items, items)
+
+  @pytest.mark.parametrize(
+    "shape",
+    [
+      pytest.param((4,), id="one dimension"),
+      pytest.param((3, 0), id="no columns"),
+      pytest.param((2, 3), id="three columns"),
+      pytest.param((1, 5), id="five columns"),
+      pytest.param((2, 4, 1), id="three dimensions"),
+    ],
+  )
+  def test_rejects_a_matrix_that_is_not_n_by_4(self, shape: tuple[int, ...]) -> None:
+    """A matrix that is not n x 4 raises ValueError naming its shape.
+
+    Without the shape check, missing columns fail with an IndexError and a fifth column is ignored. ItemBank rejects
+    other dimensions and completes 1 to 3 columns before it, so the check is called directly.
+    """
+    with pytest.raises(ValueError, match=re.escape(f"shape {shape}; it must be 2-D with exactly 4 columns")):
+      item_bank_module._validate(np.ones(shape))
+
+  def test_rejects_a_matrix_without_items(self) -> None:
+    """A 0 x 4 matrix raises ValueError: with no rows, every parameter check passes vacuously."""
+    with pytest.raises(ValueError, match="no items"):
+      ItemBank(np.empty((0, 4)))
+
+  @pytest.mark.parametrize(
+    ("item", "message"),
+    [
+      pytest.param([-0.5, 0.0, 0.1, 0.95], "discrimination <= 0", id="a < 0"),
+      pytest.param([0.0, 0.0, 0.1, 0.95], "discrimination <= 0", id="a = 0"),
+      pytest.param([1.0, 0.0, -0.1, 0.95], "pseudo-guessing < 0", id="c < 0"),
+      pytest.param([1.0, 0.0, 1.5, 0.95], "pseudo-guessing > 1", id="c > 1"),
+      pytest.param([1.0, 0.0, 0.1, 1.5], "upper asymptote > 1", id="d > 1"),
+      pytest.param([1.0, 0.0, 0.1, -0.1], "upper asymptote < 0", id="d < 0"),
+      pytest.param([1.0, 0.0, 0.3, 0.3], "pseudo-guessing >= upper asymptote", id="c = d"),
+    ],
+  )
+  def test_rejects_a_parameter_out_of_its_range(self, item: list[float], message: str) -> None:
+    """Each range check raises ValueError naming the parameter; printing the message and returning would accept it.
+
+    a = 0 gives no information and no point of maximum information; c >= d makes the ICC flat or decreasing and the
+    information formula divide by d - c.
+    """
+    items = np.array([[1.0, 0.0, 0.0, 1.0], item])
+
+    with pytest.raises(ValueError, match=message):
+      ItemBank(items)
+
+  @pytest.mark.parametrize(
+    "item",
+    [
+      pytest.param([np.nan, 0.0, 0.0, 1.0], id="a = nan"),
+      pytest.param([1.0, np.nan, 0.0, 1.0], id="b = nan"),
+      pytest.param([1.0, 0.0, np.nan, 1.0], id="c = nan"),
+      pytest.param([1.0, 0.0, 0.0, np.nan], id="d = nan"),
+      pytest.param([np.inf, 0.0, 0.0, 1.0], id="a = inf"),
+      pytest.param([-np.inf, 0.0, 0.0, 1.0], id="a = -inf"),
+      pytest.param([1.0, np.inf, 0.0, 1.0], id="b = inf"),
+      pytest.param([1.0, -np.inf, 0.0, 1.0], id="b = -inf"),
+    ],
+  )
+  def test_rejects_nan_and_infinite_parameters(self, item: list[float]) -> None:
+    """NaN and infinite parameters raise ValueError.
+
+    Every range check compares, and comparisons with NaN are false; without a finiteness check b is never checked and
+    a = inf passes, so such an item turns the ICC, likelihoods and information sums it enters into NaN.
+    """
+    items = np.array([[1.0, 0.5, 0.1, 1.0], item])
+
+    with pytest.raises(ValueError, match="NaN or infinite parameters"):
+      ItemBank(items)
+
+  def test_reports_every_violation_on_one_line(self) -> None:
+    """All violations are listed, separated by "; "; starting with and joining by newlines would not match."""
+    items = np.array([[-1.0, 0.0, -0.1, 1.0]])
+    expected = "There are items with discrimination <= 0; There are items with pseudo-guessing < 0"
+
+    with pytest.raises(ValueError, match=rf"\A{re.escape(expected)}\Z"):
+      ItemBank(items)
+
+
 class TestItemBankGenerate:
   """Tests for ItemBank.generate() factory method."""
 
@@ -195,7 +265,7 @@ class TestItemBankGenerate:
     bank = ItemBank.generate(50, item_type="4PL", seed=42)
 
     assert bank.n_items == 50
-    assert bank.model == 4
+    assert bank.model == IrtModel.PL4
     # Check distributions are reasonable
     assert 0.5 < np.mean(bank.discrimination) < 2.0
     assert -2 < np.mean(bank.difficulty) < 2
@@ -207,7 +277,7 @@ class TestItemBankGenerate:
     bank = ItemBank.generate(30, item_type="3PL", seed=42)
 
     assert bank.n_items == 30
-    assert bank.model == 3
+    assert bank.model == IrtModel.PL3
     assert np.allclose(bank.upper_asymptote, 1.0)
     assert np.any(bank.pseudo_guessing > 0)
 
@@ -216,7 +286,7 @@ class TestItemBankGenerate:
     bank = ItemBank.generate(20, item_type="2PL", seed=42)
 
     assert bank.n_items == 20
-    assert bank.model == 2
+    assert bank.model == IrtModel.PL2
     assert np.allclose(bank.pseudo_guessing, 0.0)
     assert np.allclose(bank.upper_asymptote, 1.0)
 
@@ -225,7 +295,7 @@ class TestItemBankGenerate:
     bank = ItemBank.generate(15, item_type="1PL", seed=42)
 
     assert bank.n_items == 15
-    assert bank.model == 1
+    assert bank.model == IrtModel.PL1
     assert np.allclose(bank.discrimination, 1.0)
     assert np.allclose(bank.pseudo_guessing, 0.0)
     assert np.allclose(bank.upper_asymptote, 1.0)
@@ -244,17 +314,20 @@ class TestItemBankGenerate:
     bank2 = ItemBank.generate(10, item_type="3PL", seed=42)
     bank3 = ItemBank.generate(10, item_type="3Pl", seed=42)
 
-    assert bank1.model == bank2.model == bank3.model == 3
+    assert bank1.model == bank2.model == bank3.model == IrtModel.PL3
 
   def test_generate_invalid_type_raises(self) -> None:
     """Test that invalid item_type raises ValueError."""
-    with pytest.raises(ValueError, match="Invalid itemtype"):
+    with pytest.raises(ValueError, match="'5PL' is not a valid IrtModel"):
       ItemBank.generate(10, item_type="5PL")
 
-  def test_generate_with_num_params_enum(self) -> None:
-    """Test generating with irt.NumParams enum."""
-    bank = ItemBank.generate(10, item_type=irt.NumParams.PL3, seed=42)
-    assert bank.model == 3
+  def test_generate_with_an_irt_model(self) -> None:
+    """An IrtModel member is accepted like its name; a conversion that only takes plain strings would reject it."""
+    bank = ItemBank.generate(10, item_type=IrtModel.PL3, seed=42)
+
+    assert bank.model == IrtModel.PL3
+    assert np.all(bank.pseudo_guessing > 0)
+    np.testing.assert_array_equal(bank.upper_asymptote, 1.0)
 
   def test_generate_redraws_non_positive_discriminations(self) -> None:
     """A negative draw is redrawn rather than shifting every discrimination.
@@ -303,43 +376,25 @@ class TestItemBankProperties:
 
     assert np.array_equal(bank.upper_asymptote, np.array([0.95, 1.0]))
 
-  def test_model_property(self) -> None:
-    """Test model property returns correct IRT model."""
-    items_1pl = np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0]])
-    items_2pl = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.0, 1.0]])
-    items_3pl = np.array([[1.0, 0.0, 0.1, 1.0], [1.5, 1.0, 0.05, 1.0]])
-    items_4pl = np.array([[1.0, 0.0, 0.1, 0.98], [1.5, 1.0, 0.05, 0.95]])
+  @pytest.mark.parametrize(
+    ("items", "model"),
+    [
+      pytest.param([[1.0, -1.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0]], IrtModel.PL1, id="1PL"),
+      pytest.param([[0.8, -1.0, 0.0, 1.0], [1.2, 0.0, 0.0, 1.0], [1.5, 1.0, 0.0, 1.0]], IrtModel.PL2, id="2PL"),
+      pytest.param([[0.8, -1.0, 0.1, 1.0], [1.2, 0.0, 0.15, 1.0], [1.5, 1.0, 0.2, 1.0]], IrtModel.PL3, id="3PL"),
+      pytest.param([[1.0, -1.0, 0.0, 1.0], [1.0, 0.0, 0.0, 0.95]], IrtModel.PL4, id="4PL with c = 0"),
+      pytest.param([[0.8, -1.0, 0.1, 0.95], [1.2, 0.0, 0.15, 0.98], [1.5, 1.0, 0.2, 0.99]], IrtModel.PL4, id="4PL"),
+    ],
+  )
+  def test_model_is_the_simplest_that_fits_every_item(self, items: list[list[float]], model: IrtModel) -> None:
+    """A bank is 1PL, 2PL, 3PL or 4PL by the parameters that vary; a wrong column, or checking c before d, misreads it.
 
-    assert ItemBank(items_1pl).model == 1
-    assert ItemBank(items_2pl).model == 2
-    assert ItemBank(items_3pl).model == 3
-    assert ItemBank(items_4pl).model == 4
+    The model also equals the member's name, as a string.
+    """
+    detected = ItemBank(np.array(items)).model
 
-
-class TestItemBankCachedValues:
-  """Tests for cached/precomputed values."""
-
-  def test_max_info_thetas_cached(self) -> None:
-    """Test that max_info_thetas are precomputed and cached."""
-    items = np.array([[1.0, 0.5, 0.0, 1.0], [1.2, -0.3, 0.1, 1.0]])
-    bank = ItemBank(items)
-
-    # Should be cached
-    assert bank.max_info_thetas is not None
-    assert len(bank.max_info_thetas) == 2
-
-    # For 2PL item (c=0, d=1), max info theta should equal b
-    assert abs(bank.max_info_thetas[0] - 0.5) < 0.01
-
-  def test_max_info_values_cached(self) -> None:
-    """Test that max_info_values are precomputed and cached."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0]])
-    bank = ItemBank(items)
-
-    assert bank.max_info_values is not None
-    assert len(bank.max_info_values) == 1
-    # For a=1, b=0, c=0, d=1, max info should be 0.25
-    assert abs(bank.max_info_values[0] - 0.25) < 0.01
+    assert detected is model
+    assert detected == model.value
 
 
 class TestItemBankMethods:
@@ -380,58 +435,53 @@ class TestItemBankMethods:
     assert selected[0, 0] == pytest.approx(1.0)
     assert selected[1, 0] == pytest.approx(0.8)
 
-  def test_icc_scalar_theta(self) -> None:
-    """Test computing ICC for a scalar theta."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0]])
-    bank = ItemBank(items)
+  @pytest.mark.parametrize(
+    ("method", "expected"),
+    [
+      pytest.param(ItemBank.icc, [1 / (1 + math.exp(-0.5)), 0.5], id="icc"),
+      pytest.param(ItemBank.information, [math.exp(-0.5) / (1 + math.exp(-0.5)) ** 2, 1.0], id="information"),
+    ],
+  )
+  @pytest.mark.parametrize("theta", [np.float32(0.5), np.array(0.5), 0.5], ids=["float32", "0-d array", "float"])
+  def test_a_scalar_theta_of_any_type_gives_one_value_per_item(
+    self, method: Callable[[ItemBank, object], np.ndarray], expected: list[float], theta: object
+  ) -> None:
+    """A NumPy float32 or a 0-d array is one ability, like a float.
 
-    probs = bank.icc(0.0)
-    assert len(probs) == 2
-    assert 0 <= probs[0] <= 1
-    assert 0 <= probs[1] <= 1
+    An isinstance check for int and float sends them down the path for arrays of abilities, where len() raises
+    TypeError. At theta = 0.5 the 1PL item at b = 0 has P = 1 / (1 + e^-0.5) and P (1 - P), the 2PL item with a = 2
+    at its difficulty has P = 1/2 and a^2 / 4 = 1.
+    """
+    bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [2.0, 0.5, 0.0, 1.0]]))
 
-  def test_icc_array_theta(self) -> None:
-    """Test computing ICC for an array of thetas."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0]])
-    bank = ItemBank(items)
+    values = method(bank, theta)
 
+    assert values.shape == (2,)
+    np.testing.assert_allclose(values, expected, rtol=1e-12)
+
+  @pytest.mark.parametrize("method", [ItemBank.icc, ItemBank.information], ids=["icc", "information"])
+  def test_k_abilities_give_one_row_per_ability(self, method: Callable[[ItemBank, object], np.ndarray]) -> None:
+    """Three abilities and two items give a 3 x 2 array whose row j holds the values at ability j.
+
+    Pairing ability j with item j element-wise raises for three abilities and two items.
+    """
+    bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0]]))
     thetas = np.array([-1.0, 0.0, 1.0])
-    probs = bank.icc(thetas)
-    assert probs.shape == (3, 1)
-    # Probabilities should increase with theta for items with b=0
-    assert probs[0, 0] < probs[1, 0] < probs[2, 0]
 
-  def test_information_scalar_theta(self) -> None:
-    """Test computing information for a scalar theta."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0]])
-    bank = ItemBank(items)
+    values = method(bank, thetas)
 
-    info = bank.information(0.0)
-    assert len(info) == 2
-    assert info[0] > 0
-    assert info[1] > 0
-
-  def test_information_array_theta(self) -> None:
-    """Test computing information for an array of thetas."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0]])
-    bank = ItemBank(items)
-
-    thetas = np.array([-1.0, 0.0, 1.0])
-    info = bank.information(thetas)
-    assert info.shape == (3, 1)
-    # Information should be highest at theta=b=0
-    assert info[1, 0] > info[0, 0]
-    assert info[1, 0] > info[2, 0]
+    assert values.shape == (3, 2)
+    np.testing.assert_allclose(values, [method(bank, float(theta)) for theta in thetas], rtol=1e-12)
 
   def test_test_information_subset_items(self) -> None:
-    """Test computing test information using subset of items."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0], [1.0, -1.0, 0.0, 1.0]])
-    bank = ItemBank(items)
+    """Only the listed items count: items 0 and 2 give 1/4 + L (1 - L) at theta = 0, with L = 1 / (1 + e^-1).
 
-    test_info = bank.test_information(0.0, item_indices=[0, 2])
-    # Should only use items 0 and 2
-    expected = irt.test_info(0.0, items[[0, 2], :])
-    assert abs(test_info - expected) < 0.001
+    Summing every item adds another L (1 - L), for item 1.
+    """
+    bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0], [1.0, -1.0, 0.0, 1.0]]))
+    logistic = 1 / (1 + math.exp(-1.0))
+
+    assert bank.test_information(0.0, item_indices=[0, 2]) == pytest.approx(0.25 + logistic * (1 - logistic), rel=1e-12)
 
 
 class TestItemBankDunderMethods:

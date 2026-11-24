@@ -6,7 +6,7 @@ from collections.abc import Callable
 import numpy as np
 import pytest
 
-from catsim.item_bank import ItemBank
+from catsim.item_bank import IrtModel, ItemBank
 from catsim.selection import (
   AStratSelector,
   BaseSelector,
@@ -194,7 +194,7 @@ def test_cluster_selector_draws_tied_clusters_uniformly(method: str) -> None:
 
 def _old_max_info(item_bank: ItemBank, administered_items: list[int], est_theta: float, rates, r_max: float) -> int:
   """Return MaxInfoSelector's pick as implemented before ADR-0008."""
-  if item_bank.model == 1:
+  if item_bank.model == IrtModel.PL1:
     ordered = list(np.abs(item_bank.difficulty - est_theta).argsort())
   else:
     ordered = list((-item_bank.information(est_theta)).argsort())
@@ -205,7 +205,7 @@ def _old_max_info(item_bank: ItemBank, administered_items: list[int], est_theta:
 
 def _old_bin(item_bank: ItemBank, administered_items: list[int], est_theta: float, size: int) -> list[int]:
   """Return the Randomesque / 5-4-3-2-1 bin, best first, as built before ADR-0008."""
-  if item_bank.model == 1:
+  if item_bank.model == IrtModel.PL1:
     ordered = list(np.abs(item_bank.difficulty - est_theta).argsort())
   else:
     ordered = list((-item_bank.information(est_theta)).argsort())

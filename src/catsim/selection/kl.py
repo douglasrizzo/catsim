@@ -14,7 +14,7 @@ from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 def _log_probabilities(theta: float, a: float, b: float, c: float, d: float) -> tuple[float, float]:
   """Return the log-probabilities of a correct and an incorrect response at ``theta``.
 
-  Both come from the logit ``a * (theta - b)``, as in :py:func:`catsim.irt.log_likelihood_hpc`, so
+  Both come from the logit ``a * (theta - b)``, as in :py:func:`catsim.irt.log_likelihood`, so
   the log-probability of an incorrect response stays exact where the probability of a correct one
   rounds to 1.
 

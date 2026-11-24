@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 import numpy as np
 import pytest
-from hypothesis import assume, given, settings
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from catsim import irt
@@ -14,12 +16,43 @@ from tests.hypothesis_strategies import item_params_matrix, pl4_item_row, scale_
 IRT_SETTINGS = settings(max_examples=30, deadline=None)
 
 
-@given(theta=st.floats(-5.0, 5.0, allow_nan=False, allow_infinity=False), row=pl4_item_row())
+_ABILITY = st.floats(-4.0, 4.0, allow_nan=False, allow_infinity=False)
+
+_ITEM_FUNCTIONS = [
+  pytest.param(irt.icc, id="icc"),
+  pytest.param(irt.information, id="information"),
+  pytest.param(lambda _theta, items: irt.max_info_theta(items), id="max_info_theta"),
+  pytest.param(lambda theta, items: irt.info_integral(theta - 1.0, theta + 2.0, items), id="info_integral"),
+]
+
+
+@pytest.mark.parametrize("function", _ITEM_FUNCTIONS)
+@given(theta=_ABILITY, items=item_params_matrix(max_items=10))
 @IRT_SETTINGS
-def test_icc_bounded_by_asymptotes(theta: float, row: tuple[float, float, float, float]) -> None:
-  a, b, c, d = row
-  p = irt.icc(theta, a, b, c, d)
-  assert c <= p <= d
+def test_a_matrix_gives_each_item_its_value_as_a_row(
+  function: Callable[[float, np.ndarray], np.ndarray], theta: float, items: np.ndarray
+) -> None:
+  """Each item's value from a matrix equals its value as a row.
+
+  Splitting the parameters with items[:, k] fails on a row, and items[k] reads a matrix's rows as parameters.
+  """
+  np.testing.assert_allclose(function(theta, items), [function(theta, row) for row in items], rtol=1e-12, atol=1e-15)
+
+
+@pytest.mark.parametrize("function", [irt.icc, irt.information])
+@given(thetas=st.lists(_ABILITY, min_size=1, max_size=6), items=item_params_matrix(max_items=10))
+@IRT_SETTINGS
+def test_k_abilities_give_one_row_of_item_values_per_ability(
+  function: Callable[[float | np.ndarray, np.ndarray], np.ndarray], thetas: list[float], items: np.ndarray
+) -> None:
+  """k abilities and n items give a (k, n) array whose row j holds the values at thetas[j].
+
+  Pairing ability j with item j element-wise gives another shape, and raises when k != n.
+  """
+  values = function(np.array(thetas), items)
+
+  assert values.shape == (len(thetas), len(items))
+  np.testing.assert_allclose(values, [function(theta, items) for theta in thetas], rtol=1e-12, atol=1e-15)
 
 
 @given(
@@ -29,63 +62,16 @@ def test_icc_bounded_by_asymptotes(theta: float, row: tuple[float, float, float,
 )
 @IRT_SETTINGS
 def test_icc_non_decreasing_in_theta(theta1: float, delta: float, row: tuple[float, float, float, float]) -> None:
-  a, b, c, d = row
-  theta2 = theta1 + delta
-  p1 = irt.icc(theta1, a, b, c, d)
-  p2 = irt.icc(theta2, a, b, c, d)
-  assert p1 <= p2 + 1e-12
+  """A higher ability never lowers the probability of a correct response; a sign error in theta - b reverses it."""
+  item = np.array(row)
+
+  assert irt.icc(theta1, item) <= irt.icc(theta1 + delta, item) + 1e-12
 
 
-@given(theta=st.floats(-4.0, 4.0, allow_nan=False, allow_infinity=False), items=item_params_matrix(max_items=10))
-@IRT_SETTINGS
-def test_icc_hpc_matches_scalar_icc(theta: float, items: np.ndarray) -> None:
-  vec = irt.icc_hpc(theta, items)
-  for i in range(items.shape[0]):
-    assert vec[i] == pytest.approx(float(irt.icc(theta, *items[i])), rel=1e-9, abs=1e-9)
-
-
-@given(theta=st.floats(-3.5, 3.5, allow_nan=False, allow_infinity=False), items=item_params_matrix(max_items=10))
-@IRT_SETTINGS
-def test_inf_hpc_non_negative(theta: float, items: np.ndarray) -> None:
-  infos = irt.inf_hpc(theta, items)
-  assert np.all(np.isfinite(infos))
-  assert bool(np.all(infos >= 0.0))
-
-
-@given(theta=st.floats(-3.5, 3.5, allow_nan=False, allow_infinity=False), items=item_params_matrix(max_items=10))
-@IRT_SETTINGS
-def test_test_info_matches_sum_of_item_information(theta: float, items: np.ndarray) -> None:
-  expected = float(np.sum(irt.inf_hpc(theta, items)))
-  assert irt.test_info(theta, items) == pytest.approx(expected, rel=1e-9, abs=1e-9)
-
-
-@given(
-  est_theta=st.floats(-2.5, 2.5, allow_nan=False, allow_infinity=False),
-  items=item_params_matrix(min_items=1, max_items=6),
-  responses=st.lists(st.booleans(), min_size=1, max_size=6),
-)
-@IRT_SETTINGS
-def test_log_likelihood_finite_when_probabilities_interior(
-  est_theta: float,
-  items: np.ndarray,
-  responses: list[bool],
-) -> None:
-  k = min(len(responses), items.shape[0])
-  assume(k >= 1)
-  administered = items[:k, :]
-  response_vector = responses[:k]
-  ps = irt.icc_hpc(est_theta, administered)
-  assume(float(np.min(ps)) > 1e-8)
-  assume(float(np.max(ps)) < 1.0 - 1e-8)
-  ll = irt.log_likelihood(est_theta, response_vector, administered)
-  assert np.isfinite(ll)
-  assert irt.negative_log_likelihood(est_theta, response_vector, administered) == pytest.approx(-ll)
-
-
-def _probability_formula(theta: float, response_vector: list[bool], items: np.ndarray) -> tuple[float, float]:
-  """Return the old sum(log P or log(1 - P)) log-likelihood and a bound on its rounding error."""
-  correct = np.asarray(response_vector, dtype=bool)
-  ps = irt.icc_hpc(theta, items)
+def _probability_formula(theta: float, responses: list[bool], items: np.ndarray) -> tuple[float, float]:
+  """Return the sum(log P or log(1 - P)) log-likelihood and a bound on its rounding error."""
+  correct = np.asarray(responses, dtype=bool)
+  ps = irt.icc(theta, items)
   reference = float(np.sum(np.where(correct, np.log(ps), np.log(1 - ps))))
   # rounding P by a few eps moves the reference's log P or log(1 - P) by about eps / P or eps / (1 - P)
   tolerance = 1e-12 + 8 * np.finfo(float).eps * float(np.sum(1 / np.where(correct, ps, 1 - ps)))
@@ -104,10 +90,10 @@ def test_log_likelihood_matches_the_probability_formula(
   responses: list[bool],
 ) -> None:
   """The logit-based log-likelihood equals sum(log P or log(1 - P)) wherever that formula is accurate."""
-  response_vector = responses[: items.shape[0]]
-  reference, tolerance = _probability_formula(est_theta, response_vector, items)
+  responses = responses[: items.shape[0]]
+  reference, tolerance = _probability_formula(est_theta, responses, items)
 
-  assert irt.log_likelihood(est_theta, response_vector, items) == pytest.approx(reference, abs=tolerance)
+  assert irt.log_likelihood(est_theta, responses, items) == pytest.approx(reference, abs=tolerance)
 
 
 @given(
@@ -116,24 +102,25 @@ def test_log_likelihood_matches_the_probability_formula(
   responses=st.lists(st.booleans(), min_size=10, max_size=10),
 )
 @IRT_SETTINGS
-def test_log_likelihood_hpc_matches_the_probability_formula_at_each_theta(
+def test_log_likelihood_matches_the_probability_formula_at_each_theta(
   thetas: list[float],
   items: np.ndarray,
   responses: list[bool],
 ) -> None:
   """Each value returned for an array of abilities matches the reference formula at that ability."""
-  response_vector = responses[: items.shape[0]]
-  values = irt.log_likelihood_hpc(np.array(thetas), response_vector, items)
+  responses = responses[: items.shape[0]]
+  values = irt.log_likelihood(np.array(thetas), responses, items)
 
   assert values.shape == (len(thetas),)
   for theta, value in zip(thetas, values, strict=True):
-    reference, tolerance = _probability_formula(theta, response_vector, items)
+    reference, tolerance = _probability_formula(theta, responses, items)
     assert value == pytest.approx(reference, abs=tolerance)
 
 
 @given(m=scale_mapping())
 @IRT_SETTINGS
 def test_theta_scale_round_trip_identity(m: tuple[float, float, float, float]) -> None:
+  """scale_to_theta undoes theta_to_scale for any ranges; a slope or intercept that differs between the two does not."""
   theta_min, theta_max, scale_min, scale_max = m
   theta = np.linspace(theta_min, theta_max, num=5)
   scores = irt.theta_to_scale(theta, scale_min, scale_max, theta_min, theta_max)
@@ -141,74 +128,10 @@ def test_theta_scale_round_trip_identity(m: tuple[float, float, float, float]) -
   assert np.allclose(back, theta, rtol=1e-9, atol=1e-9)
 
 
-@given(items=item_params_matrix())
-@IRT_SETTINGS
-def test_normalize_item_bank_idempotent_for_four_columns(items: np.ndarray) -> None:
-  once = irt.normalize_item_bank(items)
-  twice = irt.normalize_item_bank(once)
-  assert np.array_equal(once, twice)
-
-
-@given(
-  st.lists(st.floats(-2.5, 2.5, allow_nan=False, allow_infinity=False), min_size=1, max_size=14).map(
-    lambda xs: np.asarray(xs, dtype=np.float64).reshape(-1, 1)
-  )
-)
-@IRT_SETTINGS
-def test_normalize_one_column_is_rasch_expansion(difficulties: np.ndarray) -> None:
-  out = irt.normalize_item_bank(difficulties)
-  assert out.shape == (difficulties.shape[0], 4)
-  assert np.allclose(out[:, 0], 1.0)
-  assert np.allclose(out[:, 2], 0.0)
-  assert np.allclose(out[:, 3], 1.0)
-  assert np.allclose(out[:, 1].ravel(), difficulties.ravel())
-
-
-@given(
-  st.lists(
-    st.tuples(
-      st.floats(0.3, 2.5, allow_nan=False, allow_infinity=False),
-      st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
-    ),
-    min_size=1,
-    max_size=12,
-  ).map(lambda rows: np.asarray(rows, dtype=np.float64))
-)
-@IRT_SETTINGS
-def test_normalize_two_column_is_two_pl_expansion(two_pl: np.ndarray) -> None:
-  out = irt.normalize_item_bank(two_pl)
-  assert out.shape == (two_pl.shape[0], 4)
-  assert np.allclose(out[:, :2], two_pl)
-  assert np.allclose(out[:, 2], 0.0)
-  assert np.allclose(out[:, 3], 1.0)
-
-
-@given(
-  st.lists(
-    st.tuples(
-      st.floats(0.3, 2.5, allow_nan=False, allow_infinity=False),
-      st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
-      st.floats(0.0, 0.25, allow_nan=False, allow_infinity=False),
-    ),
-    min_size=1,
-    max_size=12,
-  ).map(lambda rows: np.asarray(rows, dtype=np.float64))
-)
-@IRT_SETTINGS
-def test_normalize_three_column_is_three_pl_expansion(three_pl: np.ndarray) -> None:
-  out = irt.normalize_item_bank(three_pl)
-  assert out.shape == (three_pl.shape[0], 4)
-  assert np.allclose(out[:, :3], three_pl)
-  assert np.allclose(out[:, 3], 1.0)
-
-
 @given(items=item_params_matrix(max_items=8))
 @IRT_SETTINGS
-def test_max_info_hpc_row_matches_max_information_value(items: np.ndarray) -> None:
-  peak_thetas = irt.max_info_hpc(items)
-  peak_infos = irt.inf_hpc(peak_thetas, items)
-  for i in range(items.shape[0]):
-    theta_i = float(peak_thetas[i])
-    grid = np.linspace(theta_i - 1.2, theta_i + 1.2, num=25)
-    infos = irt.inf_hpc(grid, items[i : i + 1, :])
-    assert float(peak_infos[i]) >= float(np.max(infos)) - 1e-6
+def test_max_info_theta_is_the_peak_of_the_information(items: np.ndarray) -> None:
+  """No ability within 1.2 of an item's max_info_theta gives it more information; a wrong closed form moves the peak."""
+  for item, peak in zip(items, irt.max_info_theta(items), strict=True):
+    grid = np.linspace(peak - 1.2, peak + 1.2, num=25)
+    assert irt.information(peak, item) >= np.max(irt.information(grid, item)) - 1e-6

@@ -133,10 +133,9 @@ class TestNumericalSearchEstimatorEstimate:
     administered_items = list(range(10))
     response_vector = [True, False] * 5
     reference = minimize_scalar(
-      irt.negative_log_likelihood,
+      lambda theta: -irt.log_likelihood(theta, response_vector, item_bank.get_items(administered_items)),
       bounds=(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED),
       method="bounded",
-      args=(response_vector, item_bank.get_items(administered_items)),
       options={"xatol": 1e-12},
     ).x
     coarse, fine = NumericalSearchEstimator(tol=1e-2), NumericalSearchEstimator(tol=1e-10)
@@ -172,10 +171,9 @@ class TestNumericalSearchEstimatorEstimate:
     administered_items = list(range(10))
     response_vector = [True, False] * 5
     reference = minimize_scalar(
-      irt.negative_log_likelihood,
+      lambda theta: -irt.log_likelihood(theta, response_vector, item_bank.get_items(administered_items)),
       bounds=(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED),
       method="bounded",
-      args=(response_vector, item_bank.get_items(administered_items)),
       options={"xatol": 1e-6},
     )
 
@@ -571,7 +569,7 @@ class TestBayesianHelpers:
       np.ones(15),
     ])
     theta_true = 0.5
-    responses = [bool(rng.random() < irt.icc(theta_true, *items[idx])) for idx in range(15)]
+    responses = [bool(rng.random() < irt.icc(theta_true, items[idx])) for idx in range(15)]
 
     variances = []
     for n_items in [1, 3, 5, 10, 15]:
@@ -596,7 +594,7 @@ class TestBayesianHelpers:
       np.ones(50),
     ])
     theta_true = 1.5
-    responses = [bool(rng.random() < irt.icc(theta_true, *items[idx])) for idx in range(50)]
+    responses = [bool(rng.random() < irt.icc(theta_true, items[idx])) for idx in range(50)]
 
     post = posterior(responses, items, grid, normal_log_prior())
 

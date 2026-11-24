@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from itertools import starmap
+
 import numpy as np
 import pytest
 from hypothesis import given, settings
@@ -16,26 +18,76 @@ BANK_SETTINGS = settings(max_examples=25, deadline=None)
 
 @given(params=item_params_matrix())
 @BANK_SETTINGS
-def test_item_bank_model_matches_detect_model(params: np.ndarray) -> None:
-  bank = ItemBank(params, validate=True)
-  assert bank.model == irt.detect_model(params)
+def test_max_info_values_are_each_items_information_at_its_own_peak(params: np.ndarray) -> None:
+  """Item i's cached value is its information at max_info_thetas[i].
 
-
-@given(params=item_params_matrix())
-@BANK_SETTINGS
-def test_max_info_cache_matches_direct_irt(params: np.ndarray) -> None:
+  Passing every peak to irt.information evaluates each peak against every item, an n x n matrix.
+  """
   bank = ItemBank(params, validate=True)
-  expected_thetas = irt.max_info_hpc(params)
-  expected_values = irt.inf_hpc(expected_thetas, params)
-  assert np.allclose(bank.max_info_thetas, expected_thetas, rtol=1e-9, atol=1e-9)
-  assert np.allclose(bank.max_info_values, expected_values, rtol=1e-9, atol=1e-9)
+  expected = list(starmap(irt.information, zip(irt.max_info_theta(params), params, strict=True)))
+
+  np.testing.assert_allclose(bank.max_info_thetas, irt.max_info_theta(params), rtol=1e-12)
+  np.testing.assert_allclose(bank.max_info_values, expected, rtol=1e-12)
 
 
 @given(params=item_params_matrix())
 @BANK_SETTINGS
 def test_item_bank_stores_the_four_parameter_columns(params: np.ndarray) -> None:
-  bank = ItemBank(params, validate=True)
-  assert np.array_equal(bank.items, params)
+  """A four-column matrix is stored unchanged; completing or reordering columns it already has would change it."""
+  np.testing.assert_array_equal(ItemBank(params, validate=True).items, params)
+
+
+@given(
+  st.lists(st.floats(-2.5, 2.5, allow_nan=False, allow_infinity=False), min_size=1, max_size=14).map(
+    lambda xs: np.asarray(xs, dtype=np.float64).reshape(-1, 1)
+  )
+)
+@BANK_SETTINGS
+def test_one_column_is_read_as_difficulties(difficulties: np.ndarray) -> None:
+  """One column holds b, completed with a = 1, c = 0 and d = 1; reading it as the discrimination would not."""
+  items = ItemBank(difficulties).items
+
+  np.testing.assert_array_equal(items[:, 1], difficulties[:, 0])
+  np.testing.assert_array_equal(items[:, [0, 2, 3]], np.tile([1.0, 0.0, 1.0], (len(difficulties), 1)))
+
+
+@given(
+  st.lists(
+    st.tuples(
+      st.floats(0.3, 2.5, allow_nan=False, allow_infinity=False),
+      st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
+    ),
+    min_size=1,
+    max_size=12,
+  ).map(lambda rows: np.asarray(rows, dtype=np.float64))
+)
+@BANK_SETTINGS
+def test_two_columns_are_read_as_discrimination_and_difficulty(two_pl: np.ndarray) -> None:
+  """Two columns hold a and b, completed with c = 0 and d = 1; filling the wrong columns would move them."""
+  items = ItemBank(two_pl).items
+
+  np.testing.assert_array_equal(items[:, :2], two_pl)
+  np.testing.assert_array_equal(items[:, 2:], np.tile([0.0, 1.0], (len(two_pl), 1)))
+
+
+@given(
+  st.lists(
+    st.tuples(
+      st.floats(0.3, 2.5, allow_nan=False, allow_infinity=False),
+      st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
+      st.floats(0.0, 0.25, allow_nan=False, allow_infinity=False),
+    ),
+    min_size=1,
+    max_size=12,
+  ).map(lambda rows: np.asarray(rows, dtype=np.float64))
+)
+@BANK_SETTINGS
+def test_three_columns_are_read_as_a_b_and_c(three_pl: np.ndarray) -> None:
+  """Three columns hold a, b and c, completed with d = 1; completing them with d = 0 would make every item invalid."""
+  items = ItemBank(three_pl).items
+
+  np.testing.assert_array_equal(items[:, :3], three_pl)
+  np.testing.assert_array_equal(items[:, 3], 1.0)
 
 
 @given(
@@ -55,9 +107,11 @@ def test_generate_item_bank_respects_count_and_validates(n: int, seed: int, item
   theta=st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
 )
 @BANK_SETTINGS
-def test_test_information_matches_irt_helper(params: np.ndarray, theta: float) -> None:
-  bank = ItemBank(params, validate=True)
-  assert bank.test_information(theta) == pytest.approx(irt.test_info(theta, params), rel=1e-9, abs=1e-9)
+def test_test_information_sums_every_item_by_default(params: np.ndarray, theta: float) -> None:
+  """Without item indices the test information sums the information of every item; a default subset leaves some out."""
+  expected = sum(float(irt.information(theta, item)) for item in params)
+
+  assert ItemBank(params, validate=True).test_information(theta) == pytest.approx(expected, rel=1e-12)
 
 
 @given(params=item_params_matrix(min_items=3, max_items=12), data=st.data())

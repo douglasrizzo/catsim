@@ -60,7 +60,7 @@ class SimulatedResponseProvider:
       raise ValueError(msg)
 
     item = item_bank.get_item(item_id)
-    probability = icc(session.true_theta, item[0], item[1], item[2], item[3])
+    probability = icc(session.true_theta, item)
     return bool(probability >= rng.uniform())
 
 

@@ -34,7 +34,6 @@ version = "0.21.0"
 description = "Computerized adaptive testing toolkit"
 dependencies = [
     "scipy",
-    "numexpr",
     "matplotlib",
     "tqdm",
     "numpy",
@@ -232,8 +231,6 @@ paths = ["src/catsim", "tests"]
 min_confidence = 60
 ignore_decorators = ["@initialize", "@invariant"]  # Hypothesis runs the state machines' rules
 ignore_names = [
-  "THETA_MIN_TYPICAL",  # M25 makes the two THETA_*_TYPICAL bounds the scale functions' defaults
-  "THETA_MAX_TYPICAL",
   "WEIGHTED_INFO",  # ClusterMethod member, chosen by its value "weighted_info"
   "_selector_cache",  # empty until the planned MPWI and MEPV selectors cache their tables in it
   "writeable",  # numpy's ndarray.flags.writeable, set to make arrays read-only
@@ -261,8 +258,8 @@ writeable = "writeable"  # numpy's ndarray.flags.writeable
 include = ["src/catsim"]
 
 [tool.ty.rules]
-# ty's default rules, plus the ones below. Left off: unsound-return and unsound-assignment (SciPy and
-# numexpr stubs leak Any into return values), and missing-override-decorator until the strategies use
+# ty's default rules, plus the ones below. Left off: unsound-return and unsound-assignment (NumPy and
+# SciPy stubs leak Any into return values), and missing-override-decorator until the strategies use
 # typing.override.
 possibly-unresolved-reference = "error"
 missing-type-argument = "error"

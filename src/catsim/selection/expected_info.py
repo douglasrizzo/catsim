@@ -67,8 +67,7 @@ class MEISelector(BaseSelector):
     incorrect = dataclasses.replace(correct, responses=(*context.responses, False))
     theta_correct = self._estimator.estimate(correct).theta
     theta_incorrect = self._estimator.estimate(incorrect).theta
-    item = context.item_bank.items[candidate]
-    p_correct = irt.icc(context.theta, item[0], item[1], item[2], item[3])
+    p_correct = irt.icc(context.theta, context.item_bank.items[candidate])
     info_correct = context.item_bank.test_information(theta_correct, administered)
     info_incorrect = context.item_bank.test_information(theta_incorrect, administered)
     return float(p_correct * info_correct + (1.0 - p_correct) * info_incorrect)

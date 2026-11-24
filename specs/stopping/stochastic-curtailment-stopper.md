@@ -259,13 +259,13 @@ class StochasticCurtailmentStopper(SPRTStopper):
     item_bank = context.item_bank
     # The representative items to come: the most informative remaining ones at the current
     # estimate, as Finkelman (2008) chose them.
-    information = irt.inf_hpc(context.theta, item_bank.get_items(candidates))
+    information = irt.information(context.theta, item_bank.get_items(candidates))
     items = item_bank.get_items(candidates[numpy.argsort(-information, kind="stable")[:to_come]])
     lower, upper = self.cut_score - self.indifference, self.cut_score + self.indifference
     # The boundary point least favorable to the interim decision. Open Question 1: the plug-in
     # variant would evaluate at context.theta instead.
     theta_star = lower if above else upper
-    p_star, p_upper, p_lower = (irt.icc_hpc(theta, items) for theta in (theta_star, upper, lower))
+    p_star, p_upper, p_lower = (irt.icc(theta, items) for theta in (theta_star, upper, lower))
     log_ratio_correct = numpy.log(p_upper) - numpy.log(p_lower)
     log_ratio_incorrect = numpy.log1p(-p_upper) - numpy.log1p(-p_lower)
     means = p_star * log_ratio_correct + (1 - p_star) * log_ratio_incorrect
