@@ -8,6 +8,7 @@ algorithmic specifications, behavioral contracts, and class-level API details.
 
 techniques/index
 engine
+exposure
 state
 context
 simulation

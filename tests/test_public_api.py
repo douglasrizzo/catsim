@@ -11,7 +11,14 @@ from types import ModuleType
 
 import pytest
 
-PACKAGES = ["catsim", "catsim.selection", "catsim.estimation", "catsim.initialization", "catsim.stopping"]
+PACKAGES = [
+  "catsim",
+  "catsim.selection",
+  "catsim.estimation",
+  "catsim.initialization",
+  "catsim.stopping",
+  "catsim.exposure",
+]
 # Top-level modules that are import paths of their own; catsim's other modules are internal.
 PUBLIC_MODULES = ["catsim.irt", "catsim.metrics", "catsim.plot", "catsim.typing"]
 # Names that ADR-0014's table retired, each for the one its concept keeps.

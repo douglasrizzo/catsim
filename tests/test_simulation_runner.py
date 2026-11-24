@@ -13,9 +13,10 @@ import pytest
 from catsim import Estimate, StepContext
 from catsim.engine import CatEngine
 from catsim.estimation import NumericalSearchEstimator
+from catsim.exposure import BaseExposureControl
 from catsim.initialization import FixedPointInitializer
 from catsim.item_bank import ItemBank
-from catsim.selection import BaseSelector
+from catsim.selection import BaseSelector, RandomesqueSelector, RandomSelector
 from catsim.simulation import SimulatedResponseProvider, SimulationResult, SimulationRunner
 from catsim.state import CatSessionState, StopReason
 from catsim.stopping import MaxLengthStopper
@@ -46,10 +47,35 @@ class RngRecordingSelector(BaseSelector):
     return next(i for i in range(context.item_bank.n_items) if i not in context.administered_items)
 
 
-def make_runner(item_bank: ItemBank, selector: BaseSelector, max_items: int) -> SimulationRunner:
-  """Return a runner whose sessions start at 0, use the given selector and stop after max_items items."""
+class AcceptingControl(BaseExposureControl):
+  """Exposure control that accepts every proposal without drawing a random number."""
+
+  def accept(self, context: StepContext, item_id: int) -> bool:
+    del context, item_id
+    return True
+
+
+class CoinControl(BaseExposureControl):
+  """Exposure control that accepts each proposal with probability one half, drawn from the run's generator."""
+
+  def accept(self, context: StepContext, item_id: int) -> bool:
+    del item_id
+    return bool(context.rng.random() < 0.5)
+
+
+def make_runner(
+  item_bank: ItemBank, selector: BaseSelector, max_items: int, exposure_control: BaseExposureControl | None = None
+) -> SimulationRunner:
+  """Return a runner whose sessions start at 0, use the given selector and control and stop after max_items items."""
   return SimulationRunner(
-    CatEngine(item_bank, FixedPointInitializer(0.0), selector, NumericalSearchEstimator(), MaxLengthStopper(max_items))
+    CatEngine(
+      item_bank,
+      FixedPointInitializer(0.0),
+      selector,
+      NumericalSearchEstimator(),
+      MaxLengthStopper(max_items),
+      exposure_control=exposure_control,
+    )
   )
 
 
@@ -112,6 +138,54 @@ class TestSimulationRunnerRun:
     assert second.theta_histories == first.theta_histories
     assert np.array_equal(second.exposure_counts, first.exposure_counts)
     assert other_seed.administered_items != first.administered_items
+
+  def test_a_seeded_run_without_a_control_gives_the_tests_it_always_gave(self, item_bank: ItemBank) -> None:
+    """A seeded run of random selection without an exposure control gives fixed, pinned items and responses.
+
+    Fails if the engine draws from the run's generator when there is no exposure control, or passes the selector
+    another set of items to choose from: every later draw, and so every item and response, would move.
+    """
+    result = make_runner(item_bank, RandomSelector(), max_items=5).run([-1.0, 0.0, 1.0], rng=7)
+
+    assert result.administered_items == [[47, 30, 41, 10, 44], [0, 6, 24, 36, 13], [29, 27, 35, 31, 42]]
+    assert result.responses == [
+      [False, False, True, False, False],
+      [False, True, True, True, False],
+      [False, True, False, True, True],
+    ]
+
+  def test_a_control_that_accepts_without_drawing_reproduces_the_run_without_one(self, item_bank: ItemBank) -> None:
+    """With a control that accepts every proposal and draws nothing, a seeded run gives the run without a control.
+
+    Fails if asking the control changes what the selector is given or draws from the generator, or if accepted
+    proposals are counted twice (the proposal counts would exceed the exposure counts).
+    """
+    thetas = [-1.0, 0.0, 1.0]
+    without = make_runner(item_bank, RandomesqueSelector(bin_size=3), max_items=5).run(thetas, rng=7)
+    accepting = make_runner(item_bank, RandomesqueSelector(bin_size=3), 5, AcceptingControl()).run(thetas, rng=7)
+
+    assert accepting.administered_items == without.administered_items
+    assert accepting.responses == without.responses
+    assert accepting.theta_histories == without.theta_histories
+    assert [session.excluded_items for session in accepting.sessions] == [[], [], []]
+    assert np.array_equal(accepting.proposal_counts, accepting.exposure_counts)
+
+  def test_a_runs_proposals_are_its_administrations_plus_its_declines(self, item_bank: ItemBank) -> None:
+    """Under a control that declines at random, each item's proposals are its administrations plus its declines.
+
+    The declines are read from the sessions' excluded items. Fails if the runner reports the tracker's counts as the
+    proposals, if a decline is not recorded in the tracker or is recorded as an administration, or if proposal_rates
+    divides by anything but the number of sessions.
+    """
+    result = make_runner(item_bank, RandomSelector(), 5, CoinControl()).run(np.zeros(20), rng=3)
+
+    declines = np.bincount(
+      [item_id for session in result.sessions for item_id in session.excluded_items], minlength=item_bank.n_items
+    )
+    assert int(declines.sum()) > 0
+    assert result.test_lengths.tolist() == [5] * 20
+    assert np.array_equal(result.proposal_counts, result.exposure_counts + declines)
+    assert np.allclose(result.proposal_rates, (result.exposure_counts + declines) / 20)
 
   def test_two_runs_without_rng_give_other_tests(self, simulation_runner: SimulationRunner) -> None:
     """A run without rng draws fresh randomness, so two such runs give other final estimates.
@@ -338,19 +412,21 @@ class TestSimulationResult:
 
 
 def test_simulation_result_empty_sessions_exposure_and_overlap(item_bank) -> None:
-  """A result with no sessions has zero exposure rates and no overlap rate.
+  """A result with no sessions has zero exposure and proposal rates and no overlap rate.
 
-  Fails if exposure_rates divides the counts by zero sessions (NaN, with a warning that the test settings turn into
-  an error), or if overlap_rate computes a number for a run without tests.
+  Fails if exposure_rates or proposal_rates divides the counts by zero sessions (NaN, with a warning that the test
+  settings turn into an error), or if overlap_rate computes a number for a run without tests.
   """
   result = SimulationResult(
     item_bank=item_bank,
     sessions=[],
     exposure_counts=np.zeros(item_bank.n_items, dtype=int),
     duration=0.0,
+    proposal_counts=np.zeros(item_bank.n_items, dtype=int),
   )
 
   assert np.array_equal(result.exposure_rates, np.zeros(item_bank.n_items))
+  assert np.array_equal(result.proposal_rates, np.zeros(item_bank.n_items))
   assert result.overlap_rate is None
 
 

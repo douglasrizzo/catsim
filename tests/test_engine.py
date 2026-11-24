@@ -10,10 +10,11 @@ from dataclasses import FrozenInstanceError, dataclass
 import numpy as np
 import pytest
 
-from catsim import Estimate, StepContext
+from catsim import Estimate, ExcludedItemError, StepContext
 from catsim.engine import CatEngine, RunContext
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
+from catsim.exposure import BaseExposureControl
 from catsim.initialization import BaseInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import BaseSelector, LinearSelector, MaxInfoSelector, MEISelector, RandomSelector, remaining
@@ -168,6 +169,20 @@ class LowestIndexSelector(BaseSelector):
     return int(remaining(context)[0])
 
 
+@dataclass
+class DecliningControl(BaseExposureControl):
+  """Exposure control that declines a fixed set of items, and records what it is asked about each proposal."""
+
+  declines: frozenset[int]
+  calls: list[tuple[int, tuple[int, ...], tuple[int, ...]]] = dataclasses.field(default_factory=list)
+
+  def accept(self, context: StepContext, item_id: int) -> bool:
+    self.calls.append((item_id, context.excluded_items, context.administered_items))
+    # a selector proposing a declined item again would otherwise loop forever in a broken engine
+    assert len(self.calls) <= 50, "the control was asked about too many proposals"
+    return item_id not in self.declines
+
+
 class CorrectCountEstimator(BaseEstimator):
   """Custom estimator: the number of correct responses."""
 
@@ -265,8 +280,8 @@ def test_should_stop_passes_runtime_state_to_stopper(item_bank) -> None:
 
 
 def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
-  """select_next hands the selector the bank, the session's items, responses and current estimate with its SE, the
-  generator, the rates and no excluded items.
+  """select_next hands the selector the bank, the session's items, responses, excluded items and current estimate with
+  its SE, the generator and the rates.
 
   Two earlier sessions administered [0, 3] and [0], so the rates are 1 for item 0 and 0.5 for item 3. Fails if any
   input is dropped or taken from elsewhere, such as the initial estimate instead of the current one.
@@ -286,6 +301,7 @@ def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
     estimates=[Estimate(0.0, math.inf), Estimate(0.5, 0.9), Estimate(-0.25, 0.6)],
     administered_items=[1, 2],
     responses=[True, False],
+    excluded_items=[5, 0],
   )
 
   selected = engine.select_next(state, context)
@@ -293,7 +309,7 @@ def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
   assert selected == 4
   assert selector.seen.item_bank is item_bank
   assert (selector.seen.administered_items, selector.seen.responses) == ((1, 2), (True, False))
-  assert selector.seen.excluded_items == ()
+  assert selector.seen.excluded_items == (5, 0)
   assert (selector.seen.theta, selector.seen.se) == (-0.25, 0.6)
   assert selector.seen.rng is rng
   expected_rates = np.zeros(item_bank.n_items)
@@ -749,7 +765,11 @@ def test_apply_response_rejects_invalid_item_index(
   estimator,
   fixed_length_stopper,
 ) -> None:
-  """Applying a response should validate item ids."""
+  """An item index past the end of the bank raises ValueError naming the valid range.
+
+  Fails if apply_response records the index: the estimator would then fail on it half-way through the step, or a
+  bank-sized index would read past the item parameters.
+  """
   engine = CatEngine(item_bank, fixed_initializer, random_selector, estimator, fixed_length_stopper)
   context = RunContext(rng=np.random.default_rng(42))
   session = engine.start_session(session_id=0, context=context, true_theta=0.0)
@@ -790,7 +810,11 @@ def test_apply_response_rejects_duplicate_items(
   estimator,
   fixed_length_stopper,
 ) -> None:
-  """A session cannot administer the same item twice."""
+  """A response to an item the session already had raises ValueError.
+
+  Fails if the item is administered again: its response would count twice in the estimate and its administration
+  twice in the exposure tracker.
+  """
   engine = CatEngine(item_bank, fixed_initializer, random_selector, estimator, fixed_length_stopper)
   context = RunContext(rng=np.random.default_rng(42))
   session = CatSessionState(
@@ -799,6 +823,70 @@ def test_apply_response_rejects_duplicate_items(
 
   with pytest.raises(ValueError, match=r"Item 0 has already been administered in this session"):
     engine.apply_response(session, 0, response=False, context=context)
+
+
+def test_apply_response_rejects_an_item_the_session_excluded(item_bank) -> None:
+  """A response to an item in the session's excluded items raises ExcludedItemError and changes nothing.
+
+  Fails if the engine administers an item that the exposure control declined for the rest of the test, if it raises
+  a plain ValueError that an application cannot tell from a bad index, or if the rejected step records the item in
+  the session or the tracker.
+  """
+  tracker = ExposureTracker(item_bank.n_items)
+  context = RunContext(rng=np.random.default_rng(0), exposure_tracker=tracker)
+  engine = CatEngine(
+    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False)
+  )
+  session = engine.start_session(session_id=0, context=context)
+  session.excluded_items.append(3)
+
+  with pytest.raises(ExcludedItemError, match="Item 3 is excluded from this session"):
+    engine.apply_response(session, 3, response=True, context=context)
+
+  assert (session.administered_items, session.responses, session.excluded_items) == ([], [], [3])
+  assert int(tracker.counts[3]) == 0
+
+
+def test_step_rejects_an_excluded_item_from_the_selector_before_asking_for_a_response(item_bank) -> None:
+  """A selector that proposes an item the session excluded raises ExcludedItemError before the provider is asked.
+
+  Fails if step shows a live examinee an item withheld from them, such as one seen in an earlier attempt, or administers
+  it.
+  """
+  provider = RecordingResponseProvider()
+  engine = CatEngine(
+    item_bank, RecordingInitializer(0.0), RecordingSelector(7), RecordingEstimator(0.0), RecordingStopper(False)
+  )
+  context = RunContext(rng=np.random.default_rng(0))
+  session = engine.start_session(session_id=0, context=context)
+  session.excluded_items.append(7)
+
+  with pytest.raises(ExcludedItemError, match="Item 7 is excluded"):
+    engine.step(session, provider, context)
+
+  assert provider.calls == []
+  assert session.administered_items == []
+
+
+def test_a_session_rebuilt_with_excluded_items_is_never_given_them(item_bank) -> None:
+  """A session rebuilt from a snapshot keeps its excluded items, and the engine passes them over for the rest of it.
+
+  The session had item 1 and excluded items 0 and 2; the lowest-index selector then gives 3 and 4. Fails if the
+  snapshot or the rebuilt session drops the exclusions, or the engine does not pass them to the selector: the
+  session would get items 0 and 2.
+  """
+  engine = CatEngine(item_bank, HalfInitializer(), LowestIndexSelector(), CorrectCountEstimator(), ThreeItemStopper())
+  context = RunContext(rng=np.random.default_rng(0))
+  session = engine.start_session(0, context)
+  engine.apply_response(session, 1, response=True, context=context)
+  session.excluded_items.extend([0, 2])
+  snapshot = session.snapshot()
+
+  rebuilt = CatSessionState(**{field.name: getattr(snapshot, field.name) for field in dataclasses.fields(snapshot)})
+  engine.run_session(rebuilt, FixedResponseProvider(True), context)
+
+  assert rebuilt.administered_items == [1, 3, 4]
+  assert rebuilt.excluded_items == [0, 2]
 
 
 def test_step_ends_a_session_whose_initial_state_satisfies_the_stopper(item_bank) -> None:
@@ -836,6 +924,179 @@ def test_select_next_ends_the_session_when_the_selector_has_no_item(item_bank) -
 
   assert engine.select_next(session, context) is None
   assert session.stop_reason is StopReason.NO_ITEMS
+
+
+def test_a_declined_item_is_excluded_for_the_rest_of_the_test(item_bank) -> None:
+  """An item the exposure control declines joins the session's excluded items and is never proposed again.
+
+  The lowest-index selector proposes item 0 first at every step; the control declines it once, and the session gives
+  items 1, 2 and 3. Fails if the decline lasts only for the selection it happened in: the selector would propose item
+  0 at every step, the control would be asked about it three times, and the session would keep no record of it.
+  """
+  control = DecliningControl(declines=frozenset({0}))
+  engine = CatEngine(
+    item_bank,
+    HalfInitializer(),
+    LowestIndexSelector(),
+    CorrectCountEstimator(),
+    ThreeItemStopper(),
+    exposure_control=control,
+  )
+  context = RunContext(rng=np.random.default_rng(0))
+  session = engine.start_session(0, context)
+
+  engine.run_session(session, FixedResponseProvider(True), context)
+
+  assert session.administered_items == [1, 2, 3]
+  assert session.excluded_items == [0]
+  assert [item_id for item_id, _, _ in control.calls] == [0, 1, 2, 3]
+
+
+def test_the_control_sees_each_proposal_with_the_declines_so_far_at_the_same_position(item_bank) -> None:
+  """Each proposal reaches the control in a context that adds the selection's declines to the session's exclusions.
+
+  The session gave item 5 and had excluded item 7; the control declines items 0 and 1, so the selector proposes 0, 1
+  and 2. Fails if a later proposal's context drops the earlier declines (the selector would propose 0 again), replaces
+  the session's own exclusions, or moves the test position.
+  """
+  control = DecliningControl(declines=frozenset({0, 1}))
+  engine = CatEngine(
+    item_bank,
+    HalfInitializer(),
+    LowestIndexSelector(),
+    CorrectCountEstimator(),
+    ThreeItemStopper(),
+    exposure_control=control,
+  )
+  context = RunContext(rng=np.random.default_rng(0))
+  session = CatSessionState(
+    session_id=0,
+    estimates=[Estimate(0.5, math.inf), Estimate(1.0, 1.0)],
+    administered_items=[5],
+    responses=[True],
+    excluded_items=[7],
+  )
+
+  assert engine.select_next(session, context) == 2
+  assert control.calls == [(0, (7,), (5,)), (1, (7, 0), (5,)), (2, (7, 0, 1), (5,))]
+  assert session.excluded_items == [7, 0, 1]
+
+
+def test_a_session_whose_remaining_items_are_all_declined_ends_with_no_items() -> None:
+  """When the control declines every item left, the session ends with NO_ITEMS and keeps the declines.
+
+  On a 4-item bank where item 2 was given, the control declines 0, 1 and 3 in turn. Fails if the engine loops
+  forever, lets NoItemsAvailableError escape, ends the session without recording the items it declined, or reports
+  it stopped by the stopper.
+  """
+  bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0]] * 4))
+  engine = CatEngine(
+    bank,
+    HalfInitializer(),
+    LowestIndexSelector(),
+    CorrectCountEstimator(),
+    ThreeItemStopper(),
+    exposure_control=DecliningControl(declines=frozenset(range(4))),
+  )
+  context = RunContext(rng=np.random.default_rng(0))
+  session = CatSessionState(
+    session_id=0, estimates=[Estimate(0.5, math.inf), Estimate(1.0, 1.0)], administered_items=[2], responses=[True]
+  )
+
+  assert engine.select_next(session, context) is None
+  assert session.stop_reason is StopReason.NO_ITEMS
+  assert session.excluded_items == [0, 1, 3]
+
+
+class ControlFailingAfterADecline(BaseExposureControl):
+  """Exposure control that declines item 0 and fails on any other item."""
+
+  def accept(self, context: StepContext, item_id: int) -> bool:
+    del context
+    if item_id == 0:
+      return False
+    msg = "control failed"
+    raise RuntimeError(msg)
+
+
+def test_a_control_that_fails_after_a_decline_leaves_the_session_and_tracker_unchanged(item_bank) -> None:
+  """A selection whose control raises commits none of the declines it made before, to the session or the tracker.
+
+  The control declines item 0, then fails on item 1. Fails if item 0 stays excluded or counted as proposed although
+  the selection never finished: retrying the step would give another item than a run in which the control had not
+  failed, and the proposal would be counted again on the retry.
+  """
+  engine = CatEngine(
+    item_bank,
+    HalfInitializer(),
+    LowestIndexSelector(),
+    CorrectCountEstimator(),
+    ThreeItemStopper(),
+    exposure_control=ControlFailingAfterADecline(),
+  )
+  tracker = ExposureTracker(item_bank.n_items)
+  context = RunContext(rng=np.random.default_rng(0), exposure_tracker=tracker)
+  session = engine.start_session(0, context)
+
+  with pytest.raises(RuntimeError, match="control failed"):
+    engine.select_next(session, context)
+
+  assert session.excluded_items == []
+  assert session.stop_reason is None
+  assert int(tracker.proposals.sum()) == 0
+
+
+def test_selecting_again_before_the_response_counts_no_proposal_twice(item_bank) -> None:
+  """A second select_next before the answer, as on a page reload, adds nothing to the tracker's proposals.
+
+  The control declines item 0, so both calls give item 1; after its response, items 0 and 1 have one proposal each.
+  Fails if proposals are counted each time select_next returns an item (item 1 would have two, and its proposal
+  rate could exceed 1) or if the decline is counted again.
+  """
+  engine = CatEngine(
+    item_bank,
+    HalfInitializer(),
+    LowestIndexSelector(),
+    CorrectCountEstimator(),
+    ThreeItemStopper(),
+    exposure_control=DecliningControl(declines=frozenset({0})),
+  )
+  tracker = ExposureTracker(item_bank.n_items)
+  context = RunContext(rng=np.random.default_rng(0), exposure_tracker=tracker)
+  session = engine.start_session(0, context)
+
+  assert engine.select_next(session, context) == 1
+  assert engine.select_next(session, context) == 1
+  engine.apply_response(session, 1, response=True, context=context)
+
+  assert tracker.proposals[:3].tolist() == [1, 1, 0]
+  assert tracker.counts[:3].tolist() == [0, 1, 0]
+  assert int(tracker.proposals.sum()) == 2
+
+
+def test_a_selector_proposing_a_declined_item_again_raises_instead_of_looping(item_bank) -> None:
+  """A selector that ignores excluded_items and proposes the item just declined raises ExcludedItemError.
+
+  The selector always proposes item 3, which the control declines. Fails if the engine asks the control about item 3
+  again (forever, but for the stub's limit), or hands a declined item to the examinee.
+  """
+  control = DecliningControl(declines=frozenset({3}))
+  engine = CatEngine(
+    item_bank,
+    HalfInitializer(),
+    RecordingSelector(3),
+    CorrectCountEstimator(),
+    ThreeItemStopper(),
+    exposure_control=control,
+  )
+  context = RunContext(rng=np.random.default_rng(0))
+  session = engine.start_session(0, context)
+
+  with pytest.raises(ExcludedItemError, match="Item 3 is excluded"):
+    engine.select_next(session, context)
+
+  assert control.calls == [(3, (), ())]
+  assert session.excluded_items == []
 
 
 def test_custom_strategies_written_against_the_base_classes_run_a_session(item_bank) -> None:

@@ -12,7 +12,7 @@ import numpy
 from .context import Estimate
 
 if TYPE_CHECKING:
-  from collections.abc import Hashable
+  from collections.abc import Hashable, Iterable
 
   import numpy.typing as npt
 
@@ -43,13 +43,22 @@ class CatSessionState:
   as given. A session runs
   while ``stop_reason`` is None.
 
+  ``excluded_items`` holds the items the session must not be given although it has not had them.
+  An application may fill it before the first item, for example with the items the examinee saw in
+  an earlier attempt; during the test it only grows, as the engine adds the items its exposure
+  control declines. Removing an item from it during the test is not supported. The engine passes
+  the items to every strategy and raises :class:`~catsim.exceptions.ExcludedItemError` for a
+  response to one. Their indices are checked against the item bank at the session's next step.
+
   Raises
   ------
   ValueError
       If the session does not have one response per administered item and one more estimate than
-      responses, or if ``stop_reason`` is not a :class:`StopReason` value.
+      responses, if ``excluded_items`` repeats an item or holds an administered one, or if
+      ``stop_reason`` is not a :class:`StopReason` value.
   TypeError
-      If an entry of ``estimates`` is not an :class:`~catsim.context.Estimate`.
+      If an entry of ``estimates`` is not an :class:`~catsim.context.Estimate`, or an entry of
+      ``administered_items`` or ``excluded_items`` is not an integer.
   """
 
   session_id: Hashable
@@ -58,14 +67,16 @@ class CatSessionState:
   administered_items: list[int] = field(default_factory=list)
   responses: list[bool] = field(default_factory=list)
   stop_reason: StopReason | None = None
+  excluded_items: list[int] = field(default_factory=list)
 
   def __post_init__(self) -> None:
     """Take its own copy of the histories and reject a session whose entries do not line up."""
     # The engine appends to these lists, so they must be lists the session owns: a snapshot's tuples
     # would fail half-way through a step, and a caller's lists would change under the caller.
-    self.administered_items = list(self.administered_items)
+    self.administered_items = _item_indices(self.session_id, "administered_items", self.administered_items)
     self.responses = list(self.responses)
     self.estimates = list(self.estimates)
+    self.excluded_items = _item_indices(self.session_id, "excluded_items", self.excluded_items)
     if not all(isinstance(estimate, Estimate) for estimate in self.estimates):
       # A session restored from storage needs its estimates rebuilt, not bare thetas or mappings.
       msg = f"Session {self.session_id} needs Estimate entries in estimates, got {self.estimates!r}"
@@ -85,6 +96,13 @@ class CatSessionState:
         f"Session {self.session_id} needs the initial estimate and one estimate per response in "
         f"estimates, got len(estimates)={len(self.estimates)} and len(responses)={n_responses}"
       )
+      raise ValueError(msg)
+    if len(set(self.excluded_items)) != len(self.excluded_items):
+      msg = f"Session {self.session_id} repeats an item in excluded_items, got {self.excluded_items}"
+      raise ValueError(msg)
+    # A session either gave an item or withheld it: a save that holds an item in both lists is corrupt.
+    if administered := sorted(set(self.excluded_items) & set(self.administered_items)):
+      msg = f"Session {self.session_id} has administered items {administered}, which excluded_items also holds"
       raise ValueError(msg)
 
   @property
@@ -121,6 +139,7 @@ class CatSessionState:
       administered_items=tuple(self.administered_items),
       responses=tuple(self.responses),
       stop_reason=self.stop_reason,
+      excluded_items=tuple(self.excluded_items),
     )
 
 
@@ -134,6 +153,7 @@ class CatSessionSnapshot:
   administered_items: tuple[int, ...]
   responses: tuple[bool, ...]
   stop_reason: StopReason | None
+  excluded_items: tuple[int, ...] = ()
 
   @property
   def theta_history(self) -> tuple[float, ...]:
@@ -186,12 +206,15 @@ class CatStepResult:
 
 @dataclass(slots=True, init=False)
 class ExposureTracker:
-  """Count item administrations and sessions across a run, and give sessions their exposure rates.
+  """Count item administrations, proposals and sessions across a run, and give sessions their exposure rates.
 
   One tracker is shared by every session of a run or of a live deployment, through
-  :class:`~catsim.engine.RunContext`. The engine calls :meth:`start_session` when a session starts and
-  :meth:`record` for every administered item. ``counts`` holds each item's administrations so far,
-  those of sessions still in progress included, and ``n_sessions`` the number of sessions started.
+  :class:`~catsim.engine.RunContext`. The engine calls :meth:`start_session` when a session starts,
+  :meth:`record` for every administered item and :meth:`record_decline` for every item the engine's
+  exposure control declines. ``counts`` holds each item's administrations so far, those of sessions
+  still in progress included, ``proposals`` its administrations plus its declines, and
+  ``n_sessions`` the number of sessions started. A session proposes an item at most once, so
+  neither count can exceed ``n_sessions``.
 
   A session is selected against each item's administrations divided by the number of other sessions
   started so far (ADR-0003). With sessions run one after another, as a simulation runs them, that
@@ -200,7 +223,7 @@ class ExposureTracker:
   as in a live deployment, see each other's administrations as they happen.
 
   A new tracker starts from zero. An application that must keep the exposure across restarts saves
-  ``counts`` and ``n_sessions`` and passes them back to rebuild the tracker.
+  ``counts``, ``proposals`` and ``n_sessions`` and passes them back to rebuild the tracker.
 
   Parameters
   ----------
@@ -211,24 +234,38 @@ class ExposureTracker:
       keeps a copy. Default is None, for no administrations.
   n_sessions : int, optional
       Sessions started so far, as a saved tracker's ``n_sessions`` holds them. Default is 0.
+  proposals : array-like of int or None, optional
+      Each item's proposals so far, as a saved tracker's ``proposals`` holds them. The tracker keeps
+      a copy. Default is None, which takes a copy of ``counts``, the proposals of a run without an
+      exposure control.
 
   Raises
   ------
   ValueError
-      If ``counts`` does not hold one count per item, holds a negative count or a count above
-      ``n_sessions``, or ``n_sessions`` is negative.
+      If ``counts`` or ``proposals`` does not hold one count per item or holds a negative count, if
+      an item has more administrations than proposals or more proposals than ``n_sessions``, or if
+      ``n_sessions`` is negative.
   TypeError
-      If ``counts`` holds a value that is not an integer, or ``n_sessions`` is not an integer (a
-      bool included).
+      If ``counts`` or ``proposals`` holds a value that is not an integer, or ``n_sessions`` is not
+      an integer (a bool included).
   """
 
   n_items: int
   counts: IntArray
+  proposals: IntArray
   n_sessions: int
 
-  def __init__(self, n_items: int, counts: npt.ArrayLike | None = None, n_sessions: int = 0) -> None:
+  def __init__(
+    self,
+    n_items: int,
+    counts: npt.ArrayLike | None = None,
+    n_sessions: int = 0,
+    *,
+    proposals: npt.ArrayLike | None = None,
+  ) -> None:
     self.n_items = n_items
-    self.counts = numpy.zeros(n_items, dtype=int) if counts is None else _restored_counts(n_items, counts)
+    self.counts = numpy.zeros(n_items, dtype=int) if counts is None else _restored_counts(n_items, counts, "counts")
+    self.proposals = self.counts.copy() if proposals is None else _restored_counts(n_items, proposals, "proposals")
     # bool is an int to operator.index, but a flag passed by mistake is not a session count.
     if isinstance(n_sessions, (bool, numpy.bool_)):
       msg = f"n_sessions must be an integer, got {type(n_sessions).__name__} {n_sessions!r}"
@@ -248,14 +285,33 @@ class ExposureTracker:
         f"but only {self.n_sessions} sessions started"
       )
       raise ValueError(msg)
+    # Every administration is a proposal, and an item is proposed at most once per session.
+    if (below := numpy.flatnonzero(self.proposals < self.counts)).size:
+      item = int(below[0])
+      msg = (
+        f"counts and proposals do not belong together: item {item} has {int(self.counts[item])} administrations "
+        f"but only {int(self.proposals[item])} proposals"
+      )
+      raise ValueError(msg)
+    if self.proposals.size and int(numpy.max(self.proposals)) > self.n_sessions:
+      msg = (
+        f"proposals and n_sessions do not belong together: an item has {int(numpy.max(self.proposals))} proposals "
+        f"but only {self.n_sessions} sessions started"
+      )
+      raise ValueError(msg)
 
   def start_session(self) -> None:
     """Count a session that has started."""
     self.n_sessions += 1
 
   def record(self, item_id: int) -> None:
-    """Record one administration for an item."""
+    """Record one administration for an item, which is also one proposal of it."""
     self.counts[item_id] += 1
+    self.proposals[item_id] += 1
+
+  def record_decline(self, item_id: int) -> None:
+    """Record one proposal of an item that the exposure control declined; its administrations are unchanged."""
+    self.proposals[item_id] += 1
 
   def rates(self) -> FloatArray:
     """Return the exposure rates a session in progress is selected against.
@@ -278,8 +334,42 @@ class ExposureTracker:
     return self.counts / others
 
 
-def _restored_counts(n_items: int, counts: npt.ArrayLike) -> IntArray:
-  """Return a copy of a saved tracker's counts, checking there is one non-negative integer per item.
+def _item_indices(session_id: Hashable, name: str, items: Iterable[int]) -> list[int]:
+  """Return a session's item indices as a new list of builtin ints.
+
+  Parameters
+  ----------
+  session_id : Hashable
+      The session's identifier, for the error message.
+  name : str
+      The session field the indices belong to, for the error message.
+  items : Iterable[int]
+      The indices, which may be NumPy integers.
+
+  Returns
+  -------
+  list[int]
+      A list the session owns.
+
+  Raises
+  ------
+  TypeError
+      If an entry is not an integer.
+  """
+  indices = []
+  for item in items:
+    # A float such as 2.5 would never match the engine's membership checks, while selectors
+    # truncate it to an item when they index the bank with it.
+    try:
+      indices.append(operator.index(item))
+    except TypeError:
+      msg = f"Session {session_id} needs integer item indices in {name}, got {item!r}"
+      raise TypeError(msg) from None
+  return indices
+
+
+def _restored_counts(n_items: int, counts: npt.ArrayLike, name: str) -> IntArray:
+  """Return a copy of a saved tracker's per-item counts, checking there is one non-negative integer per item.
 
   Parameters
   ----------
@@ -287,6 +377,8 @@ def _restored_counts(n_items: int, counts: npt.ArrayLike) -> IntArray:
       Number of items in the bank.
   counts : array-like of int
       The saved counts.
+  name : str
+      The tracker attribute they were saved from, for the error messages.
 
   Returns
   -------
@@ -302,14 +394,14 @@ def _restored_counts(n_items: int, counts: npt.ArrayLike) -> IntArray:
   """
   restored = numpy.array(counts)
   if restored.shape != (n_items,):
-    msg = f"counts must hold one count per item ({n_items}), got shape {restored.shape}"
+    msg = f"{name} must hold one count per item ({n_items}), got shape {restored.shape}"
     raise ValueError(msg)
   # bool is not an integer dtype to NumPy, so a mask passed by mistake is rejected too.
   if not numpy.issubdtype(restored.dtype, numpy.integer):
-    msg = f"counts must be integers, got dtype {restored.dtype}"
+    msg = f"{name} must be integers, got dtype {restored.dtype}"
     raise TypeError(msg)
   if (restored < 0).any():
-    msg = f"counts cannot be negative, got {restored.min()}"
+    msg = f"{name} cannot be negative, got {restored.min()}"
     raise ValueError(msg)
   # Saved in a compact type such as uint8, the counts would wrap to 0 past its maximum.
   return restored.astype(numpy.int64)

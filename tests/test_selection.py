@@ -1074,7 +1074,7 @@ class TestClusterSelector:
       ({"clusters": [0, -1]}, "non-negative integers"),
       ({"clusters": [0.0, 1.5]}, "non-negative integers"),
       ({"clusters": [0, 1], "method": "max_info"}, "not a valid cluster selection method"),
-      ({"clusters": [0, 1], "r_control": "strict"}, "not a valid item exposure control method"),
+      ({"clusters": [0, 1], "r_control": "strict"}, "not a valid cap fallback"),
     ],
   )
   def test_constructor_rejects_invalid_arguments(self, kwargs: dict[str, object], match: str) -> None:
@@ -1410,7 +1410,7 @@ SELECTOR_REPRS = {
   "ProportionalSelector": "ProportionalSelector(test_size=12, acceleration=-1.0, r_max=0.5)",
   "ClusterSelector": (
     "ClusterSelector(clusters=[0, 1, 0], method=ClusterMethod.CLUSTER_INFO, r_max=0.5, "
-    "r_control=ExposureControl.AGGRESSIVE)"
+    "r_control=CapFallback.AGGRESSIVE)"
   ),
   "AStratSelector": "AStratSelector(test_size=12, n_strata=4)",
   "AStratBBlockSelector": "AStratBBlockSelector(test_size=12, n_strata=4)",

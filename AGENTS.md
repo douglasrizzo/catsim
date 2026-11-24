@@ -39,8 +39,8 @@ hidden runtime coupling.
   - `ItemBank` should remain focused on calibrated item data and related derived data.
   - Run-level exposure and aggregate metrics belong in runtime/result objects.
 - Preserve explicit strategy contracts.
-  - Initializers, selectors, estimators, and stoppers should use explicit parameters rather than
-    engine-facing `**kwargs` when the engine owns the call contract.
+  - Initializers, selectors, estimators, stoppers and exposure controls should use explicit
+    parameters rather than engine-facing `**kwargs` when the engine owns the call contract.
 - Preserve stable step semantics.
   - `CatStepResult` should represent a durable step outcome, not a mutable live-session alias.
 

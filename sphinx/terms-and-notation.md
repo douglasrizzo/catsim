@@ -75,6 +75,10 @@ responses $\mathbf{u}$
 administered items
 : The items given so far, in order. In the API: `administered_items`.
 
+excluded items
+: Items a session must not be given although it has not had them, such as the items its exposure
+  control declined. They do not count toward the test length. In the API: `excluded_items`.
+
 test length $n$
 : The number of administered items. In the API: `test_lengths` in a simulation result. A
   `MaxLengthStopper` ends the test at `max_items`; a selector that plans its schedule for a test of
@@ -106,9 +110,15 @@ stopper
   `MaxLengthStopper` or `StandardErrorStopper`. `StopRule` is the stopper that combines several
   others; these pages say "rule" only for it.
 
+exposure control
+: Keeping items from being given so often that they become known to future examinees. Some
+  selectors do it themselves, with an exposure cap `r_max` or by choosing at random. An engine can
+  also take an *exposure control*, a `BaseExposureControl`, which may decline the item the selector
+  proposes; the session then excludes that item for the rest of its test.
+
 stop reason
 : Why a session ended: `StopReason.STOPPER` when its stopper was satisfied, `StopReason.NO_ITEMS`
-  when its selector had no item to offer.
+  when its selector had no item to offer, or none that the exposure control accepted.
 
 standard error $SE(\hat{\theta})$
 : The uncertainty of an ability estimate, on the scale of $\theta$. Also called the *standard
@@ -123,6 +133,11 @@ exposure rate $r_i$
 : The share of examinees who were given item $i$. In the API: `exposure_rates` in a simulation
   result. Exposure-control selectors limit it with a cap, `r_max`. While a run is in progress the
   rates are counted over the examinees tested so far; `ExposureTracker` says how.
+
+proposal rate
+: The share of examinees for whom the selector proposed item $i$: the item was given or the
+  exposure control declined it. In the API: `proposal_rates` in a simulation result. Without an
+  exposure control it equals the exposure rate.
 
 overlap rate
 : The expected share of items that two examinees have in common. In the API: `overlap_rate` in a

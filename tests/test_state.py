@@ -94,6 +94,82 @@ def test_session_state_turns_a_persisted_stop_reason_back_into_the_enum() -> Non
     CatSessionState(session_id=0, estimates=[Estimate(0.0, math.inf)], stop_reason=persisted["unknown"])
 
 
+@pytest.mark.parametrize(
+  ("excluded", "match"),
+  [
+    pytest.param([4, 4], r"repeats an item in excluded_items, got \[4, 4\]", id="repeated"),
+    pytest.param([1, 4], r"has administered items \[1\], which excluded_items also holds", id="administered"),
+  ],
+)
+def test_session_state_rejects_excluded_items_it_cannot_hold(excluded: list[int], match: str) -> None:
+  """A session restored with an excluded item twice, or with an item both administered and excluded, is rejected.
+
+  Fails if such a session is accepted: an item is given or declined once per session, so a save holding either is
+  corrupt, and its proposal counts (administrations plus declines) would count an item twice for one examinee.
+  """
+  with pytest.raises(ValueError, match=match):
+    CatSessionState(
+      session_id=0,
+      estimates=[Estimate(0.0, math.inf), Estimate(0.5, 1.0)],
+      administered_items=[1],
+      responses=[True],
+      excluded_items=excluded,
+    )
+
+
+@pytest.mark.parametrize("field_name", ["administered_items", "excluded_items"])
+@pytest.mark.parametrize("entry", [pytest.param(2.5, id="float"), pytest.param("3", id="str")])
+def test_session_state_rejects_item_indices_that_are_not_integers(field_name: str, entry: object) -> None:
+  """A restored session whose item lists hold a float or a string fails when it is built, naming the field.
+
+  Fails if 2.5 is accepted: the engine's membership checks never match it while ``remaining`` truncates it to item 2,
+  so an excluded item could be given or an administered one given again. Fails too if "3" is accepted and the session
+  breaks later inside a strategy with a TypeError that says nothing about the saved data.
+  """
+  n_responses = 1 if field_name == "administered_items" else 0
+  with pytest.raises(TypeError, match=rf"needs integer item indices in {field_name}, got {entry!r}"):
+    CatSessionState(
+      session_id=0,
+      estimates=[Estimate(0.0, math.inf)] * (n_responses + 1),
+      responses=[True] * n_responses,
+      **{field_name: [entry]},
+    )
+
+
+def test_session_state_stores_numpy_integer_indices_as_python_ints() -> None:
+  """Item indices restored as NumPy integers, such as from a saved array, are stored as builtin ints.
+
+  Fails if the session keeps the numpy.int64 entries: saving it again with json.dumps would raise TypeError.
+  """
+  state = CatSessionState(
+    session_id=0,
+    estimates=[Estimate(0.0, math.inf), Estimate(0.5, 1.0)],
+    administered_items=[np.int64(4)],
+    responses=[True],
+    excluded_items=[np.int64(7)],
+  )
+
+  assert json.dumps([state.administered_items, state.excluded_items]) == "[[4], [7]]"
+  assert [type(item) for item in state.administered_items + state.excluded_items] == [int, int]
+
+
+def test_a_session_and_its_snapshot_keep_their_own_excluded_items() -> None:
+  """The session copies the excluded items it is given, and a snapshot keeps them as they were.
+
+  Fails if the session keeps the caller's list (the engine's declines would change the application's saved copy) or
+  if the snapshot shares the session's list (a later decline would show up in an earlier step result).
+  """
+  saved = [6, 2]
+  state = CatSessionState(session_id=0, estimates=[Estimate(0.0, math.inf)], excluded_items=saved)
+  snapshot = state.snapshot()
+
+  state.excluded_items.append(9)
+
+  assert saved == [6, 2]
+  assert state.excluded_items == [6, 2, 9]
+  assert snapshot.excluded_items == (6, 2)
+
+
 def test_exposure_tracker_gives_each_session_the_rates_of_the_sessions_before_it() -> None:
   """A session sees each item's share of the sessions started before it, as catR does, from start to end.
 
@@ -204,6 +280,62 @@ def test_a_tracker_rejects_saved_counts_it_cannot_use(
   """
   with pytest.raises(error, match=match):
     ExposureTracker(4, counts=counts, n_sessions=n_sessions)
+
+
+def test_a_decline_counts_as_a_proposal_but_not_as_an_administration() -> None:
+  """record_decline adds to an item's proposals only, so declines never raise its exposure rate.
+
+  Three sessions started; item 0 was administered once and declined once, item 1 declined twice. Fails if a decline
+  is counted as an administration (item 1 would then be held back by an r_max cap it never reached) or not counted
+  as a proposal (Sympson-Hetter's calibration would see too few proposals).
+  """
+  tracker = ExposureTracker(3)
+  for _ in range(3):
+    tracker.start_session()
+  tracker.record(0)
+  for item_id in (0, 1, 1):
+    tracker.record_decline(item_id)
+
+  assert tracker.counts.tolist() == [1, 0, 0]
+  assert tracker.proposals.tolist() == [2, 2, 0]
+  assert tracker.rates().tolist() == [0.5, 0.0, 0.0]
+
+
+def test_a_tracker_rebuilt_without_proposals_takes_its_counts_as_its_own_copy() -> None:
+  """A tracker rebuilt from counts alone has one proposal per administration, in an array of its own.
+
+  Fails if the rebuilt tracker starts its proposals at zero (every item would have more administrations than
+  proposals) or shares the counts array (each administration would then add two to both).
+  """
+  tracker = ExposureTracker(3, counts=[2, 0, 1], n_sessions=2)
+
+  tracker.record(1)
+
+  assert tracker.counts.tolist() == [2, 1, 1]
+  assert tracker.proposals.tolist() == [2, 1, 1]
+
+
+@pytest.mark.parametrize(
+  ("proposals", "error", "match"),
+  [
+    pytest.param(
+      [2, 1, 1], ValueError, r"proposals must hold one count per item \(4\), got shape \(3,\)", id="too-few"
+    ),
+    pytest.param([2, -1, 1, 0], ValueError, "proposals cannot be negative, got -1", id="negative"),
+    pytest.param([2.0, 1.0, 1.0, 0.0], TypeError, "proposals must be integers, got dtype float64", id="float"),
+    pytest.param([2, 0, 1, 0], ValueError, "item 1 has 1 administrations but only 0 proposals", id="below-counts"),
+    pytest.param([2, 1, 4, 0], ValueError, "an item has 4 proposals but only 3 sessions", id="above-sessions"),
+  ],
+)
+def test_a_tracker_rejects_saved_proposals_it_cannot_use(proposals: list, error: type[Exception], match: str) -> None:
+  """Proposals that are not one non-negative integer per item, or that do not fit the counts and sessions, fail.
+
+  The saved counts are [2, 1, 1, 0] over 3 sessions. Fails if the tracker accepts proposals saved for another bank,
+  negative or fractional ones, fewer proposals than administrations (every administration is a proposal) or more
+  proposals than sessions (a session proposes an item at most once, so the proposal rate would exceed 1).
+  """
+  with pytest.raises(error, match=match):
+    ExposureTracker(4, counts=[2, 1, 1, 0], n_sessions=3, proposals=proposals)
 
 
 def test_a_tracker_rebuilt_from_compact_counts_counts_past_their_type() -> None:
