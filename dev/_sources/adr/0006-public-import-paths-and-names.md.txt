@@ -1,4 +1,4 @@
-# ADR-0014: Public Import Paths and One Name per Concept
+# ADR-0006: Public Import Paths and One Name per Concept
 
 ## Status
 
@@ -8,9 +8,9 @@ Accepted 2026-11-24
 
 Nothing said which import path of a class was the public one. Docs and tests imported names from
 their package or from the module file that defines them, and some public names, such as `LogPrior`
-and the helpers for custom selectors, existed only in a module file. Some module names repeated their package (`selection/selection.py`), and
-`selection/random.py` shadowed the standard library: any process whose `sys.path[0]` was the
-package directory failed on `import tempfile`.
+and the helpers for custom selectors, existed only in a module file. Some module names repeated
+their package (`selection/selection.py`), and `selection/random.py` shadowed the standard library:
+any process whose `sys.path[0]` was the package directory failed on `import tempfile`.
 
 The same concept also had several names. The ability estimate was `est_theta`, `theta` and
 `updated_theta`; the items given so far were `administered_items` and `administered_item_ids`,
@@ -43,7 +43,7 @@ while `administered_items` also named a parameter matrix; the responses were `re
     exception;
   - `responses` for the responses to the administered items, in the same order;
   - `n_items` for a number of items, `model` for the logistic model, and
-    `rng: int | numpy.random.Generator | None` for the random source (ADR-0013);
+    `rng: int | numpy.random.Generator | None` for the random source (ADR-0010);
   - `test_size` for the test length a selector plans its schedule for, and `max_items` for the
     length at which `MaxLengthStopper` ends a test. They are different settings: a test may stop
     before or after the length its selector planned.
@@ -52,7 +52,7 @@ while `administered_items` also named a parameter matrix; the responses were `re
 
 - An object keeps its import path when its module is split, merged or renamed. Its `__module__`
   still names the defining module, so a pickle of a catsim object breaks when its class moves.
-- The renames break 0.x code, and no alias keeps an old name or module path working.
+- No alias keeps a retired name or module path working.
 - Tests check that each package's `__all__` matches the public definitions of its modules and that
   no public signature or attribute uses a retired name.
 

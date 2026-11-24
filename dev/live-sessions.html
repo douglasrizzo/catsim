@@ -665,7 +665,7 @@ the item, divided by the number of sessions started so far other than its own. S
 progress count too, so sessions that run side by side see each other’s items as they are given,
 and the first session sees every rate at 0. When sessions run one after another, as in a
 simulation, this is the share of the examinees tested before the current one
-(<a class="reference internal" href="adr/0003-runtime-state-ownership.html"><span class="doc">ADR-0003: Keep Runtime State Outside Domain Objects</span></a>). Above, <code class="docutils literal notranslate"><span class="pre">attempt-2</span></code> starts with a different item from
+(<a class="reference internal" href="adr/0004-runtime-state-ownership.html"><span class="doc">ADR-0004: Keep Runtime State Outside Domain Objects</span></a>). Above, <code class="docutils literal notranslate"><span class="pre">attempt-2</span></code> starts with a different item from
 <code class="docutils literal notranslate"><span class="pre">attempt-1</span></code>: with two sessions started, each item <code class="docutils literal notranslate"><span class="pre">attempt-1</span></code> was given has a rate of 1 for
 <code class="docutils literal notranslate"><span class="pre">attempt-2</span></code>. The <a class="reference internal" href="api/state.html#catsim.ExposureTracker" title="catsim.ExposureTracker"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExposureTracker</span></code></a> reference gives the exact count.</p>
 <p>The tracker lives in memory. A tracker created at a restart starts from zero and applies no cap
@@ -682,7 +682,7 @@ until new sessions have run, so save its counts and rebuild it from them:</p>
 exposure control declined it, and <code class="docutils literal notranslate"><span class="pre">n_sessions</span></code> the sessions started. Save them whenever you save a
 session, in the same transaction if you can: a tracker saved only at shutdown is lost in a crash,
 and a tracker older than the sessions saved after it under-counts them, which no check detects. A session that starts and is abandoned still
-counts as a session, which lowers every rate a little. A tracker counts only the sessions that run
+counts as a session, as does a second session started for the same examinee; each lowers every rate a little. A tracker counts only the sessions that run
 on its context: processes with trackers of their own do not see each other’s administrations.</p>
 </section>
 <section id="decline-items-with-an-exposure-control">

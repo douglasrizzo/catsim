@@ -48,7 +48,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Bibliography" href="references.html" />
-    <link rel="prev" title="ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal" href="adr/0016-session-exclusions-and-exposure-control.html" />
+    <link rel="prev" title="ADR-0014: Plotting as an Optional Extra" href="adr/0014-plotting-as-an-optional-extra.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -542,7 +542,7 @@ uv<span class="w"> </span>run<span class="w"> </span>pylint<span class="w"> </sp
 uv<span class="w"> </span>run<span class="w"> </span>ty<span class="w"> </span>check
 </pre></div>
 </div>
-<p>If you change a tutorial notebook in <code class="docutils literal notranslate"><span class="pre">notebooks/</span></code>, run the notebooks too:</p>
+<p>The tutorials are <code class="docutils literal notranslate"><span class="pre">.ipynb</span></code> files in <code class="docutils literal notranslate"><span class="pre">notebooks/</span></code>, versioned with the package so that they open from GitHub and Colab and are checked as the API changes. Commit them without outputs: pre-commit strips the outputs (nbstripout) and runs the notebooks a commit changes (nbmake), and CI runs every notebook, so a notebook that no longer runs fails the gate like a failing test. If you change a notebook, run the notebooks too:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>--nbmake<span class="w"> </span>--nbmake-timeout<span class="o">=</span><span class="m">300</span><span class="w"> </span>notebooks/*.ipynb
 </pre></div>
 </div>
@@ -554,6 +554,7 @@ uv<span class="w"> </span>run<span class="w"> </span>ty<span class="w"> </span>c
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">-W</span></code> turns warnings into errors. The build also regenerates <code class="docutils literal notranslate"><span class="pre">README.md</span></code> from <code class="docutils literal notranslate"><span class="pre">sphinx/readme_head.md</span></code> and <code class="docutils literal notranslate"><span class="pre">sphinx/readme_body.md</span></code>, so edit those two files instead of <code class="docutils literal notranslate"><span class="pre">README.md</span></code>.</p>
+<p>A release is ready only when its documentation is online, so a documentation deployment gates every publication, in the same workflow run as the publication (a job cannot wait for a job in another run): the <code class="docutils literal notranslate"><span class="pre">dev</span></code> → <code class="docutils literal notranslate"><span class="pre">main</span></code> pull request deploys the dev documentation and then publishes a release candidate to TestPyPI, and a GitHub release deploys the production documentation and then publishes to PyPI. These are the only two publishing paths; there is no manual publish. The production documentation goes live before the PyPI upload waits for the maintainer’s approval in the <code class="docutils literal notranslate"><span class="pre">pypi</span></code> environment, so a rejected upload leaves documentation online for a version that is not on PyPI until the next deployment.</p>
 </section>
 <section id="adding-a-technique">
 <h2>Adding a technique<a class="headerlink" href="#adding-a-technique" title="Link to this heading">#</a></h2>
@@ -592,12 +593,12 @@ uv<span class="w"> </span>run<span class="w"> </span>ty<span class="w"> </span>c
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adr/0016-session-exclusions-and-exposure-control.html"
+       href="adr/0014-plotting-as-an-optional-extra.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</p>
+        <p class="prev-next-title">ADR-0014: Plotting as an Optional Extra</p>
       </div>
     </a>
     <a class="right-next"

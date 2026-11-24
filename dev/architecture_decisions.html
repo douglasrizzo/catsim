@@ -47,7 +47,7 @@
     <link rel="icon" href="_static/favicon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="ADR-0001: Adopt Explicit CAT Engine Architecture" href="adr/0001-explicit-cat-engine.html" />
+    <link rel="next" title="ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT" href="adr/0001-unidimensional-dichotomous-scope.html" />
     <link rel="prev" title="Planned techniques" href="planned-techniques.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
@@ -455,22 +455,20 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="adr/0001-explicit-cat-engine.html">ADR-0001: Adopt Explicit CAT Engine Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0002-remove-legacy-simulator-apis.html">ADR-0002: Remove Legacy Simulator APIs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0003-runtime-state-ownership.html">ADR-0003: Keep Runtime State Outside Domain Objects</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0004-explicit-strategy-contracts.html">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0005-immutable-step-results.html">ADR-0005: Make Step Results Immutable Snapshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0006-versioned-tutorial-notebooks.html">ADR-0006: Version Tutorial Notebooks as .ipynb Files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0007-release-gated-by-docs.html">ADR-0007: Gate Package Publication on Documentation Availability</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0008-random-tie-breaking.html">ADR-0008: Break Ties Between Items Uniformly at Random</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0009-ability-scale-and-extreme-patterns.html">ADR-0009: Ability Scale and Extreme Response Patterns</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0010-published-progressive-schedule.html">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0011-how-a-session-ends.html">ADR-0011: Decide in One Place How a Session Ends</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0014-public-import-paths-and-names.html">ADR-0014: Public Import Paths and One Name per Concept</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0015-plotting-as-an-optional-extra.html">ADR-0015: Plotting as an Optional Extra</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0016-session-exclusions-and-exposure-control.html">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0001-unidimensional-dichotomous-scope.html">ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0002-four-parameter-item-matrix.html">ADR-0002: Items Are an n×4 Matrix of 4PL Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0003-explicit-cat-engine.html">ADR-0003: Adopt Explicit CAT Engine Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0004-runtime-state-ownership.html">ADR-0004: Keep Runtime State Outside Domain Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0005-explicit-strategy-contracts.html">ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0006-public-import-paths-and-names.html">ADR-0006: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0007-how-a-session-ends.html">ADR-0007: Decide in One Place How a Session Ends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0008-session-exclusions-and-exposure-control.html">ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0009-immutable-step-results.html">ADR-0009: Make Step Results Immutable Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0010-random-numbers-and-reproducibility.html">ADR-0010: Random Numbers and Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0011-random-tie-breaking.html">ADR-0011: Break Ties Between Items Uniformly at Random</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0012-ability-scale-and-extreme-patterns.html">ADR-0012: Ability Scale and Extreme Response Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0013-published-progressive-schedule.html">ADR-0013: Progressive and Proportional Follow the Published Schedule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0014-plotting-as-an-optional-extra.html">ADR-0014: Plotting as an Optional Extra</a></li>
 </ul>
 </div>
 </nav></div>
@@ -530,26 +528,29 @@
                   
   <section class="tex2jax_ignore mathjax_ignore" id="architecture-decision-records">
 <h1>Architecture Decision Records<a class="headerlink" href="#architecture-decision-records" title="Link to this heading">#</a></h1>
-<p>This section captures durable technical decisions that shaped the current architecture of
-<code class="docutils literal notranslate"><span class="pre">catsim</span></code>. These records replace the temporary implementation plans that guided the refactor.</p>
+<p>Each Architecture Decision Record (ADR) states one decision that shapes catsim’s architecture: the
+forces behind it, the rule, what follows from it and the options rejected. They are written for
+contributors and method authors who want to know why the code is shaped as it is before they
+change or extend it; the guides and technique pages describe what users observe and link the ADR
+for the reason. From 1.0 on, an accepted ADR is not rewritten: a changed decision gets a new ADR
+that supersedes it, and the old one’s Status names its successor. The records read in order, from
+the scope of the package to the specifics of its strategies.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="adr/0001-explicit-cat-engine.html">ADR-0001: Adopt Explicit CAT Engine Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0002-remove-legacy-simulator-apis.html">ADR-0002: Remove Legacy Simulator APIs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0003-runtime-state-ownership.html">ADR-0003: Keep Runtime State Outside Domain Objects</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0004-explicit-strategy-contracts.html">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0005-immutable-step-results.html">ADR-0005: Make Step Results Immutable Snapshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0006-versioned-tutorial-notebooks.html">ADR-0006: Version Tutorial Notebooks as .ipynb Files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0007-release-gated-by-docs.html">ADR-0007: Gate Package Publication on Documentation Availability</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0008-random-tie-breaking.html">ADR-0008: Break Ties Between Items Uniformly at Random</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0009-ability-scale-and-extreme-patterns.html">ADR-0009: Ability Scale and Extreme Response Patterns</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0010-published-progressive-schedule.html">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0011-how-a-session-ends.html">ADR-0011: Decide in One Place How a Session Ends</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0014-public-import-paths-and-names.html">ADR-0014: Public Import Paths and One Name per Concept</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0015-plotting-as-an-optional-extra.html">ADR-0015: Plotting as an Optional Extra</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0016-session-exclusions-and-exposure-control.html">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0001-unidimensional-dichotomous-scope.html">ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0002-four-parameter-item-matrix.html">ADR-0002: Items Are an n×4 Matrix of 4PL Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0003-explicit-cat-engine.html">ADR-0003: Adopt Explicit CAT Engine Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0004-runtime-state-ownership.html">ADR-0004: Keep Runtime State Outside Domain Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0005-explicit-strategy-contracts.html">ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0006-public-import-paths-and-names.html">ADR-0006: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0007-how-a-session-ends.html">ADR-0007: Decide in One Place How a Session Ends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0008-session-exclusions-and-exposure-control.html">ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0009-immutable-step-results.html">ADR-0009: Make Step Results Immutable Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0010-random-numbers-and-reproducibility.html">ADR-0010: Random Numbers and Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0011-random-tie-breaking.html">ADR-0011: Break Ties Between Items Uniformly at Random</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0012-ability-scale-and-extreme-patterns.html">ADR-0012: Ability Scale and Extreme Response Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0013-published-progressive-schedule.html">ADR-0013: Progressive and Proportional Follow the Published Schedule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0014-plotting-as-an-optional-extra.html">ADR-0014: Plotting as an Optional Extra</a></li>
 </ul>
 </div>
 </section>
@@ -574,11 +575,11 @@
       </div>
     </a>
     <a class="right-next"
-       href="adr/0001-explicit-cat-engine.html"
+       href="adr/0001-unidimensional-dichotomous-scope.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ADR-0001: Adopt Explicit CAT Engine Architecture</p>
+        <p class="prev-next-title">ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

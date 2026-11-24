@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ADR-0005: Make Step Results Immutable Snapshots &#8212; catsim 0.21.0 documentation</title>
+    <title>ADR-0013: Progressive and Proportional Follow the Published Schedule &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -42,13 +42,13 @@
     <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0005-immutable-step-results';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0013-published-progressive-schedule';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ADR-0006: Version Tutorial Notebooks as .ipynb Files" href="0006-versioned-tutorial-notebooks.html" />
-    <link rel="prev" title="ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate" href="0004-explicit-strategy-contracts.html" />
+    <link rel="next" title="ADR-0014: Plotting as an Optional Extra" href="0014-plotting-as-an-optional-extra.html" />
+    <link rel="prev" title="ADR-0012: Ability Scale and Extreme Response Patterns" href="0012-ability-scale-and-extreme-patterns.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -455,22 +455,20 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="0001-explicit-cat-engine.html">ADR-0001: Adopt Explicit CAT Engine Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0002-remove-legacy-simulator-apis.html">ADR-0002: Remove Legacy Simulator APIs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0003-runtime-state-ownership.html">ADR-0003: Keep Runtime State Outside Domain Objects</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0004-explicit-strategy-contracts.html">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0005: Make Step Results Immutable Snapshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0006-versioned-tutorial-notebooks.html">ADR-0006: Version Tutorial Notebooks as .ipynb Files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0007-release-gated-by-docs.html">ADR-0007: Gate Package Publication on Documentation Availability</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0008-random-tie-breaking.html">ADR-0008: Break Ties Between Items Uniformly at Random</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0009-ability-scale-and-extreme-patterns.html">ADR-0009: Ability Scale and Extreme Response Patterns</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0010-published-progressive-schedule.html">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0011-how-a-session-ends.html">ADR-0011: Decide in One Place How a Session Ends</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0014-public-import-paths-and-names.html">ADR-0014: Public Import Paths and One Name per Concept</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0015-plotting-as-an-optional-extra.html">ADR-0015: Plotting as an Optional Extra</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0016-session-exclusions-and-exposure-control.html">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0001-unidimensional-dichotomous-scope.html">ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0002-four-parameter-item-matrix.html">ADR-0002: Items Are an n×4 Matrix of 4PL Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0003-explicit-cat-engine.html">ADR-0003: Adopt Explicit CAT Engine Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0004-runtime-state-ownership.html">ADR-0004: Keep Runtime State Outside Domain Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0005-explicit-strategy-contracts.html">ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0006-public-import-paths-and-names.html">ADR-0006: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0007-how-a-session-ends.html">ADR-0007: Decide in One Place How a Session Ends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0008-session-exclusions-and-exposure-control.html">ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0009-immutable-step-results.html">ADR-0009: Make Step Results Immutable Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0010-random-numbers-and-reproducibility.html">ADR-0010: Random Numbers and Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0011-random-tie-breaking.html">ADR-0011: Break Ties Between Items Uniformly at Random</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0012-ability-scale-and-extreme-patterns.html">ADR-0012: Ability Scale and Extreme Response Patterns</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0013: Progressive and Proportional Follow the Published Schedule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0014-plotting-as-an-optional-extra.html">ADR-0014: Plotting as an Optional Extra</a></li>
 </ul>
 </div>
 </nav></div>
@@ -514,7 +512,7 @@
     
     <li class="breadcrumb-item"><a href="../architecture_decisions.html" class="nav-link">Architecture Decision Records</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0005: Make Step Results Immutable Snapshots</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0013: Progressive and Proportional Follow the Published Schedule</span></li>
   </ul>
 </nav>
 </div>
@@ -531,29 +529,66 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="adr-0005-make-step-results-immutable-snapshots">
-<h1>ADR-0005: Make Step Results Immutable Snapshots<a class="headerlink" href="#adr-0005-make-step-results-immutable-snapshots" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="adr-0013-progressive-and-proportional-follow-the-published-schedule">
+<h1>ADR-0013: Progressive and Proportional Follow the Published Schedule<a class="headerlink" href="#adr-0013-progressive-and-proportional-follow-the-published-schedule" title="Link to this heading">#</a></h1>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
-<p>Accepted</p>
+<p>Accepted 2026-11-23</p>
 </section>
 <section id="context">
 <h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
-<p>Returning a live mutable session object from step results made earlier results drift as the session
-continued to evolve. That weakened the semantics of step-level inspection, tracing, and tutorials.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ProgressiveSelector</span></code> and <code class="docutils literal notranslate"><span class="pre">ProportionalSelector</span></code> carry the names of published methods: the
+progressive method of Revuelta and Ponsoda (1998) and the proportional method of Segall (2004), in
+the form Barrada et al. (2008) gave them, which catR implements. catsim used its own
+parameterisation of both:</p>
+<ul class="simple">
+<li><p>The weight on information at position <code class="docutils literal notranslate"><span class="pre">n</span></code> of a test of planned length <code class="docutils literal notranslate"><span class="pre">N</span></code> was
+<code class="docutils literal notranslate"><span class="pre">min(1,</span> <span class="pre">(n</span> <span class="pre">-</span> <span class="pre">1)</span> <span class="pre">/</span> <span class="pre">(N</span> <span class="pre">-</span> <span class="pre">1))</span> <span class="pre">**</span> <span class="pre">acceleration</span></code>, with <code class="docutils literal notranslate"><span class="pre">acceleration</span></code> positive and 1 (linear) by default.
+Barrada et al.’s schedule is a cumulative power sum with an acceleration parameter <code class="docutils literal notranslate"><span class="pre">t</span></code>. The two
+agree only when both are linear, so <code class="docutils literal notranslate"><span class="pre">acceleration</span></code> was not their <code class="docutils literal notranslate"><span class="pre">t</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ProportionalSelector</span></code> raised the information to <code class="docutils literal notranslate"><span class="pre">sharpness</span></code> times that weight, with
+<code class="docutils literal notranslate"><span class="pre">sharpness</span> <span class="pre">=</span> <span class="pre">6</span></code> by default. In the published method the exponent grows to the test length.</p></li>
+</ul>
+<p>The documentation said so, but under the same method names users comparing with catR got different
+behaviour, and the default exponent left the last item of a test far from maximum-information
+selection, which the published exponent comes close to.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
-<p>Make <code class="docutils literal notranslate"><span class="pre">CatStepResult.session</span></code> an immutable snapshot of session state at the end of the step rather
-than a reference to the live mutable session object.</p>
+<p>Both selectors use Barrada et al.’s (2008, Equations 12 and 13) schedule, through one shared
+helper. The weight at position <code class="docutils literal notranslate"><span class="pre">n</span></code> is the sum of <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">**</span> <span class="pre">acceleration</span></code> for <code class="docutils literal notranslate"><span class="pre">m</span></code> below <code class="docutils literal notranslate"><span class="pre">n</span></code>, divided by
+the same sum for <code class="docutils literal notranslate"><span class="pre">m</span></code> below <code class="docutils literal notranslate"><span class="pre">N</span></code>; <code class="docutils literal notranslate"><span class="pre">ProgressiveSelector</span></code> blends with that weight, and
+<code class="docutils literal notranslate"><span class="pre">ProportionalSelector</span></code> raises the information to <code class="docutils literal notranslate"><span class="pre">N</span></code> times it. <code class="docutils literal notranslate"><span class="pre">acceleration</span></code> is Barrada et al.’s
+acceleration parameter (<code class="docutils literal notranslate"><span class="pre">t</span></code> for the progressive weight, <code class="docutils literal notranslate"><span class="pre">s</span></code> for the proportional exponent): any
+finite number, 0 by default. At 0 the schedule is linear (p. 498) and differs little from Revuelta
+and Ponsoda’s original one (p. 500).</p>
+<p>catsim departs from catR where a session leaves the planned test: past position <code class="docutils literal notranslate"><span class="pre">N</span></code> the weight
+stays 1 and the exponent stays at <code class="docutils literal notranslate"><span class="pre">N</span></code> rather than growing, and a one-item test is at its last
+position, with weight 1, from the start. Its default acceleration is 0, where catR’s <code class="docutils literal notranslate"><span class="pre">AP</span></code> defaults
+to 1. The technique pages list these departures.</p>
 </section>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>Stored step results remain stable after later CAT steps.</p></li>
-<li><p>Step-level debugging and audit-style inspection become reliable.</p></li>
-<li><p>The engine continues to mutate <code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code> internally, but result objects have durable
-semantics.</p></li>
+<li><p>Within the planned length, the weights and exponents are those of catR’s <code class="docutils literal notranslate"><span class="pre">nextItem</span></code> with
+<code class="docutils literal notranslate"><span class="pre">criterion</span> <span class="pre">=</span> <span class="pre">&quot;progressive&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;proportional&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">rule</span> <span class="pre">=</span> <span class="pre">&quot;length&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">AP</span></code> equal to
+<code class="docutils literal notranslate"><span class="pre">acceleration</span></code>, so results can be compared with catR’s.</p></li>
+<li><p>At the last item of a planned test, <code class="docutils literal notranslate"><span class="pre">ProportionalSelector</span></code> selects close to maximum information,
+as the published method intends.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">acceleration</span></code> accepts 0 and negative values; only NaN and infinite values are rejected.</p></li>
+<li><p>The two selectors share one schedule, so a fix to it reaches both.</p></li>
+</ul>
+</section>
+<section id="alternatives-considered">
+<h2>Alternatives Considered<a class="headerlink" href="#alternatives-considered" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Keeping catsim’s own parameterisation under the published names, documented: users comparing
+with catR would still get different behaviour from methods of the same name.</p></li>
+<li><p>Keeping catsim’s own schedule behind a parameter: two schedules to test and document for no
+use the published one does not serve.</p></li>
+<li><p>Keeping <code class="docutils literal notranslate"><span class="pre">sharpness</span></code>, with <code class="docutils literal notranslate"><span class="pre">None</span></code> meaning the test length: neither Barrada et al. nor catR has such
+a parameter, the published end point already scales with the test, and a second way to spell the
+default would add an optional value and a property that returns either <code class="docutils literal notranslate"><span class="pre">None</span></code> or a number.</p></li>
 </ul>
 </section>
 </section>
@@ -569,20 +604,20 @@ semantics.</p></li>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="0004-explicit-strategy-contracts.html"
+       href="0012-ability-scale-and-extreme-patterns.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</p>
+        <p class="prev-next-title">ADR-0012: Ability Scale and Extreme Response Patterns</p>
       </div>
     </a>
     <a class="right-next"
-       href="0006-versioned-tutorial-notebooks.html"
+       href="0014-plotting-as-an-optional-extra.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ADR-0006: Version Tutorial Notebooks as .ipynb Files</p>
+        <p class="prev-next-title">ADR-0014: Plotting as an Optional Extra</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -609,13 +644,14 @@ semantics.</p></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#context">Context</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#decision">Decision</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#consequences">Consequences</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#alternatives-considered">Alternatives Considered</a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/adr/0005-immutable-step-results.md.txt">
+    <a href="../_sources/adr/0013-published-progressive-schedule.md.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

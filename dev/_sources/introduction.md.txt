@@ -41,7 +41,7 @@ the standard normal distribution $N(0, 1)$, under which about 99.99% of examinee
 and $4$. The ability cannot be observed, so it is estimated from the responses: the *ability
 estimate* $\hat{\theta}$, which tends to get closer to the true $\theta$ as the test gets longer.
 By default, {py:mod}`catsim`'s estimators keep their estimates within $[-6, 6]$, wider than any plausible
-examinee or item bank ({doc}`/adr/0009-ability-scale-and-extreme-patterns`).
+examinee or item bank ({doc}`/adr/0012-ability-scale-and-extreme-patterns`).
 
 Under the logistic models, item $i$ has up to four parameters:
 
@@ -256,4 +256,4 @@ the same test to simulated examinees whose true abilities are known, and returns
 {py:class}`~catsim.SimulationResult` that compares the final estimates with those abilities
 ({doc}`running-simulations`). {doc}`reproducibility` shows how to seed a simulation study so that
 it repeats, and {doc}`extending` how to write a strategy of your own.
-{doc}`/adr/0001-explicit-cat-engine` records why catsim is built around the engine.
+{doc}`/adr/0003-explicit-cat-engine` records why catsim is built around the engine.

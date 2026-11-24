@@ -1,8 +1,8 @@
-# ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT
+# ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT
 
 ## Status
 
-Accepted
+Accepted 2026-11-24
 
 ## Context
 
@@ -35,3 +35,11 @@ ability or a Boolean-or-category response.
   exposure controls, can be added without breaking the contracts.
 - MIRT or polytomous support is a breaking change, or a separate set of types, and gets its own
   design when it is planned.
+
+## Alternatives Considered
+
+- Widening the current types before 1.0, to a scalar-or-vector ability or a Boolean-or-category
+  response: every strategy would have to check which form it received, for models that no part of
+  catsim implements.
+- Leaving the scope unstated: the 1.0 contracts would still fix it, but a proposal for MIRT or
+  polytomous items would find no record of what may change and how.

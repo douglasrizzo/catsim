@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ADR-0001: Adopt Explicit CAT Engine Architecture &#8212; catsim 0.21.0 documentation</title>
+    <title>ADR-0010: Random Numbers and Reproducibility &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -42,13 +42,13 @@
     <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0001-explicit-cat-engine';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0010-random-numbers-and-reproducibility';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ADR-0002: Remove Legacy Simulator APIs" href="0002-remove-legacy-simulator-apis.html" />
-    <link rel="prev" title="Architecture Decision Records" href="../architecture_decisions.html" />
+    <link rel="next" title="ADR-0011: Break Ties Between Items Uniformly at Random" href="0011-random-tie-breaking.html" />
+    <link rel="prev" title="ADR-0009: Make Step Results Immutable Snapshots" href="0009-immutable-step-results.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -455,22 +455,20 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0001: Adopt Explicit CAT Engine Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0002-remove-legacy-simulator-apis.html">ADR-0002: Remove Legacy Simulator APIs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0003-runtime-state-ownership.html">ADR-0003: Keep Runtime State Outside Domain Objects</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0004-explicit-strategy-contracts.html">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0005-immutable-step-results.html">ADR-0005: Make Step Results Immutable Snapshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0006-versioned-tutorial-notebooks.html">ADR-0006: Version Tutorial Notebooks as .ipynb Files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0007-release-gated-by-docs.html">ADR-0007: Gate Package Publication on Documentation Availability</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0008-random-tie-breaking.html">ADR-0008: Break Ties Between Items Uniformly at Random</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0009-ability-scale-and-extreme-patterns.html">ADR-0009: Ability Scale and Extreme Response Patterns</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0010-published-progressive-schedule.html">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0011-how-a-session-ends.html">ADR-0011: Decide in One Place How a Session Ends</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0014-public-import-paths-and-names.html">ADR-0014: Public Import Paths and One Name per Concept</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0015-plotting-as-an-optional-extra.html">ADR-0015: Plotting as an Optional Extra</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0016-session-exclusions-and-exposure-control.html">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0001-unidimensional-dichotomous-scope.html">ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0002-four-parameter-item-matrix.html">ADR-0002: Items Are an n×4 Matrix of 4PL Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0003-explicit-cat-engine.html">ADR-0003: Adopt Explicit CAT Engine Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0004-runtime-state-ownership.html">ADR-0004: Keep Runtime State Outside Domain Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0005-explicit-strategy-contracts.html">ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0006-public-import-paths-and-names.html">ADR-0006: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0007-how-a-session-ends.html">ADR-0007: Decide in One Place How a Session Ends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0008-session-exclusions-and-exposure-control.html">ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0009-immutable-step-results.html">ADR-0009: Make Step Results Immutable Snapshots</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0010: Random Numbers and Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0011-random-tie-breaking.html">ADR-0011: Break Ties Between Items Uniformly at Random</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0012-ability-scale-and-extreme-patterns.html">ADR-0012: Ability Scale and Extreme Response Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0013-published-progressive-schedule.html">ADR-0013: Progressive and Proportional Follow the Published Schedule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0014-plotting-as-an-optional-extra.html">ADR-0014: Plotting as an Optional Extra</a></li>
 </ul>
 </div>
 </nav></div>
@@ -514,7 +512,7 @@
     
     <li class="breadcrumb-item"><a href="../architecture_decisions.html" class="nav-link">Architecture Decision Records</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0001: Adopt Explicit CAT Engine Architecture</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0010: Random Numbers and Reproducibility</span></li>
   </ul>
 </nav>
 </div>
@@ -531,35 +529,75 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="adr-0001-adopt-explicit-cat-engine-architecture">
-<h1>ADR-0001: Adopt Explicit CAT Engine Architecture<a class="headerlink" href="#adr-0001-adopt-explicit-cat-engine-architecture" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="adr-0010-random-numbers-and-reproducibility">
+<h1>ADR-0010: Random Numbers and Reproducibility<a class="headerlink" href="#adr-0010-random-numbers-and-reproducibility" title="Link to this heading">#</a></h1>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
-<p>Accepted</p>
+<p>Accepted 2026-11-24</p>
 </section>
 <section id="context">
 <h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
-<p>The previous architecture centered CAT execution around a simulator object. That made batch
-simulation the dominant workflow and forced manual or third-party usage through interfaces that
-were indirectly coupled to simulator-owned state.</p>
+<p>Three components of a simulated CAT draw random numbers: the initializer (a random starting
+ability), the selectors (breaking ties, ADR-0011, and the randomized selectors’ draws) and the
+simulated responses, each a uniform draw against the item’s probability of a correct answer. The
+estimators and stoppers draw nothing.</p>
+<p><code class="docutils literal notranslate"><span class="pre">SimulationRunner</span></code> created one generator from its <code class="docutils literal notranslate"><span class="pre">seed</span></code> when it was constructed and passed it to
+every run, and its <code class="docutils literal notranslate"><span class="pre">run(n)</span></code> form drew the true abilities from the bank’s difficulties with that
+same generator. Later, <code class="docutils literal notranslate"><span class="pre">run</span></code> and <code class="docutils literal notranslate"><span class="pre">ItemBank.generate</span></code> defaulted to <code class="docutils literal notranslate"><span class="pre">rng=0</span></code>, so every unseeded call
+gave the same run or bank. NumPy, <code class="docutils literal notranslate"><span class="pre">scipy.stats</span></code> and scikit-learn read a missing seed as fresh
+randomness.</p>
+<p>Whether a run can be repeated, compared with another or split across processes depends on where the
+generator comes from and on what draws from it, which nothing recorded.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
-<p>Adopt an explicit execution model built around:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">CatEngine</span></code> for stepwise CAT execution</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code> for per-session runtime state</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">SimulationRunner</span></code> for batch execution on top of the same engine</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code> for aggregate outputs</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SimulationRunner.run(true_thetas,</span> <span class="pre">*,</span> <span class="pre">rng=None)</span></code> builds one generator,
+<code class="docutils literal notranslate"><span class="pre">numpy.random.default_rng(rng)</span></code>, at the start of every call. <code class="docutils literal notranslate"><span class="pre">rng</span></code> is None, a seed or a
+<code class="docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code>: None draws fresh entropy (NumPy’s convention), a seed gives a generator
+in a fixed state, and a generator is used as is and advanced by the run.</p></li>
+<li><p>That one generator serves the whole run. It reaches the strategies through <code class="docutils literal notranslate"><span class="pre">RunContext.rng</span></code> and
+<code class="docutils literal notranslate"><span class="pre">StepContext.rng</span></code> (ADR-0005) and the simulated responses through <code class="docutils literal notranslate"><span class="pre">ResponseProvider.answer</span></code>, so the
+initializer, the selectors, the engine’s exposure control (ADR-0008) and the responses of every
+session draw from one stream. An engine without an exposure control draws nothing for it.</p></li>
+<li><p>The sessions run one after another, in the order of <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code>, so the draws of a session
+depend on every draw of the sessions before it.</p></li>
+<li><p>The runner draws nothing itself. The true abilities are an input: to simulate a population, the
+caller draws them with a generator of its own.</p></li>
+<li><p>Reproducibility comes from passing <code class="docutils literal notranslate"><span class="pre">rng</span></code>. An unseeded call is random, so unseeded replications in
+a loop differ, as they must for their spread to mean anything.</p></li>
 </ul>
 </section>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>Manual CAT execution becomes a first-class use case.</p></li>
-<li><p>Simulation reuses the same execution path instead of owning a separate lifecycle.</p></li>
-<li><p>State transitions become easier to test because the engine boundary is explicit.</p></li>
-<li><p>The package is better described as a CAT toolkit than as a simulator-only library.</p></li>
+<li><p>The same seed and the same <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code> give identical results, run after run and runner after
+runner, on the same engine configuration and package versions; a generator passed as <code class="docutils literal notranslate"><span class="pre">rng</span></code> gives
+other results each time, since each run advances it.</p></li>
+<li><p>An unseeded run cannot be repeated: nothing records the entropy it drew.</p></li>
+<li><p>Reordering <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code> changes the results, and so does inserting or removing an examinee:
+every later session starts from another point of the stream.</p></li>
+<li><p>A change in how many numbers one component draws, such as a selector changed to break ties it
+used to leave alone, shifts the draws of every later session, so seeded results can change across
+catsim versions.</p></li>
+<li><p>Running the sessions of one run in parallel would make the draws depend on their timing, so the
+runner does not. A parallel study splits the population and runs each part with a generator of
+its own, and its results differ from those of one sequential run (<a class="reference internal" href="../reproducibility.html"><span class="doc">Reproducibility</span></a>).</p></li>
+<li><p>An application that steps sessions itself (<code class="docutils literal notranslate"><span class="pre">CatEngine.step</span></code> and <code class="docutils literal notranslate"><span class="pre">apply_response</span></code>) owns its
+<code class="docutils literal notranslate"><span class="pre">RunContext</span></code> and so its generator; the same rules apply to the sessions it runs on one context.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ItemBank.generate</span></code> takes its own <code class="docutils literal notranslate"><span class="pre">rng</span></code>, also None by default, so a generated bank does not
+depend on any run.</p></li>
+</ul>
+</section>
+<section id="alternatives-considered">
+<h2>Alternatives Considered<a class="headerlink" href="#alternatives-considered" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>One generator per runner, created when the runner is built: two runs on the same true abilities
+give different tests, the second continuing the first one’s stream.</p></li>
+<li><p>A fixed default seed: unseeded replications in a loop are identical, with no warning, against
+the convention of NumPy and SciPy.</p></li>
+<li><p>Drawing the true abilities inside the runner: the same abilities give other tests depending on
+whether they were drawn or passed in.</p></li>
 </ul>
 </section>
 </section>
@@ -575,20 +613,20 @@ were indirectly coupled to simulator-owned state.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../architecture_decisions.html"
+       href="0009-immutable-step-results.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Architecture Decision Records</p>
+        <p class="prev-next-title">ADR-0009: Make Step Results Immutable Snapshots</p>
       </div>
     </a>
     <a class="right-next"
-       href="0002-remove-legacy-simulator-apis.html"
+       href="0011-random-tie-breaking.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ADR-0002: Remove Legacy Simulator APIs</p>
+        <p class="prev-next-title">ADR-0011: Break Ties Between Items Uniformly at Random</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -615,13 +653,14 @@ were indirectly coupled to simulator-owned state.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#context">Context</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#decision">Decision</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#consequences">Consequences</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#alternatives-considered">Alternatives Considered</a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/adr/0001-explicit-cat-engine.md.txt">
+    <a href="../_sources/adr/0010-random-numbers-and-reproducibility.md.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

@@ -155,7 +155,7 @@ the item, divided by the number of sessions started so far other than its own. S
 progress count too, so sessions that run side by side see each other's items as they are given,
 and the first session sees every rate at 0. When sessions run one after another, as in a
 simulation, this is the share of the examinees tested before the current one
-({doc}`/adr/0003-runtime-state-ownership`). Above, `attempt-2` starts with a different item from
+({doc}`/adr/0004-runtime-state-ownership`). Above, `attempt-2` starts with a different item from
 `attempt-1`: with two sessions started, each item `attempt-1` was given has a rate of 1 for
 `attempt-2`. The {py:class}`~catsim.ExposureTracker` reference gives the exact count.
 
@@ -175,7 +175,7 @@ context = RunContext(rng=numpy.random.default_rng(), exposure_tracker=tracker)
 exposure control declined it, and `n_sessions` the sessions started. Save them whenever you save a
 session, in the same transaction if you can: a tracker saved only at shutdown is lost in a crash,
 and a tracker older than the sessions saved after it under-counts them, which no check detects. A session that starts and is abandoned still
-counts as a session, which lowers every rate a little. A tracker counts only the sessions that run
+counts as a session, as does a second session started for the same examinee; each lowers every rate a little. A tracker counts only the sessions that run
 on its context: processes with trackers of their own do not see each other's administrations.
 
 ## Decline Items with an Exposure Control

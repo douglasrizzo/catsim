@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate &#8212; catsim 0.21.0 documentation</title>
+    <title>ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -42,15 +42,13 @@
     <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0004-explicit-strategy-contracts';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0005-explicit-strategy-contracts';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ADR-0005: Make Step Results Immutable Snapshots" href="0005-immutable-step-results.html" />
-    <link rel="prev" title="ADR-0003: Keep Runtime State Outside Domain Objects" href="0003-runtime-state-ownership.html" />
+    <link rel="next" title="ADR-0006: Public Import Paths and One Name per Concept" href="0006-public-import-paths-and-names.html" />
+    <link rel="prev" title="ADR-0004: Keep Runtime State Outside Domain Objects" href="0004-runtime-state-ownership.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -457,22 +455,20 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="0001-explicit-cat-engine.html">ADR-0001: Adopt Explicit CAT Engine Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0002-remove-legacy-simulator-apis.html">ADR-0002: Remove Legacy Simulator APIs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0003-runtime-state-ownership.html">ADR-0003: Keep Runtime State Outside Domain Objects</a></li>
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0005-immutable-step-results.html">ADR-0005: Make Step Results Immutable Snapshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0006-versioned-tutorial-notebooks.html">ADR-0006: Version Tutorial Notebooks as .ipynb Files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0007-release-gated-by-docs.html">ADR-0007: Gate Package Publication on Documentation Availability</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0008-random-tie-breaking.html">ADR-0008: Break Ties Between Items Uniformly at Random</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0009-ability-scale-and-extreme-patterns.html">ADR-0009: Ability Scale and Extreme Response Patterns</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0010-published-progressive-schedule.html">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0011-how-a-session-ends.html">ADR-0011: Decide in One Place How a Session Ends</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0014-public-import-paths-and-names.html">ADR-0014: Public Import Paths and One Name per Concept</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0015-plotting-as-an-optional-extra.html">ADR-0015: Plotting as an Optional Extra</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0016-session-exclusions-and-exposure-control.html">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0001-unidimensional-dichotomous-scope.html">ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0002-four-parameter-item-matrix.html">ADR-0002: Items Are an n×4 Matrix of 4PL Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0003-explicit-cat-engine.html">ADR-0003: Adopt Explicit CAT Engine Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0004-runtime-state-ownership.html">ADR-0004: Keep Runtime State Outside Domain Objects</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0006-public-import-paths-and-names.html">ADR-0006: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0007-how-a-session-ends.html">ADR-0007: Decide in One Place How a Session Ends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0008-session-exclusions-and-exposure-control.html">ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0009-immutable-step-results.html">ADR-0009: Make Step Results Immutable Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0010-random-numbers-and-reproducibility.html">ADR-0010: Random Numbers and Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0011-random-tie-breaking.html">ADR-0011: Break Ties Between Items Uniformly at Random</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0012-ability-scale-and-extreme-patterns.html">ADR-0012: Ability Scale and Extreme Response Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0013-published-progressive-schedule.html">ADR-0013: Progressive and Proportional Follow the Published Schedule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0014-plotting-as-an-optional-extra.html">ADR-0014: Plotting as an Optional Extra</a></li>
 </ul>
 </div>
 </nav></div>
@@ -516,7 +512,7 @@
     
     <li class="breadcrumb-item"><a href="../architecture_decisions.html" class="nav-link">Architecture Decision Records</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate</span></li>
   </ul>
 </nav>
 </div>
@@ -533,61 +529,26 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="adr-0004-strategies-take-one-step-context-and-estimators-return-an-estimate">
-<h1>ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate<a class="headerlink" href="#adr-0004-strategies-take-one-step-context-and-estimators-return-an-estimate" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="adr-0005-strategies-take-one-step-context-and-estimators-return-an-estimate">
+<h1>ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate<a class="headerlink" href="#adr-0005-strategies-take-one-step-context-and-estimators-return-an-estimate" title="Link to this heading">#</a></h1>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
-<p>Accepted</p>
+<p>Accepted 2026-11-24</p>
 </section>
 <section id="context">
 <h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
-<p>The strategy interfaces first took engine-managed data through generic <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code>, and this ADR
-replaced them with explicit typed parameters. That left four contracts that named and ordered the
-same session inputs differently:</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Strategy</p></th>
-<th class="head"><p>Signature</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>initializer</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">initialize(item_bank,</span> <span class="pre">rng)</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>selector</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">select(item_bank,</span> <span class="pre">administered_items,</span> <span class="pre">est_theta,</span> <span class="pre">rng=None,</span> <span class="pre">exposure_rates=None,</span> <span class="pre">response_vector=None)</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>estimator</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">estimate(item_bank,</span> <span class="pre">administered_items,</span> <span class="pre">response_vector,</span> <span class="pre">est_theta)</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>stopper</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">stop(item_bank,</span> <span class="pre">administered_items,</span> <span class="pre">theta)</span></code></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>The estimate was <code class="docutils literal notranslate"><span class="pre">est_theta</span></code> in two of them and <code class="docutils literal notranslate"><span class="pre">theta</span></code> in the third, and the responses came before
-it in one and after it in another. <code class="docutils literal notranslate"><span class="pre">rng</span></code>, <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code> and <code class="docutils literal notranslate"><span class="pre">response_vector</span></code> were optional in
-<code class="docutils literal notranslate"><span class="pre">select</span></code> although the engine always passed them, so the selectors that need them checked for <code class="docutils literal notranslate"><span class="pre">None</span></code>,
-and a deterministic selector called directly without <code class="docutils literal notranslate"><span class="pre">rng</span></code> raised when items tied (ADR-0008).</p>
-<p>Every input added so far changed every strategy signature, so a custom strategy written against an
-older one constructed fine and failed at its first call. The planned techniques need more inputs:
-the responses in <code class="docutils literal notranslate"><span class="pre">stop</span></code> for SPRT, GLR and curtailment stoppers, a generator for curtailment’s Monte
-Carlo refinement, and a set of items to pass over for Sympson-Hetter exposure control. Passing over
-an item by adding it to the administered items would also move the test position, which several
-selectors read from the number of administered items. Some planned techniques also kept
-per-session state on the strategy object, such as a stopper’s last classification, which the next
-session on the same engine overwrites.</p>
-<p>The estimator returned a bare <code class="docutils literal notranslate"><span class="pre">float</span></code>, so the precision stoppers computed a standard error
-themselves, always the Fisher one at the estimate (<code class="docutils literal notranslate"><span class="pre">irt.see</span></code>), whatever the estimator. For EAP that
-is not the estimator’s own error, the posterior standard deviation: on 200 simulated EAP sessions
-in the 1.0 review, the Fisher standard error was a median 26% above the posterior standard
-deviation after 3 items and 4% above after 20, and with a 0.4 threshold the stopping decision after
-20 items differed in 47 sessions. catR uses each estimator’s own standard error (Magis and Raîche
-2012). The estimator also counted its calls and objective evaluations on the object (<code class="docutils literal notranslate"><span class="pre">calls</span></code>,
-<code class="docutils literal notranslate"><span class="pre">evaluations</span></code>, <code class="docutils literal notranslate"><span class="pre">total_evaluations</span></code>, <code class="docutils literal notranslate"><span class="pre">avg_evaluations</span></code>). Those counters summed over every session the
-estimator served and over MEI’s look-ahead calls, so no count could be attributed to a session or a
-step.</p>
+<p>The strategy interfaces took the session’s inputs as explicit parameters, which the four
+contracts named and ordered differently, and <code class="docutils literal notranslate"><span class="pre">rng</span></code> was optional in <code class="docutils literal notranslate"><span class="pre">select</span></code> although the engine
+always passed it, so a deterministic selector called directly raised when items tied (ADR-0011).
+Every added input changed every signature, so a custom strategy written against an older one failed
+at its first call, and the planned techniques need more: the responses in <code class="docutils literal notranslate"><span class="pre">stop</span></code> for SPRT, GLR and
+curtailment stoppers, and items to pass over for Sympson-Hetter exposure control. Some also kept
+per-session state on the strategy object, which the next session on the same engine overwrites.</p>
+<p>The estimator returned a bare <code class="docutils literal notranslate"><span class="pre">float</span></code>, so the precision stoppers computed the Fisher standard error
+themselves, whatever the estimator. For EAP that is not the estimator’s own error, the posterior
+standard deviation, and the difference changes stopping decisions in short tests; catR uses each
+estimator’s own standard error. The estimator also counted its objective evaluations on the
+object, over every session it served and MEI’s look-ahead calls, so no count belonged to a session.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
@@ -607,134 +568,49 @@ step.</p>
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>The context holds <code class="docutils literal notranslate"><span class="pre">item_bank</span></code>, <code class="docutils literal notranslate"><span class="pre">rng</span></code>, <code class="docutils literal notranslate"><span class="pre">administered_items</span></code>, <code class="docutils literal notranslate"><span class="pre">responses</span></code>, <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code>, <code class="docutils literal notranslate"><span class="pre">theta</span></code>,
-<code class="docutils literal notranslate"><span class="pre">se</span></code> and <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code>. Only the item bank and the generator are required; the other fields
-default to a session with no responses and no exposure tracking (<code class="docutils literal notranslate"><span class="pre">se</span></code> is <code class="docutils literal notranslate"><span class="pre">math.inf</span></code>;
-<code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code> when the run has no tracker, and selectors then apply no cap). It
-checks that the responses hold one Boolean per administered item, so no strategy has to.</p></li>
-<li><p>The selector gets the session as it stands. The estimator gets the session with the newest item
-and response added, and <code class="docutils literal notranslate"><span class="pre">theta</span></code> and <code class="docutils literal notranslate"><span class="pre">se</span></code> still the previous estimate’s, its starting point. The
-stopper gets that same state with the new estimate and its standard error. The engine builds the
-estimator’s and the stopper’s contexts before it changes the session (ADR-0011).</p></li>
-<li><p>The examinee’s true ability and the session’s bookkeeping are not in the context: strategies
-cannot see the simulated truth.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">excluded_items</span></code> holds items a selector must not choose although they have not been administered.
-The engine passes the session’s excluded items, among them those its exposure control declined
-(ADR-0016); a wrapper that passes a changed context on with <code class="docutils literal notranslate"><span class="pre">dataclasses.replace</span></code> adds to them,
-never replaces them. Selectors draw their candidates through <code class="docutils literal notranslate"><span class="pre">catsim.selection.remaining</span></code>,
-which leaves out both, and the test position stays <code class="docutils literal notranslate"><span class="pre">len(context.administered_items)</span></code>.</p></li>
-<li><p>The exposure control, an optional engine component (ADR-0016), takes the context the selector
-proposed from and the proposed item: <code class="docutils literal notranslate"><span class="pre">accept(context,</span> <span class="pre">item_id)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span></code>. The rules below apply to
-it as to the other strategies.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">select</span></code> returns an <code class="docutils literal notranslate"><span class="pre">int</span></code>. A selector with no item to offer raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>; <code class="docutils literal notranslate"><span class="pre">None</span></code>
-is not a return value.</p></li>
-<li><p>The initializer keeps its two arguments, keyword-only: it runs once per session, before any step
-state exists, so there is nothing else to pass.</p></li>
-<li><p>Strategies hold configuration and caches derived from the item bank, never per-session state.
-One strategy object serves every session of a run, an application may interleave the sessions of
-several examinees on one engine, and look-ahead selectors such as MEI call their estimator with
-hypothetical responses. A strategy that reports something about a session, such as a
-classification, computes it from the context with a pure method instead of storing it.</p></li>
+<li><p>The context holds the item bank, the run’s generator and the session as each strategy needs it
+(<code class="docutils literal notranslate"><span class="pre">StepContext</span></code>’s docstring and <a class="reference internal" href="../extending.html"><span class="doc">Extending catsim</span></a> list its fields). The examinee’s true ability is
+not in it, so strategies cannot see the simulated truth.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">excluded_items</span></code> holds the items a selector must not choose although they have not been
+administered (ADR-0008), so the test position stays the number of administered items.</p></li>
+<li><p>The exposure control, an optional engine component (ADR-0008), follows the same rules:
+<code class="docutils literal notranslate"><span class="pre">accept(context,</span> <span class="pre">item_id)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span></code>.</p></li>
+<li><p>The initializer runs before any step state exists, so it keeps its two keyword-only arguments.</p></li>
+<li><p>Strategies hold configuration and caches derived from the item bank, never per-session state:
+one strategy object serves every session of a run, an application may interleave several
+examinees’ sessions on one engine, and MEI calls its estimator with hypothetical responses. A
+strategy that reports something about a session computes it from the context.</p></li>
 <li><p>Adding a field to the context is not a breaking change: a new field gets a default, and a
 strategy reads only the fields it needs. Removing or renaming a field is.</p></li>
-</ul>
-<p><code class="docutils literal notranslate"><span class="pre">estimate</span></code> returns a frozen <code class="docutils literal notranslate"><span class="pre">catsim.Estimate(theta,</span> <span class="pre">se,</span> <span class="pre">evaluations)</span></code>: the estimate, its standard
-error by the estimator’s own formula, and how many times the estimator evaluated its objective for
-this estimate, or <code class="docutils literal notranslate"><span class="pre">None</span></code> where that count has no meaning. The standard error is finite, or
-<code class="docutils literal notranslate"><span class="pre">math.inf</span></code> when the responses carry no information about the ability; it is never NaN.</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Estimator</p></th>
-<th class="head"><p><code class="docutils literal notranslate"><span class="pre">se</span></code></p></th>
-<th class="head"><p><code class="docutils literal notranslate"><span class="pre">evaluations</span></code></p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">NumericalSearchEstimator</span></code></p></td>
-<td><p><span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta)}\)</span> (Magis and Raîche 2012, Eq. 3, p. 4)</p></td>
-<td><p>SciPy’s function evaluations; 0 for Dodd’s step</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">EAPEstimator</span></code></p></td>
-<td><p>the posterior standard deviation (Eq. 11, p. 6)</p></td>
-<td><p>the grid’s node count</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MAPEstimator</span></code></p></td>
-<td><p><span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta) - (\log p)''(\hat\theta)}\)</span>, which is <span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta) + 1/\sigma^2}\)</span> for a normal prior (Eq. 6, p. 5)</p></td>
-<td><p>201 search points plus the refinement’s evaluations</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">WarmLikelihoodEstimator</span></code></p></td>
-<td><p><span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta)}\)</span>, catR’s default</p></td>
-<td><p>the root scan’s, Brent’s and the ranking integrals’ evaluations</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<ul class="simple">
-<li><p>For the WLE catsim departs from Magis and Raîche (2012, Eq. 14, p. 6), who add
-<span class="math notranslate nohighlight">\((I'J - IJ')/(2I^2)\)</span> to the information. catR dropped that term in version 3.0, whose NEWS
-says it sometimes led to mathematical problems, and its <code class="docutils literal notranslate"><span class="pre">semTheta</span></code> still returns <span class="math notranslate nohighlight">\(1/\sqrt{I}\)</span>
-for the WLE under the default <code class="docutils literal notranslate"><span class="pre">sem.type</span> <span class="pre">=</span> <span class="pre">&quot;classic&quot;</span></code>. catsim follows catR (the maintainer’s
-decision, 2026-11-24), after comparing the formulas with the WLE’s sampling spread at a known
-ability (every response pattern for 5 and 10 items, 3,000 simulated ones for 20 and 40):</p>
-<ul>
-<li><p>The classic formula overestimates the error in short tests: by 10% (2PL) and 28% (3PL) at
-5 items. That is conservative: a standard-error stopper runs a few items longer than needed.</p></li>
-<li><p>Eq. 14 roughly halves that gap. The sandwich formula of Magis (2016), catR’s
-<code class="docutils literal notranslate"><span class="pre">sem.type</span> <span class="pre">=</span> <span class="pre">&quot;new&quot;</span></code>, is closest under the 3PL but underestimates the error under the 2PL
-(by 8% at 5 items), which would stop tests too early.</p></li>
-<li><p>From 20 items on, the three agree within about 3%.</p></li>
-<li><p>Under the 1PL and 2PL, Eq. 14’s sum is the curvature of the weighted likelihood at its
-maximum, so it is positive. With guessing or slipping parameters it can be negative, which
-leaves no standard error: 13 of 3,920 response patterns (0.4% of their probability) on random
-3PL tests of 2 to 8 items, none of 4,560 on 2PL tests.</p></li>
-</ul>
-</li>
-<li><p>The engine records every step’s <code class="docutils literal notranslate"><span class="pre">Estimate</span></code> in the session. <code class="docutils literal notranslate"><span class="pre">CatSessionState.estimates</span></code> starts with
-<code class="docutils literal notranslate"><span class="pre">Estimate(theta=initial,</span> <span class="pre">se=math.inf,</span> <span class="pre">evaluations=0)</span></code> and gains the estimator’s result for each
-response; <code class="docutils literal notranslate"><span class="pre">theta_history</span></code>, <code class="docutils literal notranslate"><span class="pre">current_theta</span></code> and <code class="docutils literal notranslate"><span class="pre">current_se</span></code> are read from it, and snapshots copy
-it.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">StandardErrorStopper</span></code> and <code class="docutils literal notranslate"><span class="pre">ConfidenceIntervalStopper</span></code> judge the standard error the estimator
-reported, <code class="docutils literal notranslate"><span class="pre">context.se</span></code>, instead of computing one.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">BaseEstimator</span></code> has no counters and no <code class="docutils literal notranslate"><span class="pre">__init__</span></code>. The per-step counts in the session’s estimates
-replace them, and MEI’s look-ahead estimates are never recorded, so MEI may share the engine’s
-estimator.</p></li>
-<li><p>Rejected: an optional <code class="docutils literal notranslate"><span class="pre">BaseEstimator.standard_error(context)</span></code> method, defaulting to the Fisher
-standard error. EAP would compute the posterior twice per step, once for the mean and once for
-its standard deviation, and caching the posterior between the two calls would put per-session
-state on an estimator that serves every session.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">estimate</span></code> returns a frozen <code class="docutils literal notranslate"><span class="pre">catsim.Estimate(theta,</span> <span class="pre">se,</span> <span class="pre">evaluations)</span></code>: the estimate, its standard
+error by the estimator’s own formula (finite or <code class="docutils literal notranslate"><span class="pre">math.inf</span></code>, never NaN) and its objective
+evaluations, or <code class="docutils literal notranslate"><span class="pre">None</span></code>. The WLE reports the Fisher standard error, as catR’s default does
+(<a class="reference internal" href="../api/techniques/estimation/warm-wle.html"><span class="doc">Warm Weighted Likelihood Estimator</span></a>). The session records every step’s <code class="docutils literal notranslate"><span class="pre">Estimate</span></code>, and the
+precision stoppers judge <code class="docutils literal notranslate"><span class="pre">context.se</span></code>.</p></li>
 </ul>
 </section>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>Custom strategies keep working when the context gains a field. The inputs have one name each,
-the context’s field names, in every contract.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">rng</span></code> and <code class="docutils literal notranslate"><span class="pre">responses</span></code> are always present, so the <code class="docutils literal notranslate"><span class="pre">None</span></code> checks are gone, and a deterministic
-selector called directly breaks ties as it does under the engine.</p></li>
-<li><p>Direct calls, in tests, notebooks and custom code, build a context:
-<code class="docutils literal notranslate"><span class="pre">selector.select(StepContext(item_bank=bank,</span> <span class="pre">rng=numpy.random.default_rng(0)))</span></code>. A direct
-<code class="docutils literal notranslate"><span class="pre">estimate</span></code> call gets an <code class="docutils literal notranslate"><span class="pre">Estimate</span></code> and reads <code class="docutils literal notranslate"><span class="pre">.theta</span></code>, <code class="docutils literal notranslate"><span class="pre">.se</span></code> or <code class="docutils literal notranslate"><span class="pre">.evaluations</span></code> from it.</p></li>
-<li><p>ty, which CI runs on catsim’s own code, rejects a built-in strategy whose method does not match its
-base class’s signature, and an engine call that does not match it. A custom strategy is checked
-only by its author’s type checker; one with another signature fails at its first call.</p></li>
-<li><p>The context copies the session’s items and responses into tuples for every call, which is
-proportional to the test length; MEI makes two copies per candidate item. Both are small next to
-an estimate.</p></li>
-<li><p>Contexts compare equal only to themselves: a generated equality would compare the exposure-rate
-arrays elementwise and raise.</p></li>
-<li><p>With <code class="docutils literal notranslate"><span class="pre">NumericalSearchEstimator</span></code> and <code class="docutils literal notranslate"><span class="pre">WarmLikelihoodEstimator</span></code> the precision stoppers decide as
-before: the standard error they report is the Fisher one the stoppers computed. With
-<code class="docutils literal notranslate"><span class="pre">EAPEstimator</span></code> and <code class="docutils literal notranslate"><span class="pre">MAPEstimator</span></code> the decisions change. Their standard error is usually below the
-Fisher one at the same estimate, and with a normal prior MAP’s always is, so seeded runs that
-pair them with a precision stopper end sooner.</p></li>
-<li><p>A custom estimator returns an <code class="docutils literal notranslate"><span class="pre">Estimate</span></code>. The engine raises a <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> naming the estimator when
-it returns anything else, instead of failing later on a missing <code class="docutils literal notranslate"><span class="pre">.theta</span></code>. An estimator with no
-standard error formula of its own can report <code class="docutils literal notranslate"><span class="pre">irt.see(theta,</span> <span class="pre">items)</span></code>, the Fisher one.</p></li>
-<li><p>An application that stores sessions stores their estimates and rebuilds them as <code class="docutils literal notranslate"><span class="pre">Estimate</span></code>s:
-<code class="docutils literal notranslate"><span class="pre">theta_history</span></code> is derived and read-only, and <code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code> rejects entries that are not
-<code class="docutils literal notranslate"><span class="pre">Estimate</span></code>s.</p></li>
-<li><p>An estimator’s cost over a session is the sum of its estimates’ <code class="docutils literal notranslate"><span class="pre">evaluations</span></code>; summed over the
-sessions, it compares estimators across simulations. No count is kept outside a session.</p></li>
+<li><p>Custom strategies keep working when the context gains a field, and each input has one name in
+every contract.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rng</span></code> and <code class="docutils literal notranslate"><span class="pre">responses</span></code> are always present, so a deterministic selector called directly, with a
+context it builds (<a class="reference internal" href="../extending.html"><span class="doc">Extending catsim</span></a>), breaks ties as under the engine.</p></li>
+<li><p>A precision stopper’s decision depends on the estimator: the Bayesian standard errors are usually
+below the Fisher one (<a class="reference internal" href="../api/techniques/estimation/index.html"><span class="doc">Estimation Techniques</span></a> compares them).</p></li>
+<li><p>An estimator’s cost is the sum of a session’s recorded <code class="docutils literal notranslate"><span class="pre">evaluations</span></code>. Look-ahead estimates are
+never recorded, so MEI may share the engine’s estimator.</p></li>
+</ul>
+</section>
+<section id="alternatives-considered">
+<h2>Alternatives Considered<a class="headerlink" href="#alternatives-considered" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Explicit per-strategy parameters: every added input changes every signature.</p></li>
+<li><p>Passing over an item by adding it to the administered items: it moves the test position, which
+several selectors read.</p></li>
+<li><p>An optional <code class="docutils literal notranslate"><span class="pre">BaseEstimator.standard_error(context)</span></code>, defaulting to the Fisher one: EAP would
+compute the posterior twice per step, and caching it between the calls would put per-session
+state on an estimator that serves every session.</p></li>
 </ul>
 </section>
 </section>
@@ -750,20 +626,20 @@ sessions, it compares estimators across simulations. No count is kept outside a 
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="0003-runtime-state-ownership.html"
+       href="0004-runtime-state-ownership.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ADR-0003: Keep Runtime State Outside Domain Objects</p>
+        <p class="prev-next-title">ADR-0004: Keep Runtime State Outside Domain Objects</p>
       </div>
     </a>
     <a class="right-next"
-       href="0005-immutable-step-results.html"
+       href="0006-public-import-paths-and-names.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ADR-0005: Make Step Results Immutable Snapshots</p>
+        <p class="prev-next-title">ADR-0006: Public Import Paths and One Name per Concept</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -790,13 +666,14 @@ sessions, it compares estimators across simulations. No count is kept outside a 
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#context">Context</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#decision">Decision</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#consequences">Consequences</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#alternatives-considered">Alternatives Considered</a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/adr/0004-explicit-strategy-contracts.md.txt">
+    <a href="../_sources/adr/0005-explicit-strategy-contracts.md.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

@@ -98,7 +98,7 @@ Any correct implementation must satisfy the following properties:
 
 1. With no administered items, the estimate and its standard error equal the mean and standard deviation of the prior induced by the configured grid and prior.
 2. The estimator returns a finite value for extreme response patterns such as all-correct or all-incorrect strings.
-3. The estimate depends only on the arguments of the call, never on earlier calls: the estimator keeps no per-session state ({doc}`ADR-0003 </adr/0003-runtime-state-ownership>`).
+3. The estimate depends only on the arguments of the call, never on earlier calls: the estimator keeps no per-session state ({doc}`ADR-0005 </adr/0005-explicit-strategy-contracts>`).
 4. The standard error is the posterior standard deviation on the grid, and the evaluation count is the grid's node count.
 5. Relative to a flatter prior, a centered normal prior produces stronger shrinkage of extreme short-test estimates toward the prior mean.
 

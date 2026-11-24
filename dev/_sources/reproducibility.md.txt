@@ -83,7 +83,7 @@ before it:
 
 To compare one examinee's test across two runs, keep the population array identical. Why catsim
 runs the sessions in sequence and draws from one generator is in
-{doc}`/adr/0013-random-numbers-and-reproducibility`.
+{doc}`/adr/0010-random-numbers-and-reproducibility`.
 
 ## Replications
 

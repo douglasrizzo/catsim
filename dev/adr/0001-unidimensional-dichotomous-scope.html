@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ADR-0006: Version Tutorial Notebooks as .ipynb Files &#8212; catsim 0.21.0 documentation</title>
+    <title>ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -42,13 +42,13 @@
     <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0006-versioned-tutorial-notebooks';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0001-unidimensional-dichotomous-scope';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ADR-0007: Gate Package Publication on Documentation Availability" href="0007-release-gated-by-docs.html" />
-    <link rel="prev" title="ADR-0005: Make Step Results Immutable Snapshots" href="0005-immutable-step-results.html" />
+    <link rel="next" title="ADR-0002: Items Are an n×4 Matrix of 4PL Parameters" href="0002-four-parameter-item-matrix.html" />
+    <link rel="prev" title="Architecture Decision Records" href="../architecture_decisions.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -455,22 +455,20 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="0001-explicit-cat-engine.html">ADR-0001: Adopt Explicit CAT Engine Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0002-remove-legacy-simulator-apis.html">ADR-0002: Remove Legacy Simulator APIs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0003-runtime-state-ownership.html">ADR-0003: Keep Runtime State Outside Domain Objects</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0004-explicit-strategy-contracts.html">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0005-immutable-step-results.html">ADR-0005: Make Step Results Immutable Snapshots</a></li>
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0006: Version Tutorial Notebooks as .ipynb Files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0007-release-gated-by-docs.html">ADR-0007: Gate Package Publication on Documentation Availability</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0008-random-tie-breaking.html">ADR-0008: Break Ties Between Items Uniformly at Random</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0009-ability-scale-and-extreme-patterns.html">ADR-0009: Ability Scale and Extreme Response Patterns</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0010-published-progressive-schedule.html">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0011-how-a-session-ends.html">ADR-0011: Decide in One Place How a Session Ends</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0014-public-import-paths-and-names.html">ADR-0014: Public Import Paths and One Name per Concept</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0015-plotting-as-an-optional-extra.html">ADR-0015: Plotting as an Optional Extra</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0016-session-exclusions-and-exposure-control.html">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0002-four-parameter-item-matrix.html">ADR-0002: Items Are an n×4 Matrix of 4PL Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0003-explicit-cat-engine.html">ADR-0003: Adopt Explicit CAT Engine Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0004-runtime-state-ownership.html">ADR-0004: Keep Runtime State Outside Domain Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0005-explicit-strategy-contracts.html">ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0006-public-import-paths-and-names.html">ADR-0006: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0007-how-a-session-ends.html">ADR-0007: Decide in One Place How a Session Ends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0008-session-exclusions-and-exposure-control.html">ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0009-immutable-step-results.html">ADR-0009: Make Step Results Immutable Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0010-random-numbers-and-reproducibility.html">ADR-0010: Random Numbers and Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0011-random-tie-breaking.html">ADR-0011: Break Ties Between Items Uniformly at Random</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0012-ability-scale-and-extreme-patterns.html">ADR-0012: Ability Scale and Extreme Response Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0013-published-progressive-schedule.html">ADR-0013: Progressive and Proportional Follow the Published Schedule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0014-plotting-as-an-optional-extra.html">ADR-0014: Plotting as an Optional Extra</a></li>
 </ul>
 </div>
 </nav></div>
@@ -514,7 +512,7 @@
     
     <li class="breadcrumb-item"><a href="../architecture_decisions.html" class="nav-link">Architecture Decision Records</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0006: Version Tutorial Notebooks as .ipynb Files</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT</span></li>
   </ul>
 </nav>
 </div>
@@ -531,28 +529,52 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="adr-0006-version-tutorial-notebooks-as-ipynb-files">
-<h1>ADR-0006: Version Tutorial Notebooks as .ipynb Files<a class="headerlink" href="#adr-0006-version-tutorial-notebooks-as-ipynb-files" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="adr-0001-scope-1-0-to-unidimensional-dichotomous-irt">
+<h1>ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT<a class="headerlink" href="#adr-0001-scope-1-0-to-unidimensional-dichotomous-irt" title="Link to this heading">#</a></h1>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
-<p>Accepted</p>
+<p>Accepted 2026-11-24</p>
 </section>
 <section id="context">
 <h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
-<p>The tutorial material needs to live alongside the package, open easily in Colab, and remain
-executable as the API evolves.</p>
+<p>Every contract in catsim assumes one ability and right-or-wrong answers. An ability estimate is a
+<code class="docutils literal notranslate"><span class="pre">float</span></code>, a response is a <code class="docutils literal notranslate"><span class="pre">bool</span></code>, and an item bank has the four columns of the logistic models, <code class="docutils literal notranslate"><span class="pre">a</span></code>,
+<code class="docutils literal notranslate"><span class="pre">b</span></code>, <code class="docutils literal notranslate"><span class="pre">c</span></code> and <code class="docutils literal notranslate"><span class="pre">d</span></code>. <code class="docutils literal notranslate"><span class="pre">StepContext</span></code>, <code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code> and the functions in <code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code> are typed and
+validated that way.</p>
+<p>Multidimensional IRT (MIRT) would replace the ability with a vector and each discrimination with
+one per dimension, which reaches <code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code>, <code class="docutils literal notranslate"><span class="pre">ItemBank</span></code>, <code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code> and every initializer,
+selector, estimator and stopper. Polytomous items, such as partial-credit or graded-response items,
+would replace the Boolean responses and the item parameters. Neither is planned, but nothing stated
+that 1.0 leaves them out, and the contracts frozen at 1.0 would decide how either could be added.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
-<p>Keep tutorial notebooks as version-controlled <code class="docutils literal notranslate"><span class="pre">.ipynb</span></code> files under <code class="docutils literal notranslate"><span class="pre">notebooks/</span></code> and validate
-them through the repository toolchain.</p>
+<p>The 1.0 contracts cover unidimensional IRT with dichotomous items: the one- to four-parameter
+logistic models. A scalar ability estimate, Boolean responses and the four-column item bank are part
+of the stable API.</p>
+<p>Support for multidimensional abilities or polytomous items would come as a new major version, or as
+parallel types beside the current ones, not by widening the current types to a scalar-or-vector
+ability or a Boolean-or-category response.</p>
 </section>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>Users get stable GitHub and Colab entry points for tutorials.</p></li>
-<li><p>Notebook outputs are normalized through notebook-specific pre-commit hooks.</p></li>
-<li><p>Notebook execution is treated as validation of documentation, not as optional polish.</p></li>
+<li><p>Strategies can rely on the ability being one <code class="docutils literal notranslate"><span class="pre">float</span></code> and the responses being Booleans, without
+checks for other shapes.</p></li>
+<li><p>Planned techniques that stay within the scope, such as the classification stoppers and the
+exposure controls, can be added without breaking the contracts.</p></li>
+<li><p>MIRT or polytomous support is a breaking change, or a separate set of types, and gets its own
+design when it is planned.</p></li>
+</ul>
+</section>
+<section id="alternatives-considered">
+<h2>Alternatives Considered<a class="headerlink" href="#alternatives-considered" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Widening the current types before 1.0, to a scalar-or-vector ability or a Boolean-or-category
+response: every strategy would have to check which form it received, for models that no part of
+catsim implements.</p></li>
+<li><p>Leaving the scope unstated: the 1.0 contracts would still fix it, but a proposal for MIRT or
+polytomous items would find no record of what may change and how.</p></li>
 </ul>
 </section>
 </section>
@@ -568,20 +590,20 @@ them through the repository toolchain.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="0005-immutable-step-results.html"
+       href="../architecture_decisions.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ADR-0005: Make Step Results Immutable Snapshots</p>
+        <p class="prev-next-title">Architecture Decision Records</p>
       </div>
     </a>
     <a class="right-next"
-       href="0007-release-gated-by-docs.html"
+       href="0002-four-parameter-item-matrix.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ADR-0007: Gate Package Publication on Documentation Availability</p>
+        <p class="prev-next-title">ADR-0002: Items Are an n×4 Matrix of 4PL Parameters</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -608,13 +630,14 @@ them through the repository toolchain.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#context">Context</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#decision">Decision</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#consequences">Consequences</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#alternatives-considered">Alternatives Considered</a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/adr/0006-versioned-tutorial-notebooks.md.txt">
+    <a href="../_sources/adr/0001-unidimensional-dichotomous-scope.md.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

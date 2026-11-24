@@ -83,10 +83,19 @@ NEWS](https://github.com/cran/catR/blob/master/NEWS), version 3.0), and its
 default `sem.type = "classic"` still does. Under the 1PL and 2PL models the
 corrected sum is the curvature of the weighted likelihood at its maximum, so it is
 positive; with guessing or slipping parameters it can be negative, which leaves no
-standard error. In short tests the classic formula overestimates the error (it is
-conservative, so a standard-error stopper runs a few items longer), and from about
-20 items the two agree within a few percent; ADR-0004 gives the comparison. The
-evaluation count is the number of
+standard error: 13 of 3,920 response patterns (0.4% of their probability) on random
+3PL tests of 2 to 8 items, none of 4,560 on 2PL tests.
+
+Against the WLE's sampling spread at a known ability (every response pattern for 5
+and 10 items, 3,000 simulated ones for 20 and 40), the classic formula
+overestimates the error in short tests, by 10% under the 2PL and 28% under the 3PL
+at 5 items. That is conservative: a standard-error stopper runs a few items longer
+than needed. Equation 14 roughly halves that gap. The sandwich formula of Magis
+(2016), catR's `sem.type = "new"`, is closest under the 3PL but underestimates the
+error under the 2PL (by 8% at 5 items), which would stop tests too early. From 20
+items on, the three agree within about 3%.
+
+The evaluation count is the number of
 modified-score evaluations: the 121 scan points, Brent's refinement of each
 bracketed root and, when several roots compete, the integrals that rank them.
 
@@ -131,6 +140,8 @@ Warm, T. A. (1989). Weighted likelihood estimation of ability in item response t
 Warm, T. A. (1985). *Weighted likelihood estimation of ability in item response theory with tests of finite length* (Doctoral dissertation). University of Oklahoma. <https://shareok.org/handle/11244/5356> (open access).
 
 Lord, F. M. (1983). Unbiased estimators of ability parameters, of their variance, and of their parallel-forms reliability. *Psychometrika*, 48(2), 233-245. <https://doi.org/10.1007/BF02294018>. Not openly available; Warm (1985, p. 7) gives its bias formula.
+
+Magis, D. (2016). Efficient standard error formulas of ability estimators with dichotomous item response models. *Psychometrika*, 81(1), 184-200. <https://doi.org/10.1007/s11336-015-9443-3>.
 
 Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
 

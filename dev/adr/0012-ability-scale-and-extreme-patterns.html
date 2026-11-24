@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT &#8212; catsim 0.21.0 documentation</title>
+    <title>ADR-0012: Ability Scale and Extreme Response Patterns &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -42,13 +42,13 @@
     <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0012-unidimensional-dichotomous-scope';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0012-ability-scale-and-extreme-patterns';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ADR-0013: Random Numbers and Reproducibility" href="0013-random-numbers-and-reproducibility.html" />
-    <link rel="prev" title="ADR-0011: Decide in One Place How a Session Ends" href="0011-how-a-session-ends.html" />
+    <link rel="next" title="ADR-0013: Progressive and Proportional Follow the Published Schedule" href="0013-published-progressive-schedule.html" />
+    <link rel="prev" title="ADR-0011: Break Ties Between Items Uniformly at Random" href="0011-random-tie-breaking.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -455,22 +455,20 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="0001-explicit-cat-engine.html">ADR-0001: Adopt Explicit CAT Engine Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0002-remove-legacy-simulator-apis.html">ADR-0002: Remove Legacy Simulator APIs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0003-runtime-state-ownership.html">ADR-0003: Keep Runtime State Outside Domain Objects</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0004-explicit-strategy-contracts.html">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0005-immutable-step-results.html">ADR-0005: Make Step Results Immutable Snapshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0006-versioned-tutorial-notebooks.html">ADR-0006: Version Tutorial Notebooks as .ipynb Files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0007-release-gated-by-docs.html">ADR-0007: Gate Package Publication on Documentation Availability</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0008-random-tie-breaking.html">ADR-0008: Break Ties Between Items Uniformly at Random</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0009-ability-scale-and-extreme-patterns.html">ADR-0009: Ability Scale and Extreme Response Patterns</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0010-published-progressive-schedule.html">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0011-how-a-session-ends.html">ADR-0011: Decide in One Place How a Session Ends</a></li>
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0014-public-import-paths-and-names.html">ADR-0014: Public Import Paths and One Name per Concept</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0015-plotting-as-an-optional-extra.html">ADR-0015: Plotting as an Optional Extra</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0016-session-exclusions-and-exposure-control.html">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0001-unidimensional-dichotomous-scope.html">ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0002-four-parameter-item-matrix.html">ADR-0002: Items Are an n×4 Matrix of 4PL Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0003-explicit-cat-engine.html">ADR-0003: Adopt Explicit CAT Engine Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0004-runtime-state-ownership.html">ADR-0004: Keep Runtime State Outside Domain Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0005-explicit-strategy-contracts.html">ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0006-public-import-paths-and-names.html">ADR-0006: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0007-how-a-session-ends.html">ADR-0007: Decide in One Place How a Session Ends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0008-session-exclusions-and-exposure-control.html">ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0009-immutable-step-results.html">ADR-0009: Make Step Results Immutable Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0010-random-numbers-and-reproducibility.html">ADR-0010: Random Numbers and Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0011-random-tie-breaking.html">ADR-0011: Break Ties Between Items Uniformly at Random</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0012: Ability Scale and Extreme Response Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0013-published-progressive-schedule.html">ADR-0013: Progressive and Proportional Follow the Published Schedule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0014-plotting-as-an-optional-extra.html">ADR-0014: Plotting as an Optional Extra</a></li>
 </ul>
 </div>
 </nav></div>
@@ -514,7 +512,7 @@
     
     <li class="breadcrumb-item"><a href="../architecture_decisions.html" class="nav-link">Architecture Decision Records</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0012: Ability Scale and Extreme Response Patterns</span></li>
   </ul>
 </nav>
 </div>
@@ -531,42 +529,75 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="adr-0012-scope-1-0-to-unidimensional-dichotomous-irt">
-<h1>ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT<a class="headerlink" href="#adr-0012-scope-1-0-to-unidimensional-dichotomous-irt" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="adr-0012-ability-scale-and-extreme-response-patterns">
+<h1>ADR-0012: Ability Scale and Extreme Response Patterns<a class="headerlink" href="#adr-0012-ability-scale-and-extreme-response-patterns" title="Link to this heading">#</a></h1>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
-<p>Accepted</p>
+<p>Accepted 2026-11-23</p>
 </section>
 <section id="context">
 <h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
-<p>Every contract in catsim assumes one ability and right-or-wrong answers. An ability estimate is a
-<code class="docutils literal notranslate"><span class="pre">float</span></code>, a response is a <code class="docutils literal notranslate"><span class="pre">bool</span></code>, and an item bank has the four columns of the logistic models, <code class="docutils literal notranslate"><span class="pre">a</span></code>,
-<code class="docutils literal notranslate"><span class="pre">b</span></code>, <code class="docutils literal notranslate"><span class="pre">c</span></code> and <code class="docutils literal notranslate"><span class="pre">d</span></code>. <code class="docutils literal notranslate"><span class="pre">StepContext</span></code>, <code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code> and the functions in <code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code> are typed and
-validated that way.</p>
-<p>Multidimensional IRT (MIRT) would replace the ability with a vector and each discrimination with
-one per dimension, which reaches <code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code>, <code class="docutils literal notranslate"><span class="pre">ItemBank</span></code>, <code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code> and every initializer,
-selector, estimator and stopper. Polytomous items, such as partial-credit or graded-response items,
-would replace the Boolean responses and the item parameters. Neither is planned, but nothing stated
-that 1.0 leaves them out, and the contracts frozen at 1.0 would decide how either could be added.</p>
+<p><code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code> defines two ability ranges: <code class="docutils literal notranslate"><span class="pre">THETA_MIN_TYPICAL</span></code> and <code class="docutils literal notranslate"><span class="pre">THETA_MAX_TYPICAL</span></code> (±4) and
+<code class="docutils literal notranslate"><span class="pre">THETA_MIN_EXTENDED</span></code> and <code class="docutils literal notranslate"><span class="pre">THETA_MAX_EXTENDED</span></code> (±6). Every search and grid in the package defaults to
+the extended range, but only <code class="docutils literal notranslate"><span class="pre">MAPEstimator</span></code> let its range be changed: <code class="docutils literal notranslate"><span class="pre">NumericalSearchEstimator</span></code> and
+<code class="docutils literal notranslate"><span class="pre">WarmLikelihoodEstimator</span></code> searched [-6, 6], and <code class="docutils literal notranslate"><span class="pre">EAPEstimator</span></code> averaged over its quadrature grid.</p>
+<p>After an all-correct or all-incorrect response pattern the likelihood keeps rising toward one end of
+the scale, and the maximum likelihood estimate is infinite. <code class="docutils literal notranslate"><span class="pre">NumericalSearchEstimator(dodd=False)</span></code>
+returned that infinity. The engine stored it as the session’s estimate, every item then had zero
+information at it, and the selectors picked uniformly from the whole bank (ADR-0011); a session that
+ended on such a pattern reported an infinite estimate, and <code class="docutils literal notranslate"><span class="pre">MEISelector</span></code> needed a special case for
+infinite look-ahead estimates. With <code class="docutils literal notranslate"><span class="pre">dodd=True</span></code>, the default, the estimator took Dodd’s step half
+the distance to the bank’s hardest or easiest item, which moved the estimate down after correct
+answers when it was already above the hardest item (4.0 to 3.0), and was not clipped to the search
+range.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
-<p>The 1.0 contracts cover unidimensional IRT with dichotomous items: the one- to four-parameter
-logistic models. A scalar ability estimate, Boolean responses and the four-column item bank are part
-of the stable API.</p>
-<p>Support for multidimensional abilities or polytomous items would come as a new major version, or as
-parallel types beside the current ones, not by widening the current types to a scalar-or-vector
-ability or a Boolean-or-category response.</p>
+<p>The ability scale’s default range is [-6, 6], six standard deviations either side of the mean of a
+standard normal population: wider than any plausible examinee or item bank, and narrow enough that
+every search ends.</p>
+<p>Every estimator returns a finite estimate inside its bounds once an item has been administered,
+whatever the response pattern. <code class="docutils literal notranslate"><span class="pre">BaseEstimator.estimate</span></code> states this as the contract, and the engine
+and the selectors rely on it. The estimators that search the scale, <code class="docutils literal notranslate"><span class="pre">NumericalSearchEstimator</span></code>,
+<code class="docutils literal notranslate"><span class="pre">MAPEstimator</span></code> and <code class="docutils literal notranslate"><span class="pre">WarmLikelihoodEstimator</span></code>, take the same <code class="docutils literal notranslate"><span class="pre">bounds</span></code> parameter, by default
+<code class="docutils literal notranslate"><span class="pre">(THETA_MIN_EXTENDED,</span> <span class="pre">THETA_MAX_EXTENDED)</span></code>, and reject bounds that are not finite with the lower one
+below the upper. <code class="docutils literal notranslate"><span class="pre">EAPEstimator</span></code>’s range is its quadrature grid.</p>
+<p>What each estimator does with an all-correct or all-incorrect pattern:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">NumericalSearchEstimator</span></code> always takes Dodd’s step (Dodd, 1990): half the distance from the
+current estimate to the bank’s largest difficulty after correct answers, or to its smallest after
+incorrect ones. The step never moves against the responses, so an estimate already beyond that
+difficulty stays where it is, and the result is clipped to the bounds. There is no switch to turn
+it off.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EAPEstimator</span></code> returns the posterior mean over its grid, which the prior pulls toward the prior
+mean.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAPEstimator</span></code> returns the posterior mode inside its bounds. With the default normal prior the mode
+is interior; with <code class="docutils literal notranslate"><span class="pre">uniform_log_prior()</span></code> it is, to within <code class="docutils literal notranslate"><span class="pre">tol</span></code>, the bound the responses point to,
+which is the maximum likelihood estimate restricted to the bounds.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">WarmLikelihoodEstimator</span></code> returns the root of Warm’s modified score, which is finite for these
+patterns, or the bound the modified score points to when the root lies beyond the bounds.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">THETA_MIN_TYPICAL</span></code> and <code class="docutils literal notranslate"><span class="pre">THETA_MAX_TYPICAL</span></code> do not bound any estimate.</p>
 </section>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>Strategies can rely on the ability being one <code class="docutils literal notranslate"><span class="pre">float</span></code> and the responses being Booleans, without
-checks for other shapes.</p></li>
-<li><p>Planned techniques that stay within the scope, such as the classification stoppers and the
-exposure controls, can be added without breaking the contracts.</p></li>
-<li><p>MIRT or polytomous support is a breaking change, or a separate set of types, and gets its own
-design when it is planned.</p></li>
+<li><p>No estimator returns an infinite estimate, so session histories, simulation results and the
+scores selectors compute are always finite, and a look-ahead selector such as MEI needs no special
+case for an infinite estimate.</p></li>
+<li><p>The bounded maximum likelihood estimate for constant patterns is
+<code class="docutils literal notranslate"><span class="pre">MAPEstimator(log_prior=uniform_log_prior())</span></code>, which returns -6 or 6 to within its <code class="docutils literal notranslate"><span class="pre">tol</span></code>.</p></li>
+<li><p>Narrower <code class="docutils literal notranslate"><span class="pre">bounds</span></code> restrict mixed response patterns too: their estimate is then the bound when the
+likelihood’s maximum lies beyond it.</p></li>
+<li><p>A custom estimator must keep the contract; nothing downstream checks it.</p></li>
+</ul>
+</section>
+<section id="alternatives-considered">
+<h2>Alternatives Considered<a class="headerlink" href="#alternatives-considered" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Returning the infinite maximum likelihood estimate: every item has zero information at it, so
+selection becomes uniform over the bank, and every consumer of the estimate needs a special case.</p></li>
+<li><p>Dodd’s step as an option that can be turned off: turning it off returns the infinite estimate.</p></li>
 </ul>
 </section>
 </section>
@@ -582,20 +613,20 @@ design when it is planned.</p></li>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="0011-how-a-session-ends.html"
+       href="0011-random-tie-breaking.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ADR-0011: Decide in One Place How a Session Ends</p>
+        <p class="prev-next-title">ADR-0011: Break Ties Between Items Uniformly at Random</p>
       </div>
     </a>
     <a class="right-next"
-       href="0013-random-numbers-and-reproducibility.html"
+       href="0013-published-progressive-schedule.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ADR-0013: Random Numbers and Reproducibility</p>
+        <p class="prev-next-title">ADR-0013: Progressive and Proportional Follow the Published Schedule</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -622,13 +653,14 @@ design when it is planned.</p></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#context">Context</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#decision">Decision</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#consequences">Consequences</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#alternatives-considered">Alternatives Considered</a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/adr/0012-unidimensional-dichotomous-scope.md.txt">
+    <a href="../_sources/adr/0012-ability-scale-and-extreme-patterns.md.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

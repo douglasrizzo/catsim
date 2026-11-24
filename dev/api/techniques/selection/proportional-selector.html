@@ -581,6 +581,9 @@ w_n = 1
 \quad (n \ge N).\]</div>
 <p>The exponent is 0 at the first position, where selection is uniformly random,
 and grows to the test length <span class="math notranslate nohighlight">\(N\)</span> at the last; with <span class="math notranslate nohighlight">\(s = 0\)</span> it grows linearly.
+At the last item of a 20-item test at <span class="math notranslate nohighlight">\(\theta = 0\)</span>, over 20 simulated 500-item
+3PL banks, the most informative item is drawn with probability 0.32 to 0.96
+(median 0.64).
 Past position <span class="math notranslate nohighlight">\(N\)</span> it stays at <span class="math notranslate nohighlight">\(N\)</span>. The implementation divides the information
 by its maximum over the available items before raising it to the power, which
 leaves the probabilities unchanged and keeps a large exponent from underflowing

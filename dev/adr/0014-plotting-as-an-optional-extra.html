@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ADR-0010: Progressive and Proportional Follow the Published Schedule &#8212; catsim 0.21.0 documentation</title>
+    <title>ADR-0014: Plotting as an Optional Extra &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -42,13 +42,13 @@
     <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0010-published-progressive-schedule';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0014-plotting-as-an-optional-extra';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ADR-0011: Decide in One Place How a Session Ends" href="0011-how-a-session-ends.html" />
-    <link rel="prev" title="ADR-0009: Ability Scale and Extreme Response Patterns" href="0009-ability-scale-and-extreme-patterns.html" />
+    <link rel="next" title="Contributing" href="../contributing.html" />
+    <link rel="prev" title="ADR-0013: Progressive and Proportional Follow the Published Schedule" href="0013-published-progressive-schedule.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -455,22 +455,20 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="0001-explicit-cat-engine.html">ADR-0001: Adopt Explicit CAT Engine Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0002-remove-legacy-simulator-apis.html">ADR-0002: Remove Legacy Simulator APIs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0003-runtime-state-ownership.html">ADR-0003: Keep Runtime State Outside Domain Objects</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0004-explicit-strategy-contracts.html">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0005-immutable-step-results.html">ADR-0005: Make Step Results Immutable Snapshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0006-versioned-tutorial-notebooks.html">ADR-0006: Version Tutorial Notebooks as .ipynb Files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0007-release-gated-by-docs.html">ADR-0007: Gate Package Publication on Documentation Availability</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0008-random-tie-breaking.html">ADR-0008: Break Ties Between Items Uniformly at Random</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0009-ability-scale-and-extreme-patterns.html">ADR-0009: Ability Scale and Extreme Response Patterns</a></li>
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0011-how-a-session-ends.html">ADR-0011: Decide in One Place How a Session Ends</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0014-public-import-paths-and-names.html">ADR-0014: Public Import Paths and One Name per Concept</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0015-plotting-as-an-optional-extra.html">ADR-0015: Plotting as an Optional Extra</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0016-session-exclusions-and-exposure-control.html">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0001-unidimensional-dichotomous-scope.html">ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0002-four-parameter-item-matrix.html">ADR-0002: Items Are an n×4 Matrix of 4PL Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0003-explicit-cat-engine.html">ADR-0003: Adopt Explicit CAT Engine Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0004-runtime-state-ownership.html">ADR-0004: Keep Runtime State Outside Domain Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0005-explicit-strategy-contracts.html">ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0006-public-import-paths-and-names.html">ADR-0006: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0007-how-a-session-ends.html">ADR-0007: Decide in One Place How a Session Ends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0008-session-exclusions-and-exposure-control.html">ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0009-immutable-step-results.html">ADR-0009: Make Step Results Immutable Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0010-random-numbers-and-reproducibility.html">ADR-0010: Random Numbers and Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0011-random-tie-breaking.html">ADR-0011: Break Ties Between Items Uniformly at Random</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0012-ability-scale-and-extreme-patterns.html">ADR-0012: Ability Scale and Extreme Response Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0013-published-progressive-schedule.html">ADR-0013: Progressive and Proportional Follow the Published Schedule</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0014: Plotting as an Optional Extra</a></li>
 </ul>
 </div>
 </nav></div>
@@ -514,7 +512,7 @@
     
     <li class="breadcrumb-item"><a href="../architecture_decisions.html" class="nav-link">Architecture Decision Records</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0010: Progressive and Proportional Follow the Published Schedule</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0014: Plotting as an Optional Extra</span></li>
   </ul>
 </nav>
 </div>
@@ -531,65 +529,73 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="adr-0010-progressive-and-proportional-follow-the-published-schedule">
-<h1>ADR-0010: Progressive and Proportional Follow the Published Schedule<a class="headerlink" href="#adr-0010-progressive-and-proportional-follow-the-published-schedule" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="adr-0014-plotting-as-an-optional-extra">
+<h1>ADR-0014: Plotting as an Optional Extra<a class="headerlink" href="#adr-0014-plotting-as-an-optional-extra" title="Link to this heading">#</a></h1>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
-<p>Accepted</p>
+<p>Accepted 2026-11-24</p>
 </section>
 <section id="context">
 <h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">ProgressiveSelector</span></code> and <code class="docutils literal notranslate"><span class="pre">ProportionalSelector</span></code> carry the names of published methods: the
-progressive method of Revuelta and Ponsoda (1998) and the proportional method of Segall (2004), in
-the form Barrada et al. (2008) gave them, which catR implements. catsim used its own
-parameterisation of both:</p>
-<ul class="simple">
-<li><p>The weight on information at position <code class="docutils literal notranslate"><span class="pre">n</span></code> of a test of planned length <code class="docutils literal notranslate"><span class="pre">N</span></code> was
-<code class="docutils literal notranslate"><span class="pre">min(1,</span> <span class="pre">(n</span> <span class="pre">-</span> <span class="pre">1)</span> <span class="pre">/</span> <span class="pre">(N</span> <span class="pre">-</span> <span class="pre">1))</span> <span class="pre">**</span> <span class="pre">acceleration</span></code>, with <code class="docutils literal notranslate"><span class="pre">acceleration</span></code> positive and 1 (linear) by default.
-Barrada et al.’s schedule is a cumulative power sum with an acceleration parameter <code class="docutils literal notranslate"><span class="pre">t</span></code>. The two
-agree only when both are linear, so <code class="docutils literal notranslate"><span class="pre">acceleration</span></code> was not their <code class="docutils literal notranslate"><span class="pre">t</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ProportionalSelector</span></code> raised the information to <code class="docutils literal notranslate"><span class="pre">sharpness</span></code> times that weight, with
-<code class="docutils literal notranslate"><span class="pre">sharpness</span> <span class="pre">=</span> <span class="pre">6</span></code> by default. In the published method the exponent grows to the test length.</p></li>
-</ul>
-<p>The documentation said so, but under the same method names users comparing with catR got different
-behaviour, and the default exponent left the end of a test far from maximum-information selection.
-At the last item of a 20-item test at θ = 0, over 20 simulated 500-item 3PL banks
-(<code class="docutils literal notranslate"><span class="pre">ItemBank.generate(500,</span> <span class="pre">model=&quot;3PL&quot;,</span> <span class="pre">rng=s)</span></code> for <code class="docutils literal notranslate"><span class="pre">s</span></code> from 0 to 19), the most
-informative item was drawn with probability 0.08 to 0.24 (median 0.12), against 0.32 to 0.96
-(median 0.64) with the published exponent of 20.</p>
+<p><code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code> was catsim’s only use of matplotlib, yet matplotlib was a required dependency. Every
+install carried it and its dependency tree, including services that run live sessions and never
+draw a figure, and importing it is slow.</p>
+<p>The plot functions also had no common calling convention. <code class="docutils literal notranslate"><span class="pre">item_curve</span></code> took an item’s four
+parameters as separate scalars, while <code class="docutils literal notranslate"><span class="pre">item_exposure</span></code> and <code class="docutils literal notranslate"><span class="pre">test_progress</span></code> put <code class="docutils literal notranslate"><span class="pre">ax</span></code> and <code class="docutils literal notranslate"><span class="pre">title</span></code>
+first and took either a <code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code> or raw arrays through mutually exclusive keywords.
+<code class="docutils literal notranslate"><span class="pre">test_progress</span></code> could not plot a session run directly with <code class="docutils literal notranslate"><span class="pre">CatEngine</span></code>, and three functions took a
+<code class="docutils literal notranslate"><span class="pre">figsize</span></code> that applied only when they created the figure themselves.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
-<p>Both selectors use Barrada et al.’s (2008, Equations 12 and 13) schedule, through one helper in
-<code class="docutils literal notranslate"><span class="pre">catsim.selection.progressive</span></code>. The weight at position <code class="docutils literal notranslate"><span class="pre">n</span></code> is the sum of <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">**</span> <span class="pre">acceleration</span></code> for
-<code class="docutils literal notranslate"><span class="pre">m</span></code> below <code class="docutils literal notranslate"><span class="pre">n</span></code>, divided by the same sum for <code class="docutils literal notranslate"><span class="pre">m</span></code> below <code class="docutils literal notranslate"><span class="pre">N</span></code>; <code class="docutils literal notranslate"><span class="pre">ProgressiveSelector</span></code> blends with that
-weight, and <code class="docutils literal notranslate"><span class="pre">ProportionalSelector</span></code> raises the information to <code class="docutils literal notranslate"><span class="pre">N</span></code> times it. <code class="docutils literal notranslate"><span class="pre">acceleration</span></code> is
-Barrada et al.’s acceleration parameter (<code class="docutils literal notranslate"><span class="pre">t</span></code> for the progressive weight, <code class="docutils literal notranslate"><span class="pre">s</span></code> for the proportional
-exponent): any finite number, 0 by default. At 0 the schedule is linear (p. 498) and differs little
-from Revuelta and Ponsoda’s original one (p. 500).</p>
-<p><code class="docutils literal notranslate"><span class="pre">sharpness</span></code> is removed rather than kept with <code class="docutils literal notranslate"><span class="pre">None</span></code> meaning the test length. Neither Barrada et al.
-nor catR has such a parameter, the published end point already scales with the test, and a second
-way to spell the default would add an optional value and a property that returns either <code class="docutils literal notranslate"><span class="pre">None</span></code> or a
-number for no current use. catsim’s former schedule is not kept behind a parameter.</p>
-<p>catsim departs from catR where a session leaves the planned test: past position <code class="docutils literal notranslate"><span class="pre">N</span></code> the weight
-stays 1 and the exponent stays at <code class="docutils literal notranslate"><span class="pre">N</span></code> instead of growing, and a one-item test is at its last
-position, with weight 1, from the start. Its default acceleration is 0, where catR’s <code class="docutils literal notranslate"><span class="pre">AP</span></code> defaults
-to 1. The technique pages list these departures.</p>
+<ul>
+<li><p>matplotlib is an optional dependency, installed with the <code class="docutils literal notranslate"><span class="pre">catsim[plot]</span></code> extra.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code> is the only module that imports matplotlib. Importing <code class="docutils literal notranslate"><span class="pre">catsim</span></code>, or any public module
+other than <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code>, never loads it. Two import-linter contracts in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> check
+both rules.</p></li>
+<li><p>Importing <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code> without matplotlib raises an <code class="docutils literal notranslate"><span class="pre">ImportError</span></code> that gives the install command
+for the extra.</p></li>
+<li><p>A plot function takes its data first, as plain catsim objects (an item’s parameter row, the
+exposure rates, a session), and its options as keyword-only arguments:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">session_progress</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span>
+</pre></div>
+</div>
+</li>
+<li><p>Every plot function draws on the axes the caller passes as <code class="docutils literal notranslate"><span class="pre">ax</span></code>, or on the axes of a new figure,
+and returns the axes it drew on. None takes a figure size: a caller who wants one creates the
+axes with <code class="docutils literal notranslate"><span class="pre">plt.subplots(figsize=...)</span></code> and passes them.</p></li>
+</ul>
 </section>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>Seeded results change for every <code class="docutils literal notranslate"><span class="pre">ProportionalSelector</span></code>, whose exponent at the last item is the
-test length instead of 6. The one exception is <code class="docutils literal notranslate"><span class="pre">test_size=6</span></code> with the default acceleration, where
-the two exponents coincide.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ProgressiveSelector</span></code>’s default weights are unchanged, since the former default (1) and the new
-one (0) are both linear. An explicit <code class="docutils literal notranslate"><span class="pre">acceleration</span></code> now means Barrada et al.’s <code class="docutils literal notranslate"><span class="pre">t</span></code>: a former
-<code class="docutils literal notranslate"><span class="pre">acceleration=1.0</span></code> (linear) is now <code class="docutils literal notranslate"><span class="pre">acceleration=0.0</span></code>, and <code class="docutils literal notranslate"><span class="pre">acceleration=1.0</span></code> now gives catR’s
-default schedule. For long tests a former value <code class="docutils literal notranslate"><span class="pre">s</span></code> is close to <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">s</span> <span class="pre">-</span> <span class="pre">1</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">acceleration</span></code> accepts 0 and negative values; only NaN and infinite values are rejected.</p></li>
-<li><p>Within the planned length, the weights and exponents are those of catR’s <code class="docutils literal notranslate"><span class="pre">nextItem</span></code> with
-<code class="docutils literal notranslate"><span class="pre">criterion</span> <span class="pre">=</span> <span class="pre">&quot;progressive&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;proportional&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">rule</span> <span class="pre">=</span> <span class="pre">&quot;length&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">AP</span></code> equal to
-<code class="docutils literal notranslate"><span class="pre">acceleration</span></code>.</p></li>
+<li><p>A plain install of catsim needs numpy, scipy, tqdm and typing-extensions only. Users who plot
+install the extra; code that imports <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code> without it fails at the import, with the fix in
+the message.</p></li>
+<li><p>Domain, strategy and runtime modules cannot grow a plotting helper: a figure belongs in
+<code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code>.</p></li>
+<li><p>A session plots the same way whether it comes from a simulation (<code class="docutils literal notranslate"><span class="pre">result.sessions[j]</span></code>) or from a
+live loop, because the function reads the session, not the result that holds it.</p></li>
+<li><p>Figures with several panels are laid out by the caller with matplotlib’s own tools, and each plot
+function fills one axes.</p></li>
+<li><p>The test suite, the documentation build and the notebooks need matplotlib, so the development and
+documentation dependency groups include it, and the CI job that tests the built wheel installs
+the wheel with the extra.</p></li>
+</ul>
+</section>
+<section id="alternatives-considered">
+<h2>Alternatives Considered<a class="headerlink" href="#alternatives-considered" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Keep matplotlib required: every deployment pays its installation and import cost for figures it
+never draws.</p></li>
+<li><p>Import matplotlib inside each plot function: <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">catsim.plot</span></code> would succeed and the error
+would surface at the first call, far from the missing install; one guarded import at the top of
+the module fails at once.</p></li>
+<li><p>A separate plotting package: a second distribution to version and release for three functions.</p></li>
+<li><p>Plot functions that take a <code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code> and a session index: they cannot plot a live
+session, and they tie the plots to the runner’s result type.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">figsize</span></code> argument on every function: it does nothing when the caller passes <code class="docutils literal notranslate"><span class="pre">ax</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">plt.subplots</span></code> already provides it.</p></li>
 </ul>
 </section>
 </section>
@@ -605,20 +611,20 @@ default schedule. For long tests a former value <code class="docutils literal no
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="0009-ability-scale-and-extreme-patterns.html"
+       href="0013-published-progressive-schedule.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ADR-0009: Ability Scale and Extreme Response Patterns</p>
+        <p class="prev-next-title">ADR-0013: Progressive and Proportional Follow the Published Schedule</p>
       </div>
     </a>
     <a class="right-next"
-       href="0011-how-a-session-ends.html"
+       href="../contributing.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ADR-0011: Decide in One Place How a Session Ends</p>
+        <p class="prev-next-title">Contributing</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -645,13 +651,14 @@ default schedule. For long tests a former value <code class="docutils literal no
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#context">Context</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#decision">Decision</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#consequences">Consequences</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#alternatives-considered">Alternatives Considered</a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/adr/0010-published-progressive-schedule.md.txt">
+    <a href="../_sources/adr/0014-plotting-as-an-optional-extra.md.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

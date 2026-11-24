@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ADR-0003: Keep Runtime State Outside Domain Objects &#8212; catsim 0.21.0 documentation</title>
+    <title>ADR-0003: Adopt Explicit CAT Engine Architecture &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -42,13 +42,13 @@
     <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0003-runtime-state-ownership';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0003-explicit-cat-engine';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate" href="0004-explicit-strategy-contracts.html" />
-    <link rel="prev" title="ADR-0002: Remove Legacy Simulator APIs" href="0002-remove-legacy-simulator-apis.html" />
+    <link rel="next" title="ADR-0004: Keep Runtime State Outside Domain Objects" href="0004-runtime-state-ownership.html" />
+    <link rel="prev" title="ADR-0002: Items Are an n×4 Matrix of 4PL Parameters" href="0002-four-parameter-item-matrix.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -455,22 +455,20 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="0001-explicit-cat-engine.html">ADR-0001: Adopt Explicit CAT Engine Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0002-remove-legacy-simulator-apis.html">ADR-0002: Remove Legacy Simulator APIs</a></li>
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0003: Keep Runtime State Outside Domain Objects</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0004-explicit-strategy-contracts.html">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0005-immutable-step-results.html">ADR-0005: Make Step Results Immutable Snapshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0006-versioned-tutorial-notebooks.html">ADR-0006: Version Tutorial Notebooks as .ipynb Files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0007-release-gated-by-docs.html">ADR-0007: Gate Package Publication on Documentation Availability</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0008-random-tie-breaking.html">ADR-0008: Break Ties Between Items Uniformly at Random</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0009-ability-scale-and-extreme-patterns.html">ADR-0009: Ability Scale and Extreme Response Patterns</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0010-published-progressive-schedule.html">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0011-how-a-session-ends.html">ADR-0011: Decide in One Place How a Session Ends</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0014-public-import-paths-and-names.html">ADR-0014: Public Import Paths and One Name per Concept</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0015-plotting-as-an-optional-extra.html">ADR-0015: Plotting as an Optional Extra</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0016-session-exclusions-and-exposure-control.html">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0001-unidimensional-dichotomous-scope.html">ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0002-four-parameter-item-matrix.html">ADR-0002: Items Are an n×4 Matrix of 4PL Parameters</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0003: Adopt Explicit CAT Engine Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0004-runtime-state-ownership.html">ADR-0004: Keep Runtime State Outside Domain Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0005-explicit-strategy-contracts.html">ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0006-public-import-paths-and-names.html">ADR-0006: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0007-how-a-session-ends.html">ADR-0007: Decide in One Place How a Session Ends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0008-session-exclusions-and-exposure-control.html">ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0009-immutable-step-results.html">ADR-0009: Make Step Results Immutable Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0010-random-numbers-and-reproducibility.html">ADR-0010: Random Numbers and Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0011-random-tie-breaking.html">ADR-0011: Break Ties Between Items Uniformly at Random</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0012-ability-scale-and-extreme-patterns.html">ADR-0012: Ability Scale and Extreme Response Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0013-published-progressive-schedule.html">ADR-0013: Progressive and Proportional Follow the Published Schedule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0014-plotting-as-an-optional-extra.html">ADR-0014: Plotting as an Optional Extra</a></li>
 </ul>
 </div>
 </nav></div>
@@ -514,7 +512,7 @@
     
     <li class="breadcrumb-item"><a href="../architecture_decisions.html" class="nav-link">Architecture Decision Records</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0003: Keep Runtime State Outside Domain Objects</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0003: Adopt Explicit CAT Engine Architecture</span></li>
   </ul>
 </nav>
 </div>
@@ -531,97 +529,59 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="adr-0003-keep-runtime-state-outside-domain-objects">
-<h1>ADR-0003: Keep Runtime State Outside Domain Objects<a class="headerlink" href="#adr-0003-keep-runtime-state-outside-domain-objects" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="adr-0003-adopt-explicit-cat-engine-architecture">
+<h1>ADR-0003: Adopt Explicit CAT Engine Architecture<a class="headerlink" href="#adr-0003-adopt-explicit-cat-engine-architecture" title="Link to this heading">#</a></h1>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
-<p>Accepted</p>
+<p>Accepted 2026-04-08</p>
 </section>
 <section id="context">
 <h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
-<p>Exposure tracking and per-session execution details were previously entangled with long-lived
-objects in ways that made repeated runs and object reuse harder to reason about.</p>
-<p>The exposure rates a selector checks its <code class="docutils literal notranslate"><span class="pre">r_max</span></code> cap against were the tracker’s counts divided by a
-number of sessions the caller passed in <code class="docutils literal notranslate"><span class="pre">RunContext.total_sessions</span></code>, the planned size of the run.
-That caused two problems:</p>
-<ul class="simple">
-<li><p>Without <code class="docutils literal notranslate"><span class="pre">total_sessions</span></code>, the engine passed no rates at all, so an <code class="docutils literal notranslate"><span class="pre">r_max</span></code> cap did nothing and
-nothing said so. That is the natural setup for a live deployment, which does not know in advance
-how many examinees it will test.</p></li>
-<li><p>With it, early examinees saw every rate near zero and the cap bore only on late ones, so the
-precision of an examinee’s test depended on their place in the run: the later the examinee, the
-less informative the items left below the cap.</p></li>
-</ul>
-<p>catR’s <code class="docutils literal notranslate"><span class="pre">simulateRespondents</span></code> divides by the examinees tested so far instead: after respondent <code class="docutils literal notranslate"><span class="pre">i</span></code>
-it sets the rates to the counts divided by <code class="docutils literal notranslate"><span class="pre">i</span></code>, and respondent <code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">+</span> <span class="pre">1</span></code> is tested against them, with
-no restriction for the first respondent and none at all when <code class="docutils literal notranslate"><span class="pre">rmax</span></code> is 1.</p>
+<p>catsim’s CAT execution was centred on a simulator object. Batch simulation was the workflow the
+design served: a live test, run one response at a time by an application, had to go through
+interfaces coupled to state the simulator owned, and strategies reached that state through a
+reference back to the simulator rather than through their arguments. No component could be used or
+tested without a simulator built around it.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
-<p>Treat calibrated item data as domain data and keep runtime state in dedicated execution models:</p>
+<p>catsim executes a CAT through four explicit objects:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ItemBank</span></code> holds item parameters and related derived data</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code> holds per-examinee runtime state, the items it excluded included (ADR-0016)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code> (in <code class="docutils literal notranslate"><span class="pre">catsim.state</span></code>) and <code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code> (in <code class="docutils literal notranslate"><span class="pre">catsim.simulation</span></code>) hold
-run-level exposure information</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CatEngine</span></code> runs one session step by step. It holds the item bank and the strategies, and each
+of its methods takes the session’s state as an argument.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code> holds one session’s runtime state.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SimulationRunner</span></code> runs a batch of sessions through the same engine.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code> holds the batch’s aggregate outputs.</p></li>
 </ul>
-<p><code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code> owns the denominator of the exposure rates, which follow catR:</p>
-<ul class="simple">
-<li><p>The tracker counts sessions as well as administrations. <code class="docutils literal notranslate"><span class="pre">CatEngine.start_session</span></code> calls
-<code class="docutils literal notranslate"><span class="pre">tracker.start_session()</span></code> when the run context has a tracker, after the initializer has
-succeeded, and <code class="docutils literal notranslate"><span class="pre">apply_response</span></code> records each administered item. <code class="docutils literal notranslate"><span class="pre">RunContext</span></code> has no
-<code class="docutils literal notranslate"><span class="pre">total_sessions</span></code>, and <code class="docutils literal notranslate"><span class="pre">ExposureTracker.rates()</span></code> takes no argument.</p></li>
-<li><p>The tracker also counts each item’s proposals, its administrations plus the times the engine’s
-exposure control declined it (ADR-0016). Declines never enter the rates.</p></li>
-<li><p>A session is selected against each item’s administrations divided by the number of other
-sessions started so far. With sessions run one after another, as <code class="docutils literal notranslate"><span class="pre">SimulationRunner</span></code> runs them,
-that is catR’s rate: the share of the examinees tested before the current one. The session being
-tested is not in the denominator. Counting it would divide the administrations of an item it can
-still receive by one examinee more than could have received it, which lowers the rates most for
-the early sessions: the second session would see every item of the first at 1/2 instead of 1. Its
-own administrations stay in the counts, but only for items it has already administered, which it
-is never offered again.</p></li>
-<li><p>The rates are computed when a session asks, not fixed when it starts, so a single tracker serves
-sessions that run side by side without keeping anything per session: each sees the others’
-administrations as they happen, over the other sessions started so far.</p></li>
-<li><p>The first session sees every rate at 0: no examinee has been tested before it.</p></li>
-<li><p>An <code class="docutils literal notranslate"><span class="pre">r_max</span></code> of 1 applies no cap, as in catR. An item that every earlier examinee received has a
-rate of exactly 1, and the selectors’ strict <code class="docutils literal notranslate"><span class="pre">rate</span> <span class="pre">&lt;</span> <span class="pre">r_max</span></code> test would otherwise pass it over.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">SimulationResult.exposure_rates</span></code> divides the run’s counts by all its sessions: the exposure at
-the end of the run, not the rates any session saw.</p></li>
-</ul>
+<p>This is the only execution model. No strategy holds a reference to the engine or the runner: each
+receives what it needs as arguments.</p>
 </section>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>Reusing an item bank across sessions or simulations is safer.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ItemBank</span></code> keeps its own copy of the parameters and makes it read-only, together with the column
-views its properties return, so the values derived and cached from them (<code class="docutils literal notranslate"><span class="pre">max_info_thetas</span></code>,
-<code class="docutils literal notranslate"><span class="pre">model</span></code>, a stratified selector’s strata) cannot go stale.</p></li>
-<li><p>Exposure becomes a property of a run, not of the calibrated bank itself.</p></li>
-<li><p>Run metrics have a clearer ownership model and are easier to validate.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ItemBank.items</span></code> has exactly four columns, <code class="docutils literal notranslate"><span class="pre">[a,</span> <span class="pre">b,</span> <span class="pre">c,</span> <span class="pre">d]</span></code>. The fifth exposure-rate column that
-earlier versions kept for compatibility is gone, together with <code class="docutils literal notranslate"><span class="pre">ItemBank.exposure_rates</span></code>,
-<code class="docutils literal notranslate"><span class="pre">update_exposure_rate</span></code>, <code class="docutils literal notranslate"><span class="pre">reset_exposure_rates</span></code> and <code class="docutils literal notranslate"><span class="pre">reset</span></code>. An item matrix with more than four
-columns raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> instead of having its extra column read as exposure rates.</p></li>
-<li><p>A context with a tracker is all exposure control needs, so a live deployment gets it without
-knowing how many examinees it will test. <code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code> is exported from <code class="docutils literal notranslate"><span class="pre">catsim</span></code> for that
-use. A context without a tracker gives selectors no rates, and they apply no cap.</p></li>
-<li><p>The cap holds from the second examinee on: that examinee sees every item of the first at a rate
-of 1. A capped run’s results differ from earlier versions; runs with <code class="docutils literal notranslate"><span class="pre">r_max</span> <span class="pre">=</span> <span class="pre">1</span></code> do not change.</p></li>
-<li><p>In a live deployment, a session that starts and is abandoned before its first item still counts
-in the denominator, which lowers every later rate a little; so does starting a session twice for
-one examinee. The tracker cannot tell such a session from one still running, so the count stays.</p></li>
-<li><p>The tracker’s counts are not part of any session snapshot. A deployment that restarts with a new
-tracker applies no cap until new sessions have run. To keep the cap across restarts, the
-application saves <code class="docutils literal notranslate"><span class="pre">tracker.counts</span></code>, <code class="docutils literal notranslate"><span class="pre">tracker.proposals</span></code> and <code class="docutils literal notranslate"><span class="pre">tracker.n_sessions</span></code> (e.g. as two
-lists and an int in JSON) and rebuilds the tracker with
-<code class="docutils literal notranslate"><span class="pre">ExposureTracker(n_items,</span> <span class="pre">counts=...,</span> <span class="pre">n_sessions=...,</span> <span class="pre">proposals=...)</span></code>, which checks that there is
-one non-negative integer count per item, with no more administrations than proposals and no more
-proposals than sessions, and keeps its own copy of them. Saving is the application’s job: it
-decides when (after every administration, on shutdown) and where.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ExposureTracker.rates()</span></code> gives the rates a session in progress is selected against, which leave
-that session out; the run’s own exposure is <code class="docutils literal notranslate"><span class="pre">SimulationResult.exposure_rates</span></code>.</p></li>
+<li><p>A live CAT session is a first-class use: an application drives the engine one item at a time,
+through the same methods the runner calls.</p></li>
+<li><p>Simulation runs on the engine’s execution path, with no lifecycle of its own, so a simulated
+session and a live one behave alike.</p></li>
+<li><p>Each state transition can be tested through the engine alone, without a batch around it.</p></li>
+<li><p>The documentation and tutorials teach the engine, session and result objects directly, and
+catsim is a CAT toolkit of which simulation is one use.</p></li>
+<li><p>A strategy gets its inputs from its arguments (the strategy contract, ADR-0005), so it can be
+called and tested on its own.</p></li>
+<li><p>The import-linter contract in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> keeps the runner above the engine and the engine
+above the strategies, and keeps the strategy families from importing one another, with two
+exceptions: <code class="docutils literal notranslate"><span class="pre">MEISelector</span></code> and <code class="docutils literal notranslate"><span class="pre">MLWISelector</span></code> import the estimators, for their look-ahead estimates
+and their posterior.</p></li>
+</ul>
+</section>
+<section id="alternatives-considered">
+<h2>Alternatives Considered<a class="headerlink" href="#alternatives-considered" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Keep the simulator at the centre and add a step-by-step mode to it: a live session would still
+depend on simulator-owned state, and batch concerns would reach every session.</p></li>
+<li><p>Keep the simulator-centric interfaces beside the engine, as a compatibility layer: the package
+would have two competing execution models, each with its own lifecycle, and a lasting
+compatibility burden.</p></li>
 </ul>
 </section>
 </section>
@@ -637,20 +597,20 @@ that session out; the run’s own exposure is <code class="docutils literal notr
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="0002-remove-legacy-simulator-apis.html"
+       href="0002-four-parameter-item-matrix.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ADR-0002: Remove Legacy Simulator APIs</p>
+        <p class="prev-next-title">ADR-0002: Items Are an n×4 Matrix of 4PL Parameters</p>
       </div>
     </a>
     <a class="right-next"
-       href="0004-explicit-strategy-contracts.html"
+       href="0004-runtime-state-ownership.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</p>
+        <p class="prev-next-title">ADR-0004: Keep Runtime State Outside Domain Objects</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -677,13 +637,14 @@ that session out; the run’s own exposure is <code class="docutils literal notr
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#context">Context</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#decision">Decision</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#consequences">Consequences</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#alternatives-considered">Alternatives Considered</a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/adr/0003-runtime-state-ownership.md.txt">
+    <a href="../_sources/adr/0003-explicit-cat-engine.md.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

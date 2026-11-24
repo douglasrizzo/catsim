@@ -905,6 +905,34 @@ accuracy, bias, and the availability of uncertainty quantification.</p>
 its standard error by the estimator’s own formula, which the precision stoppers
 judge, and the number of objective evaluations it took. The session records one
 per step.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Estimator</p></th>
+<th class="head"><p>Standard error</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="numerical-search-estimator.html#catsim.estimation.NumericalSearchEstimator" title="catsim.estimation.NumericalSearchEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericalSearchEstimator</span></code></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta)}\)</span>, the Fisher standard error (Magis and Raîche 2012, Eq. 3, p. 4)</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="eap-estimator.html#catsim.estimation.EAPEstimator" title="catsim.estimation.EAPEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EAPEstimator</span></code></a></p></td>
+<td><p>the posterior standard deviation (Eq. 11, p. 6)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="map-estimator.html#catsim.estimation.MAPEstimator" title="catsim.estimation.MAPEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">MAPEstimator</span></code></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta) - (\log p)''(\hat\theta)}\)</span>, where <span class="math notranslate nohighlight">\(\log p\)</span> is the prior’s log-density; <span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta) + 1/\sigma^2}\)</span> for a normal prior of variance <span class="math notranslate nohighlight">\(\sigma^2\)</span> (Eq. 6, p. 5)</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="warm-wle.html#catsim.estimation.WarmLikelihoodEstimator" title="catsim.estimation.WarmLikelihoodEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">WarmLikelihoodEstimator</span></code></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta)}\)</span>, catR’s default</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The two Bayesian standard errors are usually below the Fisher one at the same
+estimate, and with a normal prior MAP’s always is, so a precision stopper ends
+their tests sooner than the Fisher standard error would. On 200 simulated EAP
+sessions, the Fisher standard error at the estimate was a median 26% above the
+posterior standard deviation after 3 items and 4% above after 20, and with a 0.4
+threshold the stopping decision after 20 items differed in 47 sessions.</p>
 <section id="implemented">
 <h2>Implemented<a class="headerlink" href="#implemented" title="Link to this heading">#</a></h2>
 <div class="toctree-wrapper compound">

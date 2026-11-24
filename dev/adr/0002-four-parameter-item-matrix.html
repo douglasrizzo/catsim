@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ADR-0015: Plotting as an Optional Extra &#8212; catsim 0.21.0 documentation</title>
+    <title>ADR-0002: Items Are an n×4 Matrix of 4PL Parameters &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -42,13 +42,15 @@
     <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0015-plotting-as-an-optional-extra';</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0002-four-parameter-item-matrix';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal" href="0016-session-exclusions-and-exposure-control.html" />
-    <link rel="prev" title="ADR-0014: Public Import Paths and One Name per Concept" href="0014-public-import-paths-and-names.html" />
+    <link rel="next" title="ADR-0003: Adopt Explicit CAT Engine Architecture" href="0003-explicit-cat-engine.html" />
+    <link rel="prev" title="ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT" href="0001-unidimensional-dichotomous-scope.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -455,22 +457,20 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="0001-explicit-cat-engine.html">ADR-0001: Adopt Explicit CAT Engine Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0002-remove-legacy-simulator-apis.html">ADR-0002: Remove Legacy Simulator APIs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0003-runtime-state-ownership.html">ADR-0003: Keep Runtime State Outside Domain Objects</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0004-explicit-strategy-contracts.html">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0005-immutable-step-results.html">ADR-0005: Make Step Results Immutable Snapshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0006-versioned-tutorial-notebooks.html">ADR-0006: Version Tutorial Notebooks as .ipynb Files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0007-release-gated-by-docs.html">ADR-0007: Gate Package Publication on Documentation Availability</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0008-random-tie-breaking.html">ADR-0008: Break Ties Between Items Uniformly at Random</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0009-ability-scale-and-extreme-patterns.html">ADR-0009: Ability Scale and Extreme Response Patterns</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0010-published-progressive-schedule.html">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0011-how-a-session-ends.html">ADR-0011: Decide in One Place How a Session Ends</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0014-public-import-paths-and-names.html">ADR-0014: Public Import Paths and One Name per Concept</a></li>
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0015: Plotting as an Optional Extra</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0016-session-exclusions-and-exposure-control.html">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0001-unidimensional-dichotomous-scope.html">ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0002: Items Are an n×4 Matrix of 4PL Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0003-explicit-cat-engine.html">ADR-0003: Adopt Explicit CAT Engine Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0004-runtime-state-ownership.html">ADR-0004: Keep Runtime State Outside Domain Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0005-explicit-strategy-contracts.html">ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0006-public-import-paths-and-names.html">ADR-0006: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0007-how-a-session-ends.html">ADR-0007: Decide in One Place How a Session Ends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0008-session-exclusions-and-exposure-control.html">ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0009-immutable-step-results.html">ADR-0009: Make Step Results Immutable Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0010-random-numbers-and-reproducibility.html">ADR-0010: Random Numbers and Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0011-random-tie-breaking.html">ADR-0011: Break Ties Between Items Uniformly at Random</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0012-ability-scale-and-extreme-patterns.html">ADR-0012: Ability Scale and Extreme Response Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0013-published-progressive-schedule.html">ADR-0013: Progressive and Proportional Follow the Published Schedule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0014-plotting-as-an-optional-extra.html">ADR-0014: Plotting as an Optional Extra</a></li>
 </ul>
 </div>
 </nav></div>
@@ -514,7 +514,7 @@
     
     <li class="breadcrumb-item"><a href="../architecture_decisions.html" class="nav-link">Architecture Decision Records</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0015: Plotting as an Optional Extra</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0002: Items Are an n×4 Matrix of 4PL Parameters</span></li>
   </ul>
 </nav>
 </div>
@@ -531,74 +531,72 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="adr-0015-plotting-as-an-optional-extra">
-<h1>ADR-0015: Plotting as an Optional Extra<a class="headerlink" href="#adr-0015-plotting-as-an-optional-extra" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="adr-0002-items-are-an-n4-matrix-of-4pl-parameters">
+<h1>ADR-0002: Items Are an n×4 Matrix of 4PL Parameters<a class="headerlink" href="#adr-0002-items-are-an-n4-matrix-of-4pl-parameters" title="Link to this heading">#</a></h1>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
 <p>Accepted 2026-11-24</p>
 </section>
 <section id="context">
 <h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code> was catsim’s only use of matplotlib, yet matplotlib was a required dependency. Every
-install carried it and its dependency tree, including services that run live sessions and never
-draw a figure, and importing it is slow.</p>
-<p>The plot functions also had no common calling convention. <code class="docutils literal notranslate"><span class="pre">item_curve</span></code> took an item’s four
-parameters as separate scalars, while <code class="docutils literal notranslate"><span class="pre">item_exposure</span></code> and <code class="docutils literal notranslate"><span class="pre">test_progress</span></code> put <code class="docutils literal notranslate"><span class="pre">ax</span></code> and <code class="docutils literal notranslate"><span class="pre">title</span></code>
-first and took either a <code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code> or raw arrays through mutually exclusive keywords.
-<code class="docutils literal notranslate"><span class="pre">test_progress</span></code> could not plot a session run directly with <code class="docutils literal notranslate"><span class="pre">CatEngine</span></code>, and three functions took a
-<code class="docutils literal notranslate"><span class="pre">figsize</span></code> that applied only when they created the figure themselves.</p>
+<p>The logistic models differ in which item parameters they vary: the 1PL only the difficulty <span class="math notranslate nohighlight">\(b\)</span>
+(with one discrimination for every item), the 2PL also the discrimination <span class="math notranslate nohighlight">\(a\)</span>, the 3PL also the
+guessing parameter <span class="math notranslate nohighlight">\(c\)</span> and the 4PL also the upper asymptote <span class="math notranslate nohighlight">\(d\)</span>. Each is the 4PL with the parameters
+it leaves out fixed at <span class="math notranslate nohighlight">\(a = 1\)</span>, <span class="math notranslate nohighlight">\(c = 0\)</span> and <span class="math notranslate nohighlight">\(d = 1\)</span>. Calibration software writes the parameters its
+model estimates, so item banks arrive with one to four columns.</p>
+<p>The item bank kept a fifth column of exposure rates beside the parameters (ADR-0004), its
+validation could be turned off with <code class="docutils literal notranslate"><span class="pre">validate=False</span></code>, the expansion and validation of a matrix were
+public functions of <code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code>, and the bank reported its model as the number of parameters, an
+<code class="docutils literal notranslate"><span class="pre">int</span></code>. A bank built without validation could carry a NaN or out-of-range parameter into every value
+derived from it: the probabilities, the information and each selector’s scores come out NaN or
+wrong, with no error.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
-<ul>
-<li><p>matplotlib is an optional dependency, installed with the <code class="docutils literal notranslate"><span class="pre">catsim[plot]</span></code> extra.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code> is the only module that imports matplotlib. Importing <code class="docutils literal notranslate"><span class="pre">catsim</span></code>, or any public module
-other than <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code>, never loads it. Two import-linter contracts in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> check
-both rules.</p></li>
-<li><p>Importing <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code> without matplotlib raises an <code class="docutils literal notranslate"><span class="pre">ImportError</span></code> that gives the install command
-for the extra.</p></li>
-<li><p>A plot function takes its data first, as plain catsim objects (an item’s parameter row, the
-exposure rates, a session), and its options as keyword-only arguments:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">session_progress</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span>
+<ul class="simple">
+<li><p>Every item bank holds an n×4 matrix of 4PL parameters, one row per item, with the columns
+<span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(c\)</span> and <span class="math notranslate nohighlight">\(d\)</span>. Every function of <code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code> and every strategy reads that shape.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ItemBank(items)</span></code> takes a matrix of one to four columns, read as <span class="math notranslate nohighlight">\([b]\)</span>, <span class="math notranslate nohighlight">\([a, b]\)</span>, <span class="math notranslate nohighlight">\([a, b, c]\)</span> or
+<span class="math notranslate nohighlight">\([a, b, c, d]\)</span>, and fills the missing parameters with <span class="math notranslate nohighlight">\(a = 1\)</span>, <span class="math notranslate nohighlight">\(c = 0\)</span> and <span class="math notranslate nohighlight">\(d = 1\)</span>; a 1-D array
+is one item. A matrix with more than four columns is rejected, never truncated.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ItemBank(items)</span></code> always validates: every parameter is finite, with <span class="math notranslate nohighlight">\(a &gt; 0\)</span> and
+<span class="math notranslate nohighlight">\(0 \leq c &lt; d \leq 1\)</span>. The expansion and the checks are private to the item bank, which is their
+only entry point.</p></li>
+<li><p>The bank reports its model as an <code class="docutils literal notranslate"><span class="pre">IrtModel</span></code>, a <code class="docutils literal notranslate"><span class="pre">StrEnum</span></code> whose members equal <code class="docutils literal notranslate"><span class="pre">&quot;1PL&quot;</span></code> to <code class="docutils literal notranslate"><span class="pre">&quot;4PL&quot;</span></code>:
+the simplest model that fits every item.</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>  <span class="c1"># items: n×1 [b], n×2 [a, b], n×3 [a, b, c] or n×4 [a, b, c, d]</span>
+<span class="n">bank</span><span class="o">.</span><span class="n">items</span>              <span class="c1"># n×4, read-only</span>
+<span class="n">bank</span><span class="o">.</span><span class="n">model</span>              <span class="c1"># IrtModel.PL1 to IrtModel.PL4</span>
 </pre></div>
 </div>
-</li>
-<li><p>Every plot function draws on the axes the caller passes as <code class="docutils literal notranslate"><span class="pre">ax</span></code>, or on the axes of a new figure,
-and returns the axes it drew on. None takes a figure size: a caller who wants one creates the
-axes with <code class="docutils literal notranslate"><span class="pre">plt.subplots(figsize=...)</span></code> and passes them.</p></li>
-</ul>
 </section>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>A plain install of catsim needs numpy, scipy, tqdm and typing-extensions only. Users who plot
-install the extra; code that imports <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code> without it fails at the import, with the fix in
-the message.</p></li>
-<li><p>Domain, strategy and runtime modules cannot grow a plotting helper: a figure belongs in
-<code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code>.</p></li>
-<li><p>A session plots the same way whether it comes from a simulation (<code class="docutils literal notranslate"><span class="pre">result.sessions[j]</span></code>) or from a
-live loop, because the function reads the session, not the result that holds it.</p></li>
-<li><p>Figures with several panels are laid out by the caller with matplotlib’s own tools, and each plot
-function fills one axes. Callers that relied on a function creating a sized figure create it
-themselves.</p></li>
-<li><p>The test suite, the documentation build and the notebooks need matplotlib, so the development and
-documentation dependency groups include it, and the CI job that tests the built wheel installs
-the wheel with the extra.</p></li>
+<li><p>One shape serves every model, so no function or strategy branches on the model. With <span class="math notranslate nohighlight">\(c = 0\)</span> and
+<span class="math notranslate nohighlight">\(d = 1\)</span> the 4PL’s characteristic curve is exactly the 2PL’s.</p></li>
+<li><p>A 1PL bank stores four columns and runs the 4PL formulas, a cost small next to selection and
+estimation.</p></li>
+<li><p>Every bank’s parameters are valid, so the values derived and cached from them are finite and in
+range, and no strategy checks them.</p></li>
+<li><p>A caller with a 1-3 column matrix gets the n×4 one from <code class="docutils literal notranslate"><span class="pre">bank.items</span></code>, the form the <code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code>
+functions take.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IrtModel</span></code> members compare equal to their names, so code and configuration can pass <code class="docutils literal notranslate"><span class="pre">&quot;3PL&quot;</span></code>
+wherever catsim takes a model, as in <code class="docutils literal notranslate"><span class="pre">ItemBank.generate(n_items,</span> <span class="pre">model=&quot;3PL&quot;)</span></code>.</p></li>
 </ul>
 </section>
 <section id="alternatives-considered">
 <h2>Alternatives Considered<a class="headerlink" href="#alternatives-considered" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>Keep matplotlib required: every deployment pays its installation and import cost for figures it
-never draws.</p></li>
-<li><p>Import matplotlib inside each plot function: <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">catsim.plot</span></code> would succeed and the error
-would surface at the first call, far from the missing install; one guarded import at the top of
-the module fails at once.</p></li>
-<li><p>A separate plotting package: a second distribution to version and release for three functions.</p></li>
-<li><p>Plot functions that take a <code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code> and a session index: they cannot plot a live
-session, and they tie the plots to the runner’s result type.</p></li>
-<li><p>A <code class="docutils literal notranslate"><span class="pre">figsize</span></code> argument on every function: it does nothing when the caller passes <code class="docutils literal notranslate"><span class="pre">ax</span></code>, and
-<code class="docutils literal notranslate"><span class="pre">plt.subplots</span></code> already provides it.</p></li>
+<li><p>A matrix as wide as its model, with each function dispatching on the width: every function and
+strategy would branch on the shape.</p></li>
+<li><p>Further columns for metadata such as exposure or content area: exposure is runtime state
+(ADR-0004), and other metadata belongs to the application, keyed by the item’s index.</p></li>
+<li><p>Optional validation, for speed: a bank built without it carries invalid parameters into every
+derived value, while validation runs once per bank.</p></li>
+<li><p>The model as its number of parameters: an <code class="docutils literal notranslate"><span class="pre">int</span></code> reads like a column count, which is always 4,
+and cannot be passed where catsim takes a model name.</p></li>
 </ul>
 </section>
 </section>
@@ -614,20 +612,20 @@ session, and they tie the plots to the runner’s result type.</p></li>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="0014-public-import-paths-and-names.html"
+       href="0001-unidimensional-dichotomous-scope.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ADR-0014: Public Import Paths and One Name per Concept</p>
+        <p class="prev-next-title">ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT</p>
       </div>
     </a>
     <a class="right-next"
-       href="0016-session-exclusions-and-exposure-control.html"
+       href="0003-explicit-cat-engine.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</p>
+        <p class="prev-next-title">ADR-0003: Adopt Explicit CAT Engine Architecture</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -661,7 +659,7 @@ session, and they tie the plots to the runner’s result type.</p></li>
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/adr/0015-plotting-as-an-optional-extra.md.txt">
+    <a href="../_sources/adr/0002-four-parameter-item-matrix.md.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

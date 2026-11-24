@@ -46,6 +46,9 @@ $$
 
 The exponent is 0 at the first position, where selection is uniformly random,
 and grows to the test length $N$ at the last; with $s = 0$ it grows linearly.
+At the last item of a 20-item test at $\theta = 0$, over 20 simulated 500-item
+3PL banks, the most informative item is drawn with probability 0.32 to 0.96
+(median 0.64).
 Past position $N$ it stays at $N$. The implementation divides the information
 by its maximum over the available items before raising it to the power, which
 leaves the probabilities unchanged and keeps a large exponent from underflowing

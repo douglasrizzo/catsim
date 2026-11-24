@@ -615,10 +615,17 @@ NEWS</a>, version 3.0), and its
 default <code class="docutils literal notranslate"><span class="pre">sem.type</span> <span class="pre">=</span> <span class="pre">&quot;classic&quot;</span></code> still does. Under the 1PL and 2PL models the
 corrected sum is the curvature of the weighted likelihood at its maximum, so it is
 positive; with guessing or slipping parameters it can be negative, which leaves no
-standard error. In short tests the classic formula overestimates the error (it is
-conservative, so a standard-error stopper runs a few items longer), and from about
-20 items the two agree within a few percent; ADR-0004 gives the comparison. The
-evaluation count is the number of
+standard error: 13 of 3,920 response patterns (0.4% of their probability) on random
+3PL tests of 2 to 8 items, none of 4,560 on 2PL tests.</p>
+<p>Against the WLE’s sampling spread at a known ability (every response pattern for 5
+and 10 items, 3,000 simulated ones for 20 and 40), the classic formula
+overestimates the error in short tests, by 10% under the 2PL and 28% under the 3PL
+at 5 items. That is conservative: a standard-error stopper runs a few items longer
+than needed. Equation 14 roughly halves that gap. The sandwich formula of Magis
+(2016), catR’s <code class="docutils literal notranslate"><span class="pre">sem.type</span> <span class="pre">=</span> <span class="pre">&quot;new&quot;</span></code>, is closest under the 3PL but underestimates the
+error under the 2PL (by 8% at 5 items), which would stop tests too early. From 20
+items on, the three agree within about 3%.</p>
+<p>The evaluation count is the number of
 modified-score evaluations: the 121 scan points, Brent’s refinement of each
 bracketed root and, when several roots compete, the integrals that rank them.</p>
 </section>
@@ -672,6 +679,7 @@ the items, so no unconditional bias guarantee is made for that case.</p></li>
 <p>Warm, T. A. (1989). Weighted likelihood estimation of ability in item response theory. <em>Psychometrika</em>, 54(3), 427-450. <a class="reference external" href="https://doi.org/10.1007/BF02294627">https://doi.org/10.1007/BF02294627</a>. Not openly available; Warm (1985) derives the same estimator.</p>
 <p>Warm, T. A. (1985). <em>Weighted likelihood estimation of ability in item response theory with tests of finite length</em> (Doctoral dissertation). University of Oklahoma. <a class="reference external" href="https://shareok.org/handle/11244/5356">https://shareok.org/handle/11244/5356</a> (open access).</p>
 <p>Lord, F. M. (1983). Unbiased estimators of ability parameters, of their variance, and of their parallel-forms reliability. <em>Psychometrika</em>, 48(2), 233-245. <a class="reference external" href="https://doi.org/10.1007/BF02294018">https://doi.org/10.1007/BF02294018</a>. Not openly available; Warm (1985, p. 7) gives its bias formula.</p>
+<p>Magis, D. (2016). Efficient standard error formulas of ability estimators with dichotomous item response models. <em>Psychometrika</em>, 81(1), 184-200. <a class="reference external" href="https://doi.org/10.1007/s11336-015-9443-3">https://doi.org/10.1007/s11336-015-9443-3</a>.</p>
 <p>Magis, D., &amp; Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8), 1-31. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">https://doi.org/10.18637/jss.v048.i08</a> (open access).</p>
 </section>
 <section id="api-reference">

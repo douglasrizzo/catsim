@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ADR-0014: Public Import Paths and One Name per Concept &#8212; catsim 0.21.0 documentation</title>
+    <title>ADR-0007: Decide in One Place How a Session Ends &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -42,13 +42,13 @@
     <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0014-public-import-paths-and-names';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0007-how-a-session-ends';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ADR-0015: Plotting as an Optional Extra" href="0015-plotting-as-an-optional-extra.html" />
-    <link rel="prev" title="ADR-0013: Random Numbers and Reproducibility" href="0013-random-numbers-and-reproducibility.html" />
+    <link rel="next" title="ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal" href="0008-session-exclusions-and-exposure-control.html" />
+    <link rel="prev" title="ADR-0006: Public Import Paths and One Name per Concept" href="0006-public-import-paths-and-names.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -455,22 +455,20 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="0001-explicit-cat-engine.html">ADR-0001: Adopt Explicit CAT Engine Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0002-remove-legacy-simulator-apis.html">ADR-0002: Remove Legacy Simulator APIs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0003-runtime-state-ownership.html">ADR-0003: Keep Runtime State Outside Domain Objects</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0004-explicit-strategy-contracts.html">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0005-immutable-step-results.html">ADR-0005: Make Step Results Immutable Snapshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0006-versioned-tutorial-notebooks.html">ADR-0006: Version Tutorial Notebooks as .ipynb Files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0007-release-gated-by-docs.html">ADR-0007: Gate Package Publication on Documentation Availability</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0008-random-tie-breaking.html">ADR-0008: Break Ties Between Items Uniformly at Random</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0009-ability-scale-and-extreme-patterns.html">ADR-0009: Ability Scale and Extreme Response Patterns</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0010-published-progressive-schedule.html">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0011-how-a-session-ends.html">ADR-0011: Decide in One Place How a Session Ends</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0014: Public Import Paths and One Name per Concept</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0015-plotting-as-an-optional-extra.html">ADR-0015: Plotting as an Optional Extra</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0016-session-exclusions-and-exposure-control.html">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0001-unidimensional-dichotomous-scope.html">ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0002-four-parameter-item-matrix.html">ADR-0002: Items Are an n×4 Matrix of 4PL Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0003-explicit-cat-engine.html">ADR-0003: Adopt Explicit CAT Engine Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0004-runtime-state-ownership.html">ADR-0004: Keep Runtime State Outside Domain Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0005-explicit-strategy-contracts.html">ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0006-public-import-paths-and-names.html">ADR-0006: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0007: Decide in One Place How a Session Ends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0008-session-exclusions-and-exposure-control.html">ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0009-immutable-step-results.html">ADR-0009: Make Step Results Immutable Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0010-random-numbers-and-reproducibility.html">ADR-0010: Random Numbers and Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0011-random-tie-breaking.html">ADR-0011: Break Ties Between Items Uniformly at Random</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0012-ability-scale-and-extreme-patterns.html">ADR-0012: Ability Scale and Extreme Response Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0013-published-progressive-schedule.html">ADR-0013: Progressive and Proportional Follow the Published Schedule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0014-plotting-as-an-optional-extra.html">ADR-0014: Plotting as an Optional Extra</a></li>
 </ul>
 </div>
 </nav></div>
@@ -514,7 +512,7 @@
     
     <li class="breadcrumb-item"><a href="../architecture_decisions.html" class="nav-link">Architecture Decision Records</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0014: Public Import Paths and One Name per Concept</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0007: Decide in One Place How a Session Ends</span></li>
   </ul>
 </nav>
 </div>
@@ -531,83 +529,79 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="adr-0014-public-import-paths-and-one-name-per-concept">
-<h1>ADR-0014: Public Import Paths and One Name per Concept<a class="headerlink" href="#adr-0014-public-import-paths-and-one-name-per-concept" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="adr-0007-decide-in-one-place-how-a-session-ends">
+<h1>ADR-0007: Decide in One Place How a Session Ends<a class="headerlink" href="#adr-0007-decide-in-one-place-how-a-session-ends" title="Link to this heading">#</a></h1>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
 <p>Accepted 2026-11-24</p>
 </section>
 <section id="context">
 <h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
-<p>Nothing said which import path of a class was the public one. Docs and tests imported names from
-their package or from the module file that defines them, and some public names, such as <code class="docutils literal notranslate"><span class="pre">LogPrior</span></code>
-and the helpers for custom selectors, existed only in a module file. Some module names repeated their package (<code class="docutils literal notranslate"><span class="pre">selection/selection.py</span></code>), and
-<code class="docutils literal notranslate"><span class="pre">selection/random.py</span></code> shadowed the standard library: any process whose <code class="docutils literal notranslate"><span class="pre">sys.path[0]</span></code> was the
-package directory failed on <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">tempfile</span></code>.</p>
-<p>The same concept also had several names. The ability estimate was <code class="docutils literal notranslate"><span class="pre">est_theta</span></code>, <code class="docutils literal notranslate"><span class="pre">theta</span></code> and
-<code class="docutils literal notranslate"><span class="pre">updated_theta</span></code>; the items given so far were <code class="docutils literal notranslate"><span class="pre">administered_items</span></code> and <code class="docutils literal notranslate"><span class="pre">administered_item_ids</span></code>,
-while <code class="docutils literal notranslate"><span class="pre">administered_items</span></code> also named a parameter matrix; the responses were <code class="docutils literal notranslate"><span class="pre">response_vector</span></code> and
-<code class="docutils literal notranslate"><span class="pre">responses</span></code>; the item model <code class="docutils literal notranslate"><span class="pre">itemtype</span></code>, <code class="docutils literal notranslate"><span class="pre">item_type</span></code> and <code class="docutils literal notranslate"><span class="pre">model</span></code>; the random source <code class="docutils literal notranslate"><span class="pre">seed</span></code> and
-<code class="docutils literal notranslate"><span class="pre">rng</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">CatEngine</span></code> ended sessions in three places, with three free-form strings. <code class="docutils literal notranslate"><span class="pre">step()</span></code> asked the
+stopper before selecting (<code class="docutils literal notranslate"><span class="pre">&quot;stop_rule&quot;</span></code>), turned <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code> into
+<code class="docutils literal notranslate"><span class="pre">&quot;item_bank_exhausted&quot;</span></code> and a <code class="docutils literal notranslate"><span class="pre">None</span></code> from the selector into <code class="docutils literal notranslate"><span class="pre">&quot;selector_stopped&quot;</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">apply_response</span></code> asked the stopper again after each estimate. The manual workflow, <code class="docutils literal notranslate"><span class="pre">select_next</span></code>
+then <code class="docutils literal notranslate"><span class="pre">apply_response</span></code>, shared none of that, so every application had to copy <code class="docutils literal notranslate"><span class="pre">step()</span></code>’s handling,
+and a stopped session accepted more responses.</p>
+<p>The labels were also wrong. <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code> does not mean that the bank is exhausted: a
+stratified selector raises it when a stratum runs out, and <code class="docutils literal notranslate"><span class="pre">LinearSelector</span></code> when its list does. The
+built-in stoppers checked bank exhaustion themselves, so a bank that really ran out reported
+<code class="docutils literal notranslate"><span class="pre">&quot;stop_rule&quot;</span></code>. No selector returned <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
+<ul>
+<li><p>A session ends for one of two reasons, the members of the <code class="docutils literal notranslate"><span class="pre">StopReason</span></code> enum:</p>
 <ul class="simple">
-<li><p>The public import paths are:</p>
-<ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">catsim</span></code>, for the core types: the engine, the session state and step results, the runner and
-its result, the item bank, <code class="docutils literal notranslate"><span class="pre">StepContext</span></code>, <code class="docutils literal notranslate"><span class="pre">Estimate</span></code> and the exceptions;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">catsim.selection</span></code>, <code class="docutils literal notranslate"><span class="pre">catsim.estimation</span></code>, <code class="docutils literal notranslate"><span class="pre">catsim.initialization</span></code>, <code class="docutils literal notranslate"><span class="pre">catsim.stopping</span></code> and
-<code class="docutils literal notranslate"><span class="pre">catsim.exposure</span></code>, for the strategies and the exposure controls, their base classes and the
-helpers documented for custom strategies;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code>, <code class="docutils literal notranslate"><span class="pre">catsim.metrics</span></code>, <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code> and <code class="docutils literal notranslate"><span class="pre">catsim.typing</span></code>, modules of functions and
-type aliases.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">STOPPER</span></code> (<code class="docutils literal notranslate"><span class="pre">&quot;stopper&quot;</span></code>): the engine’s stopper is satisfied by the session’s current state;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NO_ITEMS</span></code> (<code class="docutils literal notranslate"><span class="pre">&quot;no_items&quot;</span></code>): the selector has no item to offer, or none that the engine’s
+exposure control accepts (ADR-0008).</p></li>
 </ul>
+<p><code class="docutils literal notranslate"><span class="pre">stop_reason</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code> while the session runs, and it is the only record of whether the
+session has ended: <code class="docutils literal notranslate"><span class="pre">is_stopped</span></code> reads it. Lifecycle states such as paused or abandoned belong to
+the application.</p>
 </li>
-<li><p>Every other module is internal: the module files of the subpackages and the modules that define
-what <code class="docutils literal notranslate"><span class="pre">catsim</span></code> exports (<code class="docutils literal notranslate"><span class="pre">catsim.engine</span></code>, <code class="docutils literal notranslate"><span class="pre">catsim.state</span></code>, …). Code outside catsim imports each
-name from its public path; only a test of a private helper imports a module file. A package’s
-<code class="docutils literal notranslate"><span class="pre">__all__</span></code> lists every public class, function and alias its modules define, and nothing else.</p></li>
-<li><p>A module is named after what it holds (<code class="docutils literal notranslate"><span class="pre">selection/information.py</span></code>, <code class="docutils literal notranslate"><span class="pre">selection/randomized.py</span></code>),
-never after its package or a standard-library module.</p></li>
-<li><p>One name per concept:</p>
-<ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">theta</span></code> for an ability or ability estimate passed to a function or held by a <code class="docutils literal notranslate"><span class="pre">StepContext</span></code>;
-<code class="docutils literal notranslate"><span class="pre">current_theta</span></code> for a session’s latest estimate;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">administered_items</span></code> for the indices of the items given so far, in order;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">items</span></code> for an item parameter matrix, one row per item, and <code class="docutils literal notranslate"><span class="pre">indices</span></code> for other lists of item
-indices into a bank; <code class="docutils literal notranslate"><span class="pre">LinearSelector(items)</span></code>, the list of items it administers, is the one
-exception;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">responses</span></code> for the responses to the administered items, in the same order;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">n_items</span></code> for a number of items, <code class="docutils literal notranslate"><span class="pre">model</span></code> for the logistic model, and
-<code class="docutils literal notranslate"><span class="pre">rng:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">numpy.random.Generator</span> <span class="pre">|</span> <span class="pre">None</span></code> for the random source (ADR-0013);</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">test_size</span></code> for the test length a selector plans its schedule for, and <code class="docutils literal notranslate"><span class="pre">max_items</span></code> for the
-length at which <code class="docutils literal notranslate"><span class="pre">MaxLengthStopper</span></code> ends a test. They are different settings: a test may stop
-before or after the length its selector planned.</p></li>
-</ul>
-</li>
+<li><p>A selector says that it has no item by raising <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>. That is the single “no
+item” signal: <code class="docutils literal notranslate"><span class="pre">select</span></code> returns an <code class="docutils literal notranslate"><span class="pre">int</span></code> (ADR-0005).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">select_next</span></code> is the only place that decides whether a session continues. It returns <code class="docutils literal notranslate"><span class="pre">None</span></code> and
+records the reason when the stopper is satisfied or the selector has no item, and it returns
+<code class="docutils literal notranslate"><span class="pre">None</span></code> without changing anything for a session that has already stopped. It records the items
+the exposure control declined once the selection has ended, so a selection that raises changes
+nothing. A manual session is therefore one loop with no other stop check: <code class="docutils literal notranslate"><span class="pre">select_next</span></code> until it
+returns <code class="docutils literal notranslate"><span class="pre">None</span></code>, and <code class="docutils literal notranslate"><span class="pre">apply_response</span></code> after each item (<a class="reference internal" href="../live-sessions.html"><span class="doc">Live CAT Sessions</span></a>); <code class="docutils literal notranslate"><span class="pre">step()</span></code> is one turn
+of it.</p></li>
+<li><p>The stopper is evaluated once per session state: by <code class="docutils literal notranslate"><span class="pre">select_next</span></code> for the initial state and by
+<code class="docutils literal notranslate"><span class="pre">apply_response</span></code> after each new estimate. Stoppers are pure, so asking once loses nothing.</p></li>
+<li><p>Running out of items is the engine’s to detect, through the selector: it reports <code class="docutils literal notranslate"><span class="pre">NO_ITEMS</span></code>. A
+stopper that checks bank exhaustion itself reports <code class="docutils literal notranslate"><span class="pre">STOPPER</span></code>, since all the engine knows is that
+its stopper said stop.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">apply_response</span></code> applies a response atomically, and only to a running session. It estimates and
+asks the stopper on step contexts built from the session with the new item and response
+(ADR-0005), and commits the item, the response, the estimate, the exposure count and the stop
+decision only once both have succeeded.</p></li>
 </ul>
 </section>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>An object keeps its import path when its module is split, merged or renamed. Its <code class="docutils literal notranslate"><span class="pre">__module__</span></code>
-still names the defining module, so a pickle of a catsim object breaks when its class moves.</p></li>
-<li><p>The renames break 0.x code, and no alias keeps an old name or module path working.</p></li>
-<li><p>Tests check that each package’s <code class="docutils literal notranslate"><span class="pre">__all__</span></code> matches the public definitions of its modules and that
-no public signature or attribute uses a retired name.</p></li>
+<li><p>A manual session and <code class="docutils literal notranslate"><span class="pre">step()</span></code> or <code class="docutils literal notranslate"><span class="pre">run_session()</span></code> end the same way, with the same reason.</p></li>
+<li><p>Analysis code compares a stop reason with one of two values; as a <code class="docutils literal notranslate"><span class="pre">StrEnum</span></code>, each member also
+equals its string.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NO_ITEMS</span></code> does not tell a bank that ran out from a selector whose own pool ran out; comparing the
+number of administered items with the bank size does.</p></li>
+<li><p>A session of n items makes n + 1 stopper calls, which matters for stoppers that are costly to
+evaluate.</p></li>
+<li><p>A state whose items were appended by hand, outside <code class="docutils literal notranslate"><span class="pre">apply_response</span></code>, is not re-evaluated by the
+stopper, so an application that persists sessions restores their stop reason with them.</p></li>
 </ul>
 </section>
 <section id="alternatives-considered">
 <h2>Alternatives Considered<a class="headerlink" href="#alternatives-considered" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>Public module files: every split or rename of a module would break user code.</p></li>
-<li><p>Aliases for the old names: two names for one concept are what this decision removes.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">est_theta</span></code> for <code class="docutils literal notranslate"><span class="pre">theta</span></code>: the <code class="docutils literal notranslate"><span class="pre">irt</span></code> functions take any ability, not only an estimate.</p></li>
-<li><p>One length setting for selectors and stoppers: it would tie a selector’s schedule to a length
-criterion that a precision-based test lacks.</p></li>
-<li><p>Underscore-prefixed internal modules (<code class="docutils literal notranslate"><span class="pre">_information.py</span></code>): noisier <code class="docutils literal notranslate"><span class="pre">__module__</span></code> names and
-tracebacks for what the rule and <code class="docutils literal notranslate"><span class="pre">__all__</span></code> already state.</p></li>
+<li><p>A status field beside <code class="docutils literal notranslate"><span class="pre">stop_reason</span></code>: two records of the same fact, which can disagree.</p></li>
+<li><p>Asking the stopper in <code class="docutils literal notranslate"><span class="pre">select_next</span></code> as well as in <code class="docutils literal notranslate"><span class="pre">apply_response</span></code>: every state is judged twice,
+and the two answers can only agree, since stoppers are pure.</p></li>
+<li><p>A selector returning <code class="docutils literal notranslate"><span class="pre">None</span></code> as a second “no item” signal: every caller would check for both.</p></li>
 </ul>
 </section>
 </section>
@@ -623,20 +617,20 @@ tracebacks for what the rule and <code class="docutils literal notranslate"><spa
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="0013-random-numbers-and-reproducibility.html"
+       href="0006-public-import-paths-and-names.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ADR-0013: Random Numbers and Reproducibility</p>
+        <p class="prev-next-title">ADR-0006: Public Import Paths and One Name per Concept</p>
       </div>
     </a>
     <a class="right-next"
-       href="0015-plotting-as-an-optional-extra.html"
+       href="0008-session-exclusions-and-exposure-control.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ADR-0015: Plotting as an Optional Extra</p>
+        <p class="prev-next-title">ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -670,7 +664,7 @@ tracebacks for what the rule and <code class="docutils literal notranslate"><spa
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/adr/0014-public-import-paths-and-names.md.txt">
+    <a href="../_sources/adr/0007-how-a-session-ends.md.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

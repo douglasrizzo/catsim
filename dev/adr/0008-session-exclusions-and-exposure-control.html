@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ADR-0013: Random Numbers and Reproducibility &#8212; catsim 0.21.0 documentation</title>
+    <title>ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -42,13 +42,13 @@
     <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0013-random-numbers-and-reproducibility';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0008-session-exclusions-and-exposure-control';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ADR-0014: Public Import Paths and One Name per Concept" href="0014-public-import-paths-and-names.html" />
-    <link rel="prev" title="ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT" href="0012-unidimensional-dichotomous-scope.html" />
+    <link rel="next" title="ADR-0009: Make Step Results Immutable Snapshots" href="0009-immutable-step-results.html" />
+    <link rel="prev" title="ADR-0007: Decide in One Place How a Session Ends" href="0007-how-a-session-ends.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -455,22 +455,20 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="0001-explicit-cat-engine.html">ADR-0001: Adopt Explicit CAT Engine Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0002-remove-legacy-simulator-apis.html">ADR-0002: Remove Legacy Simulator APIs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0003-runtime-state-ownership.html">ADR-0003: Keep Runtime State Outside Domain Objects</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0004-explicit-strategy-contracts.html">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0005-immutable-step-results.html">ADR-0005: Make Step Results Immutable Snapshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0006-versioned-tutorial-notebooks.html">ADR-0006: Version Tutorial Notebooks as .ipynb Files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0007-release-gated-by-docs.html">ADR-0007: Gate Package Publication on Documentation Availability</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0008-random-tie-breaking.html">ADR-0008: Break Ties Between Items Uniformly at Random</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0009-ability-scale-and-extreme-patterns.html">ADR-0009: Ability Scale and Extreme Response Patterns</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0010-published-progressive-schedule.html">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0011-how-a-session-ends.html">ADR-0011: Decide in One Place How a Session Ends</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0013: Random Numbers and Reproducibility</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0014-public-import-paths-and-names.html">ADR-0014: Public Import Paths and One Name per Concept</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0015-plotting-as-an-optional-extra.html">ADR-0015: Plotting as an Optional Extra</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0016-session-exclusions-and-exposure-control.html">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0001-unidimensional-dichotomous-scope.html">ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0002-four-parameter-item-matrix.html">ADR-0002: Items Are an n×4 Matrix of 4PL Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0003-explicit-cat-engine.html">ADR-0003: Adopt Explicit CAT Engine Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0004-runtime-state-ownership.html">ADR-0004: Keep Runtime State Outside Domain Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0005-explicit-strategy-contracts.html">ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0006-public-import-paths-and-names.html">ADR-0006: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0007-how-a-session-ends.html">ADR-0007: Decide in One Place How a Session Ends</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0009-immutable-step-results.html">ADR-0009: Make Step Results Immutable Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0010-random-numbers-and-reproducibility.html">ADR-0010: Random Numbers and Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0011-random-tie-breaking.html">ADR-0011: Break Ties Between Items Uniformly at Random</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0012-ability-scale-and-extreme-patterns.html">ADR-0012: Ability Scale and Extreme Response Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0013-published-progressive-schedule.html">ADR-0013: Progressive and Proportional Follow the Published Schedule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0014-plotting-as-an-optional-extra.html">ADR-0014: Plotting as an Optional Extra</a></li>
 </ul>
 </div>
 </nav></div>
@@ -514,7 +512,7 @@
     
     <li class="breadcrumb-item"><a href="../architecture_decisions.html" class="nav-link">Architecture Decision Records</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0013: Random Numbers and Reproducibility</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</span></li>
   </ul>
 </nav>
 </div>
@@ -531,70 +529,75 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="adr-0013-random-numbers-and-reproducibility">
-<h1>ADR-0013: Random Numbers and Reproducibility<a class="headerlink" href="#adr-0013-random-numbers-and-reproducibility" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="adr-0008-the-session-keeps-its-excluded-items-and-an-exposure-control-may-decline-a-proposal">
+<h1>ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal<a class="headerlink" href="#adr-0008-the-session-keeps-its-excluded-items-and-an-exposure-control-may-decline-a-proposal" title="Link to this heading">#</a></h1>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
 <p>Accepted 2026-11-24</p>
 </section>
 <section id="context">
 <h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
-<p>Three components of a simulated CAT draw random numbers: the initializer (a random starting
-ability), the selectors (breaking ties, ADR-0008, and the randomized selectors’ draws) and the
-simulated responses, each a uniform draw against the item’s probability of a correct answer. The
-estimators and stoppers draw nothing.</p>
-<p><code class="docutils literal notranslate"><span class="pre">SimulationRunner</span></code> used to create one generator when it was constructed, from its <code class="docutils literal notranslate"><span class="pre">seed</span></code>, and pass
-it to every run. Two calls to <code class="docutils literal notranslate"><span class="pre">run</span></code> with the same true abilities then gave different tests, the
-second continuing the first one’s stream. Its <code class="docutils literal notranslate"><span class="pre">run(n)</span></code> form also drew the <code class="docutils literal notranslate"><span class="pre">n</span></code> true abilities from
-the bank’s difficulties with that same generator, so the same abilities gave other tests when they
-were passed explicitly instead.</p>
-<p><code class="docutils literal notranslate"><span class="pre">run</span></code> and <code class="docutils literal notranslate"><span class="pre">ItemBank.generate</span></code> then defaulted to <code class="docutils literal notranslate"><span class="pre">rng=0</span></code>, so every unseeded call gave the same run
-or bank, and unseeded replications in a loop were identical, with no warning.
-NumPy, <code class="docutils literal notranslate"><span class="pre">scipy.stats</span></code> and scikit-learn read a missing seed as fresh randomness.</p>
-<p>Whether a run can be repeated, compared with another or split across processes depends on where the
-generator comes from and on what draws from it, which nothing recorded.</p>
+<p>Sympson-Hetter exposure control administers the item a selector proposes only with a calibrated
+probability. A declined item is set aside for the rest of the examinee’s test, and the calibration
+counts how often each item is proposed. Under the strategy contract of ADR-0005 the engine built
+every <code class="docutils literal notranslate"><span class="pre">StepContext</span></code> with no excluded items, <code class="docutils literal notranslate"><span class="pre">select</span></code> returned only an <code class="docutils literal notranslate"><span class="pre">int</span></code>, and strategies keep no
+per-session state. A wrapper selector could exclude a declined item only for one <code class="docutils literal notranslate"><span class="pre">select</span></code> call, and
+nothing recorded declines or proposals from one step to the next.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">SimulationRunner.run(true_thetas,</span> <span class="pre">*,</span> <span class="pre">rng=None)</span></code> builds one generator,
-<code class="docutils literal notranslate"><span class="pre">numpy.random.default_rng(rng)</span></code>, at the start of every call. <code class="docutils literal notranslate"><span class="pre">rng</span></code> is None, a seed or a
-<code class="docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code>: None draws fresh entropy (NumPy’s convention), a seed gives a generator
-in a fixed state, and a generator is used as is and advanced by the run.</p></li>
-<li><p>That one generator serves the whole run. It reaches the strategies through <code class="docutils literal notranslate"><span class="pre">RunContext.rng</span></code> and
-<code class="docutils literal notranslate"><span class="pre">StepContext.rng</span></code> (ADR-0004) and the simulated responses through <code class="docutils literal notranslate"><span class="pre">ResponseProvider.answer</span></code>, so the
-initializer, the selectors, the engine’s exposure control (ADR-0016) and the responses of every
-session draw from one stream. An engine without an exposure control draws nothing for it.</p></li>
-<li><p>The sessions run one after another, in the order of <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code>, so the draws of a session
-depend on every draw of the sessions before it.</p></li>
-<li><p>The runner draws nothing itself. The true abilities are an input: to simulate a population, the
-caller draws them, e.g. <code class="docutils literal notranslate"><span class="pre">numpy.random.default_rng(1).normal(0,</span> <span class="pre">1,</span> <span class="pre">n)</span></code>, with a generator of its
-own.</p></li>
-<li><p>Reproducibility comes from passing <code class="docutils literal notranslate"><span class="pre">rng</span></code>. An unseeded call is random, so unseeded replications in
-a loop differ, as they must for their spread to mean anything.</p></li>
+<ul>
+<li><p>A session owns its exclusions. <code class="docutils literal notranslate"><span class="pre">CatSessionState.excluded_items</span></code> holds the items the session must
+not be given although it has not had them, in the order they were excluded, with no repeat and no
+administered item. It is saved with the session, and snapshots copy it. The engine passes it
+into every <code class="docutils literal notranslate"><span class="pre">StepContext</span></code>; a wrapper that passes a changed context on adds to it, never replaces it.</p></li>
+<li><p>An exposure control is an optional engine component, a strategy under ADR-0005:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">BaseExposureControl</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>  <span class="c1"># catsim.exposure</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">,</span> <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span> <span class="o">...</span>
+
+<span class="n">CatEngine</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">initializer</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">stopper</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">exposure_control</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">select_next</span></code> asks the control about every proposal. A declined item joins the context’s excluded
+items and the selector is asked again, until the control accepts an item or the selector raises
+<code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>, which ends the session with <code class="docutils literal notranslate"><span class="pre">StopReason.NO_ITEMS</span></code> (ADR-0007). Each
+proposal is checked first, so a selector that ignores the exclusions raises and the loop ends.
+The declines are committed once the selection ends; a selection that raises commits none.</p></li>
+<li><p>A response to an excluded item, or a proposal of one, raises <code class="docutils literal notranslate"><span class="pre">ExcludedItemError</span></code>, a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code> counts proposals when an item is administered or declined: <code class="docutils literal notranslate"><span class="pre">record</span></code> adds an
+administration and a proposal, <code class="docutils literal notranslate"><span class="pre">record_decline</span></code> a proposal only, so declines never reach the
+rates an <code class="docutils literal notranslate"><span class="pre">r_max</span></code> cap is checked against (ADR-0004). <code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code> reports
+<code class="docutils literal notranslate"><span class="pre">proposal_counts</span></code> and <code class="docutils literal notranslate"><span class="pre">proposal_rates</span></code>.</p></li>
 </ul>
 </section>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>The same seed and the same <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code> give identical results, run after run and runner after
-runner, on the same engine configuration and package versions. A generator passed as <code class="docutils literal notranslate"><span class="pre">rng</span></code> is
-advanced by each run, so reusing the same generator object gives other results.</p></li>
-<li><p>An unseeded run cannot be repeated: nothing records the entropy it drew.</p></li>
-<li><p>Reordering <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code> changes the results, and so does inserting or removing an examinee:
-every later session starts from another point of the stream.</p></li>
-<li><p>A change in how many numbers one component draws, such as a selector changed to break ties it
-used to leave alone, shifts the draws of every later session, so seeded results can change across
-catsim versions.</p></li>
-<li><p>Running the sessions of one run in parallel would make the draws depend on their timing, so the
-runner does not. To parallelise, split the population and run each part with a generator of its
-own, for example <code class="docutils literal notranslate"><span class="pre">numpy.random.default_rng(child)</span></code> for each <code class="docutils literal notranslate"><span class="pre">child</span></code> of
-<code class="docutils literal notranslate"><span class="pre">numpy.random.SeedSequence(seed).spawn(k)</span></code>, accepting that the results differ from those of one
-sequential run.</p></li>
-<li><p>An application that steps sessions itself (<code class="docutils literal notranslate"><span class="pre">CatEngine.step</span></code> and <code class="docutils literal notranslate"><span class="pre">apply_response</span></code>) owns its
-<code class="docutils literal notranslate"><span class="pre">RunContext</span></code> and so its generator; the same rules apply to the sessions it runs on one context.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ItemBank.generate</span></code> takes its own <code class="docutils literal notranslate"><span class="pre">rng</span></code>, also None by default, so a generated bank does not
-depend on any run.</p></li>
+<li><p>Sympson-Hetter is a control of a few lines. An item is proposed at most once per examinee, so
+<code class="docutils literal notranslate"><span class="pre">proposal_rates</span></code> is the share its calibration needs.</p></li>
+<li><p>Without a control nothing draws, so the mechanism leaves seeded runs as they are; a control
+draws from the run’s generator (ADR-0010).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">select_next</span></code> can change the session, so an application saves sessions after <code class="docutils literal notranslate"><span class="pre">select_next</span></code> too.
+Each call selects anew: a second call before the answer, as on a page reload, may decline the
+item already shown, so an application keeps the item’s id and shows it again.</p></li>
+<li><p>Items may be added to <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code> before the first item, never removed during the test:
+each decline is already counted as a proposal.</p></li>
+<li><p>A session whose remaining items are all declined ends early, with <code class="docutils literal notranslate"><span class="pre">NO_ITEMS</span></code>.</p></li>
+<li><p>A tracker rebuilt without proposals takes one per administration.</p></li>
+</ul>
+</section>
+<section id="alternatives-considered">
+<h2>Alternatives Considered<a class="headerlink" href="#alternatives-considered" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">select</span></code> returning the item with its declines: it breaks every selector and caller.</p></li>
+<li><p>Exclusions that last one selection: they depart from Sympson and Hetter, and an item declined and
+proposed again would be counted twice.</p></li>
+<li><p>A decline callback in <code class="docutils literal notranslate"><span class="pre">StepContext</span></code>: a side effect in a frozen context, which look-ahead selectors
+such as MEI and direct calls would trigger wrongly or lose.</p></li>
+<li><p>A wrapper keeping declines by <code class="docutils literal notranslate"><span class="pre">session_id</span></code>: per-session state on a strategy, lost on restore.</p></li>
+<li><p>The control in <code class="docutils literal notranslate"><span class="pre">RunContext</span></code>: it is part of the test design, like the selector.</p></li>
+<li><p>Counting a proposal each time <code class="docutils literal notranslate"><span class="pre">select_next</span></code> returns an item: a reload would count it twice.</p></li>
 </ul>
 </section>
 </section>
@@ -610,20 +613,20 @@ depend on any run.</p></li>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="0012-unidimensional-dichotomous-scope.html"
+       href="0007-how-a-session-ends.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</p>
+        <p class="prev-next-title">ADR-0007: Decide in One Place How a Session Ends</p>
       </div>
     </a>
     <a class="right-next"
-       href="0014-public-import-paths-and-names.html"
+       href="0009-immutable-step-results.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ADR-0014: Public Import Paths and One Name per Concept</p>
+        <p class="prev-next-title">ADR-0009: Make Step Results Immutable Snapshots</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -650,13 +653,14 @@ depend on any run.</p></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#context">Context</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#decision">Decision</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#consequences">Consequences</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#alternatives-considered">Alternatives Considered</a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/adr/0013-random-numbers-and-reproducibility.md.txt">
+    <a href="../_sources/adr/0008-session-exclusions-and-exposure-control.md.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal &#8212; catsim 0.21.0 documentation</title>
+    <title>ADR-0004: Keep Runtime State Outside Domain Objects &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -42,13 +42,13 @@
     <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0016-session-exclusions-and-exposure-control';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0004-runtime-state-ownership';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Contributing" href="../contributing.html" />
-    <link rel="prev" title="ADR-0015: Plotting as an Optional Extra" href="0015-plotting-as-an-optional-extra.html" />
+    <link rel="next" title="ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate" href="0005-explicit-strategy-contracts.html" />
+    <link rel="prev" title="ADR-0003: Adopt Explicit CAT Engine Architecture" href="0003-explicit-cat-engine.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -455,22 +455,20 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="0001-explicit-cat-engine.html">ADR-0001: Adopt Explicit CAT Engine Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0002-remove-legacy-simulator-apis.html">ADR-0002: Remove Legacy Simulator APIs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0003-runtime-state-ownership.html">ADR-0003: Keep Runtime State Outside Domain Objects</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0004-explicit-strategy-contracts.html">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0005-immutable-step-results.html">ADR-0005: Make Step Results Immutable Snapshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0006-versioned-tutorial-notebooks.html">ADR-0006: Version Tutorial Notebooks as .ipynb Files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0007-release-gated-by-docs.html">ADR-0007: Gate Package Publication on Documentation Availability</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0008-random-tie-breaking.html">ADR-0008: Break Ties Between Items Uniformly at Random</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0009-ability-scale-and-extreme-patterns.html">ADR-0009: Ability Scale and Extreme Response Patterns</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0010-published-progressive-schedule.html">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0011-how-a-session-ends.html">ADR-0011: Decide in One Place How a Session Ends</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0014-public-import-paths-and-names.html">ADR-0014: Public Import Paths and One Name per Concept</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0015-plotting-as-an-optional-extra.html">ADR-0015: Plotting as an Optional Extra</a></li>
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0001-unidimensional-dichotomous-scope.html">ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0002-four-parameter-item-matrix.html">ADR-0002: Items Are an n×4 Matrix of 4PL Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0003-explicit-cat-engine.html">ADR-0003: Adopt Explicit CAT Engine Architecture</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0004: Keep Runtime State Outside Domain Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0005-explicit-strategy-contracts.html">ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0006-public-import-paths-and-names.html">ADR-0006: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0007-how-a-session-ends.html">ADR-0007: Decide in One Place How a Session Ends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0008-session-exclusions-and-exposure-control.html">ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0009-immutable-step-results.html">ADR-0009: Make Step Results Immutable Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0010-random-numbers-and-reproducibility.html">ADR-0010: Random Numbers and Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0011-random-tie-breaking.html">ADR-0011: Break Ties Between Items Uniformly at Random</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0012-ability-scale-and-extreme-patterns.html">ADR-0012: Ability Scale and Extreme Response Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0013-published-progressive-schedule.html">ADR-0013: Progressive and Proportional Follow the Published Schedule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0014-plotting-as-an-optional-extra.html">ADR-0014: Plotting as an Optional Extra</a></li>
 </ul>
 </div>
 </nav></div>
@@ -514,7 +512,7 @@
     
     <li class="breadcrumb-item"><a href="../architecture_decisions.html" class="nav-link">Architecture Decision Records</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0004: Keep Runtime State Outside Domain Objects</span></li>
   </ul>
 </nav>
 </div>
@@ -531,75 +529,76 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="adr-0016-the-session-keeps-its-excluded-items-and-an-exposure-control-may-decline-a-proposal">
-<h1>ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal<a class="headerlink" href="#adr-0016-the-session-keeps-its-excluded-items-and-an-exposure-control-may-decline-a-proposal" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="adr-0004-keep-runtime-state-outside-domain-objects">
+<h1>ADR-0004: Keep Runtime State Outside Domain Objects<a class="headerlink" href="#adr-0004-keep-runtime-state-outside-domain-objects" title="Link to this heading">#</a></h1>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
 <p>Accepted 2026-11-24</p>
 </section>
 <section id="context">
 <h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
-<p>Sympson-Hetter exposure control administers the item a selector proposes only with a calibrated
-probability. A declined item is set aside for the rest of the examinee’s test, and the calibration
-counts how often each item is proposed. Under the strategy contract of ADR-0004 the engine built
-every <code class="docutils literal notranslate"><span class="pre">StepContext</span></code> with no excluded items, <code class="docutils literal notranslate"><span class="pre">select</span></code> returned only an <code class="docutils literal notranslate"><span class="pre">int</span></code>, and strategies keep no
-per-session state. A wrapper selector could exclude a declined item only for one <code class="docutils literal notranslate"><span class="pre">select</span></code> call, and
-nothing recorded declines or proposals from one step to the next.</p>
+<p>Runtime state was entangled with long-lived objects: the item bank kept a column of exposure
+rates beside its parameters, so a bank reused across runs carried one run’s exposure into the
+next.</p>
+<p>The exposure rates a selector checks its <code class="docutils literal notranslate"><span class="pre">r_max</span></code> cap against were the tracker’s counts divided by
+the planned size of the run, which the caller passed in. That caused two problems:</p>
+<ul class="simple">
+<li><p>Without the planned size, the engine passed no rates at all, so an <code class="docutils literal notranslate"><span class="pre">r_max</span></code> cap did nothing and
+nothing said so. That is the natural setup for a live deployment, which does not know in advance
+how many examinees it will test.</p></li>
+<li><p>With it, early examinees saw every rate near zero and the cap bore only on late ones, so the
+precision of an examinee’s test depended on their place in the run.</p></li>
+</ul>
+<p>catR’s <code class="docutils literal notranslate"><span class="pre">simulateRespondents</span></code> divides by the examinees tested so far, with no restriction for the
+first respondent and none at all when <code class="docutils literal notranslate"><span class="pre">rmax</span></code> is 1.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
-<ul>
-<li><p>A session owns its exclusions. <code class="docutils literal notranslate"><span class="pre">CatSessionState.excluded_items</span></code> holds the items the session must
-not be given although it has not had them, in the order they were excluded, with no repeat and no
-administered item. It is saved with the session, and snapshots copy it. The engine passes it
-into every <code class="docutils literal notranslate"><span class="pre">StepContext</span></code>; a wrapper that passes a changed context on adds to it, never replaces it.</p></li>
-<li><p>An exposure control is an optional engine component, a strategy under ADR-0004:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">BaseExposureControl</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>  <span class="c1"># catsim.exposure</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">,</span> <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span> <span class="o">...</span>
-
-<span class="n">CatEngine</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">initializer</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">stopper</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">exposure_control</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-</pre></div>
-</div>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">select_next</span></code> asks the control about every proposal. A declined item joins the context’s excluded
-items and the selector is asked again, until the control accepts an item or the selector raises
-<code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>, which ends the session with <code class="docutils literal notranslate"><span class="pre">StopReason.NO_ITEMS</span></code> (ADR-0011). Each
-proposal is checked first, so a selector that ignores the exclusions raises and the loop ends.
-The declines are committed once the selection ends; a selection that raises commits none.</p></li>
-<li><p>A response to an excluded item, or a proposal of one, raises <code class="docutils literal notranslate"><span class="pre">ExcludedItemError</span></code>, a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code> counts proposals when an item is administered or declined: <code class="docutils literal notranslate"><span class="pre">record</span></code> adds an
-administration and a proposal, <code class="docutils literal notranslate"><span class="pre">record_decline</span></code> a proposal only, so declines never reach the
-rates an <code class="docutils literal notranslate"><span class="pre">r_max</span></code> cap is checked against (ADR-0003). <code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code> reports
-<code class="docutils literal notranslate"><span class="pre">proposal_counts</span></code> and <code class="docutils literal notranslate"><span class="pre">proposal_rates</span></code>.</p></li>
+<p>Calibrated item data is domain data; runtime state lives in dedicated execution objects:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ItemBank</span></code> holds the item parameters and the values derived from them, in read-only arrays.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code> holds one examinee’s runtime state, the items it excluded included (ADR-0008).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code> and <code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code> hold run-level exposure information.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code> owns the denominator of the exposure rates, which follow catR:</p>
+<ul class="simple">
+<li><p>The tracker counts the sessions started as well as each item’s administrations and proposals
+(administrations plus the exposure control’s declines, which never enter the rates). The engine
+updates it.</p></li>
+<li><p>A session is selected against each item’s administrations divided by the number of other
+sessions started so far. With sessions run one after another, as <code class="docutils literal notranslate"><span class="pre">SimulationRunner</span></code> runs them,
+that is catR’s rate: the share of the examinees tested before the current one.</p></li>
+<li><p>The rates are computed when a session asks, not fixed when it starts, so one tracker serves
+sessions that run side by side without keeping anything per session.</p></li>
+<li><p>An <code class="docutils literal notranslate"><span class="pre">r_max</span></code> of 1 applies no cap, as in catR: an item that every earlier examinee received has a
+rate of exactly 1, which a strict <code class="docutils literal notranslate"><span class="pre">rate</span> <span class="pre">&lt;</span> <span class="pre">r_max</span></code> test would pass over.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SimulationResult.exposure_rates</span></code> divides the run’s counts by all its sessions: the exposure at
+the end of the run, not the rates any session saw.</p></li>
 </ul>
 </section>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>Sympson-Hetter is a control of a few lines. An item is proposed at most once per examinee, so
-<code class="docutils literal notranslate"><span class="pre">proposal_rates</span></code> is the share its calibration needs.</p></li>
-<li><p>Without a control nothing draws, so the mechanism leaves seeded runs as they are; a control
-draws from the run’s generator (ADR-0013).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">select_next</span></code> can change the session, so an application saves sessions after <code class="docutils literal notranslate"><span class="pre">select_next</span></code> too.
-Each call selects anew: a second call before the answer, as on a page reload, may decline the
-item already shown, so an application keeps the item’s id and shows it again.</p></li>
-<li><p>Items may be added to <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code> before the first item, never removed during the test:
-each decline is already counted as a proposal.</p></li>
-<li><p>A session whose remaining items are all declined ends early, with <code class="docutils literal notranslate"><span class="pre">NO_ITEMS</span></code>.</p></li>
-<li><p>A tracker rebuilt without proposals takes one per administration.</p></li>
+<li><p>An item bank can be reused across sessions and simulations, and its cached values cannot go
+stale.</p></li>
+<li><p>A context with a tracker is all exposure control needs, so a live deployment gets it without
+knowing how many examinees it will test; without a tracker, selectors apply no cap.</p></li>
+<li><p>A session that starts and is abandoned still counts in the denominator, which lowers every later
+rate a little: the tracker cannot tell it from one still running.</p></li>
+<li><p>The tracker’s counts are not part of any session snapshot: saving a tracker across restarts is
+the application’s job (<a class="reference internal" href="../live-sessions.html"><span class="doc">Live CAT Sessions</span></a>).</p></li>
 </ul>
 </section>
 <section id="alternatives-considered">
 <h2>Alternatives Considered<a class="headerlink" href="#alternatives-considered" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">select</span></code> returning the item with its declines: it breaks every selector and caller.</p></li>
-<li><p>Exclusions that last one selection: they depart from Sympson and Hetter, and an item declined and
-proposed again would be counted twice.</p></li>
-<li><p>A decline callback in <code class="docutils literal notranslate"><span class="pre">StepContext</span></code>: a side effect in a frozen context, which look-ahead selectors
-such as MEI and direct calls would trigger wrongly or lose.</p></li>
-<li><p>A wrapper keeping declines by <code class="docutils literal notranslate"><span class="pre">session_id</span></code>: per-session state on a strategy, lost on restore.</p></li>
-<li><p>The control in <code class="docutils literal notranslate"><span class="pre">RunContext</span></code>: it is part of the test design, like the selector.</p></li>
-<li><p>Counting a proposal each time <code class="docutils literal notranslate"><span class="pre">select_next</span></code> returns an item: a reload would count it twice.</p></li>
+<li><p>Dividing by the planned size of the run: it leaves a live deployment without a cap and makes the
+cap bear on examinees by their place in the run.</p></li>
+<li><p>Counting the session being tested in the denominator: it divides the administrations of an item
+the session can still receive by one examinee more than could have received it, which lowers the
+rates most for the early sessions (the second session would see the first’s items at 1/2, not 1).</p></li>
+<li><p>Fixing each session’s rates when it starts: the tracker would keep per-session state.</p></li>
+<li><p>Keeping exposure on the item bank: one run’s exposure would leak into the next.</p></li>
 </ul>
 </section>
 </section>
@@ -615,20 +614,20 @@ such as MEI and direct calls would trigger wrongly or lose.</p></li>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="0015-plotting-as-an-optional-extra.html"
+       href="0003-explicit-cat-engine.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ADR-0015: Plotting as an Optional Extra</p>
+        <p class="prev-next-title">ADR-0003: Adopt Explicit CAT Engine Architecture</p>
       </div>
     </a>
     <a class="right-next"
-       href="../contributing.html"
+       href="0005-explicit-strategy-contracts.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Contributing</p>
+        <p class="prev-next-title">ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -662,7 +661,7 @@ such as MEI and direct calls would trigger wrongly or lose.</p></li>
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/adr/0016-session-exclusions-and-exposure-control.md.txt">
+    <a href="../_sources/adr/0004-runtime-state-ownership.md.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

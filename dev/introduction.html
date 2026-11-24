@@ -910,7 +910,7 @@ the standard normal distribution <span class="math notranslate nohighlight">\(N(
 and <span class="math notranslate nohighlight">\(4\)</span>. The ability cannot be observed, so it is estimated from the responses: the <em>ability
 estimate</em> <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>, which tends to get closer to the true <span class="math notranslate nohighlight">\(\theta\)</span> as the test gets longer.
 By default, <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>’s estimators keep their estimates within <span class="math notranslate nohighlight">\([-6, 6]\)</span>, wider than any plausible
-examinee or item bank (<a class="reference internal" href="adr/0009-ability-scale-and-extreme-patterns.html"><span class="doc">ADR-0009: Ability Scale and Extreme Response Patterns</span></a>).</p>
+examinee or item bank (<a class="reference internal" href="adr/0012-ability-scale-and-extreme-patterns.html"><span class="doc">ADR-0012: Ability Scale and Extreme Response Patterns</span></a>).</p>
 <p>Under the logistic models, item <span class="math notranslate nohighlight">\(i\)</span> has up to four parameters:</p>
 <ul class="simple">
 <li><p>its <em>discrimination</em> <span class="math notranslate nohighlight">\(a_i\)</span>: how sharply the item separates examinees of lower and higher ability.
@@ -1087,7 +1087,7 @@ the same test to simulated examinees whose true abilities are known, and returns
 <a class="reference internal" href="api/simulation.html#catsim.SimulationResult" title="catsim.SimulationResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulationResult</span></code></a> that compares the final estimates with those abilities
 (<a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a>). <a class="reference internal" href="reproducibility.html"><span class="doc">Reproducibility</span></a> shows how to seed a simulation study so that
 it repeats, and <a class="reference internal" href="extending.html"><span class="doc">Extending catsim</span></a> how to write a strategy of your own.
-<a class="reference internal" href="adr/0001-explicit-cat-engine.html"><span class="doc">ADR-0001: Adopt Explicit CAT Engine Architecture</span></a> records why catsim is built around the engine.</p>
+<a class="reference internal" href="adr/0003-explicit-cat-engine.html"><span class="doc">ADR-0003: Adopt Explicit CAT Engine Architecture</span></a> records why catsim is built around the engine.</p>
 </section>
 </section>
 

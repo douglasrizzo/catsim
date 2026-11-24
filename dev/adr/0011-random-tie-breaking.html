@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ADR-0011: Decide in One Place How a Session Ends &#8212; catsim 0.21.0 documentation</title>
+    <title>ADR-0011: Break Ties Between Items Uniformly at Random &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -42,13 +42,13 @@
     <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0011-how-a-session-ends';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0011-random-tie-breaking';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT" href="0012-unidimensional-dichotomous-scope.html" />
-    <link rel="prev" title="ADR-0010: Progressive and Proportional Follow the Published Schedule" href="0010-published-progressive-schedule.html" />
+    <link rel="next" title="ADR-0012: Ability Scale and Extreme Response Patterns" href="0012-ability-scale-and-extreme-patterns.html" />
+    <link rel="prev" title="ADR-0010: Random Numbers and Reproducibility" href="0010-random-numbers-and-reproducibility.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -455,22 +455,20 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="0001-explicit-cat-engine.html">ADR-0001: Adopt Explicit CAT Engine Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0002-remove-legacy-simulator-apis.html">ADR-0002: Remove Legacy Simulator APIs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0003-runtime-state-ownership.html">ADR-0003: Keep Runtime State Outside Domain Objects</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0004-explicit-strategy-contracts.html">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0005-immutable-step-results.html">ADR-0005: Make Step Results Immutable Snapshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0006-versioned-tutorial-notebooks.html">ADR-0006: Version Tutorial Notebooks as .ipynb Files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0007-release-gated-by-docs.html">ADR-0007: Gate Package Publication on Documentation Availability</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0008-random-tie-breaking.html">ADR-0008: Break Ties Between Items Uniformly at Random</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0009-ability-scale-and-extreme-patterns.html">ADR-0009: Ability Scale and Extreme Response Patterns</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0010-published-progressive-schedule.html">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0011: Decide in One Place How a Session Ends</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0014-public-import-paths-and-names.html">ADR-0014: Public Import Paths and One Name per Concept</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0015-plotting-as-an-optional-extra.html">ADR-0015: Plotting as an Optional Extra</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0016-session-exclusions-and-exposure-control.html">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0001-unidimensional-dichotomous-scope.html">ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0002-four-parameter-item-matrix.html">ADR-0002: Items Are an n×4 Matrix of 4PL Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0003-explicit-cat-engine.html">ADR-0003: Adopt Explicit CAT Engine Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0004-runtime-state-ownership.html">ADR-0004: Keep Runtime State Outside Domain Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0005-explicit-strategy-contracts.html">ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0006-public-import-paths-and-names.html">ADR-0006: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0007-how-a-session-ends.html">ADR-0007: Decide in One Place How a Session Ends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0008-session-exclusions-and-exposure-control.html">ADR-0008: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0009-immutable-step-results.html">ADR-0009: Make Step Results Immutable Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0010-random-numbers-and-reproducibility.html">ADR-0010: Random Numbers and Reproducibility</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0011: Break Ties Between Items Uniformly at Random</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0012-ability-scale-and-extreme-patterns.html">ADR-0012: Ability Scale and Extreme Response Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0013-published-progressive-schedule.html">ADR-0013: Progressive and Proportional Follow the Published Schedule</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0014-plotting-as-an-optional-extra.html">ADR-0014: Plotting as an Optional Extra</a></li>
 </ul>
 </div>
 </nav></div>
@@ -514,7 +512,7 @@
     
     <li class="breadcrumb-item"><a href="../architecture_decisions.html" class="nav-link">Architecture Decision Records</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0011: Decide in One Place How a Session Ends</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0011: Break Ties Between Items Uniformly at Random</span></li>
   </ul>
 </nav>
 </div>
@@ -531,83 +529,73 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="adr-0011-decide-in-one-place-how-a-session-ends">
-<h1>ADR-0011: Decide in One Place How a Session Ends<a class="headerlink" href="#adr-0011-decide-in-one-place-how-a-session-ends" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="adr-0011-break-ties-between-items-uniformly-at-random">
+<h1>ADR-0011: Break Ties Between Items Uniformly at Random<a class="headerlink" href="#adr-0011-break-ties-between-items-uniformly-at-random" title="Link to this heading">#</a></h1>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
-<p>Accepted</p>
+<p>Accepted 2026-11-24</p>
 </section>
 <section id="context">
 <h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">CatEngine</span></code> ended sessions in three places, with three free-form strings. <code class="docutils literal notranslate"><span class="pre">step()</span></code> asked the
-stopper before selecting (<code class="docutils literal notranslate"><span class="pre">&quot;stop_rule&quot;</span></code>), turned <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code> into
-<code class="docutils literal notranslate"><span class="pre">&quot;item_bank_exhausted&quot;</span></code> and a <code class="docutils literal notranslate"><span class="pre">None</span></code> from the selector into <code class="docutils literal notranslate"><span class="pre">&quot;selector_stopped&quot;</span></code>, and
-<code class="docutils literal notranslate"><span class="pre">apply_response</span></code> asked the stopper again after each estimate. The manual workflow, <code class="docutils literal notranslate"><span class="pre">select_next</span></code>
-then <code class="docutils literal notranslate"><span class="pre">apply_response</span></code>, shared none of that: <code class="docutils literal notranslate"><span class="pre">select_next</span></code> let the exception escape and left the
-session in progress, so every application had to copy <code class="docutils literal notranslate"><span class="pre">step()</span></code>’s handling. A stopped session
-accepted more responses, stepping it again relabelled it, and the stopper was asked twice about
-every state.</p>
-<p>The labels were also wrong. <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code> does not mean that the bank is exhausted: a
-stratified selector raises it when a stratum runs out, and <code class="docutils literal notranslate"><span class="pre">LinearSelector</span></code> when its list does. The
-built-in stoppers checked bank exhaustion themselves, so a bank that really ran out reported
-<code class="docutils literal notranslate"><span class="pre">&quot;stop_rule&quot;</span></code>. No selector returned <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<p>Selectors that pick the best item by a score broke ties in three different ways:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">MaxInfoSelector</span></code> and <code class="docutils literal notranslate"><span class="pre">UrrySelector</span></code> took the first item in numpy’s default <code class="docutils literal notranslate"><span class="pre">argsort</span></code> order. That
+sort is not stable, so the tied item they chose followed no rule: it changed when unrelated items
+were added to the bank or administered.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IntervalInfoSelector</span></code>, the stratified selectors, <code class="docutils literal notranslate"><span class="pre">ClusterSelector</span></code> and the newer selectors took
+the lowest index through <code class="docutils literal notranslate"><span class="pre">argmax</span></code> or <code class="docutils literal notranslate"><span class="pre">argmin</span></code>.</p></li>
+<li><p>The Randomesque and 5-4-3-2-1 bins cut a sorted list at a fixed size, so which tied item made the
+bin also followed the unstable sort.</p></li>
+</ul>
+<p>Ties are common: duplicated items, 1PL banks with repeated difficulties, and items whose
+difficulties sit symmetrically around the ability estimate. Duplicates and repeated difficulties
+tie bit for bit, so the choice among them is a real behaviour, not a rounding accident. A fixed
+order also hands all the exposure of a set of duplicates to one copy until it is administered.</p>
+<p>catR breaks every tie the same way: it keeps the items whose score equals the best score exactly
+and draws one of them with <code class="docutils literal notranslate"><span class="pre">sample()</span></code>. For randomesque bins, every item scoring at least the
+cutoff joins the pool.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
-<ul>
-<li><p>A session ends for one of two reasons, the members of the <code class="docutils literal notranslate"><span class="pre">StopReason</span></code> enum:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">STOPPER</span></code> (<code class="docutils literal notranslate"><span class="pre">&quot;stopper&quot;</span></code>): the engine’s stopper is satisfied by the session’s current state;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">NO_ITEMS</span></code> (<code class="docutils literal notranslate"><span class="pre">&quot;no_items&quot;</span></code>): the selector has no item to offer, or none that the engine’s
-exposure control accepts (ADR-0016).</p></li>
-</ul>
-<p><code class="docutils literal notranslate"><span class="pre">stop_reason</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code> while the session runs, and it is the only record of whether the
-session has ended: <code class="docutils literal notranslate"><span class="pre">is_stopped</span></code> reads it, and there is no separate status field. Lifecycle
-states such as paused or abandoned belong to the application.</p>
-</li>
-<li><p>A selector says that it has no item by raising <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>. That is the single “no
-item” signal: <code class="docutils literal notranslate"><span class="pre">select</span></code> returns an <code class="docutils literal notranslate"><span class="pre">int</span></code> (ADR-0004).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">select_next</span></code> is the only place that decides whether a session continues. It returns <code class="docutils literal notranslate"><span class="pre">None</span></code> and
-records the reason when the stopper is satisfied or the selector has no item, and it returns
-<code class="docutils literal notranslate"><span class="pre">None</span></code> without changing anything for a session that has already stopped. It records the items
-the exposure control declined once the selection has ended, so a selection that raises changes
-nothing. A manual session is therefore one loop with no other stop check:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="n">item_id</span> <span class="o">:=</span> <span class="n">engine</span><span class="o">.</span><span class="n">select_next</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-  <span class="n">engine</span><span class="o">.</span><span class="n">apply_response</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_id</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">step()</span></code> is the same three moves: select, get the response, apply it.</p>
-</li>
-<li><p>The stopper is evaluated once per session state: by <code class="docutils literal notranslate"><span class="pre">select_next</span></code> for the initial state, before
-any response, and by <code class="docutils literal notranslate"><span class="pre">apply_response</span></code> after each new estimate. What <code class="docutils literal notranslate"><span class="pre">apply_response</span></code> records is
-final; <code class="docutils literal notranslate"><span class="pre">select_next</span></code> does not ask again.</p></li>
-<li><p>Stoppers are pure: the same inputs give the same answer, and asking has no side effects. Asking
-once per state therefore loses nothing.</p></li>
-<li><p>Running out of items is the engine’s to detect, through the selector, and it reports <code class="docutils literal notranslate"><span class="pre">NO_ITEMS</span></code>.
-A stopper that checks bank exhaustion itself and says stop reports <code class="docutils literal notranslate"><span class="pre">STOPPER</span></code>, because all the
-engine knows is that its stopper said stop.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">apply_response</span></code> applies a response atomically, and only to a running session. It raises
-<code class="docutils literal notranslate"><span class="pre">ValueError</span></code> for a stopped session, <code class="docutils literal notranslate"><span class="pre">ExcludedItemError</span></code> (a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>) for an item the session
-excluded, and <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> for an item index that is not an integer or a response that is not a
-<code class="docutils literal notranslate"><span class="pre">bool</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy.bool_</span></code>. It estimates and asks the stopper on step contexts
-built from the session with the new item and response (ADR-0004), and commits the item, the
-response, the estimate, the exposure count and the stop decision only once both have succeeded.</p></li>
-</ul>
+<p>Every selector that picks the best item by a score uses one rule, catR’s: the candidates whose
+score equals the best score exactly are tied, and one of them is drawn uniformly with the session’s
+random generator. Randomesque and 5-4-3-2-1 bins hold every candidate tied with the bin’s least
+informative item. <code class="docutils literal notranslate"><span class="pre">pick_best</span></code> and <code class="docutils literal notranslate"><span class="pre">best_pool</span></code>, exported from <code class="docutils literal notranslate"><span class="pre">catsim.selection</span></code>, implement the
+rule.</p>
+<p>The rule is fixed. There is no parameter, enum or package setting to change it.</p>
+<p>When there is no tie, no random number is drawn. The generator is the run’s, which every step
+context carries (ADR-0005), so a selector called directly breaks ties the same way as under
+<code class="docutils literal notranslate"><span class="pre">CatEngine</span></code>.</p>
+<p>Ties are exact equality of each selector’s own score, as in catR, so they depend on how the score
+rounds. Two items whose difficulties sit symmetrically around the estimate tie in information, but
+not always in distance: in floating point, |0.3 - 0.1| is 0.19999999999999998 and |-0.1 - 0.1| is
+0.2. <code class="docutils literal notranslate"><span class="pre">UrrySelector</span></code> and the stratified selectors, which score by distance, then pick the nearer
+item, as catR’s <code class="docutils literal notranslate"><span class="pre">bOpt</span></code> does. On 1PL banks, <code class="docutils literal notranslate"><span class="pre">MaxInfoSelector</span></code> and the bins rank by information, as
+catR’s <code class="docutils literal notranslate"><span class="pre">MFI</span></code> does, not by distance to the estimate. Information is flat near its peak, so items
+whose distances differ only by rounding tie there.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ClusterSelector</span></code> applies the rule twice: to its choice of cluster, among clusters whose scores tie
+exactly, and to its choice of item within that cluster. Its <code class="docutils literal notranslate"><span class="pre">item_info</span></code> rule scores clusters by
+information on every bank, 1PL included, as <code class="docutils literal notranslate"><span class="pre">MaxInfoSelector</span></code> does.</p>
 </section>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>A manual session and <code class="docutils literal notranslate"><span class="pre">step()</span></code> or <code class="docutils literal notranslate"><span class="pre">run_session()</span></code> end the same way, with the same reason.</p></li>
-<li><p>Analysis code compares a stop reason with one of two values; as a <code class="docutils literal notranslate"><span class="pre">StrEnum</span></code>, each member also
-equals its string.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">NO_ITEMS</span></code> does not tell a bank that ran out from a selector whose own pool ran out; comparing the
-number of administered items with the bank size does.</p></li>
-<li><p>A session of n items makes n + 1 stopper calls instead of 2n, which matters for stoppers that are
-costly to evaluate.</p></li>
-<li><p>A state whose items were appended by hand, outside <code class="docutils literal notranslate"><span class="pre">apply_response</span></code>, is not re-evaluated by the
-stopper. An application that persists sessions restores their stop reason with them.</p></li>
-<li><p>Custom selectors that return <code class="docutils literal notranslate"><span class="pre">None</span></code>, and code comparing the old strings (<code class="docutils literal notranslate"><span class="pre">&quot;stop_rule&quot;</span></code>,
-<code class="docutils literal notranslate"><span class="pre">&quot;item_bank_exhausted&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;selector_stopped&quot;</span></code>), must change.</p></li>
+<li><p>Seeded results depend on the random stream only where items tie exactly in a selector’s score;
+on banks with continuous parameters, ties are rare and the stream is untouched.</p></li>
+<li><p>Exposure is shared evenly among duplicated items.</p></li>
+<li><p>Every best-by-score selector goes through the same two helpers, so a custom selector that uses
+them breaks ties as the built-in ones do.</p></li>
+</ul>
+</section>
+<section id="alternatives-considered">
+<h2>Alternatives Considered<a class="headerlink" href="#alternatives-considered" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>The lowest index: deterministic, but it gives all of a set of duplicates’ exposure to one copy
+and departs from catR.</p></li>
+<li><p>A tolerance, so that scores differing only by rounding tie: no tolerance suits every score’s
+scale, and catR uses exact equality, so results would not match it.</p></li>
+<li><p>A setting to choose the tie-breaking rule: every selector and test would have to cover each
+rule, for no use the fixed rule does not serve.</p></li>
 </ul>
 </section>
 </section>
@@ -623,20 +611,20 @@ stopper. An application that persists sessions restores their stop reason with t
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="0010-published-progressive-schedule.html"
+       href="0010-random-numbers-and-reproducibility.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ADR-0010: Progressive and Proportional Follow the Published Schedule</p>
+        <p class="prev-next-title">ADR-0010: Random Numbers and Reproducibility</p>
       </div>
     </a>
     <a class="right-next"
-       href="0012-unidimensional-dichotomous-scope.html"
+       href="0012-ability-scale-and-extreme-patterns.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</p>
+        <p class="prev-next-title">ADR-0012: Ability Scale and Extreme Response Patterns</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -663,13 +651,14 @@ stopper. An application that persists sessions restores their stop reason with t
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#context">Context</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#decision">Decision</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#consequences">Consequences</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#alternatives-considered">Alternatives Considered</a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/adr/0011-how-a-session-ends.md.txt">
+    <a href="../_sources/adr/0011-random-tie-breaking.md.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>
