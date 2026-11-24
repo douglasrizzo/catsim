@@ -191,6 +191,14 @@ class HalfInitializer(BaseInitializer):
     return 0.5
 
 
+def test_engine_rejects_item_parameters_that_are_not_an_item_bank(item_bank) -> None:
+  """A bare parameter array was accepted and failed only at the first session, with an AttributeError on n_items."""
+  with pytest.raises(TypeError, match=r"item_bank must be an ItemBank, got ndarray; wrap item parameters in ItemBank"):
+    CatEngine(
+      item_bank.items, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.0), RecordingStopper(False)
+    )
+
+
 def test_start_session_passes_item_bank_and_rng_to_initializer(item_bank) -> None:
   """start_session gives the initializer the bank and the run's generator, and starts a running session at its estimate.
 

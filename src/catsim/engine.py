@@ -12,6 +12,7 @@ import numpy
 
 from .context import Estimate, StepContext
 from .exceptions import NoItemsAvailableError
+from .item_bank import ItemBank
 from .state import CatSessionState, CatStepResult, ExposureTracker, StopReason
 
 if TYPE_CHECKING:
@@ -19,7 +20,6 @@ if TYPE_CHECKING:
 
   from .estimation import BaseEstimator
   from .initialization import BaseInitializer
-  from .item_bank import ItemBank
   from .selection import BaseSelector
   from .state import CatSessionSnapshot
   from .stopping import BaseStopper
@@ -85,6 +85,11 @@ class CatEngine:
       Updates the ability estimate after each response.
   stopper : BaseStopper
       Decides when a session has ended.
+
+  Raises
+  ------
+  TypeError
+      If ``item_bank`` is not an :class:`~catsim.item_bank.ItemBank`.
   """
 
   def __init__(
@@ -95,6 +100,10 @@ class CatEngine:
     estimator: BaseEstimator,
     stopper: BaseStopper,
   ) -> None:
+    # Checked here because a NumPy array of parameters would otherwise fail only at the first session.
+    if not isinstance(item_bank, ItemBank):
+      msg = f"item_bank must be an ItemBank, got {type(item_bank).__name__}; wrap item parameters in ItemBank(...)"
+      raise TypeError(msg)
     self._item_bank = item_bank
     self._initializer = initializer
     self._selector = selector
