@@ -1,8 +1,7 @@
-**Status:** Implemented
-**Module:** {py:class}`catsim.selection.KLSelector`
-**Reference:** Chang & Ying (1996)
-
 # Kullback-Leibler Selector
+
+:Class: {py:class}`catsim.selection.KLSelector`
+:Sources: Chang & Ying (1996)
 
 ## Motivation
 
@@ -10,7 +9,7 @@ Maximum Fisher information is a local criterion: it trusts the current ability
 estimate completely. Early in a CAT, that estimate is noisy, so selecting items
 only by information at a single point can be brittle.
 
-The KL selector replaces that local view with a global one. It integrates a
+The KL selector takes a global view. It integrates a
 Kullback-Leibler divergence over a shrinking window around the current estimate,
 so the method behaves more globally early in the test and more locally later on.
 
@@ -48,8 +47,10 @@ curvature, that is, by the Fisher information; for a large one, by the tails of
 the divergence (p. 220). Before the first item, catsim uses $n = 1$, so the
 window is $\hat{\theta} \pm c$. Chang and Ying also define a Bayesian version
 that weights the divergence by the posterior (p. 222), a planned extension,
-KLP. The selector chooses the non-administered item with the
+KLP. The selector chooses the item, neither administered nor excluded, with the
 largest value of $K_i(\hat{\theta})$.
+
+### Computation
 
 Each integral is computed with a Gauss-Legendre rule over the window, the same
 rule for every candidate. A steep item's divergence changes quickly near its
@@ -84,15 +85,12 @@ nodes and the error grows, to about $2 \times 10^{-7}$ at $a\,\delta_n = 120$.
        out before the KL scores are computed, unless every remaining item is.
 ```
 
-## Behavioral Contracts
+## Guarantees
 
-Any correct implementation must satisfy the following properties:
-
-1. The KL integrand evaluates to zero when $\theta = \hat{\theta}$, because a distribution has zero divergence from itself.
-2. Increasing the integration half-width increases the accumulated KL mass for the same item and current estimate.
-3. The half-width schedule follows $c/\sqrt{\max(1, n)}$ and therefore shrinks as the test length grows.
-4. When no items satisfy the exposure cap, the selector falls back to the best non-administered item rather than failing spuriously.
-5. As the integration window becomes very narrow, the selector approaches a local-information criterion.
+1. It never returns an item that was already administered or excluded.
+2. When every remaining item is at or above the exposure cap, it falls back to the
+   remaining item with the largest KL integral.
+3. When no item remains, it raises `NoItemsAvailableError`.
 
 ## References
 

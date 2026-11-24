@@ -1,15 +1,15 @@
-**Status:** Implemented
-**Module:** {py:class}`catsim.selection.IntervalInfoSelector`
-**Reference:** Veerkamp & Berger (1997)
-
 # Interval Information Selector
+
+:Class: {py:class}`catsim.selection.IntervalInfoSelector`
+:Sources: Veerkamp & Berger (1997)
 
 ## Motivation
 
 Point-information rules assume the current estimate is accurate enough to be
 trusted as a single design point, which is least true early in the test.
-The interval information criterion of Veerkamp and Berger (1997) instead
-integrates each item's information over a confidence interval for $\theta$.
+The interval information criterion of Veerkamp and Berger (1997) integrates
+each item's information over a confidence interval for $\theta$ rather than
+evaluate it at a single point.
 Page and equation numbers below are those of the openly available 1994 research
 report that preceded the article; there the criterion is one case of a general
 weighted information criterion, $\max_i \int W_n(\theta)\, I_i(\theta)\, d\theta$
@@ -20,7 +20,8 @@ local maximum-information selection.
 
 ## Definition
 
-For an interval $[\theta_L, \theta_U]$, each non-administered item $i \in R_k$
+For an interval $[\theta_L, \theta_U]$, each remaining item $i \in R_k$ (neither
+administered nor excluded)
 is scored by
 
 $$
@@ -55,9 +56,10 @@ $$
 (p. 9, Equation 12). The report's posterior has a uniform prior (p. 10,
 Equation 13); catsim's is the EAP estimator's prior.
 
+### Computation
+
 catsim builds the interval as $\hat{\theta} \pm \lambda\, SE(\hat{\theta})$, with
-the standard error the current estimator reports (the `se` field of
-{py:class}`~catsim.StepContext`). MLE and WLE sessions therefore get
+the standard error the session's estimator reports. MLE and WLE sessions therefore get
 Equation 11 and EAP sessions Equation 12; a MAP session gets the MAP
 estimator's standard error, which includes the prior's curvature, by the same
 reasoning. The {doc}`estimation pages </api/techniques/estimation/index>`
@@ -72,18 +74,11 @@ $\hat{\theta}$, the limit of the information averaged over the interval. With a
 fixed `interval` $\delta$, the interval is $[\hat{\theta} - \delta, \hat{\theta} + \delta]$
 throughout the test.
 
-The integral has a closed form (see {py:func}`catsim.irt.info_integral`). Since
-$dP/d\theta = a (P - c)(d - P)/(d - c)$, substituting $P$ for $\theta$ gives
-
-$$
-\int I_i(\theta)\,d\theta =
-\frac{a_i}{d_i - c_i}\Big[P - c_i d_i \log P + (1 - c_i)(1 - d_i)\log(1 - P)\Big],
-$$
-
-so the scores of all items are computed exactly, without numerical quadrature.
-This extends the 3PL closed form of Veerkamp and Berger (pp. 21–22, Appendix,
-Equation 25), to which it reduces when $d_i = 1$. Under the 2PL model, the
-integral over the whole scale is $a_i$ (Equation 28).
+The integral has a closed form, which {py:func}`catsim.irt.info_integral`
+computes, so the scores of all items are computed exactly, without numerical
+quadrature. It extends the 3PL closed form of Veerkamp and Berger (pp. 21–22,
+Appendix, Equation 25), to which it reduces when $d_i = 1$. Under the 2PL model,
+the integral over the whole scale is $a_i$ (Equation 28).
 
 ## Parameters
 
@@ -104,16 +99,13 @@ integral over the whole scale is $a_i$ (Equation 28).
      - Confidence level :math:`\gamma` of the default interval.
 ```
 
-## Behavioral Contracts
+## Guarantees
 
-Any correct implementation must satisfy the following properties:
-
-1. Each candidate score is the integral of the item information function over the interval.
-2. With `interval=None`, the interval is $\hat{\theta} \pm \lambda\, SE(\hat{\theta})$, with the standard error the current estimator reports, and the whole ability scale while that standard error is infinite, as it is before the first response.
-3. With a fixed `interval`, the interval is $\hat{\theta} \pm \delta$.
-4. It never returns an already administered item.
-5. If no non-administered items remain, it raises `NoItemsAvailableError`.
-6. It applies no exposure cap: it ignores the context's `exposure_rates`.
+1. It returns the remaining item whose information, integrated over the interval,
+   is largest.
+2. It never returns an item that was already administered or excluded.
+3. When no item remains, it raises `NoItemsAvailableError`.
+4. It applies no exposure cap: the run's exposure rates do not change its choice.
 
 ## References
 
