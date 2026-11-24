@@ -137,8 +137,8 @@ docs = [
 [package.metadata]
 requires-dist = [
     { name = "matplotlib", marker = "extra == 'plot'", specifier = ">=3.10.7" },
-    { name = "numpy", specifier = ">=2.0" },
-    { name = "scipy", specifier = ">=1.13" },
+    { name = "numpy", specifier = ">=2.3.1" },
+    { name = "scipy", specifier = ">=1.16" },
     { name = "tqdm", specifier = ">=4.64" },
     { name = "typing-extensions", specifier = ">=4.4" },
 ]

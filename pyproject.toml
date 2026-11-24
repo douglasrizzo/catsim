@@ -33,11 +33,12 @@ keywords = [
 name = "catsim"
 version = "0.21.0"
 description = "Computerized adaptive testing toolkit"
-# The CI test job's lowest-direct entry installs exactly these floors. numpy 2.0 changed the C ABI,
-# so scipy releases before 1.13 do not work with it.
+# The CI test job's lowest-direct entries install exactly these floors.
+# numpy: releases before 2.3.1 raise spurious matmul warnings when linked to Apple's Accelerate.
+# scipy: 1.13 and 1.14 require numpy < 2.3, and 1.15's macOS wheels do not load on macOS 27.
 dependencies = [
-    "numpy>=2.0",
-    "scipy>=1.13",
+    "numpy>=2.3.1",
+    "scipy>=1.16",
     "tqdm>=4.64",
     "typing-extensions>=4.4",
 ]
