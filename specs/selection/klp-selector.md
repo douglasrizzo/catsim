@@ -214,7 +214,7 @@ class KLPSelector(BaseSelector):
 **Implementation notes:**
 
 - The posterior comes from the context's responses at every call: estimators keep no per-session
-  posterior ({doc}`ADR-0003 </adr/0003-runtime-state-ownership>`), and `posterior()` is one
+  posterior ({doc}`ADR-0004 </adr/0004-explicit-strategy-contracts>`), and `posterior()` is one
   vectorized pass over the grid. With no responses it is the prior on the grid.
 - The reference point of the divergence is the context's `theta`, the engine's current estimate
   from whichever estimator it runs, not the posterior mean; the definition's $\hat\theta$ is the
