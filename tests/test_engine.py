@@ -311,7 +311,8 @@ def test_apply_response_records_exposure_and_returns_complete_step_result(item_b
   """
   estimator = RecordingEstimator(theta=1.1)
   tracker = ExposureTracker(item_bank.n_items)
-  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), estimator, RecordingStopper(False))
+  # A non-zero start tells an estimator handed StepContext's default theta of 0 apart from one handed the session's.
+  engine = CatEngine(RecordingInitializer(0.7), RecordingSelector(0), estimator, RecordingStopper(False))
   context = RunContext(rng=np.random.default_rng(42), exposure_tracker=tracker)
   session = engine.start_session(session_id=1, item_bank=item_bank, context=context, true_theta=0.2)
 
@@ -321,7 +322,7 @@ def test_apply_response_records_exposure_and_returns_complete_step_result(item_b
   assert tracker.counts.sum() == 1
   assert estimator.seen.item_bank is item_bank
   assert (estimator.seen.administered_items, estimator.seen.responses) == ((3,), (True,))
-  assert estimator.seen.theta == pytest.approx(0.0)
+  assert estimator.seen.theta == pytest.approx(0.7)
   assert session.stop_reason is None
   assert result.selected_item_id == 3
   assert result.response is True
@@ -331,26 +332,25 @@ def test_apply_response_records_exposure_and_returns_complete_step_result(item_b
   assert result.session.stop_reason is None
   assert result.session.administered_item_ids == (3,)
   assert result.session.responses == (True,)
-  assert result.session.theta_history == pytest.approx((0.0, 1.1))
+  assert result.session.theta_history == pytest.approx((0.7, 1.1))
 
 
 def test_apply_response_sets_stop_fields_when_stopper_trips(item_bank) -> None:
   """A stopper satisfied by the new state ends the session, and the step result reports it.
 
-  Fails if the decision is dropped, so the session runs past its criterion, or if the result or its snapshot reports
-  the session still running.
+  Fails if the stopper judges a stale state (without the new item and response, or with the previous estimate), if
+  the decision is dropped, so the session runs past its criterion, or if the result or its snapshot reports the
+  session still running.
   """
-  engine = CatEngine(
-    RecordingInitializer(0.0),
-    RecordingSelector(0),
-    RecordingEstimator(theta=0.3),
-    RecordingStopper(True),
-  )
+  stopper = RecordingStopper(True)
+  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(theta=0.3), stopper)
   context = RunContext(rng=np.random.default_rng(42))
   session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
 
   result = engine.apply_response(session, item_bank, item_id=0, response=False, context=context)
 
+  assert (stopper.seen.administered_items, stopper.seen.responses) == ((0,), (False,))
+  assert stopper.seen.theta == pytest.approx(0.3)
   assert session.stop_reason is StopReason.STOPPER
   assert result.stopped is True
   assert result.stop_reason is StopReason.STOPPER
