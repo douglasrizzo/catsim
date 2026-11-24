@@ -217,6 +217,7 @@ docs = [
     "sphinxcontrib-bibtex>=2.6.3",
     "pydata-sphinx-theme>=0.16.0",
     "sphinxcontrib-mermaid>=2.1.1",
+    "sphinx-reredirects>=1.1.0",
 ]
 
 [tool.pytest.ini_options]
