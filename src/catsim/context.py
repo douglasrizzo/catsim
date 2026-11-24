@@ -69,7 +69,8 @@ class StepContext:
   Raises
   ------
   ValueError
-      If ``responses`` does not hold one Boolean response per administered item.
+      If ``responses`` does not hold one Boolean response per administered item, or an index in
+      ``administered_items`` or ``excluded_items`` is outside the item bank.
 
   Notes
   -----
@@ -87,8 +88,14 @@ class StepContext:
   exposure_rates: FloatArray | None = None
 
   def __post_init__(self) -> None:
-    """Store the item and response sequences as tuples, and check that the responses fit the items."""
+    """Store the item and response sequences as tuples, and check that they fit each other and the bank."""
     object.__setattr__(self, "administered_items", tuple(self.administered_items))
     object.__setattr__(self, "responses", tuple(self.responses))
     object.__setattr__(self, "excluded_items", tuple(self.excluded_items))
     irt.validate_response_vector(self.responses, len(self.administered_items))
+    n_items = self.item_bank.n_items
+    for name, items in (("administered_items", self.administered_items), ("excluded_items", self.excluded_items)):
+      # NumPy would read a negative index as one counted from the end, and silently drop the wrong item.
+      if items and not (min(items) >= 0 and max(items) < n_items):
+        msg = f"{name} must hold item indices between 0 and {n_items - 1}, got {items}"
+        raise ValueError(msg)

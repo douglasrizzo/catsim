@@ -59,3 +59,12 @@ def test_contexts_with_exposure_rates_compare_by_identity() -> None:
 
   assert context != twin
   assert len({context, twin}) == 2
+
+
+@pytest.mark.parametrize("field", ["administered_items", "excluded_items"])
+@pytest.mark.parametrize("index", [-1, 3])
+def test_rejects_item_indices_outside_the_bank(field: str, index: int) -> None:
+  """NumPy reads -1 as the last item, so excluding item -1 silently dropped item 2; 3 raised a bare IndexError."""
+  responses = (True,) if field == "administered_items" else ()
+  with pytest.raises(ValueError, match=f"{field} must hold item indices between 0 and 2"):
+    StepContext(item_bank=BANK, rng=np.random.default_rng(0), responses=responses, **{field: (index,)})
