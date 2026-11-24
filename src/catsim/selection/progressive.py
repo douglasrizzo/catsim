@@ -81,6 +81,8 @@ class ProgressiveSelector(BaseSelector):
 
   Raises
   ------
+  TypeError
+      If ``test_size`` is not an integer.
   ValueError
       If ``test_size`` is smaller than 1, ``acceleration`` is not finite or ``r_max`` is not in
       (0, 1].
@@ -174,6 +176,8 @@ class ProportionalSelector(BaseSelector):
 
   Raises
   ------
+  TypeError
+      If ``test_size`` is not an integer.
   ValueError
       If ``test_size`` is smaller than 1, ``acceleration`` is not finite or ``r_max`` is not in
       (0, 1].
