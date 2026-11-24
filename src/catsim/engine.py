@@ -8,6 +8,8 @@ import operator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
+import numpy
+
 from . import irt
 from .context import Estimate, StepContext
 from .exceptions import ExcludedItemError, NoItemsAvailableError
@@ -16,8 +18,6 @@ from .state import CatSessionState, CatStepResult, ExposureTracker, StopReason
 
 if TYPE_CHECKING:
   from collections.abc import Hashable
-
-  import numpy
 
   from .estimation import BaseEstimator
   from .exposure import BaseExposureControl
@@ -130,22 +130,47 @@ class CatEngine:
     """Return the item bank the engine's sessions are tested on."""
     return self._item_bank
 
-  def _step_context(self, state: CatSessionState, context: RunContext) -> StepContext:
-    """Return what a strategy may read about a session as it stands.
+  def context(self, state: CatSessionState, context: RunContext | None = None) -> StepContext:
+    """Return what the strategies may read about a session as it stands.
+
+    It is the context the selector is given for its next proposal: the session's items, responses,
+    excluded items and current estimate with its standard error, with the run's generator and
+    exposure rates. Without a run context, as for a finished session of a
+    :class:`~catsim.SimulationResult`, the generator is a fresh unseeded one and there are no
+    exposure rates, so a selector given it applies no ``r_max`` cap. A
+    :class:`~catsim.stopping.StopRule` asked with it tells which of its criteria hold. See
+    :doc:`/live-sessions`.
 
     Parameters
     ----------
     state : CatSessionState
         The session.
-    context : RunContext
+    context : RunContext or None, optional
         Runtime services of the run, which give the random generator and the exposure rates.
+        Default is None.
 
     Returns
     -------
     StepContext
-        The session's items, responses, excluded items and current estimate with its standard
-        error.
+        The session's bank, items, responses, excluded items, current estimate and standard error,
+        generator and exposure rates.
+
+    Examples
+    --------
+    >>> from catsim import CatEngine, ItemBank, SimulationRunner
+    >>> from catsim.estimation import EAPEstimator
+    >>> from catsim.initialization import FixedPointInitializer
+    >>> from catsim.selection import MaxInfoSelector
+    >>> from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
+    >>> rule = StopRule(StandardErrorStopper(0.2), MaxLengthStopper(5))
+    >>> bank = ItemBank.generate(50, rng=0)
+    >>> engine = CatEngine(bank, FixedPointInitializer(0.0), MaxInfoSelector(), EAPEstimator(), rule)
+    >>> session = SimulationRunner(engine).run([0.0], rng=0).sessions[0]
+    >>> rule.satisfied(engine.context(session))
+    (MaxLengthStopper(max_items=5),)
     """
+    if context is None:
+      context = RunContext(rng=numpy.random.default_rng())
     tracker = context.exposure_tracker
     return StepContext(
       item_bank=self._item_bank,
@@ -205,7 +230,7 @@ class CatEngine:
     bool
         What the stopper says about the session as it stands.
     """
-    return bool(self._stopper.stop(self._step_context(state, context)))
+    return bool(self._stopper.stop(self.context(state, context)))
 
   def select_next(self, state: CatSessionState, context: RunContext) -> int | None:
     """Select the next item to administer, or end the session.
@@ -264,7 +289,7 @@ class CatEngine:
 
     declined: list[int] = []
     try:
-      item_id: int | None = self._accepted_item(self._step_context(state, context), declined)
+      item_id: int | None = self._accepted_item(self.context(state, context), declined)
     except NoItemsAvailableError:
       item_id = None
     # Committed only here, so a selection that raises changes neither the session nor the tracker.
@@ -351,7 +376,7 @@ class CatEngine:
       msg = f"Session {state.session_id} has stopped (reason: {state.stop_reason}) and accepts no more responses"
       raise ValueError(msg)
     irt.validate_response_vector((response,), 1)
-    current = self._step_context(state, context)
+    current = self.context(state, context)
     item_id = self._checked_item(current, item_id)
 
     response = bool(response)
