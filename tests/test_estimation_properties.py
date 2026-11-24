@@ -39,7 +39,7 @@ def test_estimate_is_a_likelihood_maximum_on_the_ability_scale(
   administered_items = list(range(k))
   response_vector = data.draw(st.lists(st.booleans(), min_size=k, max_size=k))
   assume(len(set(response_vector)) > 1)
-  bank = ItemBank(params, validate=True)
+  bank = ItemBank(params)
   items = bank.get_items(administered_items)
   estimator = NumericalSearchEstimator()
   theta = estimator.estimate(make_context(bank, administered_items, response_vector, theta=0.0)).theta

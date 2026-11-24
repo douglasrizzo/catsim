@@ -47,19 +47,17 @@ class TestItemBankCreation:
     ):
       ItemBank(np.ones(shape))
 
-  @pytest.mark.parametrize("validate", [True, False])
-  def test_rejects_a_matrix_with_more_than_four_columns(self, validate: bool) -> None:
+  def test_rejects_a_matrix_with_more_than_four_columns(self) -> None:
     """A bank saved with the old fifth exposure-rate column raises and says how to drop it, instead of being misread."""
     items = np.array([[1.0, 0.0, 0.1, 0.95, 0.3]])
 
     with pytest.raises(ValueError, match=r"5 columns.*items\[:, :4\]"):
-      ItemBank(items, validate=validate)
+      ItemBank(items)
 
-  @pytest.mark.parametrize("validate", [True, False])
-  def test_rejects_a_matrix_without_columns(self, validate: bool) -> None:
+  def test_rejects_a_matrix_without_columns(self) -> None:
     """An (n, 0) matrix raises at construction instead of failing at first use with an IndexError."""
     with pytest.raises(ValueError, match="0 columns"):
-      ItemBank(np.empty((3, 0)), validate=validate)
+      ItemBank(np.empty((3, 0)))
 
   def test_keeps_its_own_float_copy_of_the_parameters(self) -> None:
     """Editing the caller's matrix later must not change a validated bank or leave its cached values stale.
@@ -84,16 +82,13 @@ class TestItemBankCreation:
       pytest.param(operator.itemgetter(0), 1, id="getitem"),
     ],
   )
-  @pytest.mark.parametrize("validate", [True, False])
-  def test_parameters_are_read_only(
-    self, view: Callable[[ItemBank], np.ndarray], index: int | tuple[int, int], validate: bool
-  ) -> None:
-    """Writing into the parameters raises and leaves the bank alone, validated or not.
+  def test_parameters_are_read_only(self, view: Callable[[ItemBank], np.ndarray], index: int | tuple[int, int]) -> None:
+    """Writing into the parameters raises and leaves the bank alone.
 
     The arrays used to be writable, so a write changed the difficulty behind the cached max_info_thetas, model and
     strata.
     """
-    bank = ItemBank(np.array([[1.0, 0.5, 0.0, 1.0], [1.3, -0.2, 0.0, 1.0]]), validate=validate)
+    bank = ItemBank(np.array([[1.0, 0.5, 0.0, 1.0], [1.3, -0.2, 0.0, 1.0]]))
 
     with pytest.raises(ValueError, match="read-only"):
       view(bank)[index] = 99.0
@@ -152,23 +147,9 @@ class TestItemBankCreation:
     with pytest.raises(ValueError, match="read-only"):
       array(copied)[0] = 99.0
 
-  def test_validation_enabled_by_default(self) -> None:
-    """A bank is validated unless told otherwise, so a = -1 raises instead of being accepted."""
-    items = np.array([[-1.0, 0.0, 0.0, 1.0]])
-
-    with pytest.raises(ValueError, match="discrimination <= 0"):
-      ItemBank(items)
-
-  def test_validation_can_be_disabled(self) -> None:
-    """With validate=False the parameter checks are skipped, so a bank with a = -1 is built instead of raising."""
-    items = np.array([[-1.0, 0.0, 0.0, 1.0]])
-
-    bank = ItemBank(items, validate=False)
-    assert bank.n_items == 1
-
 
 class TestItemBankValidation:
-  """Tests for the parameter checks a bank runs when validate is True."""
+  """Tests for the parameter checks a bank runs when it is built."""
 
   def test_accepts_parameters_on_the_edges_of_their_ranges(self) -> None:
     """A small positive a, c = 0 and d = 1 are valid; a strict comparison in the wrong place would reject them."""

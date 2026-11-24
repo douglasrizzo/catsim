@@ -23,7 +23,7 @@ def test_max_info_values_are_each_items_information_at_its_own_peak(params: np.n
 
   Passing every peak to irt.information evaluates each peak against every item, an n x n matrix.
   """
-  bank = ItemBank(params, validate=True)
+  bank = ItemBank(params)
   expected = list(starmap(irt.information, zip(irt.max_info_theta(params), params, strict=True)))
 
   np.testing.assert_allclose(bank.max_info_thetas, irt.max_info_theta(params), rtol=1e-12)
@@ -34,7 +34,7 @@ def test_max_info_values_are_each_items_information_at_its_own_peak(params: np.n
 @BANK_SETTINGS
 def test_item_bank_stores_the_four_parameter_columns(params: np.ndarray) -> None:
   """A four-column matrix is stored unchanged; completing or reordering columns it already has would change it."""
-  np.testing.assert_array_equal(ItemBank(params, validate=True).items, params)
+  np.testing.assert_array_equal(ItemBank(params).items, params)
 
 
 @given(
@@ -111,7 +111,7 @@ def test_test_information_sums_every_item_by_default(params: np.ndarray, theta: 
   """Without item indices the test information sums the information of every item; a default subset leaves some out."""
   expected = sum(float(irt.information(theta, item)) for item in params)
 
-  assert ItemBank(params, validate=True).test_information(theta) == pytest.approx(expected, rel=1e-12)
+  assert ItemBank(params).test_information(theta) == pytest.approx(expected, rel=1e-12)
 
 
 @given(params=item_params_matrix(min_items=3, max_items=12), data=st.data())

@@ -32,7 +32,7 @@ def test_max_info_selector_returns_valid_unseen_item(
   n = params.shape[0]
   assume(administered_count < n)
   administered = list(range(administered_count))
-  bank = ItemBank(params, validate=True)
+  bank = ItemBank(params)
   rng = np.random.default_rng(seed)
   selector = MaxInfoSelector()
   item_id = selector.select(make_context(bank, administered, theta=est_theta, rng=rng))
@@ -48,7 +48,7 @@ def test_max_info_selector_returns_valid_unseen_item(
 @SEL_SETTINGS
 def test_max_info_selector_raises_when_bank_exhausted(params: np.ndarray, seed: int) -> None:
   n = params.shape[0]
-  bank = ItemBank(params, validate=True)
+  bank = ItemBank(params)
   rng = np.random.default_rng(seed)
   selector = MaxInfoSelector()
   with pytest.raises(NoItemsAvailableError):
@@ -66,7 +66,7 @@ def test_random_selector_returns_valid_unseen_item(params: np.ndarray, data: st.
   n = params.shape[0]
   administered = data.draw(st.lists(st.integers(0, n - 1), unique=True, max_size=n - 1))
   item_id = RandomSelector().select(
-    make_context(ItemBank(params, validate=True), administered, theta=0.0, rng=np.random.default_rng(seed))
+    make_context(ItemBank(params), administered, theta=0.0, rng=np.random.default_rng(seed))
   )
   assert type(item_id) is int
   assert 0 <= item_id < n

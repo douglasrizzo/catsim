@@ -40,12 +40,12 @@ class IrtModel(StrEnum):
 
 
 class ItemBank:
-  """Container for CAT item parameters with caching of derived values.
+  r"""The calibrated items of a test, with the values derived from their parameters.
 
-  The ItemBank class encapsulates static item parameters, validates them, and
-  precomputes expensive calculations that depend only on item parameters
-  (like maximum information theta values). This improves performance by
-  avoiding redundant calculations during CAT execution.
+  A bank checks every parameter when it is built and caches the values that depend only on the
+  parameters, such as each item's point of maximum information. Its arrays are read-only, so the
+  cached values cannot go stale. Build a bank from an item matrix, or draw one with
+  :py:meth:`generate`.
 
   Parameters
   ----------
@@ -53,8 +53,6 @@ class ItemBank:
       Item parameter matrix, one row per item, with columns [a, b, c, d]. A matrix with one column
       is read as [b], two as [a, b] and three as [a, b, c], filled with :math:`a = 1`, :math:`c = 0`
       and :math:`d = 1`; a 1-D array is one item.
-  validate : bool, optional
-      Whether to validate the item parameters. Default is True.
 
   Attributes
   ----------
@@ -73,42 +71,35 @@ class ItemBank:
   Raises
   ------
   ValueError
-      If the matrix does not have 1 to 4 columns, or if validate=True and the matrix has no items or a
-      parameter that is NaN, infinite or outside a > 0 and 0 <= c < d <= 1.
+      If the matrix does not have 1 to 4 columns, has no items, or has a parameter that is NaN,
+      infinite or outside :math:`a > 0` and :math:`0 \leq c < d \leq 1`.
   TypeError
       If items is not a numpy.ndarray.
 
   Examples
   --------
   >>> import numpy as np
-  >>> from catsim.item_bank import ItemBank
-  >>> # Create from existing parameters
-  >>> params = np.array([[1.0, 0.0, 0.0, 1.0], [1.2, -0.5, 0.1, 1.0]])
-  >>> bank = ItemBank(params)
-  >>> bank.n_items
-  2
-  >>> # Generate from distributions
-  >>> bank = ItemBank.generate(100, model="3PL", rng=7)
-  >>> bank.n_items
-  100
+  >>> from catsim import ItemBank
+  >>> ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.2, -0.5, 0.1, 1.0]]))
+  ItemBank(n_items=2, model=3PL)
+  >>> ItemBank.generate(100, model="3PL", rng=7)
+  ItemBank(n_items=100, model=3PL)
   """
 
-  def __init__(self, items: FloatArray, validate: bool = True) -> None:
+  def __init__(self, items: FloatArray) -> None:
     """Initialize an ItemBank with the given item parameters.
 
     Parameters
     ----------
     items : numpy.ndarray
         Item parameter matrix.
-    validate : bool, optional
-        Whether to validate the parameters. Default is True.
 
     Raises
     ------
     TypeError
         If ``items`` is not a numpy.ndarray.
     ValueError
-        If ``items`` does not have 1 to 4 columns, or ``validate`` is True and a parameter is invalid.
+        If ``items`` does not have 1 to 4 columns, has no items or has an invalid parameter.
     """
     # a float copy the caller cannot change afterwards
     self._items = _normalize(items)
@@ -118,12 +109,10 @@ class ItemBank:
         f"Item matrix has {n_columns} columns; ItemBank takes 1 to 4, read as [b], [a, b], [a, b, c] or [a, b, c, d]."
       )
       if n_columns > _N_PARAMS:
-        msg += " Earlier versions of catsim kept exposure rates in a fifth column; drop it with items[:, :4]."
+        msg += " Pass items[:, :4] to keep the first four."
       raise ValueError(msg)
 
-    # Validate if requested
-    if validate:
-      _validate(self._items)
+    _validate(self._items)
     # Read-only, together with the column views below, so the cached values derived from the
     # parameters cannot go stale
     self._items.flags.writeable = False
