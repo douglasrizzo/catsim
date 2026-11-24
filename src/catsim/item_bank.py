@@ -361,7 +361,8 @@ class ItemBank:
     Raises
     ------
     ValueError
-        If ``model`` is not "1PL", "2PL", "3PL" or "4PL", in any case.
+        If ``model`` is neither an :py:class:`IrtModel` nor one of the names "1PL", "2PL", "3PL" and
+        "4PL", in any case.
 
     Examples
     --------
