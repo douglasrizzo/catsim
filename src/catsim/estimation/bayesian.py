@@ -117,13 +117,15 @@ def uniform_log_prior(low: float = THETA_MIN_EXTENDED, high: float = THETA_MAX_E
   return _log_prior
 
 
-@dataclass(frozen=True, slots=True)
+# eq=False: generated equality and hashing would compare the arrays, which raises; a grid is compared by identity
+@dataclass(frozen=True, slots=True, eq=False)
 class QuadratureGrid:
   r"""A fixed quadrature grid for posterior computations.
 
   The posterior at node :math:`\theta_q` is proportional to
   :math:`w_q\,p(\theta_q)\,L(\mathbf{u} \mid \theta_q)`, so the weights take part in the
-  posterior itself. Equal weights, as built by :meth:`uniform`, cancel in the normalization.
+  posterior itself. Equal weights, as built by :meth:`uniform`, cancel in the normalization. Two grids
+  are equal only if they are the same object, and a grid can be a set member or a dictionary key.
 
   For the full posterior specification and quadrature contract, see
   :doc:`/api/techniques/estimation/bayesian-infrastructure`.
