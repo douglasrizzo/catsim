@@ -2,109 +2,101 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 import numpy as np
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
-from hypothesis.strategies import DrawFn, composite
 
 from catsim.exceptions import NoItemsAvailableError
 from catsim.item_bank import ItemBank
 from catsim.selection import BaseSelector, ClusterSelector
-from tests.conftest import SELECTOR_FACTORIES, TEST_SIZE
+from tests.conftest import HALF_BANK_SELECTORS, SELECTOR_FACTORIES
 from tests.contexts import make_context
 from tests.hypothesis_strategies import item_params_matrix
 
 SEL_SETTINGS = settings(max_examples=25, deadline=None)
+BANKS = item_params_matrix(min_items=2, max_items=12)
 THETAS = st.floats(-3.5, 3.5, allow_nan=False, allow_infinity=False)
 SEEDS = st.integers(min_value=0, max_value=2**31 - 1)
 
 
 def _session(
-  selector: BaseSelector, item_bank: ItemBank, responses: list[bool], *, theta: float, seed: int
+  selector: BaseSelector, item_bank: ItemBank, data: st.DataObject, *, seed: int, excluded: Sequence[int] = ()
 ) -> list[int]:
-  """Return the items ``selector`` picks for a session of ``len(responses)`` items, each pick taken by the next.
+  """Return the items a session serves, each pick administered before the next, until the selector has none left.
 
-  Stratified selectors tie the test position to a stratum, so the administered items must be the selector's own
-  earlier picks: an arbitrary set can exhaust the current stratum.
+  Every step draws a new ability estimate and response, so the next pick is not simply the next item of a ranking
+  fixed at the start. Each pick must be a builtin int indexing the bank, neither administered nor excluded; the session
+  ends when select raises NoItemsAvailableError, and any other error propagates.
   """
   rng = np.random.default_rng(seed)
   picks: list[int] = []
-  for answered in range(len(responses)):
-    picks.append(selector.select(make_context(item_bank, picks, responses[:answered], theta=theta, rng=rng)))
-  return picks
-
-
-@composite
-def bank_and_responses(draw: DrawFn, *, picks_left: int) -> tuple[ItemBank, list[bool]]:
-  """An item bank and the responses of a session that leaves at least ``picks_left`` of its items unpicked.
-
-  The session is never longer than TEST_SIZE, the test length the stratified selectors of SELECTOR_FACTORIES are
-  built for.
-  """
-  item_bank = ItemBank(draw(item_params_matrix(min_items=2, max_items=12)))
-  length = draw(st.integers(min_value=0, max_value=min(TEST_SIZE, item_bank.n_items) - picks_left))
-  return item_bank, draw(st.lists(st.booleans(), min_size=length, max_size=length))
-
-
-@pytest.mark.parametrize("name", sorted(SELECTOR_FACTORIES))
-@given(bank_responses=bank_and_responses(picks_left=0), theta=THETAS, seed=SEEDS)
-@SEL_SETTINGS
-def test_every_pick_is_an_unseen_builtin_int_of_the_bank(
-  name: str, bank_responses: tuple[ItemBank, list[bool]], theta: float, seed: int
-) -> None:
-  """Each pick of a session indexes the bank, as a builtin int, and repeats no earlier pick.
-
-  A selector that drew from the whole bank instead of the remaining items, returned an index past the bank or let a
-  numpy integer into the session state fails.
-  """
-  item_bank, responses = bank_responses
-
-  picks = _session(SELECTOR_FACTORIES[name](item_bank.n_items), item_bank, responses, theta=theta, seed=seed)
-
-  assert all(type(item_id) is int for item_id in picks)
-  assert all(0 <= item_id < item_bank.n_items for item_id in picks)
-  assert len(set(picks)) == len(picks)
+  responses: list[bool] = []
+  while True:
+    context = make_context(item_bank, picks, responses, theta=data.draw(THETAS), rng=rng, excluded_items=excluded)
+    try:
+      item_id = selector.select(context)
+    except NoItemsAvailableError:
+      return picks
+    assert type(item_id) is int
+    assert 0 <= item_id < item_bank.n_items
+    assert item_id not in picks
+    assert item_id not in excluded
+    picks.append(item_id)
+    responses.append(data.draw(st.booleans()))
 
 
 @pytest.mark.parametrize("name", sorted(SELECTOR_FACTORIES))
-@given(bank_responses=bank_and_responses(picks_left=1), theta=THETAS, seed=SEEDS)
+@given(params=BANKS, data=st.data(), seed=SEEDS)
 @SEL_SETTINGS
-def test_select_raises_once_the_bank_is_administered_or_excluded(
-  name: str, bank_responses: tuple[ItemBank, list[bool]], theta: float, seed: int
+def test_a_session_serves_new_items_until_the_selector_runs_out(
+  name: str, params: np.ndarray, data: st.DataObject, seed: int
 ) -> None:
-  """With every item the session did not pick excluded, select raises NoItemsAvailableError, which ends the session.
+  """A session serves distinct items of the bank, as builtin ints, then ends with NoItemsAvailableError.
 
-  A selector that scored an empty candidate array, handed back an administered or excluded item, or failed with
-  another error fails.
+  The linear and stratified selectors of SELECTOR_FACTORIES run out after half the bank, rounded up, through their own
+  checks (the list, the stratum); every other selector serves the whole bank. A selector that ignored the administered
+  items, returned an index past the bank or a numpy integer, kept serving once out of items, raised another error, or
+  ran out early fails.
   """
-  item_bank, responses = bank_responses
-  selector = SELECTOR_FACTORIES[name](item_bank.n_items)
-  picks = _session(selector, item_bank, responses, theta=theta, seed=seed)
-  context = make_context(
-    item_bank,
-    picks,
-    responses,
-    theta=theta,
-    excluded_items=sorted(set(range(item_bank.n_items)) - set(picks)),
-  )
+  item_bank = ItemBank(params)
 
-  with pytest.raises(NoItemsAvailableError, match="no more items"):
-    selector.select(context)
+  picks = _session(SELECTOR_FACTORIES[name](item_bank.n_items), item_bank, data, seed=seed)
+
+  assert len(picks) == ((item_bank.n_items + 1) // 2 if name in HALF_BANK_SELECTORS else item_bank.n_items)
+
+
+@pytest.mark.parametrize("name", sorted(SELECTOR_FACTORIES))
+@given(params=BANKS, data=st.data(), seed=SEEDS)
+@SEL_SETTINGS
+def test_a_session_never_serves_an_excluded_item(name: str, params: np.ndarray, data: st.DataObject, seed: int) -> None:
+  """With items excluded from the start, a session serves none of them and still ends with NoItemsAvailableError.
+
+  A selector that drew its candidates without leaving out the excluded items, or that raised another error once only
+  excluded items were left, fails; one that serves the whole bank must serve every item that is not excluded.
+  """
+  item_bank = ItemBank(params)
+  excluded = data.draw(st.lists(st.integers(0, item_bank.n_items - 1), min_size=1, unique=True))
+
+  picks = _session(SELECTOR_FACTORIES[name](item_bank.n_items), item_bank, data, seed=seed, excluded=excluded)
+
+  if name not in HALF_BANK_SELECTORS:
+    assert sorted(picks) == sorted(set(range(item_bank.n_items)) - set(excluded))
 
 
 @given(
   params=item_params_matrix(min_items=4, max_items=16),
   data=st.data(),
   method=st.sampled_from(["item_info", "cluster_info", "weighted_info"]),
-  theta=THETAS,
   seed=SEEDS,
 )
 @SEL_SETTINGS
-def test_cluster_picks_are_unseen_items_of_the_bank_for_any_labels(
-  params: np.ndarray, data: st.DataObject, method: str, theta: float, seed: int
+def test_cluster_sessions_serve_the_whole_bank_for_any_labels(
+  params: np.ndarray, data: st.DataObject, method: str, seed: int
 ) -> None:
-  """Under every method, with labels that can skip values and so leave clusters with no items, picks stay valid.
+  """Under every method, with labels that can skip values and leave clusters empty, a session serves the whole bank.
 
   A method that chose a label with no items, or a cluster whose items were all administered, would raise on an empty
   candidate set or return an administered item, and one that returned a numpy integer would let it into the session.
@@ -112,11 +104,7 @@ def test_cluster_picks_are_unseen_items_of_the_bank_for_any_labels(
   item_bank = ItemBank(params)
   n_clusters = data.draw(st.integers(min_value=1, max_value=item_bank.n_items // 2))
   clusters = data.draw(st.lists(st.integers(0, n_clusters - 1), min_size=item_bank.n_items, max_size=item_bank.n_items))
-  # the selector has no test length, so a session may run through the whole bank
-  responses = data.draw(st.lists(st.booleans(), max_size=item_bank.n_items))
 
-  picks = _session(ClusterSelector(clusters=clusters, method=method), item_bank, responses, theta=theta, seed=seed)
+  picks = _session(ClusterSelector(clusters=clusters, method=method), item_bank, data, seed=seed)
 
-  assert all(type(item_id) is int for item_id in picks)
-  assert all(0 <= item_id < item_bank.n_items for item_id in picks)
-  assert len(set(picks)) == len(picks)
+  assert sorted(picks) == list(range(item_bank.n_items))
