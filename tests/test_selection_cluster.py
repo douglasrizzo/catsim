@@ -22,6 +22,7 @@ class TestClusterSelector:
     self,
     administered: list[int],
     exposure_rates: np.ndarray | None = None,
+    *,
     method: str = "item_info",
     r_max: float = 1.0,
     r_control: str = "passive",

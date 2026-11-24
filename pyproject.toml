@@ -108,7 +108,7 @@ select = [
     "PLR01",
     "PLR02",
     "PLR04",
-    "PLR09",  # too many arguments (at most 6), locals, statements, branches or returns
+    "PLR09",  # too many arguments (at most 6, 5 positional), locals, statements, branches or returns
     "PLR1",
     "PLR2",
     "PLR5",
@@ -129,7 +129,6 @@ ignore = [
   "E111",
   "E114",
   "PLR0912",  # too many branches: C901 already bounds the branching
-  "PLR0917",  # too many positional arguments: left until the strategy and constructor signatures settle
   "RUF105",  # Keep standard `# noqa` comments rather than migrating to `# ruff: ignore`
   "RUF201",  # Keep rule codes in this config rather than migrating to rule names
 ]
@@ -145,7 +144,9 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 max-complexity = 10
 
 [tool.ruff.lint.pylint]
+# CatEngine.__init__ takes the bank, four strategies and the keyword-only exposure_control.
 max-args = 6
+max-positional-args = 5
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
