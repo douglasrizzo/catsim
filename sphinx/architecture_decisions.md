@@ -18,4 +18,5 @@ adr/0009-ability-scale-and-extreme-patterns
 adr/0010-published-progressive-schedule
 adr/0011-how-a-session-ends
 adr/0012-unidimensional-dichotomous-scope
+adr/0013-random-numbers-and-reproducibility
 ```
