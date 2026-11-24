@@ -48,7 +48,8 @@ jobs:
           SKIP: pytest-nbmake
 
   test:
-    name: Run tests
+    # Spelled out so the highest-resolution entries keep the check names the main branch ruleset requires.
+    name: Run tests (${{ matrix.os }}, ${{ matrix.python-version }}${{ matrix.resolution == 'lowest-direct' && ', lowest-direct' || '' }})
     # Run tests for every PR (stacked PRs too), pushes to dev/main, and releases.
     if: |
       github.event_name == 'pull_request' ||
@@ -61,18 +62,29 @@ jobs:
       MPLBACKEND: Agg
       # uv would otherwise take the repository's .python-version (3.13) over setup-python's interpreter.
       UV_PYTHON: ${{ matrix.python-version }}
+      # An environment variable rather than a `uv sync` flag: `uv run` re-resolves a lock made with a
+      # different resolution, which would replace the floors with the latest releases.
+      UV_RESOLUTION: ${{ matrix.resolution }}
     strategy:
       fail-fast: false
       matrix:
         # Test on primary OS with all Python versions
         os: [ubuntu-latest]
-        python-version: ["3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.11", "3.12", "3.13", "3.14", "3.15"]
+        resolution: [highest]
         include:
-          # Add cross-platform testing on latest Python only
+          # Add cross-platform testing on one Python only
           - os: macos-latest
             python-version: "3.14"
+            resolution: highest
           - os: windows-latest
             python-version: "3.14"
+            resolution: highest
+          # Every direct dependency at the lower bound pyproject.toml declares, on the oldest Python,
+          # so the floors stay ones CI has tested.
+          - os: ubuntu-latest
+            python-version: "3.11"
+            resolution: lowest-direct
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -91,7 +103,15 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
+        if: matrix.resolution == 'highest'
         run: uv sync --locked --group dev
+
+      # Not --locked: uv.lock holds the latest releases, and this entry resolves again to the floors.
+      - name: Install dependencies at their lower bounds
+        if: matrix.resolution == 'lowest-direct'
+        run: |
+          uv sync --group dev
+          uv pip list
 
       - name: Run tests
         run: uv run pytest --verbose --cov-branch --cov-report=xml --cov=catsim
