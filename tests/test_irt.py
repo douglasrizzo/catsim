@@ -208,6 +208,16 @@ class TestMaxInfoTheta:
     """With c + d = 1 the information is symmetric about b, so its peak is b; the d = 1 formula would give b + 0.30."""
     assert irt.max_info_theta(np.array([1.2, -0.5, 0.1, 0.9])) == pytest.approx(-0.5, abs=1e-12)
 
+  def test_max_info_theta_of_asymmetric_4pl_items(self) -> None:
+    """With c + d != 1 the peak moves off b: -0.0575 for [1, 0, 0.25, 0.6] and 0.5632 for [1.5, 0.5, 0.2, 0.9].
+
+    The expected values maximise a^2 (P - c)^2 (d - P)^2 / ((d - c)^2 P (1 - P)), written out by hand, with scipy's
+    bounded scalar search, which locates a flat peak to about 1e-9. A 4PL offset wrong by 1% moves them by over 5e-4.
+    """
+    items = np.array([[1.0, 0.0, 0.25, 0.6], [1.5, 0.5, 0.2, 0.9]])
+
+    np.testing.assert_allclose(irt.max_info_theta(items), [-0.0574595476, 0.5631544715], rtol=0, atol=1e-7)
+
   def test_max_info_theta_result_is_not_a_view_of_the_items(self) -> None:
     """Writing into the result leaves the item matrix alone; returning the difficulty column for 2PL items would not."""
     items = np.array([[1.0, 0.5, 0.0, 1.0], [1.3, -0.2, 0.0, 1.0]])
