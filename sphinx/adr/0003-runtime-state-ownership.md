@@ -30,7 +30,8 @@ Treat calibrated item data as domain data and keep runtime state in dedicated ex
 
 - `ItemBank` holds item parameters and related derived data
 - `CatSessionState` holds per-examinee runtime state
-- `ExposureTracker` and `SimulationResult` hold run-level exposure information
+- `ExposureTracker` (in `catsim.state`) and `SimulationResult` (in `catsim.simulation`) hold
+  run-level exposure information
 
 `ExposureTracker` owns the denominator of the exposure rates, which follow catR:
 
@@ -74,8 +75,12 @@ Treat calibrated item data as domain data and keep runtime state in dedicated ex
   of 1. A capped run's results differ from earlier versions; runs with `r_max = 1` do not change.
 - In a live deployment, a session that starts and is abandoned before its first item still counts
   in the denominator, which lowers every later rate a little; so does starting a session twice for
-  one examinee.
+  one examinee. The tracker cannot tell such a session from one still running, so the count stays.
 - The tracker's counts are not part of any session snapshot. A deployment that restarts with a new
-  tracker applies no cap until new sessions have run, unless it persists the tracker itself.
+  tracker applies no cap until new sessions have run. To keep the cap across restarts, the
+  application saves `tracker.counts` and `tracker.n_sessions` (e.g. as a list and an int in JSON)
+  and rebuilds the tracker with `ExposureTracker(n_items, counts=..., n_sessions=...)`, which checks
+  that there is one non-negative integer count per item and keeps its own copy of them. Saving is
+  the application's job: it decides when (after every administration, on shutdown) and where.
 - `ExposureTracker.rates()` gives the rates a session in progress is selected against, which leave
   that session out; the run's own exposure is `SimulationResult.exposure_rates`.
