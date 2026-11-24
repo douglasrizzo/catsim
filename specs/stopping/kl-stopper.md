@@ -1,8 +1,8 @@
 **Status:** Planned
-**Module:** `catsim.stopping.stopping.KLInfoStopper` (planned)
+**Module:** `catsim.stopping.bank.KLInfoStopper` (planned)
 **Reference:** Chang and Ying (1996); Choi, Grady, and Dodd (2011)
 **Last validated:** 2026-11-23, against Chang & Ying (1996) and Choi, Grady & Dodd (2011, PubMed Central author manuscript).
-**Implementation guidance:** not yet updated to the 1.0 strategy contract (M22).
+**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in, a single criterion for `StopRule`) on 2026-11-24.
 
 # Kullback-Leibler Information Stopper
 
@@ -92,12 +92,6 @@ is not the case for the Fisher threshold of the minimum-information rule.
      - ``3.0``
      - Positive schedule constant for the integration half-width; Chang and Ying (1996, p. 223)
        used :math:`c = 3`.
-   * - ``min_items``
-     - ``1``
-     - Minimum number of items before stopping is allowed.
-   * - ``max_items``
-     - ``None``
-     - Hard maximum test length.
 ```
 
 ## Behavioral Contracts
@@ -108,7 +102,7 @@ Any correct implementation must satisfy the following properties:
 2. The integration half-width follows `c / sqrt(max(1, n_administered))`.
 3. The implementation reuses the same KL kernel as the KL selector or an equivalent mathematically identical kernel.
 4. If no items remain, the stopper terminates.
-5. The inherited minimum-length and maximum-length checks still apply.
+5. The stopper is a single criterion: the minimum test length and the length cap come from `StopRule`'s `min_items` and a `MaxLengthStopper` it is combined with.
 
 ## References
 
@@ -136,119 +130,111 @@ This section is for contributors and agents implementing this technique.
 It is removed when the spec is promoted to "Implemented" status.
 :::
 
-**Proposed location:** `src/catsim/stopping/stopping.py`
+**Proposed location:** `src/catsim/stopping/bank.py`, next to `MinInfoInBankStopper` and the
+`_remaining` helper its spec defines.
 
 **Mock implementation:**
 
 ```python
-# src/catsim/stopping/stopping.py  (alongside the other Choi 2011 stoppers)
-"""Kullback-Leibler information stopper."""
+# src/catsim/stopping/bank.py (added to the module; the imports are those it does not have yet)
 
-import numpy
+import math
+
 from scipy.integrate import quad
 
-from .. import irt
-from .._typing import FloatArray
-from ..item_bank import ItemBank
-from .stopping import TestLengthStopper
+from ..selection.kl import _kl_integrand
 
 
-def _kl_integrand(theta: float, theta_hat: float, a: float, b: float, c: float, d: float) -> float:
-  """KL divergence between response distributions at theta_hat and theta. Mirrors KLSelector."""
-  eps = 1e-12
-  p0 = float(numpy.clip(irt.icc(theta_hat, a, b, c, d), eps, 1 - eps))
-  p = float(numpy.clip(irt.icc(theta, a, b, c, d), eps, 1 - eps))
-  return p0 * numpy.log(p0 / p) + (1 - p0) * numpy.log((1 - p0) / (1 - p))
+@dataclass(frozen=True)
+class KLInfoStopper(BaseStopper):
+  r"""Stop once no remaining item has more than a minimum KL information around the current estimate.
 
-
-class KLInfoStopper(TestLengthStopper):
-  """Stop when no remaining item has KL global information above ``min_kl``.
+  Each remaining item's KL divergence from the current estimate is integrated over
+  :math:`\hat\theta \pm c / \sqrt{\max(1, n)}`, as in :class:`~catsim.selection.KLSelector`, where
+  :math:`n` is the number of administered items.
 
   Parameters
   ----------
   min_kl : float
-      Threshold on integrated KL information for the best remaining item.
-  c : float
-      Schedule constant for the integration half-width ``delta_n = c / sqrt(n)``.
-  min_items : int or None
-      Minimum items before stopping. ``c`` requires at least 1 administered item.
-  max_items : int or None
-      Maximum items before forced stop.
+      Threshold on the largest remaining KL information. Must not be negative.
+  c : float, optional
+      Half-width of the integration window before it narrows as items are administered. Must be
+      positive. Default is 3.
+
+  Raises
+  ------
+  ValueError
+      If `min_kl` is negative or `c` is not positive (NaN included).
   """
 
-  def __init__(
-    self,
-    min_kl: float,
-    c: float = 3.0,
-    min_items: int | None = 1,
-    max_items: int | None = None,
-  ) -> None:
-    if min_kl < 0:
-      raise ValueError(f"min_kl must be non-negative, got {min_kl}")
-    if c <= 0:
-      raise ValueError(f"c must be positive, got {c}")
-    super().__init__(min_items=min_items, max_items=max_items)
-    self._min_kl = float(min_kl)
-    self._c = float(c)
+  min_kl: float
+  c: float = 3.0
 
-  def __str__(self) -> str:
-    return f"KLInfoStopper(min_kl={self._min_kl}, c={self._c})"
+  def __post_init__(self) -> None:
+    """Validate the threshold and the window constant."""
+    # written so that NaN fails the checks too
+    if not self.min_kl >= 0:
+      msg = f"min_kl must not be negative, got {self.min_kl}"
+      raise ValueError(msg)
+    if not self.c > 0:
+      msg = f"c must be positive, got {self.c}"
+      raise ValueError(msg)
 
-  # ---- core kernel ----
-  def _kl_global(self, theta_hat: float, item: FloatArray, half_width: float) -> float:
-    a, b, c_param, d = item[0], item[1], item[2], item[3]
-    val, _ = quad(
-      _kl_integrand,
-      theta_hat - half_width,
-      theta_hat + half_width,
-      args=(theta_hat, a, b, c_param, d),
+  def stop(self, context: StepContext) -> bool:
+    """Return whether no remaining item has more than `min_kl` KL information around the current estimate.
+
+    Parameters
+    ----------
+    context : StepContext
+        The session to check.
+
+    Returns
+    -------
+    bool
+        True if every remaining item's integrated KL information is at most `min_kl`, or no item
+        remains; False otherwise.
+    """
+    candidates = _remaining(context)
+    if candidates.size == 0:
+      return True
+    theta_hat = context.theta
+    half_width = self.c / math.sqrt(max(1, len(context.administered_items)))
+    items = context.item_bank.items
+    largest = max(
+      quad(_kl_integrand, theta_hat - half_width, theta_hat + half_width, args=(theta_hat, *items[i].tolist()))[0]
+      for i in candidates
     )
-    return float(val)
-
-  def stop(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    theta: float,
-  ) -> bool:
-    base_decision = super().stop(item_bank, administered_items, theta)
-    if base_decision is True:
-      return True
-
-    n = max(1, len(administered_items))
-    half_width = self._c / numpy.sqrt(n)
-
-    remaining_mask = numpy.ones(item_bank.n_items, dtype=bool)
-    remaining_mask[administered_items] = False
-    if not remaining_mask.any():
-      return True
-
-    remaining_indices = numpy.flatnonzero(remaining_mask)
-    kl_values = numpy.array([
-      self._kl_global(theta, item_bank.items[i], half_width) for i in remaining_indices
-    ])
-    return float(kl_values.max()) <= self._min_kl
-
-  def _check_stopping_criterion(  # noqa: PLR6301
-    self,
-    administered_items: FloatArray,  # noqa: ARG002
-    theta: float,  # noqa: ARG002
-  ) -> bool:
-    return False
+    # Open Question 1: a threshold that follows the window would compare with
+    # self.min_kl * half_width**3 instead.
+    return largest <= self.min_kl
 ```
 
 **Implementation notes:**
 
-- Reuse the same KL integrand as the KL selector once both features exist; do not maintain divergent formulas.
-- Runtime cost mirrors the KL selector: one quadrature per remaining item per step.
-- If profiling shows this is hot, a grid-plus-trapezoid approximation is the first simplification to try.
-
-**Dependencies:**
-
-- Reuses the same KL kernel as planned card 03 (`KLSelector`), though it can be implemented independently first if needed.
+- The sketch shows the spec's current answer to Open Question 1, a fixed threshold; the last
+  comparison is the only line the other answer changes.
+- Contract 3 asks for KLSelector's kernel, but the stopping layer may not import the selection
+  layer (`[tool.importlinter]` in `pyproject.toml`). Either move `_log_probabilities` and
+  `_kl_integrand` from `catsim/selection/kl.py` to a module both layers import, such as
+  `catsim.irt`, and import them from there in both, or add
+  `"catsim.stopping.bank -> catsim.selection.kl"` to the contract's `ignore_imports`. Moving the
+  kernel also removes the import of a private name.
+- The window uses $n$ = 1 before the first item, as KLSelector does, so the stopper needs no
+  minimum length of its own; a minimum and a cap come from `StopRule`, as in
+  `StopRule(KLInfoStopper(0.01), MaxLengthStopper(30), min_items=5)`.
+- One `quad` per remaining item per check, the KL selector's cost. If profiling shows it is hot,
+  a fixed Gauss-Legendre rule over the window, vectorized over the items, is the first
+  simplification to try.
+- A stopper is pure (`BaseStopper`): the same context gives the same answer.
 
 **Testing notes:**
 
-- Far-off item banks should trigger the stopper early.
-- Well-targeted item banks should keep the KL score above threshold longer.
-- Validate half-width scheduling and parameter validation.
+- Contract 1, hand-worked through the definition's approximation: for a narrow window, an item's
+  index is about $c^3 I_i(\hat\theta) / (3 n^{3/2})$. On a bank of identical items, check the
+  computed index against that value after many items, and set `min_kl` just above and just below
+  it to see the stopper stop and continue.
+- Contract 2: the same bank and estimate with more administered items stop at a threshold that
+  fewer items do not reach.
+- Contract 3: the index matches `KLSelector`'s integral for the same item, estimate and window.
+- Contract 4: with every item administered, it stops.
+- Parameter validation: negative or NaN `min_kl`, and `c` not positive, are rejected.
