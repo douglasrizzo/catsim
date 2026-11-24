@@ -95,9 +95,9 @@ class NumericalSearchEstimator(BaseEstimator):
     r"""Return the maximum likelihood estimate, or Dodd's step from ``context.theta`` while every response is the same.
 
     The standard error is the inverse square root of the test information at the estimate, or
-    ``math.inf`` where the information is 0. The evaluation count is the number of log-likelihood evaluations SciPy's
-    search made; Dodd's step makes none. With no administered item, the estimate is
-    ``context.theta`` and ``context.se``, unchanged, after no evaluation.
+    ``math.inf`` where the information is 0. The evaluation count is the number of log-likelihood
+    evaluations SciPy's search made; Dodd's step makes none. With no administered item, the
+    estimate is ``context.theta`` and ``context.se``, unchanged, after no evaluation.
 
     Parameters
     ----------

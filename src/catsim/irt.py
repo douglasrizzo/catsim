@@ -86,7 +86,7 @@ def icc(theta: float | FloatArray, items: FloatArray) -> FloatArray:
   numpy.ndarray or numpy.float64
       Every ability against every item, of shape ``numpy.shape(theta) + items.shape[:-1]``: a float
       ``theta`` gives ``(n,)`` for ``n`` items and ``k`` abilities give ``(k, n)``. A float ``theta``
-      with one item row gives a NumPy scalar, a ``numpy.float64``.
+      with a single item of shape ``(4,)`` gives a NumPy scalar, a ``numpy.float64``.
 
   Examples
   --------
@@ -124,7 +124,7 @@ def information(theta: float | FloatArray, items: FloatArray) -> FloatArray:
   numpy.ndarray
       Every ability against every item, of shape ``numpy.shape(theta) + items.shape[:-1]``: a float
       ``theta`` gives ``(n,)`` for ``n`` items and ``k`` abilities give ``(k, n)``. A float ``theta``
-      with one item row gives a 0-d array.
+      with a single item of shape ``(4,)`` gives a 0-d array.
 
   Examples
   --------
