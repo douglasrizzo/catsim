@@ -46,7 +46,7 @@ class UniformInitializer(BaseInitializer):
     """Get a string representation of the Initializer."""
     return "Uniform Initializer"
 
-  def initialize(self, item_bank: ItemBank, rng: numpy.random.Generator) -> float:  # noqa: ARG002
+  def initialize(self, *, item_bank: ItemBank, rng: numpy.random.Generator) -> float:  # noqa: ARG002
     """Draw an initial ability value between ``low`` and ``high``.
 
     Parameters
@@ -100,7 +100,7 @@ class NormalInitializer(BaseInitializer):
     """Get a string representation of the Initializer."""
     return "Normal Initializer"
 
-  def initialize(self, item_bank: ItemBank, rng: numpy.random.Generator) -> float:  # noqa: ARG002
+  def initialize(self, *, item_bank: ItemBank, rng: numpy.random.Generator) -> float:  # noqa: ARG002
     r"""Draw an initial ability value from :math:`\mathcal{N}(\text{mean}, \text{sd}^2)`.
 
     Parameters
@@ -152,7 +152,7 @@ class FixedPointInitializer(BaseInitializer):
       raise ValueError(msg)
     self._start = float(start)
 
-  def initialize(self, item_bank: ItemBank, rng: numpy.random.Generator) -> float:  # noqa: ARG002
+  def initialize(self, *, item_bank: ItemBank, rng: numpy.random.Generator) -> float:  # noqa: ARG002
     """Return the same ability value that was passed to the constructor.
 
     Parameters

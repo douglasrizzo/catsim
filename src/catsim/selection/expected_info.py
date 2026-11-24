@@ -1,13 +1,14 @@
 """Expected information selector implementations."""
 
+import dataclasses
+
 import numpy
 
 from .. import irt
+from ..context import StepContext
 from ..estimation.base import BaseEstimator
 from ..estimation.numerical import NumericalSearchEstimator
-from ..item_bank import ItemBank
-from ..typing import FloatArray
-from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining, require_responses
+from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 
 class MEISelector(BaseSelector):
@@ -60,82 +61,35 @@ class MEISelector(BaseSelector):
     """Return the maximum exposure rate accepted by the selector."""
     return self._r_max
 
-  def _expected_information(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    response_vector: list[bool],
-    candidate_idx: int,
-    est_theta: float,
-  ) -> float:
-    next_administered = [*administered_items, candidate_idx]
-    theta_correct = self._estimator.estimate(
-      item_bank=item_bank,
-      administered_items=next_administered,
-      response_vector=[*response_vector, True],
-      est_theta=est_theta,
-    )
-    theta_incorrect = self._estimator.estimate(
-      item_bank=item_bank,
-      administered_items=next_administered,
-      response_vector=[*response_vector, False],
-      est_theta=est_theta,
-    )
-    item = item_bank.items[candidate_idx]
-    p_correct = irt.icc(est_theta, item[0], item[1], item[2], item[3])
-    info_correct = item_bank.test_information(theta_correct, next_administered)
-    info_incorrect = item_bank.test_information(theta_incorrect, next_administered)
+  def _expected_information(self, context: StepContext, candidate: int) -> float:
+    """Return the candidate's information, expected over its two responses, at the one-step-ahead estimates."""
+    administered = (*context.administered_items, candidate)
+    correct = dataclasses.replace(context, administered_items=administered, responses=(*context.responses, True))
+    incorrect = dataclasses.replace(correct, responses=(*context.responses, False))
+    theta_correct = self._estimator.estimate(correct)
+    theta_incorrect = self._estimator.estimate(incorrect)
+    item = context.item_bank.items[candidate]
+    p_correct = irt.icc(context.theta, item[0], item[1], item[2], item[3])
+    info_correct = context.item_bank.test_information(theta_correct, administered)
+    info_incorrect = context.item_bank.test_information(theta_incorrect, administered)
     return float(p_correct * info_correct + (1.0 - p_correct) * info_incorrect)
 
-  def select(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    est_theta: float,
-    rng: numpy.random.Generator | None = None,
-    exposure_rates: FloatArray | None = None,
-    response_vector: list[bool] | None = None,
-  ) -> int | None:
-    """Return the index of the item with the highest expected post-response information.
+  def select(self, context: StepContext) -> int:
+    """Return the available item with the largest expected information after its response.
+
+    The one-step-ahead estimates start from ``context.theta``, which also gives the response
+    probabilities.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    administered_items : list[int]
-        A list containing the indexes of items that were already administered.
-    est_theta : float
-        The current estimated ability, used for the response probabilities and as the starting
-        point of the one-step-ahead estimates.
-    rng : numpy.random.Generator or None, optional
-        Random number generator, used only to break ties between candidates with equal scores
-        (ADR-0008).
-    exposure_rates : numpy.ndarray or None, optional
-        Run-level exposure-rate snapshot. ``None`` treats every item as unexposed.
-    response_vector : list[bool] or None, optional
-        Responses to the administered items. Required.
+    context : StepContext
+        The session to select for.
 
     Returns
     -------
     int
-        Index of the next item to be applied.
-
-    Raises
-    ------
-    ValueError
-        If ``response_vector`` is None, or if candidates tie for the best score and ``rng`` is None.
-    NoItemsAvailableError
-        If every item has already been administered.
+        Index of the selected item.
     """
-    response_vector = require_responses(response_vector)
-
-    candidates = below_cap(remaining(item_bank.n_items, administered_items), exposure_rates, self._r_max)
-
-    scores = numpy.array(
-      [
-        self._expected_information(item_bank, administered_items, response_vector, int(idx), est_theta)
-        for idx in candidates
-      ],
-      dtype=float,
-    )
-    return pick_best(candidates, scores, rng)
+    candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
+    scores = numpy.array([self._expected_information(context, int(idx)) for idx in candidates], dtype=float)
+    return pick_best(candidates, scores, context.rng)

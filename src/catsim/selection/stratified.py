@@ -5,10 +5,11 @@ from abc import abstractmethod
 
 import numpy
 
+from ..context import StepContext
 from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
 from ..typing import FloatArray, IntArray
-from .base import BaseSelector, check_test_size, pick_best
+from .base import BaseSelector, check_test_size, pick_best, remaining
 
 
 class StratifiedSelector(BaseSelector):
@@ -18,7 +19,7 @@ class StratifiedSelector(BaseSelector):
   on a location key so that every stratum covers the whole ability range. The test is split into
   ``n_strata`` consecutive stages, and each stage draws from its own stratum the non-administered item
   whose location is closest to the current ability estimate. The strata are the selector's exposure
-  control: it applies no exposure cap, and ``exposure_rates`` is ignored.
+  control: it applies no exposure cap, and ``context.exposure_rates`` is ignored.
 
   Parameters
   ----------
@@ -131,47 +132,27 @@ class StratifiedSelector(BaseSelector):
     """Return the 0-indexed stage of a 0-indexed test position below ``test_size``."""
     return position * self._n_strata // self._test_size
 
-  def select(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    est_theta: float,
-    rng: numpy.random.Generator | None = None,
-    exposure_rates: FloatArray | None = None,  # noqa: ARG002
-    response_vector: list[bool] | None = None,  # noqa: ARG002
-  ) -> int | None:
-    """Return the index of the next item to be administered.
+  def select(self, context: StepContext) -> int:
+    """Return the available item of the current stage's stratum whose location is closest to the estimate.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    administered_items : list[int]
-        A list containing the indexes of items that were already administered.
-    est_theta : float
-        The current estimated ability.
-    rng : numpy.random.Generator or None, optional
-        Random number generator, used only to break ties between equally close items.
-    exposure_rates : numpy.ndarray or None, optional
-        Ignored: this selector applies no exposure cap.
-    response_vector : list[bool] or None, optional
-        Unused; accepted for the engine's selector contract.
+    context : StepContext
+        The session to select for.
 
     Returns
     -------
     int
-        Index of the non-administered item in the current stratum whose location is closest to
-        ``est_theta``. Ties are broken uniformly at random (ADR-0008).
+        Index of the selected item.
 
     Raises
     ------
     NoItemsAvailableError
-        If every item in the current stratum has been administered.
+        If every item in the current stratum has been administered or excluded.
     ValueError
-        If ``test_size`` items have already been administered, or if items tie for the closest
-        location and ``rng`` is None.
+        If ``test_size`` items have already been administered.
     """
-    position = len(administered_items)
+    position = len(context.administered_items)
     if position >= self._test_size:
       msg = (
         f"{type(self).__name__} has test_size={self._test_size}, but {position} items have already been "
@@ -180,13 +161,14 @@ class StratifiedSelector(BaseSelector):
       )
       raise ValueError(msg)
     stage = self._stage(position)
-    stratum = self.strata(item_bank)[stage]
-    candidates = stratum[~numpy.isin(stratum, administered_items)]
+    stratum = self.strata(context.item_bank)[stage]
+    candidates = stratum[numpy.isin(stratum, remaining(context))]
     if candidates.size == 0:
       msg = f"There are no more items to be selected from stratum {stage}"
       raise NoItemsAvailableError(msg)
 
-    return pick_best(candidates, -numpy.abs(self._location(item_bank)[candidates] - est_theta), rng)
+    location = self._location(context.item_bank)[candidates]
+    return pick_best(candidates, -numpy.abs(location - context.theta), context.rng)
 
 
 class AStratSelector(StratifiedSelector):

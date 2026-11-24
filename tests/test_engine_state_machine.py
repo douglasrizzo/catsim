@@ -42,7 +42,7 @@ class RecordingEstimator:
 
   theta: float
 
-  def estimate(self, *, item_bank, administered_items, response_vector, est_theta) -> float:  # noqa: ARG002
+  def estimate(self, context) -> float:  # noqa: ARG002
     return float(self.theta)
 
 
@@ -52,10 +52,9 @@ class QueueOrderSelector:
   def __init__(self, order: tuple[int, ...] | list[int]) -> None:
     self._order = tuple(order)
 
-  def select(self, item_bank, administered_items, est_theta, rng=None, exposure_rates=None, response_vector=None):
-    del est_theta, rng, exposure_rates, response_vector
-    administered_set = set(administered_items)
-    n = item_bank.n_items
+  def select(self, context):
+    administered_set = set(context.administered_items)
+    n = context.item_bank.n_items
     for idx in self._order:
       if 0 <= idx < n and idx not in administered_set:
         return int(idx)

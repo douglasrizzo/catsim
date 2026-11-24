@@ -10,6 +10,7 @@ from catsim import irt
 from catsim.estimation import NumericalSearchEstimator
 from catsim.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from catsim.item_bank import ItemBank
+from tests.contexts import make_context
 from tests.hypothesis_strategies import item_params_matrix
 
 EST_SETTINGS = settings(max_examples=15, deadline=None)
@@ -41,12 +42,7 @@ def test_estimate_is_a_likelihood_maximum_on_the_ability_scale(
   bank = ItemBank(params, validate=True)
   items = bank.get_items(administered_items)
   estimator = NumericalSearchEstimator()
-  theta = estimator.estimate(
-    item_bank=bank,
-    administered_items=administered_items,
-    response_vector=response_vector,
-    est_theta=0.0,
-  )
+  theta = estimator.estimate(make_context(bank, administered_items, response_vector, theta=0.0))
   neighbours = np.clip([theta - 1e-3, theta + 1e-3], THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)
 
   assert THETA_MIN_EXTENDED <= theta <= THETA_MAX_EXTENDED

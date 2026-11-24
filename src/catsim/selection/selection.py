@@ -3,8 +3,7 @@
 import numpy
 
 from .. import irt
-from ..item_bank import ItemBank
-from ..typing import FloatArray
+from ..context import StepContext
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 
@@ -53,56 +52,29 @@ class MaxInfoSelector(BaseSelector):
     """
     return self._r_max
 
-  def select(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    est_theta: float,
-    rng: numpy.random.Generator | None = None,
-    exposure_rates: FloatArray | None = None,
-    response_vector: list[bool] | None = None,  # noqa: ARG002
-  ) -> int | None:
-    """Return the index of the next item to be administered.
+  def select(self, context: StepContext) -> int:
+    """Return the most informative remaining item at the current estimate, among those below ``r_max``.
 
-    Among the non-administered items below ``r_max`` (or all non-administered items, if every one
-    is at or above it), returns the most informative at ``est_theta``. Ties are broken uniformly at
-    random (ADR-0008).
+    When every remaining item is at or above ``r_max``, all of them are candidates.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    administered_items : list[int]
-        A list containing the indexes of items that were already administered.
-    est_theta : float
-        The current estimated ability.
-    rng : numpy.random.Generator or None, optional
-        Random number generator, used only to break ties between equally informative items.
-    exposure_rates : numpy.ndarray or None, optional
-        Run-level exposure-rate snapshot. ``None`` treats every item as unexposed.
-    response_vector : list[bool] or None, optional
-        Unused; accepted for the engine's selector contract.
+    context : StepContext
+        The session to select for.
 
     Returns
     -------
     int
-        Index of the next item to be applied.
-
-    Raises
-    ------
-    NoItemsAvailableError
-        If every item has already been administered.
-    ValueError
-        If items tie for the most information and ``rng`` is None.
+        Index of the selected item.
     """
-    candidates = below_cap(remaining(item_bank.n_items, administered_items), exposure_rates, self._r_max)
-    return pick_best(candidates, item_bank.information(est_theta)[candidates], rng)
+    candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
+    return pick_best(candidates, context.item_bank.information(context.theta)[candidates], context.rng)
 
 
 class UrrySelector(BaseSelector):
   """Select the remaining item whose difficulty parameter is closest to the current ability estimate.
 
-  It applies no exposure cap: ``exposure_rates`` is ignored.
+  It applies no exposure cap: ``context.exposure_rates`` is ignored.
 
   Notes
   -----
@@ -113,49 +85,22 @@ class UrrySelector(BaseSelector):
     """Return the selector as a constructor call that names every argument."""
     return f"{type(self).__name__}()"
 
-  def select(  # noqa: PLR6301
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    est_theta: float,
-    rng: numpy.random.Generator | None = None,
-    exposure_rates: FloatArray | None = None,  # noqa: ARG002
-    response_vector: list[bool] | None = None,  # noqa: ARG002
-  ) -> int | None:
-    """Return the index of the next item to be administered.
-
-    Returns the non-administered item whose difficulty is closest to ``est_theta``. Ties are broken
-    uniformly at random (ADR-0008).
+  def select(self, context: StepContext) -> int:  # noqa: PLR6301
+    """Return the remaining item whose difficulty is closest to the current estimate.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    administered_items : list[int]
-        A list containing the indexes of items that were already administered.
-    est_theta : float
-        The current estimated ability.
-    rng : numpy.random.Generator or None, optional
-        Random number generator, used only to break ties between equally close items.
-    exposure_rates : numpy.ndarray or None, optional
-        Ignored: this selector applies no exposure cap.
-    response_vector : list[bool] or None, optional
-        Unused; accepted for the engine's selector contract.
+    context : StepContext
+        The session to select for.
 
     Returns
     -------
     int
-        Index of the next item to be applied.
-
-    Raises
-    ------
-    NoItemsAvailableError
-        If every item has already been administered.
-    ValueError
-        If items tie for the closest difficulty and ``rng`` is None.
+        Index of the selected item.
     """
-    candidates = remaining(item_bank.n_items, administered_items)
-    return pick_best(candidates, -numpy.abs(item_bank.difficulty[candidates] - est_theta), rng)
+    candidates = remaining(context)
+    difficulty = context.item_bank.difficulty[candidates]
+    return pick_best(candidates, -numpy.abs(difficulty - context.theta), context.rng)
 
 
 class IntervalInfoSelector(BaseSelector):
@@ -172,7 +117,7 @@ class IntervalInfoSelector(BaseSelector):
 
   where :math:`I(\hat\theta)` is the information of the administered items and :math:`\gamma` the
   confidence level. A fixed half-width :math:`\delta` can be used instead. The selector applies no
-  exposure cap: ``exposure_rates`` is ignored.
+  exposure cap: ``context.exposure_rates`` is ignored.
 
   Parameters
   ----------
@@ -228,53 +173,27 @@ class IntervalInfoSelector(BaseSelector):
     """Get the confidence level of the default interval."""
     return self._confidence
 
-  def select(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    est_theta: float,
-    rng: numpy.random.Generator | None = None,
-    exposure_rates: FloatArray | None = None,  # noqa: ARG002
-    response_vector: list[bool] | None = None,  # noqa: ARG002
-  ) -> int | None:
-    """Return the index of the next item to be administered.
-
-    Ties in the integrated information are broken uniformly at random (ADR-0008).
+  def select(self, context: StepContext) -> int:
+    """Return the remaining item with the largest information integrated over the interval.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    administered_items : list[int]
-        A list containing the indexes of items that were already administered.
-    est_theta : float
-        The current estimated ability.
-    rng : numpy.random.Generator or None, optional
-        Random number generator, used only to break ties between equally good items.
-    exposure_rates : numpy.ndarray or None, optional
-        Ignored: this selector applies no exposure cap.
-    response_vector : list[bool] or None, optional
-        Unused; accepted for the engine's selector contract.
+    context : StepContext
+        The session to select for.
 
     Returns
     -------
     int
-        Index of the next item to be applied.
-
-    Raises
-    ------
-    NoItemsAvailableError
-        If every item has already been administered.
-    ValueError
-        If items tie for the largest integrated information and ``rng`` is None.
+        Index of the selected item.
     """
-    candidates = remaining(item_bank.n_items, administered_items)
+    candidates = remaining(context)
+    item_bank, theta = context.item_bank, context.theta
 
     if self._interval is None:
       # infinite before any item is administered, since there is no information yet
-      lower, upper = irt.confidence_interval(est_theta, item_bank.get_items(administered_items), self._confidence)
+      lower, upper = irt.confidence_interval(theta, item_bank.get_items(context.administered_items), self._confidence)
     else:
-      lower, upper = est_theta - self._interval, est_theta + self._interval
+      lower, upper = theta - self._interval, theta + self._interval
 
     information_integral = irt.inf_integral(lower, upper, item_bank.items[candidates])
-    return pick_best(candidates, information_integral, rng)
+    return pick_best(candidates, information_integral, context.rng)

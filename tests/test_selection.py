@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 from scipy.integrate import quad
 
-from catsim import irt
+from catsim import StepContext, irt
 from catsim.estimation import BaseEstimator
 from catsim.estimation.numerical import NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
@@ -37,6 +37,7 @@ from catsim.selection import (
   progressive,
 )
 from catsim.selection.base import below_cap, remaining
+from tests.contexts import make_context
 
 
 class RecordingEstimator(BaseEstimator):
@@ -44,18 +45,11 @@ class RecordingEstimator(BaseEstimator):
 
   def __init__(self) -> None:
     super().__init__()
-    self.records: list[tuple[list[int], list[bool], float]] = []
+    self.records: list[tuple[tuple[int, ...], tuple[bool, ...], float]] = []
 
-  def estimate(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    response_vector: list[bool],
-    est_theta: float,
-  ) -> float:
-    del item_bank
-    self.records.append((list(administered_items), list(response_vector), est_theta))
-    return float(len(response_vector))
+  def estimate(self, context: StepContext) -> float:
+    self.records.append((context.administered_items, context.responses, context.theta))
+    return float(len(context.responses))
 
   def __repr__(self) -> str:
     return "RecordingEstimator()"
@@ -64,15 +58,8 @@ class RecordingEstimator(BaseEstimator):
 class ShiftEstimator(BaseEstimator):
   """Estimator stub that moves the estimate 0.5 toward the last response."""
 
-  def estimate(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    response_vector: list[bool],
-    est_theta: float,
-  ) -> float:
-    del item_bank, administered_items
-    return est_theta + (0.5 if response_vector[-1] else -0.5)
+  def estimate(self, context: StepContext) -> float:
+    return context.theta + (0.5 if context.responses[-1] else -0.5)
 
 
 def _two_pl_bank(discriminations: list[float], difficulties: list[float]) -> ItemBank:
@@ -132,15 +119,27 @@ def _progressive_item_bank() -> ItemBank:
 class TestRemaining:
   """Tests for remaining, the items a selector may still administer."""
 
-  def test_returns_the_items_not_administered_in_ascending_order(self) -> None:
-    """An administered item left in would be administered twice; a dropped one could never be chosen."""
-    assert remaining(6, [4, 1]).tolist() == [0, 2, 3, 5]
-    assert remaining(3, []).tolist() == [0, 1, 2]
+  BANK = ItemBank.generate_item_bank(6, seed=0)
 
-  def test_raises_when_every_item_is_administered(self) -> None:
-    """An empty candidate array would reach the scorer instead of ending the session as an exhausted bank."""
+  def test_returns_the_items_not_administered_in_ascending_order(self) -> None:
+    """An administered item left in would be administered twice; a dropped one could never be chosen.
+
+    With no items administered, a tuple index of () would select the whole mask and leave no candidate.
+    """
+    assert remaining(make_context(self.BANK, [4, 1])).tolist() == [0, 2, 3, 5]
+    assert remaining(make_context(self.BANK)).tolist() == [0, 1, 2, 3, 4, 5]
+
+  def test_leaves_out_the_excluded_items(self) -> None:
+    """An excluded item left in could be handed back to the exposure-control wrapper that had just declined it."""
+    assert remaining(make_context(self.BANK, [4], excluded_items=[0, 5])).tolist() == [1, 2, 3]
+
+  @pytest.mark.parametrize(("administered", "excluded"), [([2, 0, 1, 5, 4, 3], []), ([2, 0, 1], [5, 4, 3])])
+  def test_raises_when_every_item_is_administered_or_excluded(
+    self, administered: list[int], excluded: list[int]
+  ) -> None:
+    """An empty candidate array would reach the scorer instead of ending the session with no item to give."""
     with pytest.raises(NoItemsAvailableError, match="no more items"):
-      remaining(3, [2, 0, 1])
+      remaining(make_context(self.BANK, administered, excluded_items=excluded))
 
 
 class TestBelowCap:
@@ -226,17 +225,15 @@ class TestMaxInfoSelector:
     item_bank = _two_pl_bank(list(self.BANK_A), [0.0] * 4)
     selector = MaxInfoSelector()
 
-    assert selector.select(item_bank=item_bank, administered_items=[], est_theta=0.0) == 1
-    assert selector.select(item_bank=item_bank, administered_items=[1], est_theta=0.0) == 2
+    assert selector.select(make_context(item_bank, [], theta=0.0)) == 1
+    assert selector.select(make_context(item_bank, [1], theta=0.0)) == 2
 
   def test_select_skips_items_at_the_exposure_cap(self) -> None:
     """An item whose exposure rate has reached r_max is passed over for the next most informative one."""
     item_bank = _two_pl_bank(list(self.BANK_A), [0.0] * 4)
     exposure_rates = np.array([0.0, 0.5, 0.0, 0.0])
 
-    selected = MaxInfoSelector(r_max=0.5).select(
-      item_bank=item_bank, administered_items=[], est_theta=0.0, exposure_rates=exposure_rates
-    )
+    selected = MaxInfoSelector(r_max=0.5).select(make_context(item_bank, [], theta=0.0, exposure_rates=exposure_rates))
 
     assert selected == 2
 
@@ -249,7 +246,7 @@ class TestMaxInfoSelector:
     item_bank = _two_pl_bank(list(self.BANK_A), [0.0] * 4)
 
     selected = MaxInfoSelector().select(
-      item_bank=item_bank, administered_items=[], est_theta=0.0, exposure_rates=np.array([0.0, 1.0, 0.0, 0.0])
+      make_context(item_bank, [], theta=0.0, exposure_rates=np.array([0.0, 1.0, 0.0, 0.0]))
     )
 
     assert selected == 1
@@ -258,9 +255,7 @@ class TestMaxInfoSelector:
     """With every remaining item at or over r_max, the most informative one is still administered."""
     item_bank = _two_pl_bank(list(self.BANK_A), [0.0] * 4)
 
-    selected = MaxInfoSelector(r_max=0.5).select(
-      item_bank=item_bank, administered_items=[], est_theta=0.0, exposure_rates=np.ones(4)
-    )
+    selected = MaxInfoSelector(r_max=0.5).select(make_context(item_bank, [], theta=0.0, exposure_rates=np.ones(4)))
 
     assert selected == 1
 
@@ -274,9 +269,7 @@ class TestRandomSelector:
     administered = [3, 17, 25]
 
     selections = {
-      RandomSelector().select(
-        item_bank=item_bank, administered_items=administered, est_theta=0.0, rng=np.random.default_rng(seed)
-      )
+      RandomSelector().select(make_context(item_bank, administered, theta=0.0, rng=np.random.default_rng(seed)))
       for seed in range(1000)
     }
 
@@ -294,7 +287,7 @@ class TestLinearSelector:
 
     administered: list[int] = []
     for _ in range(3):
-      administered.append(selector.select(item_bank=item_bank, administered_items=administered, est_theta=0.0))
+      administered.append(selector.select(make_context(item_bank, administered, theta=0.0)))
 
     assert administered == [15, 5, 10]
 
@@ -304,7 +297,7 @@ class TestLinearSelector:
     item_bank = ItemBank.generate_item_bank(20, seed=1)
 
     with pytest.raises(ValueError, match=r"items \[99\] are not in the item bank, whose indices run from 0 to 19"):
-      selector.select(item_bank=item_bank, administered_items=[0], est_theta=0.0)
+      selector.select(make_context(item_bank, [0], theta=0.0))
 
 
 class TestUrrySelector:
@@ -316,9 +309,9 @@ class TestUrrySelector:
     item_bank = _two_pl_bank([2.5, 0.5, 1.0, 1.0], [0.3, 0.9, -1.0, 2.5])
     selector = UrrySelector()
 
-    assert MaxInfoSelector().select(item_bank=item_bank, administered_items=[], est_theta=0.8) == 0
-    assert selector.select(item_bank=item_bank, administered_items=[], est_theta=0.8) == 1
-    assert selector.select(item_bank=item_bank, administered_items=[1], est_theta=0.8) == 0
+    assert MaxInfoSelector().select(make_context(item_bank, [], theta=0.8)) == 0
+    assert selector.select(make_context(item_bank, [], theta=0.8)) == 1
+    assert selector.select(make_context(item_bank, [1], theta=0.8)) == 0
 
 
 class TestRandomesqueSelector:
@@ -337,9 +330,7 @@ class TestRandomesqueSelector:
     selector = RandomesqueSelector(4)
     rng = np.random.default_rng(0)
 
-    picks = {
-      selector.select(item_bank=item_bank, administered_items=administered, est_theta=-0.4, rng=rng) for _ in range(200)
-    }
+    picks = {selector.select(make_context(item_bank, administered, theta=-0.4, rng=rng)) for _ in range(200)}
 
     assert picks == set(by_information[:4])
 
@@ -366,9 +357,7 @@ class TestThe54321Selector:
     selector = The54321Selector()
     rng = np.random.default_rng(0)
 
-    picks = {
-      selector.select(item_bank=item_bank, administered_items=administered, est_theta=0.3, rng=rng) for _ in range(200)
-    }
+    picks = {selector.select(make_context(item_bank, administered, theta=0.3, rng=rng)) for _ in range(200)}
 
     assert picks == set(by_information[:bin_size])
 
@@ -400,7 +389,7 @@ class TestStratifiedSelectors:
       selector = selector_class(10)
       administered: list[int] = []
       for position in range(10):
-        item = selector.select(item_bank=item_bank, administered_items=administered, est_theta=theta)
+        item = selector.select(make_context(item_bank, administered, theta=theta))
         remaining = [i for i in selector.strata(item_bank)[position] if i not in administered]
         assert item in remaining
         assert abs(location[item] - theta) == pytest.approx(np.abs(location[remaining] - theta).min())
@@ -451,7 +440,7 @@ class TestStratifiedSelectors:
     strata = selector.strata(item_bank)
     administered: list[int] = []
     for position in range(30):
-      item = selector.select(item_bank=item_bank, administered_items=administered, est_theta=0.5)
+      item = selector.select(make_context(item_bank, administered, theta=0.5))
       assert item in strata[position // 6]
       administered.append(item)
 
@@ -465,10 +454,10 @@ class TestStratifiedSelectors:
     selector = MaxInfoStratSelector(5)
     administered: list[int] = []
     for _ in range(5):
-      administered.append(selector.select(item_bank=item_bank, administered_items=administered, est_theta=0.0))
+      administered.append(selector.select(make_context(item_bank, administered, theta=0.0)))
 
     with pytest.raises(ValueError, match="MaxInfoStratSelector has test_size=5, but 5 items have already been"):
-      selector.select(item_bank=item_bank, administered_items=administered, est_theta=0.0)
+      selector.select(make_context(item_bank, administered, theta=0.0))
 
   def test_raises_when_the_current_stratum_is_exhausted(self) -> None:
     """A stage whose stratum has no items left raises NoItemsAvailableError."""
@@ -477,7 +466,7 @@ class TestStratifiedSelectors:
     first_stratum = selector.strata(item_bank)[0].tolist()
 
     with pytest.raises(NoItemsAvailableError, match="stratum 0"):
-      selector.select(item_bank=item_bank, administered_items=first_stratum, est_theta=0.0)
+      selector.select(make_context(item_bank, first_stratum, theta=0.0))
 
   def test_n_strata_must_be_between_one_and_test_size(self) -> None:
     """n_strata defaults to test_size and cannot exceed it."""
@@ -508,7 +497,7 @@ class TestIntervalInfoSelector:
       quad(irt.inf, theta - half_width, theta + half_width, args=tuple(item_bank.items[i]))[0] for i in remaining
     ]
 
-    selected = IntervalInfoSelector().select(item_bank=item_bank, administered_items=administered, est_theta=theta)
+    selected = IntervalInfoSelector().select(make_context(item_bank, administered, theta=theta))
 
     assert selected == remaining[int(np.argmax(integrals))]
 
@@ -521,13 +510,13 @@ class TestIntervalInfoSelector:
     over any interval centered on it.
     """
     items = np.column_stack([np.linspace(0.6, 2.0, 41), np.zeros(41), np.zeros(41), np.ones(41)])
-    assert IntervalInfoSelector().select(item_bank=ItemBank(items), administered_items=[], est_theta=0.0) == 40
+    assert IntervalInfoSelector().select(make_context(ItemBank(items), [], theta=0.0)) == 40
 
     items[:, 0], items[:, 1] = 1.2, np.linspace(-3.0, 3.0, 41)
     item_bank = ItemBank(items)
     administered = [18, 19, 20, 21, 22]
-    low = IntervalInfoSelector().select(item_bank=item_bank, administered_items=administered, est_theta=-2.0)
-    high = IntervalInfoSelector().select(item_bank=item_bank, administered_items=administered, est_theta=2.0)
+    low = IntervalInfoSelector().select(make_context(item_bank, administered, theta=-2.0))
+    high = IntervalInfoSelector().select(make_context(item_bank, administered, theta=2.0))
 
     assert item_bank.difficulty[low] == pytest.approx(-1.95)
     assert item_bank.difficulty[high] == pytest.approx(1.95)
@@ -537,7 +526,7 @@ class TestIntervalInfoSelector:
     item_bank = ItemBank.generate_item_bank(40, seed=8)
     integrals = [quad(irt.inf, -1.3, -0.3, args=tuple(item))[0] for item in item_bank.items]
 
-    selected = IntervalInfoSelector(interval=0.5).select(item_bank=item_bank, administered_items=[], est_theta=-0.8)
+    selected = IntervalInfoSelector(interval=0.5).select(make_context(item_bank, [], theta=-0.8))
 
     assert selected == int(np.argmax(integrals))
 
@@ -546,46 +535,27 @@ class TestIntervalInfoSelector:
     item_bank = ItemBank.generate_item_bank(3, seed=9)
     selector = IntervalInfoSelector(interval=1.0)
 
-    assert selector.select(item_bank=item_bank, administered_items=[0, 2], est_theta=0.0) == 1
+    assert selector.select(make_context(item_bank, [0, 2], theta=0.0)) == 1
     with pytest.raises(NoItemsAvailableError):
-      selector.select(item_bank=item_bank, administered_items=[0, 1, 2], est_theta=0.0)
+      selector.select(make_context(item_bank, [0, 1, 2], theta=0.0))
 
 
 class TestMEISelector:
   """Tests for MEISelector."""
 
-  def test_select_requires_response_vector(self) -> None:
-    """The selector needs the current response history."""
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-    selector = MEISelector()
-
-    with pytest.raises(ValueError, match="response_vector"):
-      selector.select(
-        item_bank=item_bank,
-        administered_items=[],
-        est_theta=0.0,
-        rng=np.random.default_rng(42),
-      )
-
   def test_select_forwards_response_history_to_estimator(self) -> None:
-    """One-step-ahead scoring should append both hypothetical responses."""
+    """Each look-ahead estimate sees the session's items and responses, then the candidate and one response.
+
+    A look-ahead that dropped the history, appended one hypothetical response only, or started from another estimate
+    would score the candidates on the wrong pattern.
+    """
     item_bank = ItemBank.generate_item_bank(10, seed=42)
     estimator = RecordingEstimator()
-    selector = MEISelector(estimator=estimator)
 
-    selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[0],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-      response_vector=[True],
-    )
+    MEISelector(estimator=estimator).select(make_context(item_bank, [0], [True], theta=0.25))
 
-    assert selected is not None
-    assert selected != 0
-    assert estimator.records
-    assert all(call[0][:1] == [0] for call in estimator.records)
-    assert {tuple(call[1]) for call in estimator.records} == {(True, True), (True, False)}
+    expected = [((0, candidate), (True, response), 0.25) for candidate in range(1, 10) for response in (True, False)]
+    assert sorted(estimator.records) == sorted(expected)
 
   def test_select_falls_back_when_exposure_cap_blocks_all_candidates(self) -> None:
     """With every remaining item over r_max, the cap is ignored and the best remaining item is still chosen."""
@@ -593,12 +563,14 @@ class TestMEISelector:
     selector = MEISelector(estimator=RecordingEstimator(), r_max=0.5)
 
     selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[1],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-      exposure_rates=np.ones(item_bank.n_items, dtype=float),
-      response_vector=[True],
+      make_context(
+        item_bank,
+        [1],
+        [True],
+        theta=0.0,
+        rng=np.random.default_rng(42),
+        exposure_rates=np.ones(item_bank.n_items, dtype=float),
+      )
     )
 
     # RecordingEstimator puts both one-step-ahead estimates at 2.0 (the number of responses), so each score is
@@ -635,17 +607,10 @@ class TestMEISelector:
     max_info = MaxInfoSelector()
 
     mei_choice = mei.select(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      est_theta=est_theta,
-      rng=np.random.default_rng(0),
-      response_vector=response_vector,
+      make_context(item_bank, administered_items, response_vector, theta=est_theta, rng=np.random.default_rng(0))
     )
     max_info_choice = max_info.select(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      est_theta=est_theta,
-      rng=np.random.default_rng(0),
+      make_context(item_bank, administered_items, theta=est_theta, rng=np.random.default_rng(0))
     )
 
     assert mei_choice == 1
@@ -684,10 +649,7 @@ class TestMEISelector:
             irt.icc(est_theta, *item_bank.items[int(idx)])
             * item_bank.test_information(
               estimator.estimate(
-                item_bank=item_bank,
-                administered_items=[*administered_items, int(idx)],
-                response_vector=[*response_vector, True],
-                est_theta=est_theta,
+                make_context(item_bank, [*administered_items, int(idx)], [*response_vector, True], theta=est_theta)
               ),
               [*administered_items, int(idx)],
             )
@@ -696,10 +658,7 @@ class TestMEISelector:
             (1.0 - irt.icc(est_theta, *item_bank.items[int(idx)]))
             * item_bank.test_information(
               estimator.estimate(
-                item_bank=item_bank,
-                administered_items=[*administered_items, int(idx)],
-                response_vector=[*response_vector, False],
-                est_theta=est_theta,
+                make_context(item_bank, [*administered_items, int(idx)], [*response_vector, False], theta=est_theta)
               ),
               [*administered_items, int(idx)],
             )
@@ -711,11 +670,7 @@ class TestMEISelector:
     )
 
     selected = selector.select(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      est_theta=est_theta,
-      rng=np.random.default_rng(0),
-      response_vector=response_vector,
+      make_context(item_bank, administered_items, response_vector, theta=est_theta, rng=np.random.default_rng(0))
     )
 
     assert selected == 1
@@ -734,34 +689,22 @@ class TestMEISelector:
     def test_information(theta: float, items: list[int]) -> float:
       return sum(probability(theta, difficulties[j]) * (1.0 - probability(theta, difficulties[j])) for j in items)
 
+    context = make_context(item_bank, [0], [True], theta=est_theta)
     expected = {}
     for candidate in (1, 2, 3):
       p_correct = probability(est_theta, difficulties[candidate])
       expected[candidate] = p_correct * test_information(est_theta + 0.5, [0, candidate]) + (
         1.0 - p_correct
       ) * test_information(est_theta - 0.5, [0, candidate])
-      score = selector._expected_information(item_bank, [0], [True], candidate, est_theta)
+      score = selector._expected_information(context, candidate)
       assert score == pytest.approx(expected[candidate], rel=1e-12)
 
-    selected = selector.select(item_bank=item_bank, administered_items=[0], est_theta=est_theta, response_vector=[True])
+    selected = selector.select(context)
     assert selected == max(expected, key=expected.__getitem__)
 
 
 class TestMLWISelector:
   """Tests for MLWISelector."""
-
-  def test_select_requires_response_vector(self) -> None:
-    """The selector needs the current response history."""
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-    selector = MLWISelector()
-
-    with pytest.raises(ValueError, match="response_vector"):
-      selector.select(
-        item_bank=item_bank,
-        administered_items=[],
-        est_theta=0.0,
-        rng=np.random.default_rng(42),
-      )
 
   def test_select_matches_manual_weighted_information(self) -> None:
     """Likelihood-weighted scores should match the manual integration."""
@@ -772,11 +715,7 @@ class TestMLWISelector:
     candidates = np.array([idx for idx in range(item_bank.n_items) if idx not in administered_items])
 
     selected = selector.select(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-      response_vector=response_vector,
+      make_context(item_bank, administered_items, response_vector, theta=0.0, rng=np.random.default_rng(42))
     )
 
     nodes = np.linspace(-6.0, 6.0, 11)
@@ -806,12 +745,14 @@ class TestMLWISelector:
     selector = MLWISelector(n_nodes=11, r_max=0.5)
 
     selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[0, 1],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-      exposure_rates=np.ones(item_bank.n_items, dtype=float),
-      response_vector=[True, False],
+      make_context(
+        item_bank,
+        [0, 1],
+        [True, False],
+        theta=0.0,
+        rng=np.random.default_rng(42),
+        exposure_rates=np.ones(item_bank.n_items, dtype=float),
+      )
     )
 
     # the pick of the manual integration in test_select_matches_manual_weighted_information
@@ -837,12 +778,7 @@ class TestMLWISelector:
       dtype=float,
     )
 
-    selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[],
-      est_theta=0.0,
-      response_vector=[],
-    )
+    selected = selector.select(make_context(item_bank, [], [], theta=0.0))
 
     assert selected == int(manual_scores.argmax())
 
@@ -855,7 +791,7 @@ class TestMLWISelector:
       )
     )
 
-    selected = MLWISelector().select(item_bank=item_bank, administered_items=[], est_theta=0.0, response_vector=[])
+    selected = MLWISelector().select(make_context(item_bank, [], [], theta=0.0))
 
     assert selected == 1
 
@@ -868,9 +804,7 @@ class TestMLWISelector:
     selector = MLWISelector()
 
     weights = selector._likelihood_weights(response_vector, item_bank.get_items(administered_items))
-    selected = selector.select(
-      item_bank=item_bank, administered_items=administered_items, est_theta=0.0, response_vector=response_vector
-    )
+    selected = selector.select(make_context(item_bank, administered_items, response_vector, theta=0.0))
 
     assert np.isfinite(weights).all()
     assert weights.max() == pytest.approx(1.0)
@@ -908,26 +842,14 @@ class TestMLWISelector:
     administered_items = list(range(20))
     response_vector = [bool(rng.random() < irt.icc(theta_true, *item_bank.items[idx])) for idx in administered_items]
     mle_theta = NumericalSearchEstimator().estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=theta_true,
+      make_context(item_bank, administered_items, response_vector, theta=theta_true)
     )
 
     mlwi = MLWISelector(n_nodes=81)
     max_info = MaxInfoSelector()
 
-    mlwi_choice = mlwi.select(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      est_theta=mle_theta,
-      response_vector=response_vector,
-    )
-    max_info_choice = max_info.select(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      est_theta=mle_theta,
-    )
+    mlwi_choice = mlwi.select(make_context(item_bank, administered_items, response_vector, theta=mle_theta))
+    max_info_choice = max_info.select(make_context(item_bank, administered_items, theta=mle_theta))
 
     assert mlwi_choice == max_info_choice
 
@@ -1007,7 +929,9 @@ class TestKLSelector:
       reference = np.trapezoid(divergence, grid, axis=1)
       reference[administered] = -np.inf
 
-      picked = KLSelector(window=2.0).select(item_bank, administered, theta_hat, rng=np.random.default_rng(0))
+      picked = KLSelector(window=2.0).select(
+        make_context(item_bank, administered, theta=theta_hat, rng=np.random.default_rng(0))
+      )
 
       assert reference[picked] == pytest.approx(reference.max(), rel=1e-6)
 
@@ -1022,15 +946,20 @@ class TestKLSelector:
     filler = [1.0, 3.0, 0.0, 1.0]
     item_bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [4.0, 1.5, 0.0, 1.0], filler, filler, filler, filler]))
 
-    assert KLSelector(window=2.0).select(item_bank, administered, 0.0, rng=np.random.default_rng(0)) == expected
+    assert (
+      KLSelector(window=2.0).select(make_context(item_bank, administered, theta=0.0, rng=np.random.default_rng(0)))
+      == expected
+    )
 
   def test_select_skips_items_at_the_exposure_cap(self) -> None:
     """The item with the most KL information is passed over while its exposure rate is at r_max."""
     item_bank = ItemBank(np.array([[1.0, -2.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 1.5, 0.0, 1.0]]))
     selector = KLSelector(window=0.5, r_max=0.5)
 
-    uncapped = selector.select(item_bank, [], 0.0, rng=np.random.default_rng(0))
-    capped = selector.select(item_bank, [], 0.0, rng=np.random.default_rng(0), exposure_rates=np.array([0.0, 0.5, 0.0]))
+    uncapped = selector.select(make_context(item_bank, [], theta=0.0, rng=np.random.default_rng(0)))
+    capped = selector.select(
+      make_context(item_bank, [], theta=0.0, rng=np.random.default_rng(0), exposure_rates=np.array([0.0, 0.5, 0.0]))
+    )
 
     assert (uncapped, capped) == (1, 2)
 
@@ -1039,9 +968,7 @@ class TestKLSelector:
     item_bank = ItemBank(np.array([[1.0, -2.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 2.0, 0.0, 1.0]]))
 
     with pytest.raises(NoItemsAvailableError, match="no more items"):
-      KLSelector().select(
-        item_bank=item_bank, administered_items=[0, 1, 2], est_theta=0.0, rng=np.random.default_rng(42)
-      )
+      KLSelector().select(make_context(item_bank, [0, 1, 2], theta=0.0, rng=np.random.default_rng(42)))
 
 
 class TestClusterSelector:
@@ -1064,9 +991,7 @@ class TestClusterSelector:
   ) -> int | None:
     item_bank = _two_pl_bank(list(self.DISCRIMINATIONS), [0.0] * len(self.DISCRIMINATIONS))
     selector = ClusterSelector(clusters=list(clusters), method=method, r_max=r_max, r_control=r_control)
-    return selector.select(
-      item_bank=item_bank, administered_items=administered, est_theta=0.0, exposure_rates=exposure_rates
-    )
+    return selector.select(make_context(item_bank, administered, theta=0.0, exposure_rates=exposure_rates))
 
   @pytest.mark.parametrize(("method", "expected"), [("item_info", 1), ("cluster_info", 7), ("weighted_info", 13)])
   @pytest.mark.parametrize(
@@ -1093,7 +1018,7 @@ class TestClusterSelector:
     """
     item_bank = ItemBank(np.array([[2.5, 0.0, 0.0, 1.0], [0.5, 3.0, 0.0, 1.0], [2.0, 0.0, 0.0, 1.0]]))
 
-    assert ClusterSelector(clusters=[0, 0, 1]).select(item_bank=item_bank, administered_items=[0], est_theta=0.0) == 1
+    assert ClusterSelector(clusters=[0, 0, 1]).select(make_context(item_bank, [0], theta=0.0)) == 1
 
   def test_select_raises_when_every_cluster_is_exhausted(self) -> None:
     """An exhausted bank raises NoItemsAvailableError, which the engine turns into a stop."""
@@ -1108,7 +1033,7 @@ class TestClusterSelector:
     selector = ClusterSelector(clusters=[*self.CLUSTERS, 2][:n_labels], method=method)
 
     with pytest.raises(ValueError, match=f"clusters holds {n_labels} labels, but the item bank has 14 items"):
-      selector.select(item_bank=item_bank, administered_items=[], est_theta=0.0)
+      selector.select(make_context(item_bank, [], theta=0.0))
 
   def test_cluster_sums_and_means_match_the_hand_computed_values(self) -> None:
     """Each cluster's information sum and mean must be a^2 / 4 summed or averaged over its items, gaps in labels too.
@@ -1182,13 +1107,7 @@ class TestClusterSelector:
     selector = ClusterSelector(clusters=[0] * 12, r_max=0.1, r_control="aggressive")
 
     picks = {
-      selector.select(
-        item_bank=item_bank,
-        administered_items=[],
-        est_theta=0.0,
-        exposure_rates=rates,
-        rng=np.random.default_rng(seed),
-      )
+      selector.select(make_context(item_bank, [], theta=0.0, rng=np.random.default_rng(seed), exposure_rates=rates))
       for seed in range(40)
     }
 
@@ -1255,7 +1174,9 @@ class TestProgressiveSelector:
     """
     selector = ProgressiveSelector(test_size=3)
 
-    selected = selector.select(_progressive_item_bank(), administered, 0.0, rng=_DeterministicRNG(draws))
+    selected = selector.select(
+      make_context(_progressive_item_bank(), administered, theta=0.0, rng=_DeterministicRNG(draws))
+    )
 
     assert selected == expected
 
@@ -1266,11 +1187,9 @@ class TestProgressiveSelector:
     exposure_rates = np.array([0.0, 0.0, 0.0, 1.0], dtype=float)
 
     selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[0, 1],
-      est_theta=0.0,
-      rng=_DeterministicRNG([0.1, 0.2, 0.3, 0.4]),
-      exposure_rates=exposure_rates,
+      make_context(
+        item_bank, [0, 1], theta=0.0, rng=_DeterministicRNG([0.1, 0.2, 0.3, 0.4]), exposure_rates=exposure_rates
+      )
     )
 
     assert selected == 2
@@ -1295,12 +1214,7 @@ class TestProgressiveSelector:
     )
     selector = ProgressiveSelector(test_size=3)
 
-    selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[0],
-      est_theta=0.0,
-      rng=_DeterministicRNG([0.9, 0.1, 0.4]),
-    )
+    selected = selector.select(make_context(item_bank, [0], theta=0.0, rng=_DeterministicRNG([0.9, 0.1, 0.4])))
 
     assert selected == 1
 
@@ -1333,7 +1247,7 @@ class TestProportionalSelector:
     rng = _DeterministicRNG([0.0, 0.0, 0.0, 0.0])
 
     ProportionalSelector(test_size=test_size, acceleration=acceleration).select(
-      _progressive_item_bank(), administered, 0.0, rng=rng
+      make_context(_progressive_item_bank(), administered, theta=0.0, rng=rng)
     )
 
     ((candidates, probs),) = rng.choice_calls
@@ -1351,7 +1265,9 @@ class TestProportionalSelector:
     """
     rng = _DeterministicRNG([0.0, 0.0, 0.0, 0.0])
 
-    ProportionalSelector(test_size=2).select(_two_pl_bank([1.0] * 4, [0.0, 1.0, 2.0, 3.0]), [3], -400.0, rng=rng)
+    ProportionalSelector(test_size=2).select(
+      make_context(_two_pl_bank([1.0] * 4, [0.0, 1.0, 2.0, 3.0]), [3], theta=-400.0, rng=rng)
+    )
 
     ((_, probs),) = rng.choice_calls
     # This far out the information ratios are e^-b to double precision, and the exponent is the test length, 2.
@@ -1386,7 +1302,7 @@ def test_randomized_selectors_repeat_with_the_same_seed(make_selector: Callable[
   def run(seed: int) -> list[int | None]:
     selector, rng, administered = make_selector(), np.random.default_rng(seed), []
     for _ in range(8):
-      administered.append(selector.select(item_bank, administered, 0.3, rng=rng))
+      administered.append(selector.select(make_context(item_bank, administered, theta=0.3, rng=rng)))
     return administered
 
   assert run(11) == run(11)
@@ -1425,11 +1341,7 @@ def test_select_returns_builtin_int(make_selector) -> None:
   item_bank = ItemBank.generate_item_bank(_N_ITEMS, seed=3)
 
   item_id = make_selector().select(
-    item_bank=item_bank,
-    administered_items=[0, 1],
-    est_theta=0.3,
-    rng=np.random.default_rng(0),
-    response_vector=[True, False],
+    make_context(item_bank, [0, 1], [True, False], theta=0.3, rng=np.random.default_rng(0))
   )
 
   assert type(item_id) is int

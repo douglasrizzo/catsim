@@ -331,6 +331,7 @@ layers = [
   "engine",
   "selection | estimation | initialization | stopping",  # "|": siblings that never import each other
   "state",
+  "context",  # StepContext: below state and the strategies, which read it, and above the domain
   "cat",
   "item_bank",
   "irt",
@@ -367,6 +368,7 @@ source_modules = [
   "catsim.irt",
   "catsim.item_bank",
   "catsim.cat",
+  "catsim.context",
   "catsim.state",
   "catsim.engine",
   "catsim.simulation",

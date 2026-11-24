@@ -7,7 +7,7 @@ For the full posterior specification and quadrature contract, see
 from __future__ import annotations
 
 import math
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -20,7 +20,7 @@ from ..typing import FloatArray
 from .base import BaseEstimator
 
 if TYPE_CHECKING:
-  from ..item_bank import ItemBank
+  from ..context import StepContext
 
 LogPrior = Callable[[FloatArray], FloatArray]
 _MIN_QUADRATURE_NODES = 2
@@ -201,7 +201,7 @@ class QuadratureGrid:
 
 
 def posterior(
-  response_vector: list[bool],
+  response_vector: Sequence[bool],
   administered_items: FloatArray,
   grid: QuadratureGrid,
   log_prior: LogPrior,
@@ -214,7 +214,7 @@ def posterior(
 
   Parameters
   ----------
-  response_vector : list[bool]
+  response_vector : Sequence[bool]
       Responses to the administered items, in the same order as ``administered_items``.
   administered_items : numpy.ndarray
       Parameter matrix of the administered items, one row per item.
@@ -318,42 +318,24 @@ class EAPEstimator(BaseEstimator):
     """Return a human-readable name for the estimator."""
     return "Expected a Posteriori Estimator"
 
-  def estimate(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    response_vector: list[bool],
-    est_theta: float,  # noqa: ARG002
-  ) -> float:
-    r"""Return the posterior mean for the administered response pattern.
+  def estimate(self, context: StepContext) -> float:
+    r"""Return the posterior mean, the prior mean when no item has been administered.
 
     Each call evaluates the likelihood once per grid node, which the ``evaluations`` counters
     report.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    administered_items : list[int]
-        Indices of the items administered so far. With none, the estimate is the prior mean.
-    response_vector : list[bool]
-        The examinee's answers to the administered items, in the same order.
-    est_theta : float
-        Unused; the posterior mean does not depend on a previous estimate.
+    context : StepContext
+        The session to estimate for. Its ``theta`` is not used.
 
     Returns
     -------
     float
         The posterior mean of :math:`\theta`.
-
-    Raises
-    ------
-    ValueError
-        If any argument is None, if ``response_vector`` and ``administered_items`` have different
-        lengths, or if ``response_vector`` contains non-Boolean elements.
     """
-    self._require_inputs(item_bank, administered_items, response_vector)
-    post = posterior(response_vector, item_bank.get_items(administered_items), self._grid, self._log_prior)
+    items = context.item_bank.get_items(context.administered_items)
+    post = posterior(context.responses, items, self._grid, self._log_prior)
     self._calls += 1
     self._last_evaluations = self._grid.nodes.size
     self._total_evaluations += self._last_evaluations
@@ -410,31 +392,20 @@ class MAPEstimator(BaseEstimator):
     """Return a human-readable estimator name."""
     return "Maximum a Posteriori Estimator"
 
-  def _negative_log_posterior(self, theta: float, response_vector: list[bool], items: FloatArray) -> float:
+  def _negative_log_posterior(self, theta: float, response_vector: Sequence[bool], items: FloatArray) -> float:
     """Return the negative log-posterior at a candidate theta."""
     log_lik = irt.log_likelihood(theta, response_vector, items)
     log_pr = float(self._log_prior(numpy.array([theta], dtype=float))[0])
     return -(log_lik + log_pr)
 
-  def estimate(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    response_vector: list[bool],
-    est_theta: float,  # noqa: ARG002 - required by the estimator contract
-  ) -> float:
-    r"""Estimate ability by maximizing the posterior density.
+  def estimate(self, context: StepContext) -> float:
+    r"""Return the posterior mode within the search bounds, the prior mode when no item has been administered.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    administered_items : list[int]
-        Indices of the items administered so far. With none, the estimate is the prior mode.
-    response_vector : list[bool]
-        The examinee's answers to the administered items, in the same order.
-    est_theta : float
-        Unused; the search covers the whole bounds on every call.
+    context : StepContext
+        The session to estimate for. Its ``theta`` is not used: the search covers the whole bounds
+        on every call.
 
     Returns
     -------
@@ -444,17 +415,14 @@ class MAPEstimator(BaseEstimator):
     Raises
     ------
     ValueError
-        If any argument is None, if ``response_vector`` and ``administered_items`` have different
-        lengths or ``response_vector`` contains non-Boolean elements, or if the log-posterior has
-        no finite maximum within the search bounds.
+        If the log-posterior has no finite maximum within the search bounds.
     """
-    self._require_inputs(item_bank, administered_items, response_vector)
-
     self._calls += 1
 
-    items = item_bank.get_items(administered_items)
+    responses = context.responses
+    items = context.item_bank.get_items(context.administered_items)
     nodes = numpy.linspace(self._bounds[0], self._bounds[1], _MODE_SEARCH_POINTS)
-    log_post = irt.log_likelihood_hpc(nodes, response_vector, items) + self._log_prior(nodes)
+    log_post = irt.log_likelihood_hpc(nodes, responses, items) + self._log_prior(nodes)
     self._last_evaluations = nodes.size
     self._total_evaluations += nodes.size
     peak = log_post.max()
@@ -476,7 +444,7 @@ class MAPEstimator(BaseEstimator):
     with numpy.errstate(invalid="ignore"):
       result = minimize_scalar(
         self._negative_log_posterior,
-        args=(response_vector, items),
+        args=(responses, items),
         bounds=(nodes[max(best - 1, 0)], nodes[min(best + 1, nodes.size - 1)]),
         method="bounded",
         options={"xatol": self._tol},

@@ -9,6 +9,7 @@ from hypothesis import strategies as st
 
 from catsim.item_bank import ItemBank
 from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthStopper, StopRule
+from tests.contexts import make_context
 
 STOP_SETTINGS = settings(max_examples=40, deadline=None)
 
@@ -34,7 +35,7 @@ def test_length_stopper_stops_once_max_items_are_administered(
   stopper = MaxLengthStopper(max_items)
   administered = list(range(administered_count))
 
-  stopped = stopper.stop(item_bank=bank, administered_items=administered, theta=0.0)
+  stopped = stopper.stop(make_context(bank, administered, theta=0.0))
 
   assert stopped is (administered_count >= max_items)
 
@@ -46,7 +47,7 @@ class FixedStopper(BaseStopper):
   holds: bool
   label: int
 
-  def stop(self, item_bank, administered_items, theta) -> bool:  # noqa: ARG002
+  def stop(self, context) -> bool:  # noqa: ARG002
     return self.holds
 
 
@@ -67,7 +68,7 @@ def test_stop_rule_stops_once_min_items_are_administered_and_any_stopper_holds(
   """A rule that stops before min_items, ignores a stopper that holds, or stops when none holds fails."""
   rule = StopRule(*(FixedStopper(held, label) for label, held in enumerate(holds)), min_items=min_items)
 
-  stopped = rule.stop(item_bank=RULE_BANK, administered_items=list(range(administered_count)), theta=0.0)
+  stopped = rule.stop(make_context(RULE_BANK, list(range(administered_count)), theta=0.0))
 
   assert stopped is (administered_count >= min_items and any(holds))
 
@@ -86,7 +87,7 @@ def test_stop_rule_satisfied_returns_exactly_the_stoppers_that_hold(
   """satisfied() that drops a stopper that holds, adds one that does not, reorders them or applies min_items fails."""
   rule = StopRule(*(FixedStopper(held, label) for label, held in enumerate(holds)), min_items=min_items)
 
-  satisfied = rule.satisfied(item_bank=RULE_BANK, administered_items=list(range(administered_count)), theta=0.0)
+  satisfied = rule.satisfied(make_context(RULE_BANK, list(range(administered_count)), theta=0.0))
 
   assert [stopper.label for stopper in satisfied] == [label for label, held in enumerate(holds) if held]
 
@@ -117,4 +118,4 @@ def test_confidence_interval_stopper_never_stops_with_zero_items(
   bank = params
   assume(len(set(bounds)) == len(bounds))
   stopper = ConfidenceIntervalStopper(interval_bounds=bounds, confidence=confidence)
-  assert stopper.stop(item_bank=bank, administered_items=[], theta=theta) is False
+  assert stopper.stop(make_context(bank, [], theta=theta)) is False

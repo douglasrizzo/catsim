@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from .base import BaseStopper
 
 if TYPE_CHECKING:
-  from ..item_bank import ItemBank
+  from ..context import StepContext
 
 
 @dataclass(frozen=True)
@@ -38,26 +38,17 @@ class MaxLengthStopper(BaseStopper):
       msg = f"max_items must be at least 1, got {self.max_items}"
       raise ValueError(msg)
 
-  def stop(
-    self,
-    item_bank: ItemBank,  # noqa: ARG002
-    administered_items: list[int],
-    theta: float,  # noqa: ARG002
-  ) -> bool:
-    """Check whether the test reached `max_items` administered items.
+  def stop(self, context: StepContext) -> bool:
+    """Return whether at least `max_items` items have been administered.
 
     Parameters
     ----------
-    item_bank : ItemBank
-        Item bank used by the session.
-    administered_items : list[int]
-        Item indices already administered in the session.
-    theta : float
-        Current ability estimate.
+    context : StepContext
+        The session to check.
 
     Returns
     -------
     bool
         True if at least `max_items` items were administered, False otherwise.
     """
-    return len(administered_items) >= self.max_items
+    return len(context.administered_items) >= self.max_items
