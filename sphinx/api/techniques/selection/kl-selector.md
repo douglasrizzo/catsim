@@ -51,12 +51,16 @@ that weights the divergence by the posterior (p. 222), a planned extension,
 KLP. The selector chooses the non-administered item with the
 largest value of $K_i(\hat{\theta})$.
 
-Each integral is computed with a 24-point Gauss-Legendre rule over the
-window. On banks drawn by `ItemBank.generate`, its
-relative error against adaptive quadrature is at most about $10^{-11}$. The
-error grows with the discrimination and the width of the window: over
-$\hat{\theta} \pm 3$, it is about $5 \times 10^{-9}$ for an item with $a = 4$
-and $10^{-6}$ for one with $a = 6$.
+Each integral is computed with a Gauss-Legendre rule over the window, the same
+rule for every candidate. A steep item's divergence changes quickly near its
+difficulty, so the rule's number of nodes is four times the largest
+discrimination among the candidates times the half-width $\delta_n$, at least
+24 and at most 240. Banks drawn by `ItemBank.generate` with the default window
+need 24 to 28 nodes. Up to $a\,\delta_n = 60$, for example $a = 10$ over
+$\hat{\theta} \pm 6$, every integral above $10^{-5}$ is within a relative
+$10^{-10}$ of adaptive quadrature: at most $7 \times 10^{-11}$ over 2PL and
+4PL items with $c \leq 0.3$ and $d \geq 0.85$. Beyond that the rule keeps 240
+nodes and the error grows, to about $2 \times 10^{-7}$ at $a\,\delta_n = 120$.
 
 ## Parameters
 
