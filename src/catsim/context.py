@@ -57,9 +57,10 @@ class StepContext:
       The examinee's responses to ``administered_items``, one per item, in the same order. Default
       is no responses.
   excluded_items : tuple[int, ...], optional
-      Items a selector must not choose although they have not been administered, such as items an
-      exposure-control wrapper has declined. They do not count toward the test position. The
-      engine always passes none.
+      Items a selector must not choose although they have not been administered: the session's
+      excluded items, such as those the engine's exposure control declined. They do not count
+      toward the test position. A wrapper that passes a changed context on adds to them, never
+      replaces them. Default is no items.
   theta : float, optional
       The current ability estimate. For the estimator, it is the estimate before the newest
       response, the starting point of its update. Default is 0.

@@ -8,3 +8,13 @@ class NoItemsAvailableError(RuntimeError):
   the end of the item bank: a selector that follows a fixed list of items or works through strata
   can run out first. ``CatEngine`` ends the session with ``StopReason.NO_ITEMS``.
   """
+
+
+class ExcludedItemError(ValueError):
+  """Exception raised by ``CatEngine`` for an item the session excluded.
+
+  A session's ``excluded_items`` are items it must not be given, such as those its engine's exposure
+  control declined. ``CatEngine`` raises this error when a response is applied to one, or when the
+  selector proposes one. An application that means to give such an item anyway removes it from the
+  session's ``excluded_items`` first.
+  """

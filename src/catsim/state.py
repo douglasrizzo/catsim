@@ -43,11 +43,18 @@ class CatSessionState:
   as given. A session runs
   while ``stop_reason`` is None.
 
+  ``excluded_items`` holds the items the session must not be given although it has not had them:
+  those its engine's exposure control declined, in the order it declined them, and any an
+  application adds, such as items the examinee saw in an earlier attempt. The engine passes them to
+  every strategy and raises :class:`~catsim.exceptions.ExcludedItemError` for a response to one.
+  Their indices are checked against the item bank at the session's next step.
+
   Raises
   ------
   ValueError
       If the session does not have one response per administered item and one more estimate than
-      responses, or if ``stop_reason`` is not a :class:`StopReason` value.
+      responses, if ``excluded_items`` repeats an item or holds an administered one, or if
+      ``stop_reason`` is not a :class:`StopReason` value.
   TypeError
       If an entry of ``estimates`` is not an :class:`~catsim.context.Estimate`.
   """
@@ -58,6 +65,7 @@ class CatSessionState:
   administered_items: list[int] = field(default_factory=list)
   responses: list[bool] = field(default_factory=list)
   stop_reason: StopReason | None = None
+  excluded_items: list[int] = field(default_factory=list)
 
   def __post_init__(self) -> None:
     """Take its own copy of the histories and reject a session whose entries do not line up."""
@@ -66,6 +74,7 @@ class CatSessionState:
     self.administered_items = list(self.administered_items)
     self.responses = list(self.responses)
     self.estimates = list(self.estimates)
+    self.excluded_items = list(self.excluded_items)
     if not all(isinstance(estimate, Estimate) for estimate in self.estimates):
       # A session restored from storage needs its estimates rebuilt, not bare thetas or mappings.
       msg = f"Session {self.session_id} needs Estimate entries in estimates, got {self.estimates!r}"
@@ -85,6 +94,13 @@ class CatSessionState:
         f"Session {self.session_id} needs the initial estimate and one estimate per response in "
         f"estimates, got len(estimates)={len(self.estimates)} and len(responses)={n_responses}"
       )
+      raise ValueError(msg)
+    if len(set(self.excluded_items)) != len(self.excluded_items):
+      msg = f"Session {self.session_id} repeats an item in excluded_items, got {self.excluded_items}"
+      raise ValueError(msg)
+    # A session either gave an item or withheld it: a save that holds an item in both lists is corrupt.
+    if administered := sorted(set(self.excluded_items) & set(self.administered_items)):
+      msg = f"Session {self.session_id} has administered items {administered}, which excluded_items also holds"
       raise ValueError(msg)
 
   @property
@@ -121,6 +137,7 @@ class CatSessionState:
       administered_items=tuple(self.administered_items),
       responses=tuple(self.responses),
       stop_reason=self.stop_reason,
+      excluded_items=tuple(self.excluded_items),
     )
 
 
@@ -134,6 +151,7 @@ class CatSessionSnapshot:
   administered_items: tuple[int, ...]
   responses: tuple[bool, ...]
   stop_reason: StopReason | None
+  excluded_items: tuple[int, ...] = ()
 
   @property
   def theta_history(self) -> tuple[float, ...]:

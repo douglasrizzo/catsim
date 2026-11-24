@@ -94,6 +94,46 @@ def test_session_state_turns_a_persisted_stop_reason_back_into_the_enum() -> Non
     CatSessionState(session_id=0, estimates=[Estimate(0.0, math.inf)], stop_reason=persisted["unknown"])
 
 
+@pytest.mark.parametrize(
+  ("excluded", "match"),
+  [
+    pytest.param([4, 4], r"repeats an item in excluded_items, got \[4, 4\]", id="repeated"),
+    pytest.param([1, 4], r"has administered items \[1\], which excluded_items also holds", id="administered"),
+  ],
+)
+def test_session_state_rejects_excluded_items_it_cannot_hold(excluded: list[int], match: str) -> None:
+  """A session restored with an excluded item twice, or with an item both administered and excluded, is rejected.
+
+  Fails if such a session is accepted: an item is given or declined once per session, so a save holding either is
+  corrupt, and its proposal counts (administrations plus declines) would count an item twice for one examinee.
+  """
+  with pytest.raises(ValueError, match=match):
+    CatSessionState(
+      session_id=0,
+      estimates=[Estimate(0.0, math.inf), Estimate(0.5, 1.0)],
+      administered_items=[1],
+      responses=[True],
+      excluded_items=excluded,
+    )
+
+
+def test_a_session_and_its_snapshot_keep_their_own_excluded_items() -> None:
+  """The session copies the excluded items it is given, and a snapshot keeps them as they were.
+
+  Fails if the session keeps the caller's list (the engine's declines would change the application's saved copy) or
+  if the snapshot shares the session's list (a later decline would show up in an earlier step result).
+  """
+  saved = [6, 2]
+  state = CatSessionState(session_id=0, estimates=[Estimate(0.0, math.inf)], excluded_items=saved)
+  snapshot = state.snapshot()
+
+  state.excluded_items.append(9)
+
+  assert saved == [6, 2]
+  assert state.excluded_items == [6, 2, 9]
+  assert snapshot.excluded_items == (6, 2)
+
+
 def test_exposure_tracker_gives_each_session_the_rates_of_the_sessions_before_it() -> None:
   """A session sees each item's share of the sessions started before it, as catR does, from start to end.
 

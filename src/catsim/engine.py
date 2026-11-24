@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Protocol
 import numpy
 
 from .context import Estimate, StepContext
-from .exceptions import NoItemsAvailableError
+from .exceptions import ExcludedItemError, NoItemsAvailableError
 from .item_bank import ItemBank
 from .state import CatSessionState, CatStepResult, ExposureTracker, StopReason
 
@@ -128,8 +128,8 @@ class CatEngine:
     Returns
     -------
     StepContext
-        The session's items, responses and current estimate with its standard error, with no
-        excluded items.
+        The session's items, responses, excluded items and current estimate with its standard
+        error.
     """
     tracker = context.exposure_tracker
     return StepContext(
@@ -137,6 +137,7 @@ class CatEngine:
       rng=context.rng,
       administered_items=tuple(state.administered_items),
       responses=tuple(state.responses),
+      excluded_items=tuple(state.excluded_items),
       theta=state.current_theta,
       se=state.current_se,
       exposure_rates=None if tracker is None else tracker.rates(),
@@ -263,6 +264,8 @@ class CatEngine:
 
     Raises
     ------
+    ExcludedItemError
+        If the item is in the session's ``excluded_items``.
     ValueError
         If the session has stopped, the item index is outside the bank or the item was already
         administered in this session.
@@ -277,10 +280,10 @@ class CatEngine:
     if not isinstance(response, (bool, numpy.bool_)):
       msg = f"response must be a bool, got {type(response).__name__} {response!r}"
       raise TypeError(msg)
-    item_id = self._checked_item(state, item_id)
+    current = self._step_context(state, context)
+    item_id = self._checked_item(current, item_id)
 
     response = bool(response)
-    current = self._step_context(state, context)
     # The estimator starts from the previous estimate; the stopper judges the new one.
     answered = dataclasses.replace(
       current,
@@ -338,12 +341,12 @@ class CatEngine:
     if item_id is None:
       return CatStepResult(session=state.snapshot(), selected_item_id=None, response=None)
     # checked before the provider is asked: a live provider shows the item to an examinee
-    item_id = self._checked_item(state, item_id)
+    item_id = self._checked_item(self._step_context(state, context), item_id)
     response = response_provider.answer(self._item_bank, item_id, state.snapshot(), context.rng)
     return self.apply_response(state, item_id, response=response, context=context)
 
-  def _checked_item(self, state: CatSessionState, item_id: int) -> int:
-    """Return ``item_id`` as an int, raising unless it is an item of the bank the session has not had.
+  def _checked_item(self, context: StepContext, item_id: int) -> int:
+    """Return ``item_id`` as an int, raising unless the session in ``context`` may be given it.
 
     Returns
     -------
@@ -354,6 +357,8 @@ class CatEngine:
     ------
     TypeError
         If ``item_id`` is not an integer.
+    ExcludedItemError
+        If the context excludes the item.
     ValueError
         If ``item_id`` is not an index of the bank, or the session has already had the item.
     """
@@ -365,9 +370,12 @@ class CatEngine:
     if item_id < 0 or item_id >= self._item_bank.n_items:
       msg = f"Invalid item index {item_id}. Must be between 0 and {self._item_bank.n_items - 1}"
       raise ValueError(msg)
-    if item_id in state.administered_items:
+    if item_id in context.administered_items:
       msg = f"Item {item_id} has already been administered in this session"
       raise ValueError(msg)
+    if item_id in context.excluded_items:
+      msg = f"Item {item_id} is excluded from this session; remove it from the session's excluded_items to give it"
+      raise ExcludedItemError(msg)
     return item_id
 
   def run_session(

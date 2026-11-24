@@ -10,7 +10,7 @@ from dataclasses import FrozenInstanceError, dataclass
 import numpy as np
 import pytest
 
-from catsim import Estimate, StepContext
+from catsim import Estimate, ExcludedItemError, StepContext
 from catsim.engine import CatEngine, RunContext
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
@@ -265,8 +265,8 @@ def test_should_stop_passes_runtime_state_to_stopper(item_bank) -> None:
 
 
 def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
-  """select_next hands the selector the bank, the session's items, responses and current estimate with its SE, the
-  generator, the rates and no excluded items.
+  """select_next hands the selector the bank, the session's items, responses, excluded items and current estimate with
+  its SE, the generator and the rates.
 
   Two earlier sessions administered [0, 3] and [0], so the rates are 1 for item 0 and 0.5 for item 3. Fails if any
   input is dropped or taken from elsewhere, such as the initial estimate instead of the current one.
@@ -286,6 +286,7 @@ def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
     estimates=[Estimate(0.0, math.inf), Estimate(0.5, 0.9), Estimate(-0.25, 0.6)],
     administered_items=[1, 2],
     responses=[True, False],
+    excluded_items=[5, 0],
   )
 
   selected = engine.select_next(state, context)
@@ -293,7 +294,7 @@ def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
   assert selected == 4
   assert selector.seen.item_bank is item_bank
   assert (selector.seen.administered_items, selector.seen.responses) == ((1, 2), (True, False))
-  assert selector.seen.excluded_items == ()
+  assert selector.seen.excluded_items == (5, 0)
   assert (selector.seen.theta, selector.seen.se) == (-0.25, 0.6)
   assert selector.seen.rng is rng
   expected_rates = np.zeros(item_bank.n_items)
@@ -799,6 +800,70 @@ def test_apply_response_rejects_duplicate_items(
 
   with pytest.raises(ValueError, match=r"Item 0 has already been administered in this session"):
     engine.apply_response(session, 0, response=False, context=context)
+
+
+def test_apply_response_rejects_an_item_the_session_excluded(item_bank) -> None:
+  """A response to an item in the session's excluded items raises ExcludedItemError and changes nothing.
+
+  Fails if the engine administers an item that the exposure control declined for the rest of the test, if it raises
+  a plain ValueError that an application cannot tell from a bad index, or if the rejected step records the item in
+  the session or the tracker.
+  """
+  tracker = ExposureTracker(item_bank.n_items)
+  context = RunContext(rng=np.random.default_rng(0), exposure_tracker=tracker)
+  engine = CatEngine(
+    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False)
+  )
+  session = engine.start_session(session_id=0, context=context)
+  session.excluded_items.append(3)
+
+  with pytest.raises(ExcludedItemError, match="Item 3 is excluded from this session"):
+    engine.apply_response(session, 3, response=True, context=context)
+
+  assert (session.administered_items, session.responses, session.excluded_items) == ([], [], [3])
+  assert int(tracker.counts[3]) == 0
+
+
+def test_step_rejects_an_excluded_item_from_the_selector_before_asking_for_a_response(item_bank) -> None:
+  """A selector that proposes an item the session excluded raises ExcludedItemError before the provider is asked.
+
+  Fails if step shows a live examinee an item withheld from them, such as one seen in an earlier attempt, or administers
+  it.
+  """
+  provider = RecordingResponseProvider()
+  engine = CatEngine(
+    item_bank, RecordingInitializer(0.0), RecordingSelector(7), RecordingEstimator(0.0), RecordingStopper(False)
+  )
+  context = RunContext(rng=np.random.default_rng(0))
+  session = engine.start_session(session_id=0, context=context)
+  session.excluded_items.append(7)
+
+  with pytest.raises(ExcludedItemError, match="Item 7 is excluded"):
+    engine.step(session, provider, context)
+
+  assert provider.calls == []
+  assert session.administered_items == []
+
+
+def test_a_session_rebuilt_with_excluded_items_is_never_given_them(item_bank) -> None:
+  """A session rebuilt from a snapshot keeps its excluded items, and the engine passes them over for the rest of it.
+
+  The session had item 1 and excluded items 0 and 2; the lowest-index selector then gives 3 and 4. Fails if the
+  snapshot or the rebuilt session drops the exclusions, or the engine does not pass them to the selector: the
+  session would get items 0 and 2.
+  """
+  engine = CatEngine(item_bank, HalfInitializer(), LowestIndexSelector(), CorrectCountEstimator(), ThreeItemStopper())
+  context = RunContext(rng=np.random.default_rng(0))
+  session = engine.start_session(0, context)
+  engine.apply_response(session, 1, response=True, context=context)
+  session.excluded_items.extend([0, 2])
+  snapshot = session.snapshot()
+
+  rebuilt = CatSessionState(**{field.name: getattr(snapshot, field.name) for field in dataclasses.fields(snapshot)})
+  engine.run_session(rebuilt, FixedResponseProvider(True), context)
+
+  assert rebuilt.administered_items == [1, 3, 4]
+  assert rebuilt.excluded_items == [0, 2]
 
 
 def test_step_ends_a_session_whose_initial_state_satisfies_the_stopper(item_bank) -> None:
