@@ -94,7 +94,7 @@ Both of these functions are graphically represented in the following figure. It 
     from catsim import ItemBank
     from catsim.plot import PlotType, item_curve
 
-    item_bank = ItemBank.generate(1)
+    item_bank = ItemBank.generate(1, rng=0)
     item_curve(item_bank[0], kind=PlotType.BOTH)
     plt.show()
 ```

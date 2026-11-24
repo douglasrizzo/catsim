@@ -113,6 +113,16 @@ class TestSimulationRunnerRun:
     assert np.array_equal(second.exposure_counts, first.exposure_counts)
     assert other_seed.administered_items != first.administered_items
 
+  def test_two_runs_without_rng_give_other_tests(self, simulation_runner: SimulationRunner) -> None:
+    """A run without rng draws fresh randomness, so two such runs give other final estimates.
+
+    Each of the three sessions draws 10 of 50 items at random, so equal final estimates for all three are
+    practically impossible. Fails if rng defaults to a fixed seed, which makes every unseeded run the same.
+    """
+    thetas = [-1.0, 0.0, 1.0]
+
+    assert not np.array_equal(simulation_runner.run(thetas).final_thetas, simulation_runner.run(thetas).final_thetas)
+
   def test_a_generator_passed_as_rng_is_the_one_every_session_draws_from(self, item_bank: ItemBank) -> None:
     """A Generator passed as rng is used as is, and every session of the run gets that same one.
 
@@ -129,7 +139,8 @@ class TestSimulationRunnerRun:
   def test_a_run_with_a_progress_bar_matches_a_quiet_run(self, simulation_runner: SimulationRunner) -> None:
     """progress=True only adds a progress bar: fails if it changes the sessions or the run does not complete."""
     thetas = [-0.5, 0.0, 0.5]
-    quiet, shown = simulation_runner.run(thetas, progress=False), simulation_runner.run(thetas, progress=True)
+    quiet = simulation_runner.run(thetas, rng=0, progress=False)
+    shown = simulation_runner.run(thetas, rng=0, progress=True)
 
     assert shown.administered_items == quiet.administered_items
     assert shown.theta_histories == quiet.theta_histories

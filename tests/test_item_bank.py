@@ -312,10 +312,17 @@ class TestItemBankGenerate:
     np.testing.assert_array_equal(ItemBank.generate(20, rng=5).items, first)
     assert not np.array_equal(ItemBank.generate(20, rng=6).items, first)
 
+  def test_a_call_without_rng_gives_another_bank_each_time(self) -> None:
+    """Without rng each call draws fresh parameters, so two 50-item banks differ.
+
+    Fails if rng defaults to a fixed seed, which makes every unseeded bank the same.
+    """
+    assert not np.array_equal(ItemBank.generate(50).items, ItemBank.generate(50).items)
+
   def test_a_generator_gives_the_bank_of_its_seed_and_is_advanced(self) -> None:
     """A generator built from seed 5 gives the seed-5 bank, and the next call on it another bank.
 
-    Ignoring the generator gives the seed-0 bank; drawing from a copy of it gives the same bank twice.
+    Ignoring the generator gives a bank of fresh randomness; drawing from a copy of it gives the same bank twice.
     """
     generator = np.random.default_rng(5)
 
