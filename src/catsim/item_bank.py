@@ -105,6 +105,8 @@ class ItemBank:
 
     Raises
     ------
+    TypeError
+        If ``items`` is not a numpy.ndarray.
     ValueError
         If ``items`` does not have 1 to 4 columns, or ``validate`` is True and a parameter is invalid.
     """
