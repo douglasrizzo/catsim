@@ -762,6 +762,28 @@ def test_apply_response_rejects_invalid_item_index(
     engine.apply_response(session, item_bank.n_items, True, context)
 
 
+@pytest.mark.parametrize(
+  "invalid_item",
+  [pytest.param(lambda bank: -1, id="negative"), pytest.param(lambda bank: bank.n_items, id="past the bank")],
+)
+def test_step_checks_the_selected_item_before_asking_for_a_response(item_bank, invalid_item) -> None:
+  """An invalid item from the selector raises before the response provider is asked about it.
+
+  Fails if step asks the provider first: in a live session the provider shows the item to an examinee, and a
+  negative index would show the bank's last item.
+  """
+  provider = RecordingResponseProvider()
+  selector = RecordingSelector(item_id=invalid_item(item_bank))
+  engine = CatEngine(item_bank, RecordingInitializer(0.0), selector, RecordingEstimator(0.0), RecordingStopper(False))
+  context = RunContext(rng=np.random.default_rng(0))
+  session = engine.start_session(session_id=0, context=context)
+
+  with pytest.raises(ValueError, match=r"Invalid item index"):
+    engine.step(session, provider, context)
+
+  assert provider.calls == []
+
+
 def test_apply_response_rejects_duplicate_items(
   item_bank,
   fixed_initializer,
