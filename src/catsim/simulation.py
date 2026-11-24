@@ -187,7 +187,7 @@ class SimulationResult:
     """Return how many objective evaluations each session's estimates took, summed over its responses.
 
     The initial estimate, which no estimator computed, counts 0. A session is None when the estimator
-    gave no count for one of its estimates (:attr:`~catsim.context.Estimate.evaluations`).
+    gave no count for one of its estimates (the ``evaluations`` of an :class:`~catsim.Estimate`).
     """
     totals: list[int | None] = []
     for session in self.sessions:

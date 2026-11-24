@@ -61,7 +61,7 @@ These are Equations 4 and 5 of Bock and Mislevy (1982, p. 433); catsim returns
 the variance, the square of their Equation 5, without Sheppard's correction (see
 {doc}`/api/techniques/estimation/bayesian-infrastructure`).
 
-The estimator returns a {py:class}`~catsim.context.Estimate` with
+The estimator returns a {py:class}`~catsim.Estimate` with
 $\hat{\theta}_{\mathrm{EAP}}$, the posterior standard deviation
 $\sqrt{\operatorname{Var}(\theta \mid \mathbf{u})}$ as its standard error, and
 $Q$, the grid's node count, as its evaluation count: the likelihood is evaluated

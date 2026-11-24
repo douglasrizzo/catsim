@@ -12,7 +12,7 @@ class BaseInitializer(ABC):
 
   An initializer gives a session its initial ability estimate, once, before any item is
   administered. It takes the item bank and the random generator alone, not a
-  :class:`~catsim.context.StepContext`, because no session state exists yet.
+  :class:`~catsim.StepContext`, because no session state exists yet.
 
   An initializer holds its configuration and caches derived from the item bank, never per-session
   state: one initializer starts every session of a run.

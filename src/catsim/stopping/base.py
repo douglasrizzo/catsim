@@ -9,7 +9,7 @@ class BaseStopper(ABC):
   """Base class for CAT stopping criteria.
 
   A stopper checks one criterion, such as the test length or the precision of the ability
-  estimate, against what a :class:`~catsim.context.StepContext` holds, and
+  estimate, against what a :class:`~catsim.StepContext` holds, and
   :class:`~catsim.stopping.StopRule` combines several of them.
 
   Stoppers are pure: the same context always gives the same answer. A stopper holds its

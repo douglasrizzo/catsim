@@ -64,7 +64,7 @@ MLE and toward the MLE at the prior mean, and its single root lies between them
 (contract 2). With a uniform prior over a wide enough interval, MAP coincides
 with the MLE (Magis & Raîche, 2012, p. 5).
 
-The estimator returns a {py:class}`~catsim.context.Estimate`. Its
+The estimator returns a {py:class}`~catsim.Estimate`. Its
 standard error is
 
 $$

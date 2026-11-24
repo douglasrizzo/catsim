@@ -122,3 +122,13 @@ html_static_path = ["_static"]
 html_css_files = ["mermaid.css"]
 
 numpydoc_show_class_members = False
+
+# Every cross-reference must resolve (sphinx-build -n). NumPy's array aliases evaluate to classes
+# under private module paths that NumPy's inventory does not list, and a module that imports
+# numpy.typing for the type checker only leaves its annotations as the text "npt.ArrayLike".
+nitpicky = True
+nitpick_ignore = [
+  ("py:class", "numpy._typing._array_like.NDArray"),
+  ("py:class", "numpy._typing._array_like.ArrayLike"),
+  ("py:class", "npt.ArrayLike"),
+]

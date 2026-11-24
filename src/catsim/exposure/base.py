@@ -8,7 +8,7 @@ from ..context import StepContext
 class BaseExposureControl(ABC):
   """Base class for exposure controls, which may decline the item a selector proposes.
 
-  :class:`~catsim.engine.CatEngine` asks its control about every item the selector proposes. A
+  :class:`~catsim.CatEngine` asks its control about every item the selector proposes. A
   declined item is excluded from the session for the rest of its test, and the selector proposes
   again; a session with no item left to accept ends with ``StopReason.NO_ITEMS``. A control holds
   configuration only, never per-session state, and draws from ``context.rng``. This one administers

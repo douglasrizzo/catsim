@@ -10,10 +10,10 @@ class BaseEstimator(ABC):
   """Base class for ability estimators.
 
   An estimator updates the ability estimate from the responses a
-  :class:`~catsim.context.StepContext` holds, the newest one included, and reports it as an
-  :class:`~catsim.context.Estimate`: the estimate, its standard error by the estimator's own
+  :class:`~catsim.StepContext` holds, the newest one included, and reports it as an
+  :class:`~catsim.Estimate`: the estimate, its standard error by the estimator's own
   formula, and how many objective evaluations it took. The engine records every step's
-  :class:`~catsim.context.Estimate` in the session, and stoppers judge the standard error the
+  :class:`~catsim.Estimate` in the session, and stoppers judge the standard error the
   estimator reported (ADR-0004).
 
   An estimator holds its configuration and caches derived from the item bank, never per-session

@@ -42,7 +42,7 @@ class RunContext:
 class ResponseProvider(Protocol):
   """Source of the examinee's responses for :meth:`CatEngine.step` and :meth:`CatEngine.run_session`.
 
-  :class:`~catsim.simulation.SimulatedResponseProvider` draws them from a simulated examinee's true
+  :class:`~catsim.SimulatedResponseProvider` draws them from a simulated examinee's true
   ability; an application that steps sessions itself can wrap whatever collects real answers.
   """
 
@@ -94,7 +94,7 @@ class CatEngine:
   Raises
   ------
   TypeError
-      If ``item_bank`` is not an :class:`~catsim.item_bank.ItemBank`.
+      If ``item_bank`` is not an :class:`~catsim.ItemBank`.
   """
 
   def __init__(
@@ -332,7 +332,7 @@ class CatEngine:
         administered in this session.
     TypeError
         If the item index is not an integer, the response is not a ``bool`` or ``numpy.bool_``, or
-        the estimator returns something other than an :class:`~catsim.context.Estimate`.
+        the estimator returns something other than an :class:`~catsim.Estimate`.
     """
     if state.is_stopped:
       msg = f"Session {state.session_id} has stopped (reason: {state.stop_reason}) and accepts no more responses"

@@ -206,7 +206,7 @@ class BaseSelector(ABC):
   """Base class for item selectors.
 
   A selector chooses the next item to administer from what a
-  :class:`~catsim.context.StepContext` tells it about the session. A custom selector behaves like
+  :class:`~catsim.StepContext` tells it about the session. A custom selector behaves like
   the built-in ones when it draws its candidates with :func:`remaining`, which leaves out the
   administered and the excluded items, applies its exposure cap with :func:`below_cap`, and
   chooses with :func:`pick_best` or :func:`best_pool`, which apply the package's tie-breaking rule

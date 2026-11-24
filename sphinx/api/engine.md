@@ -1,6 +1,12 @@
-# CAT Engine -- {mod}`catsim.engine`
+# CAT Engine
 
 ```{eval-rst}
-.. automodule:: catsim.engine
+.. autoclass:: catsim.CatEngine
+   :members:
+
+.. autoclass:: catsim.RunContext
+   :members:
+
+.. autoclass:: catsim.ResponseProvider
    :members:
 ```

@@ -1,6 +1,12 @@
-# Simulation Runs and Results -- {mod}`catsim.simulation`
+# Simulation Runs and Results
 
 ```{eval-rst}
-.. automodule:: catsim.simulation
+.. autoclass:: catsim.SimulationRunner
+   :members:
+
+.. autoclass:: catsim.SimulationResult
+   :members:
+
+.. autoclass:: catsim.SimulatedResponseProvider
    :members:
 ```

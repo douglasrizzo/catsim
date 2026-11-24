@@ -25,6 +25,8 @@ if TYPE_CHECKING:
   from ..context import StepContext
 
 LogPrior = Callable[[FloatArray], FloatArray]
+"""A log prior density: maps an array of abilities to their log-densities, elementwise."""
+
 _MIN_QUADRATURE_NODES = 2
 # Step of the central difference that gives a prior's curvature at the MAP estimate.
 _CURVATURE_STEP = 1e-4

@@ -37,8 +37,8 @@ class CatSessionState:
 
   ``session_id`` is whatever hashable value the application identifies the session by, such as an
   int, a str or a UUID. ``estimates`` starts with the initial estimate (which
-  :meth:`~catsim.engine.CatEngine.start_session` records with an infinite standard error and no
-  evaluations) and gains the :class:`~catsim.context.Estimate` the estimator returned for each
+  :meth:`~catsim.CatEngine.start_session` records with an infinite standard error and no
+  evaluations) and gains the :class:`~catsim.Estimate` the estimator returned for each
   response; its last entry is the current estimate. A restored session's estimates are trusted
   as given. A session runs
   while ``stop_reason`` is None.
@@ -47,7 +47,7 @@ class CatSessionState:
   An application may fill it before the first item, for example with the items the examinee saw in
   an earlier attempt; during the test it only grows, as the engine adds the items its exposure
   control declines. Removing an item from it during the test is not supported. The engine passes
-  the items to every strategy and raises :class:`~catsim.exceptions.ExcludedItemError` for a
+  the items to every strategy and raises :class:`~catsim.ExcludedItemError` for a
   response to one. Their indices are checked against the item bank at the session's next step.
 
   Raises
@@ -57,7 +57,7 @@ class CatSessionState:
       responses, if ``excluded_items`` repeats an item or holds an administered one, or if
       ``stop_reason`` is not a :class:`StopReason` value.
   TypeError
-      If an entry of ``estimates`` is not an :class:`~catsim.context.Estimate`, or an entry of
+      If an entry of ``estimates`` is not an :class:`~catsim.Estimate`, or an entry of
       ``administered_items`` or ``excluded_items`` is not an integer.
   """
 
@@ -209,7 +209,7 @@ class ExposureTracker:
   """Count item administrations, proposals and sessions across a run, and give sessions their exposure rates.
 
   One tracker is shared by every session of a run or of a live deployment, through
-  :class:`~catsim.engine.RunContext`. The engine calls :meth:`start_session` when a session starts,
+  :class:`~catsim.RunContext`. The engine calls :meth:`start_session` when a session starts,
   :meth:`record` for every administered item and :meth:`record_decline` for every item the engine's
   exposure control declines. ``counts`` holds each item's administrations so far, those of sessions
   still in progress included, ``proposals`` its administrations plus its declines, and
@@ -326,7 +326,7 @@ class ExposureTracker:
     numpy.ndarray
         A new array with one rate per item; all zero while at most one session has started. This is
         not the run's final exposure, which
-        :attr:`~catsim.simulation.SimulationResult.exposure_rates` gives.
+        :attr:`~catsim.SimulationResult.exposure_rates` gives.
     """
     others = self.n_sessions - 1
     if others < 1:

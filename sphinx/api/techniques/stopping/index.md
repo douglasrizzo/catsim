@@ -1,5 +1,8 @@
 # Stopping Criteria
 
+```{py:module} catsim.stopping
+```
+
 Stopping criteria determine when an adaptive test should terminate. A stopper
 evaluates the current session state after each item and signals whether testing
 should continue or stop. Each stopper checks one criterion, and a
@@ -69,3 +72,10 @@ item left to give, the engine ends the session itself.
 ## References
 
 Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
+
+## Base Class
+
+```{eval-rst}
+.. autoclass:: catsim.stopping.BaseStopper
+   :members:
+```

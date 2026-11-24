@@ -2,7 +2,7 @@
 
 The functions take one item as a row ``[a, b, c, d]`` of shape ``(4,)``, or several as a matrix of
 such rows, shape ``(n, 4)``: discrimination, difficulty, pseudo-guessing and upper asymptote.
-:py:class:`catsim.item_bank.ItemBank` builds and validates such a matrix.
+:py:class:`catsim.ItemBank` builds and validates such a matrix.
 """
 
 import math
@@ -606,7 +606,7 @@ def log_response_probabilities(theta: float | FloatArray, items: FloatArray) -> 
       An ability, or an array of abilities.
   items : numpy.ndarray
       One item ``[a, b, c, d]``, shape ``(4,)``, or a matrix of items, shape ``(n, 4)``, whose items
-      satisfy :math:`0 \leq c < d \leq 1`, as :py:class:`~catsim.item_bank.ItemBank` validates.
+      satisfy :math:`0 \leq c < d \leq 1`, as :py:class:`~catsim.ItemBank` validates.
 
   Returns
   -------
@@ -664,7 +664,7 @@ def log_likelihood(theta: float | FloatArray, responses: Sequence[bool], items: 
       One response per item, True for a correct one.
   items : numpy.ndarray
       The answered items, a matrix of shape ``(n, 4)`` whose items satisfy
-      :math:`0 \leq c < d \leq 1`, as :py:class:`~catsim.item_bank.ItemBank` validates.
+      :math:`0 \leq c < d \leq 1`, as :py:class:`~catsim.ItemBank` validates.
 
   Returns
   -------
@@ -702,7 +702,7 @@ def log_likelihood_function(
       One response per item, True for a correct one.
   items : numpy.ndarray
       The answered items, a matrix of shape ``(n, 4)`` whose items satisfy
-      :math:`0 \leq c < d \leq 1`, as :py:class:`~catsim.item_bank.ItemBank` validates.
+      :math:`0 \leq c < d \leq 1`, as :py:class:`~catsim.ItemBank` validates.
 
   Returns
   -------
