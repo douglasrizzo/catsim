@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import Callable
 
 import matplotlib
-import numpy as np
 import pytest
 
 matplotlib.use("Agg")
@@ -66,12 +65,6 @@ SELECTOR_FACTORIES: dict[str, Callable[[int], BaseSelector]] = {
 
 # pytester runs pytest on generated test modules (test_stopping checks what pytest collects from catsim)
 pytest_plugins = ["pytester"]
-
-
-@pytest.fixture
-def rng() -> np.random.Generator:
-  """Provide a deterministic RNG for tests."""
-  return np.random.default_rng(42)
 
 
 @pytest.fixture

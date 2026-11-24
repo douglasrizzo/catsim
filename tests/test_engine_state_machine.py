@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import numpy as np
-import pytest
 from hypothesis import settings
 from hypothesis import strategies as st
 from hypothesis.stateful import (
@@ -287,7 +286,6 @@ def test_cat_engine_orchestration_state_machine() -> None:
   run_state_machine_as_test(CatEngineOrchestrationMachine, settings=_ORCHESTRATION_SETTINGS)
 
 
-@pytest.mark.slow
 def test_cat_engine_integration_state_machine() -> None:
   """The same invariants hold with the real maximum-information selector and numerical estimator.
 

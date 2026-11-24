@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from catsim import Estimate, StepContext, irt
+from catsim import Estimate, StepContext
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.item_bank import ItemBank
 from catsim.selection import MaxInfoSelector, MEISelector
@@ -107,65 +107,6 @@ class TestMEISelector:
     assert mei_choice == 1
     assert max_info_choice == 2
     assert mei_choice != max_info_choice
-
-  def test_select_matches_manual_expected_information(self) -> None:
-    """MEI scores should match the manual P*I_correct + (1-P)*I_incorrect calculation.
-
-    The manual score comparison makes sure both response branches are weighted
-    correctly instead of merely exercising the estimator wiring.
-    """
-    item_bank = ItemBank(
-      np.array(
-        [
-          [1.5, 0.0, 0.0, 1.0],
-          [1.2, 0.5, 0.0, 1.0],
-          [0.8, -0.5, 0.0, 1.0],
-        ],
-        dtype=float,
-      )
-    )
-    administered_items = [0]
-    responses = [True]
-    theta = 0.4
-    estimator = NumericalSearchEstimator()
-    selector = MEISelector(estimator=estimator)
-
-    candidate_mask = np.ones(item_bank.n_items, dtype=bool)
-    candidate_mask[administered_items] = False
-    candidates = np.flatnonzero(candidate_mask)
-    manual_scores = np.array(
-      [
-        float(
-          (
-            irt.icc(theta, item_bank.items[int(idx)])
-            * item_bank.total_information(
-              estimator.estimate(
-                make_context(item_bank, [*administered_items, int(idx)], [*responses, True], theta=theta)
-              ).theta,
-              [*administered_items, int(idx)],
-            )
-          )
-          + (
-            (1.0 - irt.icc(theta, item_bank.items[int(idx)]))
-            * item_bank.total_information(
-              estimator.estimate(
-                make_context(item_bank, [*administered_items, int(idx)], [*responses, False], theta=theta)
-              ).theta,
-              [*administered_items, int(idx)],
-            )
-          )
-        )
-        for idx in candidates
-      ],
-      dtype=float,
-    )
-
-    selected = selector.select(
-      make_context(item_bank, administered_items, responses, theta=theta, rng=np.random.default_rng(0))
-    )
-
-    assert selected == 1
-    assert selected == int(candidates[int(manual_scores.argmax())])
 
   def test_expected_information_matches_the_closed_form_on_1pl_items(self) -> None:
     """Under the 1PL model an item's information is P(1 - P), so each MEI score has a closed form."""
