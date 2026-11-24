@@ -37,10 +37,12 @@ standard deviation, and for
 {doc}`MAP </api/techniques/estimation/map-estimator>` the information plus the
 prior's negative curvature. Those two are usually smaller than the Fisher error
 at the same estimate, so the same threshold ends EAP and MAP tests sooner.
-Before any response the standard error is infinite, so the test does not stop.
-As in catR, items are administered "until the standard error of the provisional
-ability estimate gets smaller than or equal to that threshold" (Magis and
-Raîche, 2012, p. 11).
+Before any response the standard error is infinite, so the test does not stop. A
+context built by hand, such as one for
+{meth}`~catsim.stopping.StopRule.satisfied` after a run, must pass the session's
+`current_se` as `se`, whose default is infinite. As in catR, items are
+administered "until the standard error of the provisional ability estimate gets
+smaller than or equal to that threshold" (Magis and Raîche, 2012, p. 11).
 
 Samejima (1977, p. 238) suggests terminating an adaptive test when the test
 information function reaches a criterion value, or equivalently when the

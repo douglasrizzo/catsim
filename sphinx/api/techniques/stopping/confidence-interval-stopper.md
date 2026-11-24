@@ -49,9 +49,11 @@ $$
 $$
 
 Equivalently, the interval lies within one band exactly when no boundary lies
-strictly inside it, which is what the implementation checks. Before any
-response the standard error is infinite, and so is the interval, so the test
-does not stop.
+strictly inside it, which is what the implementation checks. Before any response
+the standard error is infinite, and so is the interval, so the test does not
+stop. A context built by hand, such as one for
+{meth}`~catsim.stopping.StopRule.satisfied` after a run, must pass the session's
+`current_se` as `se`, whose default is infinite.
 
 Magis and Raîche (2012, p. 11) describe the classification criterion with a
 single ability threshold: a confidence interval for ability is built after every
