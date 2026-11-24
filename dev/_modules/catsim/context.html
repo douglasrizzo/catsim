@@ -831,7 +831,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  &gt;&gt;&gt; import numpy</span>
 <span class="sd">  &gt;&gt;&gt; from catsim import ItemBank, StepContext</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.estimation import EAPEstimator</span>
-<span class="sd">  &gt;&gt;&gt; bank = ItemBank.generate_item_bank(20, seed=0)</span>
+<span class="sd">  &gt;&gt;&gt; bank = ItemBank.generate(20, rng=0)</span>
 <span class="sd">  &gt;&gt;&gt; context = StepContext(</span>
 <span class="sd">  ...   item_bank=bank, rng=numpy.random.default_rng(0), administered_items=(3, 7), responses=(True, False)</span>
 <span class="sd">  ... )</span>

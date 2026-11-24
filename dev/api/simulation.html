@@ -521,7 +521,7 @@ administrations over the run and <code class="docutils literal notranslate"><spa
 <dl class="py property">
 <dt class="sig sig-object py" id="catsim.simulation.SimulationResult.administered_items">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">administered_items</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#catsim.simulation.SimulationResult.administered_items" title="Link to this definition">#</a></dt>
-<dd><p>Return administered item ids for each session.</p>
+<dd><p>Return each session’s administered items, in the order given.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -597,9 +597,9 @@ tests of no items.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="catsim.simulation.SimulationResult.response_vectors">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">response_vectors</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#catsim.simulation.SimulationResult.response_vectors" title="Link to this definition">#</a></dt>
-<dd><p>Return response vectors for each session.</p>
+<dt class="sig sig-object py" id="catsim.simulation.SimulationResult.responses">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">responses</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#catsim.simulation.SimulationResult.responses" title="Link to this definition">#</a></dt>
+<dd><p>Return each session’s responses, in the order given.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -760,7 +760,7 @@ Default is 0, so a call that passes no seed is deterministic.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.simulation.SimulationResult.mean_evaluations"><code class="docutils literal notranslate"><span class="pre">SimulationResult.mean_evaluations</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.simulation.SimulationResult.mse"><code class="docutils literal notranslate"><span class="pre">SimulationResult.mse</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.simulation.SimulationResult.overlap_rate"><code class="docutils literal notranslate"><span class="pre">SimulationResult.overlap_rate</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.simulation.SimulationResult.response_vectors"><code class="docutils literal notranslate"><span class="pre">SimulationResult.response_vectors</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.simulation.SimulationResult.responses"><code class="docutils literal notranslate"><span class="pre">SimulationResult.responses</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.simulation.SimulationResult.rmse"><code class="docutils literal notranslate"><span class="pre">SimulationResult.rmse</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.simulation.SimulationResult.test_lengths"><code class="docutils literal notranslate"><span class="pre">SimulationResult.test_lengths</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.simulation.SimulationResult.theta_histories"><code class="docutils literal notranslate"><span class="pre">SimulationResult.theta_histories</span></code></a></li>

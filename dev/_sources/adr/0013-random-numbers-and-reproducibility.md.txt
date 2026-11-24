@@ -54,5 +54,5 @@ generator comes from and on what draws from it, which nothing recorded.
   sequential run.
 - An application that steps sessions itself (`CatEngine.step` and `apply_response`) owns its
   `RunContext` and so its generator; the same rules apply to the sessions it runs on one context.
-- `ItemBank.generate_item_bank` has its own `seed`, also 0 by default, and its own generator, so a
-  generated bank does not depend on any run.
+- `ItemBank.generate` takes its own `rng`, also 0 by default, so a generated bank does not depend
+  on any run.

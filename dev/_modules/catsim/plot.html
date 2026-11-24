@@ -851,7 +851,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      import matplotlib.pyplot as plt</span>
 <span class="sd">      from catsim.item_bank import ItemBank</span>
 <span class="sd">      from catsim.plot import item_curve, PlotType</span>
-<span class="sd">      item_bank = ItemBank.generate_item_bank(1)</span>
+<span class="sd">      item_bank = ItemBank.generate(1)</span>
 <span class="sd">      item = item_bank.items[0]</span>
 <span class="sd">      fig, axes = plt.subplots(3, 1, figsize=(7, 15))</span>
 <span class="sd">      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.ICC, ax=axes[0])</span>
@@ -978,7 +978,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      import matplotlib.pyplot as plt</span>
 <span class="sd">      from catsim import plot</span>
 <span class="sd">      from catsim.item_bank import ItemBank</span>
-<span class="sd">      item_bank = ItemBank.generate_item_bank(100)</span>
+<span class="sd">      item_bank = ItemBank.generate(100)</span>
 <span class="sd">      plot.gen3d_dataset_scatter(item_bank)</span>
 <span class="sd">      plt.show()</span>
 
@@ -1050,7 +1050,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      fig, axes = plt.subplots(2, 1, figsize=(7, 12))</span>
 
 <span class="sd">      engine = CatEngine(</span>
-<span class="sd">          ItemBank.generate_item_bank(100),</span>
+<span class="sd">          ItemBank.generate(100),</span>
 <span class="sd">          UniformInitializer(),</span>
 <span class="sd">          MaxInfoSelector(),</span>
 <span class="sd">          NumericalSearchEstimator(),</span>
@@ -1205,7 +1205,7 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">      fig, axes = plt.subplots(2, 1, figsize=(7, 12))</span>
 <span class="sd">      engine = CatEngine(</span>
-<span class="sd">          ItemBank.generate_item_bank(100),</span>
+<span class="sd">          ItemBank.generate(100),</span>
 <span class="sd">          UniformInitializer(),</span>
 <span class="sd">          MaxInfoSelector(),</span>
 <span class="sd">          NumericalSearchEstimator(),</span>
@@ -1285,7 +1285,7 @@ window.runMermaid = runMermaid;</script>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="n">session</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
     <span class="n">thetas</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">theta_history</span><span class="p">)</span>
-    <span class="n">administered_items</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">)</span>
+    <span class="n">administered_items</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span>
     <span class="n">true_theta</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">true_theta</span>
 
   <span class="k">if</span> <span class="n">session</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">simulation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

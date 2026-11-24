@@ -412,6 +412,7 @@
 <li class="toctree-l1"><a class="reference internal" href="0011-how-a-session-ends.html">ADR-0011: Decide in One Place How a Session Ends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0014-public-import-paths-and-names.html">ADR-0014: Public Import Paths and One Name per Concept</a></li>
 </ul>
 </div>
 </nav></div>
@@ -495,7 +496,7 @@ agree only when both are linear, so <code class="docutils literal notranslate"><
 <p>The documentation said so, but under the same method names users comparing with catR got different
 behaviour, and the default exponent left the end of a test far from maximum-information selection.
 At the last item of a 20-item test at θ = 0, over 20 simulated 500-item 3PL banks
-(<code class="docutils literal notranslate"><span class="pre">ItemBank.generate_item_bank(500,</span> <span class="pre">itemtype=&quot;3PL&quot;,</span> <span class="pre">seed=s)</span></code> for <code class="docutils literal notranslate"><span class="pre">s</span></code> from 0 to 19), the most
+(<code class="docutils literal notranslate"><span class="pre">ItemBank.generate(500,</span> <span class="pre">model=&quot;3PL&quot;,</span> <span class="pre">rng=s)</span></code> for <code class="docutils literal notranslate"><span class="pre">s</span></code> from 0 to 19), the most
 informative item was drawn with probability 0.08 to 0.24 (median 0.12), against 0.32 to 0.96
 (median 0.64) with the published exponent of 20.</p>
 </section>

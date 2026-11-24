@@ -942,7 +942,7 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="n">StepContext</span><span class="p">(</span>
       <span class="n">item_bank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="p">,</span>
       <span class="n">rng</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">,</span>
-      <span class="n">administered_items</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">),</span>
+      <span class="n">administered_items</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">administered_items</span><span class="p">),</span>
       <span class="n">responses</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">responses</span><span class="p">),</span>
       <span class="n">theta</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">current_theta</span><span class="p">,</span>
       <span class="n">se</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">current_se</span><span class="p">,</span>
@@ -1094,17 +1094,7 @@ window.runMermaid = runMermaid;</script>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">bool_</span><span class="p">)):</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"response must be a bool, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">response</span><span class="si">!r}</span><span class="s2">"</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="n">item_id</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"item_id must be an integer, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">item_id</span><span class="si">!r}</span><span class="s2">"</span>
-      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
-    <span class="k">if</span> <span class="n">item_id</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">item_id</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Invalid item index </span><span class="si">{</span><span class="n">item_id</span><span class="si">}</span><span class="s2">. Must be between 0 and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">item_id</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Item </span><span class="si">{</span><span class="n">item_id</span><span class="si">}</span><span class="s2"> has already been administered in this session"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked_item</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_id</span><span class="p">)</span>
 
     <span class="n">response</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
     <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_context</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
@@ -1127,7 +1117,7 @@ window.runMermaid = runMermaid;</script>
     <span class="p">)</span>
     <span class="n">stopped</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">answered</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">estimate</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="n">estimate</span><span class="o">.</span><span class="n">se</span><span class="p">)))</span>
 
-    <span class="n">state</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">administered_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
     <span class="n">state</span><span class="o">.</span><span class="n">responses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
@@ -1167,9 +1157,39 @@ window.runMermaid = runMermaid;</script>
     <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">select_next</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">item_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">CatStepResult</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(),</span> <span class="n">selected_item_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="c1"># checked before the provider is asked: a live provider shows the item to an examinee</span>
+    <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked_item</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_id</span><span class="p">)</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">response_provider</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="p">,</span> <span class="n">item_id</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(),</span> <span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_response</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_id</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
 
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_checked_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return ``item_id`` as an int, raising unless it is an item of the bank the session has not had.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int</span>
+<span class="sd">        The item index.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    TypeError</span>
+<span class="sd">        If ``item_id`` is not an integer.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If ``item_id`` is not an index of the bank, or the session has already had the item.</span>
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">item_id</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"item_id must be an integer, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">item_id</span><span class="si">!r}</span><span class="s2">"</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+    <span class="k">if</span> <span class="n">item_id</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">item_id</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Invalid item index </span><span class="si">{</span><span class="n">item_id</span><span class="si">}</span><span class="s2">. Must be between 0 and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">item_id</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">administered_items</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Item </span><span class="si">{</span><span class="n">item_id</span><span class="si">}</span><span class="s2"> has already been administered in this session"</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">item_id</span>
 
 <div class="viewcode-block" id="CatEngine.run_session">
 <a class="viewcode-back" href="../../api/engine.html#catsim.engine.CatEngine.run_session">[docs]</a>

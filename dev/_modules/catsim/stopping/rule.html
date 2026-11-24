@@ -849,7 +849,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  &gt;&gt;&gt; rule = StopRule(StandardErrorStopper(0.5), MaxLengthStopper(20), min_items=5)</span>
 <span class="sd">  &gt;&gt;&gt; rule</span>
 <span class="sd">  StopRule(StandardErrorStopper(max_se=0.5), MaxLengthStopper(max_items=20), min_items=5)</span>
-<span class="sd">  &gt;&gt;&gt; bank = ItemBank.generate_item_bank(100, seed=0)</span>
+<span class="sd">  &gt;&gt;&gt; bank = ItemBank.generate(100, rng=0)</span>
 <span class="sd">  &gt;&gt;&gt; rng = numpy.random.default_rng(0)</span>
 <span class="sd">  &gt;&gt;&gt; ten = StepContext(</span>
 <span class="sd">  ...   item_bank=bank, rng=rng, administered_items=tuple(range(10)), responses=(True,) * 10, se=0.6</span>

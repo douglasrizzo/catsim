@@ -466,7 +466,7 @@ on that engine;</p></li>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumericalSearchEstimator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLengthStopper</span><span class="p">,</span> <span class="n">StandardErrorStopper</span><span class="p">,</span> <span class="n">StopRule</span>
 <span class="n">engine</span> <span class="o">=</span> <span class="n">CatEngine</span><span class="p">(</span>
-    <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span>
+    <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span>
     <span class="n">UniformInitializer</span><span class="p">(),</span>
     <span class="n">MaxInfoSelector</span><span class="p">(),</span>
     <span class="n">NumericalSearchEstimator</span><span class="p">(),</span>

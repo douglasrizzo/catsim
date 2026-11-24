@@ -19,4 +19,5 @@ adr/0010-published-progressive-schedule
 adr/0011-how-a-session-ends
 adr/0012-unidimensional-dichotomous-scope
 adr/0013-random-numbers-and-reproducibility
+adr/0014-public-import-paths-and-names
 ```

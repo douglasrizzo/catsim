@@ -1325,7 +1325,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      from catsim.item_bank import ItemBank</span>
 <span class="sd">      from catsim.plot import item_curve, PlotType</span>
 <span class="sd">      n_items = 2</span>
-<span class="sd">      item_bank = ItemBank.generate_item_bank(n_items)</span>
+<span class="sd">      item_bank = ItemBank.generate(n_items)</span>
 <span class="sd">      fig, axes = plt.subplots(n_items, 1)</span>
 <span class="sd">      for idx, item in enumerate(item_bank.items):</span>
 <span class="sd">        item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.IIC, max_info=True, ax=axes[idx])</span>

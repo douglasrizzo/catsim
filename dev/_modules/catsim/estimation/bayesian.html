@@ -1014,22 +1014,22 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="posterior">
 <a class="viewcode-back" href="../../../api/techniques/estimation/bayesian-infrastructure.html#catsim.estimation.posterior">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">posterior</span><span class="p">(</span>
-  <span class="n">response_vector</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
-  <span class="n">administered_items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span>
+  <span class="n">responses</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
+  <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span>
   <span class="n">grid</span><span class="p">:</span> <span class="n">QuadratureGrid</span><span class="p">,</span>
   <span class="n">log_prior</span><span class="p">:</span> <span class="n">LogPrior</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the normalized discrete posterior over ``grid.nodes``.</span>
 
 <span class="sd">  Each node gets mass proportional to :math:`w_q\,p(\theta_q)\,L(\mathbf{u} \mid \theta_q)`,</span>
-<span class="sd">  computed in log space and shifted by its maximum before exponentiating, so long response</span>
-<span class="sd">  vectors do not underflow.</span>
+<span class="sd">  computed in log space and shifted by its maximum before exponentiating, so the likelihood of</span>
+<span class="sd">  many responses does not underflow.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  response_vector : Sequence[bool]</span>
-<span class="sd">      Responses to the administered items, in the same order as ``administered_items``.</span>
-<span class="sd">  administered_items : numpy.ndarray</span>
+<span class="sd">  responses : Sequence[bool]</span>
+<span class="sd">      Responses to the administered items, in the same order as ``items``.</span>
+<span class="sd">  items : numpy.ndarray</span>
 <span class="sd">      Parameter matrix of the administered items, one row per item.</span>
 <span class="sd">  grid : QuadratureGrid</span>
 <span class="sd">      Nodes and weights of the discrete approximation.</span>
@@ -1045,10 +1045,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
 <span class="sd">      If the log-prior or log-likelihood is NaN or :math:`+\infty` at any node, if every node has</span>
-<span class="sd">      zero posterior mass, if ``response_vector`` and ``administered_items`` differ in length, or</span>
-<span class="sd">      if ``response_vector`` contains non-Boolean elements.</span>
+<span class="sd">      zero posterior mass, if ``responses`` and ``items`` differ in length, or if ``responses``</span>
+<span class="sd">      contains non-Boolean elements.</span>
 <span class="sd">  """</span>
-  <span class="n">log_lik</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
+  <span class="n">log_lik</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">responses</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
   <span class="n">log_post</span> <span class="o">=</span> <span class="n">log_prior</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span> <span class="o">+</span> <span class="n">log_lik</span> <span class="o">+</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
   <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">log_post</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">or</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isposinf</span><span class="p">(</span><span class="n">log_post</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="s2">"posterior is undefined: the log-prior or log-likelihood is NaN or +inf at some node"</span>
@@ -1228,9 +1228,9 @@ window.runMermaid = runMermaid;</script>
 <span class="w">    </span><span class="sd">"""Return the estimator as a constructor call that names every argument, with None for a default prior."""</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(log_prior=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_prior_argument</span><span class="si">!r}</span><span class="s2">, tol=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_tol</span><span class="si">!r}</span><span class="s2">, bounds=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="si">!r}</span><span class="s2">)"</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">_negative_log_posterior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_negative_log_posterior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">responses</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the negative log-posterior at a candidate theta."""</span>
-    <span class="n">log_lik</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+    <span class="n">log_lik</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">responses</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
     <span class="n">log_pr</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">theta</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))[</span><span class="mi">0</span><span class="p">])</span>
     <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">log_lik</span> <span class="o">+</span> <span class="n">log_pr</span><span class="p">)</span>
 

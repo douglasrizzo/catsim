@@ -859,7 +859,7 @@ window.runMermaid = runMermaid;</script>
       <span class="n">msg</span> <span class="o">=</span> <span class="s2">"true_theta is required to simulate responses"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-    <span class="n">item</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="n">item_bank</span><span class="p">[</span><span class="n">item_id</span><span class="p">]</span>
     <span class="n">probability</span> <span class="o">=</span> <span class="n">icc</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">true_theta</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">probability</span> <span class="o">&gt;=</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">())</span></div>
 </div>
@@ -931,8 +931,8 @@ window.runMermaid = runMermaid;</script>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">administered_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">"""Return administered item ids for each session."""</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">administered_item_ids</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">"""Return each session's administered items, in the order given."""</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">administered_items</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">theta_histories</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
@@ -940,8 +940,8 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">theta_history</span><span class="p">)</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">response_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">"""Return response vectors for each session."""</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">responses</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Return each session's responses, in the order given."""</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">responses</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
 
   <span class="nd">@property</span>
