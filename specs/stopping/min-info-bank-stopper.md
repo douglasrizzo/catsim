@@ -167,7 +167,7 @@ class MinInfoInBankStopper(BaseStopper):
     candidates = _remaining(context)
     if candidates.size == 0:
       return True
-    information = irt.inf_hpc(context.theta, context.item_bank.get_items(candidates))
+    information = irt.information(context.theta, context.item_bank.get_items(candidates))
     return float(information.max()) <= self.min_info
 ```
 

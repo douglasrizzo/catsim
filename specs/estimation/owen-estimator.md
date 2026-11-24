@@ -194,8 +194,8 @@ def _owen_update(
       The mean and the standard deviation after the response.
   """
   nodes = numpy.linspace(mu - half_width * sigma, mu + half_width * sigma, n_nodes)
-  # log_likelihood_hpc works from the logit, so log(1 - P) stays exact where P rounds to 1
-  log_post = -0.5 * ((nodes - mu) / sigma) ** 2 + irt.log_likelihood_hpc(nodes, (response,), item[numpy.newaxis])
+  # log_likelihood works from the logit, so log(1 - P) stays exact where P rounds to 1
+  log_post = -0.5 * ((nodes - mu) / sigma) ** 2 + irt.log_likelihood(nodes, (response,), item[numpy.newaxis])
   post = numpy.exp(log_post - log_post.max())
   post /= post.sum()
   new_mu = float(post @ nodes)
@@ -285,7 +285,7 @@ class OwenEstimator(BaseEstimator):
   response they are the initializer's value with an infinite error, a hand-built context has the
   defaults, and another estimator may have produced them. Seeding from them would break Contract 2.
 - The update follows the spec's departure from Owen's normal-ogive model: catsim's four-parameter
-  logistic curve, with the moments summed on the local grid. `irt.log_likelihood_hpc` evaluates
+  logistic curve, with the moments summed on the local grid. `irt.log_likelihood` evaluates
   the log-likelihood from the logit, so no clipping of $P$ is needed.
 - Every estimator returns an estimate inside its bounds (ADR-0009), and Owen's procedure has none:
   a correct response to a hard, discriminating item can move the mean by several standard

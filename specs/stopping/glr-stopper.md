@@ -193,7 +193,7 @@ class GLRStopper(BaseStopper):
     theta_hat = context.theta
     lower, upper = self.cut_score - self.indifference, self.cut_score + self.indifference
     items = context.item_bank.get_items(context.administered_items)
-    at_hat, at_lower, at_upper = irt.log_likelihood_hpc(
+    at_hat, at_lower, at_upper = irt.log_likelihood(
       numpy.array([theta_hat, lower, upper]), context.responses, items
     )
     above = float(at_hat - at_lower) if theta_hat > lower else -math.inf
@@ -266,7 +266,7 @@ class GLRStopper(BaseStopper):
   2.1). Pass `threshold` to use a calibrated value.
 - The stopper is one criterion: `StopRule(GLRStopper(cut_score=0.0), MaxLengthStopper(50),
   min_items=5)` gives Bartroff et al.'s minimum of 5 items and maximum of 50 (Section 3.1).
-- `irt.log_likelihood_hpc` evaluates the three points in one call and works from the logits.
+- `irt.log_likelihood` evaluates the three points in one call and works from the logits.
 
 **Testing notes:**
 

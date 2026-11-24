@@ -219,9 +219,9 @@ class PredictedSEMStopper(BaseStopper):
     # error as for the predicted one. Judging the estimator's own error would start from
     # current = context.se and information = 1 / context.se**2; the posterior-variance prediction
     # would replace `predicted` with MEPV's expected posterior variance.
-    information = irt.test_info(theta, item_bank.get_items(context.administered_items))
+    information = irt.total_information(theta, item_bank.get_items(context.administered_items))
     current = 1 / math.sqrt(information) if information > 0 else math.inf
-    best = float(irt.inf_hpc(theta, item_bank.get_items(candidates)).max())
+    best = float(irt.information(theta, item_bank.get_items(candidates)).max())
     predicted = 1 / math.sqrt(information + best) if information + best > 0 else math.inf
     # Where no remaining item has information at the estimate, none can reduce the error.
     reduction = current - predicted if math.isfinite(predicted) else 0.0

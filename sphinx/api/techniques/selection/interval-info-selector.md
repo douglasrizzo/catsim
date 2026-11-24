@@ -49,7 +49,7 @@ at the current estimate, whatever estimator produced it. Before any item is
 administered the interval is the whole ability scale (p. 11, Equation 16). With a fixed `interval` $\delta$, the
 interval is $[\hat{\theta} - \delta, \hat{\theta} + \delta]$ throughout the test.
 
-The integral has a closed form (see {py:func}`catsim.irt.inf_integral`). Since
+The integral has a closed form (see {py:func}`catsim.irt.info_integral`). Since
 $dP/d\theta = a (P - c)(d - P)/(d - c)$, substituting $P$ for $\theta$ gives
 
 $$

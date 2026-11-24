@@ -241,7 +241,7 @@ class KLPSelector(BaseSelector):
 - The divergence table depends on the current estimate, so it is computed for the candidates at
   every call and not cached (Contract 3).
 - `_log_probabilities_hpc` vectorizes `kl.py`'s `_log_probabilities`, the per-item terms of
-  `irt.log_likelihood_hpc`. Share one implementation among the three rather than adding a copy.
+  `irt.log_likelihood`. Share one implementation among the three rather than adding a copy.
 - The selection and estimation layers do not import each other (`[tool.importlinter]` in
   `pyproject.toml`). Add `"catsim.selection.kl -> catsim.estimation.bayesian"` to that contract's
   `ignore_imports`, as `MEISelector` does for its estimator, or move the grid and posterior helpers
