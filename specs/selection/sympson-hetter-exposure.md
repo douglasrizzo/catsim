@@ -2,7 +2,7 @@
 **Module:** `catsim.exposure.sympson_hetter.SympsonHetterControl` (planned)
 **Reference:** Sympson and Hetter (1985); Stocking and Lewis (1998)
 **Last validated:** 2026-11-23, against Barrada et al. (2008); Georgiadou et al. (2007); Stocking & Lewis (1995, ETS RR-95-24).
-**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in, declined items in `excluded_items`) on 2026-11-24; it cannot yet exclude a declined item for the rest of the test (see the implementation notes).
+**Implementation guidance:** written against the engine's exposure control (`BaseExposureControl.accept`, declined items kept in the session's `excluded_items`) on 2026-11-24.
 
 # Sympson-Hetter Exposure Control
 
@@ -13,7 +13,7 @@ the most widely used way of capping item exposure rates (Barrada et al., 2008,
 p. 495). It is conceptually orthogonal to item selection: a selector proposes
 an item, then SH decides whether that proposed item is actually administered.
 
-That separation lets the same mechanism wrap any selector. The control table,
+That separation lets the same mechanism work with any selector. The control table,
 however, belongs to one selector, test design and examinee population: it is
 calibrated offline, before live testing, by simulating that design with
 examinees drawn from a typical ability distribution, and is recalibrated when
@@ -30,7 +30,7 @@ that the item is administered given that the selector proposed it (Stocking &
 Lewis, 1995, p. 8). Live administration proceeds as follows (Georgiadou et al.,
 2007, p. 12; Barrada et al., 2008, p. 495):
 
-1. Select a candidate item with the wrapped selector.
+1. Select a candidate item with the selector.
 2. Draw a Bernoulli random variable with success probability $K_i$.
 3. If the draw succeeds, administer the item.
 4. If the draw fails, do not administer the item, exclude it for the rest of that examinee's test, and ask the selector for another candidate.
@@ -84,9 +84,6 @@ p. 495).
    * - Parameter
      - Default
      - Description
-   * - ``selector``
-     - required
-     - Wrapped selector that proposes candidates before SH acceptance filtering.
    * - ``k_values``
      - ``None``
      - Optional pre-calibrated SH acceptance table.
@@ -100,7 +97,7 @@ Any correct implementation must satisfy the following properties:
 2. If `k_values` are missing, live selection is invalid until calibration has been performed.
 3. A rejected item is not administered to the current examinee for the rest of the test, and the selector is queried again for another candidate.
 4. Offline calibration updates item-specific acceptance probabilities toward the target marginal exposure rate.
-5. The wrapper should preserve the selector contract so it can be slotted into the engine as a selector-like component.
+5. It works with any selector, as the engine's `exposure_control`.
 
 ## References
 
@@ -121,7 +118,8 @@ This section is for contributors and agents implementing this technique.
 It is removed when the spec is promoted to "Implemented" status.
 :::
 
-**Proposed location:** `src/catsim/exposure/sympson_hetter.py`, a new top-level package.
+**Proposed location:** `src/catsim/exposure/sympson_hetter.py`, in the `catsim.exposure` package
+beside `BaseExposureControl`.
 
 **Mock implementation:**
 
@@ -129,30 +127,28 @@ It is removed when the spec is promoted to "Implemented" status.
 # src/catsim/exposure/sympson_hetter.py
 """Sympson-Hetter exposure control."""
 
-import dataclasses
 from collections.abc import Callable
 
 import numpy
+import numpy.typing as npt
+from typing_extensions import override
 
 from ..context import StepContext
-from ..selection.base import BaseSelector
 from ..typing import FloatArray
+from .base import BaseExposureControl
 
 
-class SympsonHetterControl(BaseSelector):
-  """Administer a wrapped selector's proposal with its item's acceptance probability.
+class SympsonHetterControl(BaseExposureControl):
+  """Administer the selector's proposal with its item's acceptance probability.
 
-  A declined item goes into the ``excluded_items`` of the context passed back to the wrapped
-  selector, which proposes again, until a proposal is accepted.
+  The engine excludes a declined item from the session for the rest of its test and asks the
+  selector again, until the control accepts a proposal.
 
   Parameters
   ----------
-  selector : BaseSelector
-      The selector whose proposals are accepted or declined. It must not propose an item in the
-      context's ``excluded_items``; the built-in selectors draw their candidates with ``remaining``.
-  k_values : numpy.ndarray or None, optional
+  k_values : array-like of float or None, optional
       Calibrated acceptance probability of every item in the bank, from :func:`calibrate`. Default
-      is None, which leaves the control uncalibrated: it raises on its first selection.
+      is None, which leaves the control uncalibrated: it raises on its first proposal.
 
   Raises
   ------
@@ -160,58 +156,54 @@ class SympsonHetterControl(BaseSelector):
       If a value of ``k_values`` is not in [0, 1].
   """
 
-  def __init__(self, selector: BaseSelector, k_values: FloatArray | None = None) -> None:
+  def __init__(self, k_values: npt.ArrayLike | None = None) -> None:
+    table = None
     if k_values is not None:
-      k_values = numpy.array(k_values, dtype=float)
-      if not ((k_values >= 0) & (k_values <= 1)).all():
+      table = numpy.array(k_values, dtype=float)
+      if not ((table >= 0) & (table <= 1)).all():
         msg = "k_values must be probabilities in [0, 1]"
         raise ValueError(msg)
-      k_values.flags.writeable = False
-    self._selector = selector
-    self._k_values = k_values
+      table.flags.writeable = False
+    self._k_values: FloatArray | None = table
 
+  @override
   def __repr__(self) -> str:
     """Return the control as a constructor call that names every argument."""
-    return f"{type(self).__name__}(selector={self._selector!r}, k_values={self._k_values!r})"
+    return f"{type(self).__name__}(k_values={self._k_values!r})"
 
   @property
   def k_values(self) -> FloatArray | None:
     """Return the acceptance probabilities, or None if the control is uncalibrated."""
     return self._k_values
 
-  def select(self, context: StepContext) -> int:
-    """Return the first proposal of the wrapped selector that its acceptance draw admits.
+  @override
+  def accept(self, context: StepContext, item_id: int) -> bool:
+    """Return whether the proposed item passes its acceptance draw.
 
     Parameters
     ----------
     context : StepContext
-        The session to select for.
+        The context the selector proposed the item from.
+    item_id : int
+        Index of the proposed item.
 
     Returns
     -------
-    int
-        Index of the selected item.
+    bool
+        True with the item's acceptance probability.
 
     Raises
     ------
     RuntimeError
         If the control is uncalibrated, or its table does not have one value per item of the bank.
-    NoItemsAvailableError
-        From the wrapped selector, once every item is administered or excluded.
     """
     k_values = self._k_values
     if k_values is None or k_values.size != context.item_bank.n_items:
       msg = "SympsonHetterControl needs one calibrated acceptance probability per item; see calibrate()"
       raise RuntimeError(msg)
-    # Each decline shrinks the wrapped selector's pool, so it raises NoItemsAvailableError before
-    # this loop could run forever.
-    while True:
-      candidate = self._selector.select(context)
-      # An item with K = 1 draws no random number, so K = 1 everywhere reproduces the wrapped
-      # selector's sessions exactly, as pick_best does for untied scores (ADR-0008).
-      if k_values[candidate] >= 1 or context.rng.random() < k_values[candidate]:
-        return candidate
-      context = dataclasses.replace(context, excluded_items=(*context.excluded_items, candidate))
+    # An item with K = 1 draws no random number, so K = 1 everywhere reproduces the run without a
+    # control exactly, as pick_best does for untied scores (ADR-0008).
+    return bool(k_values[item_id] >= 1 or context.rng.random() < k_values[item_id])
 
 
 def sympson_hetter_update(proposal_rates: FloatArray, r_max: float) -> FloatArray:
@@ -247,8 +239,8 @@ def calibrate(
   ----------
   proposal_rates : Callable[[numpy.ndarray], numpy.ndarray]
       Simulates the test design with the control at the given acceptance probabilities, and returns
-      each item's proposal rate: the proportion of simulated examinees to whom the wrapped selector
-      proposed it.
+      each item's proposal rate: the proportion of simulated examinees to whom the selector proposed
+      it, a run's ``SimulationResult.proposal_rates``.
   n_items : int
       Number of items in the bank.
   r_max : float
@@ -278,38 +270,38 @@ def calibrate(
 
 **Implementation notes:**
 
-- **What the 1.0 engine does not provide.** The definition excludes a declined item for the rest
-  of the examinee's test (step 4, Contract 3). The sketch excludes it only for the rest of the
-  call: the engine builds every context with no excluded items, `select` returns only the item,
-  and the control keeps no per-session state, so a declined item can be proposed again at a later
-  step. Calibration has the same gap: a proposal rate counts the administered and the declined
-  items of each simulated examinee, and the declines are recorded nowhere. Both need the session
-  to keep each examinee's declined items and the engine to pass them in `excluded_items`; since
-  `select` returns only the item, the declines would have to reach the engine some other way, for
-  example as an acceptance step the engine runs after `select`. That is a change to the engine
-  and to ADR-0004, which this spec does not decide; implement the control after it.
-- The control honours an `excluded_items` it is given and adds to it with `dataclasses.replace`,
-  so the test position, `len(context.administered_items)`, stays what the wrapped selector expects.
-  Once the engine passes a session's declines, the control works unchanged.
+- The engine does the rest of step 4 and Contract 3 (ADR-0016): it adds a declined item to the
+  session's `excluded_items`, which lasts for the rest of the test, and asks the selector again. A
+  session whose remaining items are all declined ends with `StopReason.NO_ITEMS`. The control only
+  decides, and keeps no per-session state.
+- Each item is proposed at most once per examinee, as it is administered or declined, and the
+  run's exposure tracker counts both, so `SimulationResult.proposal_rates` is the $s_i$ of
+  Equation 5. A `proposal_rates` callable for `calibrate` is one seeded run with the control:
+
+  ```python
+  def proposal_rates(k_values):
+    engine = CatEngine(bank, initializer, MaxInfoSelector(), estimator, stopper,
+                       exposure_control=SympsonHetterControl(k_values))
+    return SimulationRunner(engine).run(true_thetas, rng=seed).proposal_rates
+  ```
+
 - The calibration follows the first form of the update, from proposal rates, because the form
   with administration rates is undefined for an item that was proposed but never administered.
   The convergence check uses the expected exposure rate $K_i s_i$ of the same simulation.
-- `catsim.exposure` is a new top-level package, so it needs a layer in the import-linter contract
-  (`pyproject.toml`). The control imports `catsim.selection`, and a `proposal_rates` built on
-  `SimulationRunner` imports the runtime layers, which the selection layer may not, so the package
-  goes in a layer above `simulation` (beside `plot`, or its own).
-- The acceptance draw uses the context's `rng`, the run's generator (ADR-0008), and an item with
+- The control imports only `catsim.context`, as the import-linter contract requires of the
+  `exposure` layer; `calibrate` takes the simulation as a callable, so the module needs no runtime
+  layer.
+- The acceptance draw uses the context's `rng`, the run's generator (ADR-0013), and an item with
   $K_i = 1$ draws nothing.
 - Conditional SH (Stocking & Lewis, 1995) and content-balanced variants are later work.
 
 **Testing notes:**
 
-- Contract 2: an uncalibrated control raises `RuntimeError` on its first selection, and so does a
-  table whose length differs from the bank's.
-- With $K_i = 1$ for every item, a seeded run gives the same sessions as the wrapped selector.
-- With $K_i = 0$ for the wrapped selector's best item and 1 elsewhere, the control returns the
-  wrapped selector's second choice, and the context the wrapped selector saw last has the best
-  item in `excluded_items` and the same administered items.
+- Contract 2: an uncalibrated control raises `RuntimeError` on its first proposal, and so does a
+  table whose length differs from the bank's; the session is left unchanged.
+- With $K_i = 1$ for every item, a seeded run gives the same sessions as the run without a control.
+- With $K_i = 0$ for the selector's best item and 1 elsewhere, the engine administers the selector's
+  second choice, and the session's `excluded_items` holds the best item for the rest of the test.
 - `sympson_hetter_update` on hand-picked rates: with `r_max = 0.2`, proposal rates
   `[0.1, 0.2, 0.4, 0.8]` give `[1, 1, 0.5, 0.25]`.
 - `calibrate` with a `proposal_rates` callable built for the test, returning fixed rates whatever

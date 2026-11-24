@@ -28,10 +28,8 @@ The specs here were written together in April 2026. Their citations, cited locat
 and catR comparisons were revalidated against their sources in November 2026 (checklist steps 1-4
 and 6 below); each spec's status lines say when and against which sources. Their implementation
 sketches were then rewritten to the catsim 1.0 strategy contract and to the revalidated
-definitions (step 5), with one gap: the Sympson-Hetter sketch excludes a declined item only for
-the rest of the selection call, not for the rest of the test, because the 1.0 engine passes no
-excluded items from one step to the next; its implementation notes say what the engine would need.
-The sketches are illustrative: they run against the current API but are not tested, and the specs
+definitions (step 5), and the Sympson-Hetter sketch to the engine's exposure control. The
+sketches are illustrative: they run against the current API but are not tested, and the specs
 with open questions show the option each spec assumes for now.
 
 ## Workflow
@@ -81,7 +79,8 @@ Check each spec against its sources before it is implemented or its references a
    and where it departs.
 5. **Implementation guidance** follows the 1.0 strategy contract:
    - per-step strategies take a `StepContext`, and estimators return an `Estimate`;
-   - Sympson-Hetter declines items through the context's `excluded_items`;
+   - Sympson-Hetter is an exposure control (`BaseExposureControl.accept`), whose declines the
+     engine keeps in the session's `excluded_items`;
    - strategy objects hold configuration and caches derived from the item bank, never per-session
      state, because one engine serves many sessions: the SPRT and GLR stoppers classify with a pure
      `classify(context)` instead of keeping `_last_classification`, and Owen's estimator replays
