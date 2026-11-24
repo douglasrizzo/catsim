@@ -1310,41 +1310,73 @@ def test_randomized_selectors_repeat_with_the_same_seed(make_selector: Callable[
 
 
 _N_ITEMS = 30
-SELECTOR_FACTORIES = {
-  "MaxInfoSelector": MaxInfoSelector,
-  "UrrySelector": UrrySelector,
-  "KLSelector": KLSelector,
-  "IntervalInfoSelector": IntervalInfoSelector,
-  "RandomSelector": RandomSelector,
-  "RandomesqueSelector": lambda: RandomesqueSelector(bin_size=5),
-  "The54321Selector": The54321Selector,
-  "LinearSelector": lambda: LinearSelector(list(range(_N_ITEMS))),
-  "ProgressiveSelector": lambda: ProgressiveSelector(test_size=10),
-  "ProportionalSelector": lambda: ProportionalSelector(test_size=10),
-  "ClusterSelector": lambda: ClusterSelector(clusters=[i % 3 for i in range(_N_ITEMS)]),
-  "AStratSelector": lambda: AStratSelector(test_size=10),
-  "AStratBBlockSelector": lambda: AStratBBlockSelector(test_size=10),
-  "MaxInfoStratSelector": lambda: MaxInfoStratSelector(test_size=10),
-  "MaxInfoBBlockSelector": lambda: MaxInfoBBlockSelector(test_size=10),
-  "MEISelector": MEISelector,
-  "MLWISelector": MLWISelector,
+# Each factory builds its selector for a bank of n_items items.
+SELECTOR_FACTORIES: dict[str, Callable[[int], BaseSelector]] = {
+  "MaxInfoSelector": lambda _: MaxInfoSelector(),
+  "UrrySelector": lambda _: UrrySelector(),
+  "KLSelector": lambda _: KLSelector(),
+  "IntervalInfoSelector": lambda _: IntervalInfoSelector(),
+  "RandomSelector": lambda _: RandomSelector(),
+  "RandomesqueSelector": lambda _: RandomesqueSelector(bin_size=5),
+  "The54321Selector": lambda _: The54321Selector(),
+  "LinearSelector": lambda n_items: LinearSelector(list(range(n_items))),
+  "ProgressiveSelector": lambda _: ProgressiveSelector(test_size=10),
+  "ProportionalSelector": lambda _: ProportionalSelector(test_size=10),
+  "ClusterSelector": lambda n_items: ClusterSelector(clusters=[i % 3 for i in range(n_items)]),
+  "AStratSelector": lambda _: AStratSelector(test_size=10),
+  "AStratBBlockSelector": lambda _: AStratBBlockSelector(test_size=10),
+  "MaxInfoStratSelector": lambda _: MaxInfoStratSelector(test_size=10),
+  "MaxInfoBBlockSelector": lambda _: MaxInfoBBlockSelector(test_size=10),
+  "MEISelector": lambda _: MEISelector(),
+  "MLWISelector": lambda _: MLWISelector(),
 }
 
 
 @pytest.mark.parametrize("make_selector", SELECTOR_FACTORIES.values(), ids=SELECTOR_FACTORIES.keys())
-def test_select_returns_builtin_int(make_selector) -> None:
-  """Called with every input CatEngine passes, select() returns a builtin int.
+def test_select_takes_a_minimal_context(make_selector: Callable[[int], BaseSelector]) -> None:
+  """Given only an item bank and a generator, every selector returns the bank's one item as a builtin int.
 
-  A selector that does not accept response_vector fails inside the engine, and numpy integers must
-  not leak into session state.
+  A selector that still took the old arguments, or that needs a field the minimal context leaves at its default (no
+  responses, no exposure rates), fails here, and numpy integers must not leak into session state.
   """
-  item_bank = ItemBank.generate_item_bank(_N_ITEMS, seed=3)
+  item_bank = ItemBank.generate_item_bank(1, seed=3)
 
-  item_id = make_selector().select(
-    make_context(item_bank, [0, 1], [True, False], theta=0.3, rng=np.random.default_rng(0))
-  )
+  item_id = make_selector(1).select(StepContext(item_bank=item_bank, rng=np.random.default_rng(0)))
 
   assert type(item_id) is int
+  assert item_id == 0
+
+
+@pytest.mark.parametrize("make_selector", SELECTOR_FACTORIES.values(), ids=SELECTOR_FACTORIES.keys())
+def test_select_never_returns_an_excluded_item(make_selector: Callable[[int], BaseSelector]) -> None:
+  """A selector that drew its candidates without leaving out excluded_items would pick its first pick again.
+
+  Each round excludes the earlier picks and selects with the same seed, so a selector that ignored them would repeat
+  the first one.
+  """
+  item_bank = ItemBank.generate_item_bank(_N_ITEMS, seed=3)
+  selector = make_selector(_N_ITEMS)
+  excluded: list[int] = []
+
+  for _ in range(3):
+    context = make_context(item_bank, theta=0.3, excluded_items=excluded, rng=np.random.default_rng(0))
+    excluded.append(selector.select(context))
+
+  assert len(set(excluded)) == 3
+
+
+def test_excluded_items_do_not_move_the_test_position() -> None:
+  """Excluded items are not administered, so a selector that counted them would move on to a later stage of the test.
+
+  The a-stratified selector's first stratum of a three-item test holds the three least discriminating of nine items;
+  with two of them excluded, the third is the only item it may give first.
+  """
+  item_bank = ItemBank.generate_item_bank(9, seed=0)
+  first_stratum = np.argsort(item_bank.discrimination, kind="stable")[:3].tolist()
+
+  item_id = AStratSelector(test_size=3).select(make_context(item_bank, excluded_items=first_stratum[:2]))
+
+  assert item_id == first_stratum[2]
 
 
 SELECTOR_REPRS = {
@@ -1429,10 +1461,10 @@ def test_integer_arguments_reject_fractions(build: Callable[[], BaseSelector]) -
 
 
 def test_selector_tables_cover_every_concrete_selector() -> None:
-  """Every concrete selector exported by catsim.selection runs through the engine-input and repr tests above.
+  """Every concrete selector exported by catsim.selection runs through the context and repr tests above.
 
-  A selector left out of SELECTOR_FACTORIES could reject the engine's inputs, and one left out of SELECTOR_REPRS could
-  hide an argument from its repr, without any test noticing.
+  A selector left out of SELECTOR_FACTORIES could reject a minimal context or select an excluded item, and one left
+  out of SELECTOR_REPRS could hide an argument from its repr, without any test noticing.
   """
   exported = {
     name

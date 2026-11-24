@@ -13,7 +13,7 @@ from scipy.integrate import IntegrationWarning
 from scipy.optimize import brentq, minimize_scalar
 from scipy.special import expit
 
-from catsim import irt
+from catsim import StepContext, irt
 from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,
@@ -190,6 +190,23 @@ ESTIMATORS = [
   pytest.param(MAPEstimator, id="map"),
   pytest.param(WarmLikelihoodEstimator, id="wle"),
 ]
+
+
+@pytest.mark.parametrize("make_estimator", ESTIMATORS)
+def test_estimate_takes_a_minimal_context(make_estimator: Callable[[], BaseEstimator]) -> None:
+  """Given only an item bank and a generator, every estimator returns 0.0 as a builtin float.
+
+  With no response, MLE and WLE keep the context's theta, 0 by default, and EAP and MAP give the mean and the mode of
+  their standard normal prior, 0 too. An estimator that still took the old arguments, or that needs a field the
+  minimal context leaves at its default, fails here.
+  """
+  context = StepContext(item_bank=ItemBank.generate_item_bank(5, seed=0), rng=np.random.default_rng(0))
+
+  theta = make_estimator().estimate(context)
+
+  assert type(theta) is float
+  assert theta == pytest.approx(0.0, abs=1e-6)
+
 
 ESTIMATOR_REPRS = {
   "NumericalSearchEstimator": "NumericalSearchEstimator(tol=0.001, bounds=(-4.0, 4.0))",

@@ -11,10 +11,12 @@ import pytest
 
 from catsim import StepContext
 from catsim.engine import CatEngine, RunContext, SimulatedResponseProvider
-from catsim.estimation import NumericalSearchEstimator
+from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
+from catsim.initialization import BaseInitializer
 from catsim.item_bank import ItemBank
-from catsim.selection import MaxInfoSelector, RandomSelector
+from catsim.selection import BaseSelector, MaxInfoSelector, RandomSelector
+from catsim.selection.base import remaining
 from catsim.state import CatSessionState, ExposureTracker, StopReason
 from catsim.stopping import BaseStopper, MaxLengthStopper
 
@@ -135,6 +137,35 @@ class FakeRng:
 
   def uniform(self) -> float:
     return self.sample
+
+
+class LowestIndexSelector(BaseSelector):
+  """Custom selector: the remaining item with the lowest index."""
+
+  def select(self, context: StepContext) -> int:
+    return int(remaining(context)[0])
+
+
+class CorrectCountEstimator(BaseEstimator):
+  """Custom estimator: the number of correct responses."""
+
+  def estimate(self, context: StepContext) -> float:
+    return float(sum(context.responses))
+
+
+class ThreeItemStopper(BaseStopper):
+  """Custom stopper: three administered items."""
+
+  def stop(self, context: StepContext) -> bool:
+    return len(context.administered_items) >= 3
+
+
+class HalfInitializer(BaseInitializer):
+  """Custom initializer: every session starts at 0.5."""
+
+  def initialize(self, *, item_bank: ItemBank, rng: np.random.Generator) -> float:
+    del item_bank, rng
+    return 0.5
 
 
 def test_start_session_passes_item_bank_and_rng_to_initializer(item_bank) -> None:
@@ -704,3 +735,21 @@ def test_select_next_ends_the_session_when_the_selector_has_no_item(item_bank) -
 
   assert engine.select_next(session, item_bank, context) is None
   assert session.stop_reason is StopReason.NO_ITEMS
+
+
+def test_custom_strategies_written_against_the_base_classes_run_a_session(item_bank) -> None:
+  """Strategies that subclass the base classes and read only their documented inputs run a whole session.
+
+  With every response correct, the estimates count them, 1, 2 and 3, after the initial 0.5, and the session stops at
+  three items. Fails if the engine calls a strategy with anything but its documented signature, or gives it a context
+  without the session's items and responses.
+  """
+  engine = CatEngine(HalfInitializer(), LowestIndexSelector(), CorrectCountEstimator(), ThreeItemStopper())
+  context = RunContext(rng=np.random.default_rng(0))
+  session = engine.start_session(0, item_bank, context)
+
+  engine.run_session(session, item_bank, FixedResponseProvider(True), context)
+
+  assert session.administered_item_ids == [0, 1, 2]
+  assert session.theta_history == [0.5, 1.0, 2.0, 3.0]
+  assert session.stop_reason is StopReason.STOPPER

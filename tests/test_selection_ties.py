@@ -68,7 +68,7 @@ class TestPickBest:
     assert picks == again
 
   def test_untied_pick_draws_no_random_number(self) -> None:
-    """A draw on every pick, tied or not, would shift every later draw and change seeded runs on banks without ties."""
+    """Breaking ties with a draw on every pick, such as jittering the scores, would change seeded runs without ties."""
     rng = np.random.default_rng(0)
     state = rng.bit_generator.state
 

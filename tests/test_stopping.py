@@ -5,9 +5,9 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from catsim import stopping
+from catsim import StepContext, stopping
 from catsim.item_bank import ItemBank
-from catsim.stopping import ConfidenceIntervalStopper, MaxLengthStopper, StandardErrorStopper, StopRule
+from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthStopper, StandardErrorStopper, StopRule
 from tests.contexts import make_context
 
 
@@ -135,6 +135,28 @@ class TestStopRule:
     """
     with pytest.raises(TypeError, match="got int"):
       StopRule(StandardErrorStopper(0.3), 40)
+
+
+@pytest.mark.parametrize(
+  "stopper",
+  [
+    MaxLengthStopper(1),
+    StandardErrorStopper(0.5),
+    ConfidenceIntervalStopper([0.0]),
+    StopRule(StandardErrorStopper(0.5), MaxLengthStopper(1)),
+  ],
+  ids=repr,
+)
+def test_stop_takes_a_minimal_context(stopper: BaseStopper) -> None:
+  """Given only an item bank and a generator, every stopper returns False, as a builtin bool.
+
+  With no item administered, no length cap of at least one item is reached, and the standard error and the confidence
+  interval are infinite. A stopper that still took the old arguments, or that needs a field the minimal context
+  leaves at its default, fails here.
+  """
+  context = StepContext(item_bank=identical_1pl_bank(5, difficulty=0.0), rng=np.random.default_rng(0))
+
+  assert stopper.stop(context) is False
 
 
 def test_importing_every_public_stopper_collects_no_test_class(pytester: pytest.Pytester) -> None:
