@@ -103,8 +103,19 @@ this estimate, or `None` where that count has no meaning. The standard error is 
 - For the WLE catsim departs from Magis and Raîche (2012, Eq. 14, p. 6), who add
   $(I'J - IJ')/(2I^2)$ to the information. catR dropped that term in version 3.0, whose NEWS
   says it sometimes led to mathematical problems, and its `semTheta` still returns $1/\sqrt{I}$
-  for the WLE under the default `sem.type = "classic"`. The sum can also be negative, which leaves
-  no standard error. catsim follows catR.
+  for the WLE under the default `sem.type = "classic"`. catsim follows catR (the maintainer's
+  decision, 2026-11-24), after comparing the formulas with the WLE's sampling spread at a known
+  ability (every response pattern for 5 and 10 items, 3,000 simulated ones for 20 and 40):
+  - The classic formula overestimates the error in short tests: by 10% (2PL) and 28% (3PL) at
+    5 items. That is conservative: a standard-error stopper runs a few items longer than needed.
+  - Eq. 14 roughly halves that gap. The sandwich formula of Magis (2016), catR's
+    `sem.type = "new"`, is closest under the 3PL but underestimates the error under the 2PL
+    (by 8% at 5 items), which would stop tests too early.
+  - From 20 items on, the three agree within about 3%.
+  - Under the 1PL and 2PL, Eq. 14's sum is the curvature of the weighted likelihood at its
+    maximum, so it is positive. With guessing or slipping parameters it can be negative, which
+    leaves no standard error: 13 of 3,920 response patterns (0.4% of their probability) on random
+    3PL tests of 2 to 8 items, none of 4,560 on 2PL tests.
 - The engine records every step's `Estimate` in the session. `CatSessionState.estimates` starts with
   `Estimate(theta=initial, se=math.inf, evaluations=0)` and gains the estimator's result for each
   response; `theta_history`, `current_theta` and `current_se` are read from it, and snapshots copy
