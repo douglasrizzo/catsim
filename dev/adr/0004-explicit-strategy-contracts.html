@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ADR-0004: Give Every Per-Step Strategy One Step Context &#8212; catsim 0.21.0 documentation</title>
+    <title>ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -42,6 +42,8 @@
     <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'adr/0004-explicit-strategy-contracts';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/favicon.svg"/>
@@ -378,7 +380,7 @@
 <li class="toctree-l1"><a class="reference internal" href="0001-explicit-cat-engine.html">ADR-0001: Adopt Explicit CAT Engine Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0002-remove-legacy-simulator-apis.html">ADR-0002: Remove Legacy Simulator APIs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0003-runtime-state-ownership.html">ADR-0003: Keep Runtime State Outside Domain Objects</a></li>
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0004: Give Every Per-Step Strategy One Step Context</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0005-immutable-step-results.html">ADR-0005: Make Step Results Immutable Snapshots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0006-versioned-tutorial-notebooks.html">ADR-0006: Version Tutorial Notebooks as .ipynb Files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0007-release-gated-by-docs.html">ADR-0007: Gate Package Publication on Documentation Availability</a></li>
@@ -430,7 +432,7 @@
     
     <li class="breadcrumb-item"><a href="../architecture_decisions.html" class="nav-link">Architecture Decision Records</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0004: Give Every Per-Step Strategy One Step Context</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</span></li>
   </ul>
 </nav>
 </div>
@@ -447,8 +449,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="adr-0004-give-every-per-step-strategy-one-step-context">
-<h1>ADR-0004: Give Every Per-Step Strategy One Step Context<a class="headerlink" href="#adr-0004-give-every-per-step-strategy-one-step-context" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="adr-0004-strategies-take-one-step-context-and-estimators-return-an-estimate">
+<h1>ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate<a class="headerlink" href="#adr-0004-strategies-take-one-step-context-and-estimators-return-an-estimate" title="Link to this heading">#</a></h1>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
 <p>Accepted</p>
@@ -492,6 +494,16 @@ an item by adding it to the administered items would also move the test position
 selectors read from the number of administered items. Some planned techniques also kept
 per-session state on the strategy object, such as a stopper’s last classification, which the next
 session on the same engine overwrites.</p>
+<p>The estimator returned a bare <code class="docutils literal notranslate"><span class="pre">float</span></code>, so the precision stoppers computed a standard error
+themselves, always the Fisher one at the estimate (<code class="docutils literal notranslate"><span class="pre">irt.see</span></code>), whatever the estimator. For EAP that
+is not the estimator’s own error, the posterior standard deviation: on 200 simulated EAP sessions
+in the 1.0 review, the Fisher standard error was a median 26% above the posterior standard
+deviation after 3 items and 4% above after 20, and with a 0.4 threshold the stopping decision after
+20 items differed in 47 sessions. catR uses each estimator’s own standard error (Magis and Raîche
+2012). The estimator also counted its calls and objective evaluations on the object (<code class="docutils literal notranslate"><span class="pre">calls</span></code>,
+<code class="docutils literal notranslate"><span class="pre">evaluations</span></code>, <code class="docutils literal notranslate"><span class="pre">total_evaluations</span></code>, <code class="docutils literal notranslate"><span class="pre">avg_evaluations</span></code>). Those counters summed over every session the
+estimator served and over MEI’s look-ahead calls, so no count could be attributed to a session or a
+step.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
@@ -501,7 +513,7 @@ session on the same engine overwrites.</p>
   <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># raises NoItemsAvailableError</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">BaseEstimator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span> <span class="o">...</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Estimate</span><span class="p">:</span> <span class="o">...</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">BaseStopper</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span> <span class="o">...</span>
@@ -511,15 +523,15 @@ session on the same engine overwrites.</p>
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>The context holds <code class="docutils literal notranslate"><span class="pre">item_bank</span></code>, <code class="docutils literal notranslate"><span class="pre">rng</span></code>, <code class="docutils literal notranslate"><span class="pre">administered_items</span></code>, <code class="docutils literal notranslate"><span class="pre">responses</span></code>, <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code>, <code class="docutils literal notranslate"><span class="pre">theta</span></code>
-and <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code>. Only the item bank and the generator are required; the other fields default
-to a session with no responses and no exposure tracking (<code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code> when the run
-has no tracker, and selectors then apply no cap). It checks that the responses hold one Boolean per
-administered item, so no strategy has to.</p></li>
+<li><p>The context holds <code class="docutils literal notranslate"><span class="pre">item_bank</span></code>, <code class="docutils literal notranslate"><span class="pre">rng</span></code>, <code class="docutils literal notranslate"><span class="pre">administered_items</span></code>, <code class="docutils literal notranslate"><span class="pre">responses</span></code>, <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code>, <code class="docutils literal notranslate"><span class="pre">theta</span></code>,
+<code class="docutils literal notranslate"><span class="pre">se</span></code> and <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code>. Only the item bank and the generator are required; the other fields
+default to a session with no responses and no exposure tracking (<code class="docutils literal notranslate"><span class="pre">se</span></code> is <code class="docutils literal notranslate"><span class="pre">math.inf</span></code>;
+<code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code> when the run has no tracker, and selectors then apply no cap). It
+checks that the responses hold one Boolean per administered item, so no strategy has to.</p></li>
 <li><p>The selector gets the session as it stands. The estimator gets the session with the newest item
-and response added, and <code class="docutils literal notranslate"><span class="pre">theta</span></code> still the previous estimate, its starting point. The stopper gets
-that same state with the new estimate. The engine builds the estimator’s and the stopper’s
-contexts before it changes the session (ADR-0011).</p></li>
+and response added, and <code class="docutils literal notranslate"><span class="pre">theta</span></code> and <code class="docutils literal notranslate"><span class="pre">se</span></code> still the previous estimate’s, its starting point. The
+stopper gets that same state with the new estimate and its standard error. The engine builds the
+estimator’s and the stopper’s contexts before it changes the session (ADR-0011).</p></li>
 <li><p>The examinee’s true ability and the session’s bookkeeping are not in the context: strategies
 cannot see the simulated truth.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">excluded_items</span></code> holds items a selector must not choose although they have not been administered.
@@ -538,6 +550,57 @@ classification, computes it from the context with a pure method instead of stori
 <li><p>Adding a field to the context is not a breaking change: a new field gets a default, and a
 strategy reads only the fields it needs. Removing or renaming a field is.</p></li>
 </ul>
+<p><code class="docutils literal notranslate"><span class="pre">estimate</span></code> returns a frozen <code class="docutils literal notranslate"><span class="pre">catsim.Estimate(theta,</span> <span class="pre">se,</span> <span class="pre">evaluations)</span></code>: the estimate, its standard
+error by the estimator’s own formula, and how many times the estimator evaluated its objective for
+this estimate, or <code class="docutils literal notranslate"><span class="pre">None</span></code> where that count has no meaning. The standard error is finite, or
+<code class="docutils literal notranslate"><span class="pre">math.inf</span></code> when the responses carry no information about the ability; it is never NaN.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Estimator</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">se</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">evaluations</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">NumericalSearchEstimator</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta)}\)</span> (Magis and Raîche 2012, Eq. 3, p. 4)</p></td>
+<td><p>SciPy’s function evaluations; 0 for Dodd’s step</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">EAPEstimator</span></code></p></td>
+<td><p>the posterior standard deviation (Eq. 11, p. 6)</p></td>
+<td><p>the grid’s node count</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MAPEstimator</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta) - (\log p)''(\hat\theta)}\)</span>, which is <span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta) + 1/\sigma^2}\)</span> for a normal prior (Eq. 6, p. 5)</p></td>
+<td><p>201 search points plus the refinement’s evaluations</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">WarmLikelihoodEstimator</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta)}\)</span>, catR’s default</p></td>
+<td><p>the root scan’s, Brent’s and the ranking integrals’ evaluations</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul class="simple">
+<li><p>For the WLE catsim departs from Magis and Raîche (2012, Eq. 14, p. 6), who add
+<span class="math notranslate nohighlight">\((I'J - IJ')/(2I^2)\)</span> to the information. catR dropped that term in version 3.0, whose NEWS
+says it sometimes led to mathematical problems, and its <code class="docutils literal notranslate"><span class="pre">semTheta</span></code> still returns <span class="math notranslate nohighlight">\(1/\sqrt{I}\)</span>
+for the WLE under the default <code class="docutils literal notranslate"><span class="pre">sem.type</span> <span class="pre">=</span> <span class="pre">&quot;classic&quot;</span></code>. The sum can also be negative, which leaves
+no standard error. catsim follows catR.</p></li>
+<li><p>The engine records every step’s <code class="docutils literal notranslate"><span class="pre">Estimate</span></code> in the session. <code class="docutils literal notranslate"><span class="pre">CatSessionState.estimates</span></code> starts with
+<code class="docutils literal notranslate"><span class="pre">Estimate(theta=initial,</span> <span class="pre">se=math.inf,</span> <span class="pre">evaluations=0)</span></code> and gains the estimator’s result for each
+response; <code class="docutils literal notranslate"><span class="pre">theta_history</span></code>, <code class="docutils literal notranslate"><span class="pre">current_theta</span></code> and <code class="docutils literal notranslate"><span class="pre">current_se</span></code> are read from it, and snapshots copy
+it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">StandardErrorStopper</span></code> and <code class="docutils literal notranslate"><span class="pre">ConfidenceIntervalStopper</span></code> judge the standard error the estimator
+reported, <code class="docutils literal notranslate"><span class="pre">context.se</span></code>, instead of computing one.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BaseEstimator</span></code> has no counters and no <code class="docutils literal notranslate"><span class="pre">__init__</span></code>. The per-step counts in the session’s estimates
+replace them, and MEI’s look-ahead estimates are never recorded, so MEI may share the engine’s
+estimator.</p></li>
+<li><p>Rejected: an optional <code class="docutils literal notranslate"><span class="pre">BaseEstimator.standard_error(context)</span></code> method, defaulting to the Fisher
+standard error. EAP would compute the posterior twice per step, once for the mean and once for
+its standard deviation, and caching the posterior between the two calls would put per-session
+state on an estimator that serves every session.</p></li>
+</ul>
 </section>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
@@ -547,7 +610,8 @@ the context’s field names, in every contract.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">rng</span></code> and <code class="docutils literal notranslate"><span class="pre">responses</span></code> are always present, so the <code class="docutils literal notranslate"><span class="pre">None</span></code> checks are gone, and a deterministic
 selector called directly breaks ties as it does under the engine.</p></li>
 <li><p>Direct calls, in tests, notebooks and custom code, build a context:
-<code class="docutils literal notranslate"><span class="pre">selector.select(StepContext(item_bank=bank,</span> <span class="pre">rng=numpy.random.default_rng(0)))</span></code>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">selector.select(StepContext(item_bank=bank,</span> <span class="pre">rng=numpy.random.default_rng(0)))</span></code>. A direct
+<code class="docutils literal notranslate"><span class="pre">estimate</span></code> call gets an <code class="docutils literal notranslate"><span class="pre">Estimate</span></code> and reads <code class="docutils literal notranslate"><span class="pre">.theta</span></code>, <code class="docutils literal notranslate"><span class="pre">.se</span></code> or <code class="docutils literal notranslate"><span class="pre">.evaluations</span></code> from it.</p></li>
 <li><p>ty, which CI runs on catsim’s own code, rejects a built-in strategy whose method does not match its
 base class’s signature, and an engine call that does not match it. A custom strategy is checked
 only by its author’s type checker; one with another signature fails at its first call.</p></li>
@@ -556,6 +620,19 @@ proportional to the test length; MEI makes two copies per candidate item. Both a
 an estimate.</p></li>
 <li><p>Contexts compare equal only to themselves: a generated equality would compare the exposure-rate
 arrays elementwise and raise.</p></li>
+<li><p>With <code class="docutils literal notranslate"><span class="pre">NumericalSearchEstimator</span></code> and <code class="docutils literal notranslate"><span class="pre">WarmLikelihoodEstimator</span></code> the precision stoppers decide as
+before: the standard error they report is the Fisher one the stoppers computed. With
+<code class="docutils literal notranslate"><span class="pre">EAPEstimator</span></code> and <code class="docutils literal notranslate"><span class="pre">MAPEstimator</span></code> the decisions change. Their standard error is usually below the
+Fisher one at the same estimate, and with a normal prior MAP’s always is, so seeded runs that
+pair them with a precision stopper end sooner.</p></li>
+<li><p>A custom estimator returns an <code class="docutils literal notranslate"><span class="pre">Estimate</span></code>. The engine raises a <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> naming the estimator when
+it returns anything else, instead of failing later on a missing <code class="docutils literal notranslate"><span class="pre">.theta</span></code>. An estimator with no
+standard error formula of its own can report <code class="docutils literal notranslate"><span class="pre">irt.see(theta,</span> <span class="pre">items)</span></code>, the Fisher one.</p></li>
+<li><p>An application that stores sessions stores their estimates and rebuilds them as <code class="docutils literal notranslate"><span class="pre">Estimate</span></code>s:
+<code class="docutils literal notranslate"><span class="pre">theta_history</span></code> is derived and read-only, and <code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code> rejects entries that are not
+<code class="docutils literal notranslate"><span class="pre">Estimate</span></code>s.</p></li>
+<li><p>An estimator’s cost over a session is the sum of its estimates’ <code class="docutils literal notranslate"><span class="pre">evaluations</span></code>; summed over the
+sessions, it compares estimators across simulations. No count is kept outside a session.</p></li>
 </ul>
 </section>
 </section>

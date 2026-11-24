@@ -64,6 +64,27 @@ MLE and toward the MLE at the prior mean, and its single root lies between them
 (contract 2). With a uniform prior over a wide enough interval, MAP coincides
 with the MLE (Magis & Raîche, 2012, p. 5).
 
+The estimator returns a {py:class}`~catsim.context.Estimate`. Its
+standard error is
+
+$$
+SE(\hat{\theta}_{\mathrm{MAP}})
+=
+\frac{1}{\sqrt{I(\hat{\theta}) - (\log p)''(\hat{\theta})}},
+$$
+
+the test information plus the prior's negative curvature at the mode. The
+curvature is a central difference, so any prior works. For a normal prior with
+variance $\sigma^2$ the curvature is $-1/\sigma^2$, and this is the standard
+error catR gives the Bayes modal estimator,
+$1/\sqrt{I(\hat{\theta}) + 1/\sigma^2}$ (Magis & Raîche, 2012, p. 5, Equation
+6). Inside a uniform prior's support the curvature is 0; at the support's edge
+the difference is not finite and the prior adds nothing. Both give the Fisher
+standard error, $1/\sqrt{I(\hat{\theta})}$. Where the sum is not positive, as
+with a uniform prior and no responses, the standard error is infinite. The
+evaluation count is the 201 grid points plus the refinement's posterior
+evaluations, or 201 alone when tied grid points leave no refinement to run.
+
 ## Parameters
 
 ```{eval-rst}
@@ -95,6 +116,8 @@ Any correct implementation must satisfy the following properties:
 4. On long, information-rich tests, MAP and EAP should converge toward similar values because the posterior becomes sharply concentrated.
 5. The estimator returns finite values on extreme response patterns because the prior keeps the objective bounded.
 6. The estimate lies inside the prior's support. A prior whose support contains none of the grid points, such as one outside the search bounds, raises `ValueError`.
+7. The standard error is $1/\sqrt{I(\hat{\theta}) + 1/\sigma^2}$ with a normal prior of variance $\sigma^2$, the Fisher standard error with a uniform prior, and `math.inf` where the information plus the prior's negative curvature is not positive.
+8. The evaluation count is the number of grid points plus the refinement's posterior evaluations.
 
 ## References
 

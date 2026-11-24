@@ -386,7 +386,7 @@
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../state.html">Runtime State and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
@@ -474,12 +474,13 @@ adaptive test lengths, including the first few items.</p>
 <p>EAP’s posterior also yields the posterior variance at no extra cost, and that
 variance serves as the error variance of the estimate (Bock &amp; Mislevy, 1982,
 p. 432); in their simulations the posterior standard deviation behaved like the
-standard error of measurement (p. 431). The same posterior can drive stopping
-rules and posterior-weighted selectors. The estimator itself keeps no posterior
-between calls, since one instance serves every session and look-ahead selectors
-call it with hypothetical responses; consumers compute a session’s posterior
-with <code class="docutils literal notranslate"><span class="pre">posterior()</span></code> from the Bayesian infrastructure, and its variance with
-<code class="docutils literal notranslate"><span class="pre">posterior_variance()</span></code>.</p>
+standard error of measurement (p. 431). The estimator reports the posterior
+standard deviation as the estimate’s standard error, as catR does (Magis &amp;
+Raîche, 2012, p. 6, Equation 11), and the precision stoppers judge it. The
+estimator itself keeps no posterior between calls, since one instance serves
+every session and look-ahead selectors call it with hypothetical responses;
+consumers that need the whole posterior, such as posterior-weighted selectors,
+compute it with <code class="docutils literal notranslate"><span class="pre">posterior()</span></code> from the Bayesian infrastructure.</p>
 </section>
 <section id="definition">
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
@@ -508,6 +509,13 @@ the implementation approximates this as</p>
 <p>These are Equations 4 and 5 of Bock and Mislevy (1982, p. 433); catsim returns
 the variance, the square of their Equation 5, without Sheppard’s correction (see
 <a class="reference internal" href="bayesian-infrastructure.html"><span class="doc">Bayesian Estimation Infrastructure</span></a>).</p>
+<p>The estimator returns a <a class="reference internal" href="../../context.html#catsim.context.Estimate" title="catsim.context.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a> with
+<span class="math notranslate nohighlight">\(\hat{\theta}_{\mathrm{EAP}}\)</span>, the posterior standard deviation
+<span class="math notranslate nohighlight">\(\sqrt{\operatorname{Var}(\theta \mid \mathbf{u})}\)</span> as its standard error, and
+<span class="math notranslate nohighlight">\(Q\)</span>, the grid’s node count, as its evaluation count: the likelihood is evaluated
+once per node. With no administered item the posterior is the prior, so the
+estimate and its standard error are the prior’s mean and standard deviation on
+the grid.</p>
 <p>The estimate depends on the prior and on the grid. The default grid (121 nodes
 on <span class="math notranslate nohighlight">\([-6, 6]\)</span>) is accurate while the posterior standard deviation is at least
 about 0.065; longer tests need a finer grid (see
@@ -544,9 +552,10 @@ about 0.065; longer tests need a finer grid (see
 <h2>Behavioral Contracts<a class="headerlink" href="#behavioral-contracts" title="Link to this heading">#</a></h2>
 <p>Any correct implementation must satisfy the following properties:</p>
 <ol class="arabic simple">
-<li><p>With no administered items, the estimate equals the mean of the prior induced by the configured grid and prior.</p></li>
+<li><p>With no administered items, the estimate and its standard error equal the mean and standard deviation of the prior induced by the configured grid and prior.</p></li>
 <li><p>The estimator returns a finite value for extreme response patterns such as all-correct or all-incorrect strings.</p></li>
 <li><p>The estimate depends only on the arguments of the call, never on earlier calls: the estimator keeps no per-session state (<a class="reference internal" href="../../../adr/0003-runtime-state-ownership.html"><span class="doc">ADR-0003</span></a>).</p></li>
+<li><p>The standard error is the posterior standard deviation on the grid, and the evaluation count is the grid’s node count.</p></li>
 <li><p>Relative to a flatter prior, a centered normal prior produces stronger shrinkage of extreme short-test estimates toward the prior mean.</p></li>
 </ol>
 </section>
@@ -554,6 +563,7 @@ about 0.065; longer tests need a finer grid (see
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
 <p>Bock, R. D., &amp; Mislevy, R. J. (1982). Adaptive EAP estimation of ability in a microcomputer environment. <em>Applied Psychological Measurement</em>, 6(4), 431-444. <a class="reference external" href="https://doi.org/10.1177/014662168200600405">https://doi.org/10.1177/014662168200600405</a>. Open copy: <a class="reference external" href="https://hdl.handle.net/11299/101546">University of Minnesota Digital Conservancy</a>.</p>
 <p>Wang, T., &amp; Vispoel, W. P. (1998). Properties of ability estimation methods in computerized adaptive testing. <em>Journal of Educational Measurement</em>, 35(2), 109-135. <a class="reference external" href="https://doi.org/10.1111/j.1745-3984.1998.tb00530.x">https://doi.org/10.1111/j.1745-3984.1998.tb00530.x</a>. Not openly available.</p>
+<p>Magis, D., &amp; Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8), 1-31. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">https://doi.org/10.18637/jss.v048.i08</a> (open access).</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>Depends on <a class="reference internal" href="bayesian-infrastructure.html"><span class="doc">Bayesian Estimation Infrastructure</span></a></p>
@@ -583,20 +593,22 @@ a session’s posterior with <a class="reference internal" href="bayesian-infras
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.estimation.EAPEstimator.estimate">
-<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.context.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/estimation/bayesian.html#EAPEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.EAPEstimator.estimate" title="Link to this definition">#</a></dt>
-<dd><p>Return the posterior mean, the prior mean when no item has been administered.</p>
-<p>Each call evaluates the likelihood once per grid node, which the <code class="docutils literal notranslate"><span class="pre">evaluations</span></code> counters
-report.</p>
+<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.context.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../context.html#catsim.context.Estimate" title="catsim.context.Estimate"><span class="pre">Estimate</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/estimation/bayesian.html#EAPEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.EAPEstimator.estimate" title="Link to this definition">#</a></dt>
+<dd><p>Return the posterior mean and the posterior standard deviation.</p>
+<p>With no administered item they are the prior’s mean and standard deviation on the grid. The
+standard error is the posterior standard deviation (<span class="bibtex-citation" id="id1">Magis and Raîche [<a class="reference internal" href="../../../references.html#id13" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the r package catr. Journal of Statistical Software, 48(8):1–31, 2012. doi:10.18637/jss.v048.i08.">2012</a>]</span>, Eq. 11, p. 6), as in
+catR. Each call evaluates the likelihood once per grid node, which is its evaluation count.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>context</strong><span class="classifier">StepContext</span></dt><dd><p>The session to estimate for. Its <code class="docutils literal notranslate"><span class="pre">theta</span></code> is not used.</p>
+<dt><strong>context</strong><span class="classifier">StepContext</span></dt><dd><p>The session to estimate for. Its <code class="docutils literal notranslate"><span class="pre">theta</span></code> and <code class="docutils literal notranslate"><span class="pre">se</span></code> are not used.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>float</dt><dd><p>The posterior mean of <span class="math notranslate nohighlight">\(\theta\)</span>.</p>
+<dt>Estimate</dt><dd><p>The posterior mean of <span class="math notranslate nohighlight">\(\theta\)</span>, the posterior standard deviation and the number of
+grid nodes.</p>
 </dd>
 </dl>
 </dd>

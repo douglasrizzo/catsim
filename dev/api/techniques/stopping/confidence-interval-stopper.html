@@ -386,7 +386,7 @@
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../state.html">Runtime State and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
@@ -482,18 +482,29 @@ boundary may never be classified, so the stopper is usually combined with a
 \[CI(\hat{\theta})
 =
 \left[
-  \hat{\theta} - z_{(1+\gamma)/2} \, SEE(\hat{\theta}),
-  \hat{\theta} + z_{(1+\gamma)/2} \, SEE(\hat{\theta})
+  \hat{\theta} - z_{(1+\gamma)/2} \, SE(\hat{\theta}),
+  \hat{\theta} + z_{(1+\gamma)/2} \, SE(\hat{\theta})
 \right],\]</div>
-<p>where <span class="math notranslate nohighlight">\(\gamma\)</span> is the configured confidence level and
-<span class="math notranslate nohighlight">\(SEE(\hat{\theta}) = \sqrt{1 / I(\hat{\theta})}\)</span>.</p>
+<p>where <span class="math notranslate nohighlight">\(\gamma\)</span> is the configured confidence level, <span class="math notranslate nohighlight">\(z_{(1+\gamma)/2}\)</span> the
+standard normal quantile, and <span class="math notranslate nohighlight">\(SE(\hat{\theta})\)</span> the standard error the
+estimator reported with the current estimate, the context’s <code class="docutils literal notranslate"><span class="pre">se</span></code>
+(<a class="reference internal" href="../../../adr/0004-explicit-strategy-contracts.html"><span class="doc">ADR-0004</span></a>). Each estimator
+computes it by its own formula: the Fisher standard error
+<span class="math notranslate nohighlight">\(1/\sqrt{I(\hat{\theta})}\)</span> for maximum likelihood and the WLE, the posterior
+standard deviation for EAP, and for MAP the information plus the prior’s
+negative curvature (see <a class="reference internal" href="standard-error-stopper.html"><span class="doc">Standard Error Stopper</span></a>).
+A smaller standard error narrows the interval, so EAP and MAP sessions are
+usually classified sooner than they would be on the Fisher error.</p>
 <p>Given sorted boundary points <span class="math notranslate nohighlight">\(b_1 &lt; \dots &lt; b_m\)</span>, the rule stops when the
 entire confidence interval falls within one interval induced by those boundaries:</p>
 <div class="math notranslate nohighlight">
 \[(-\infty, b_1],\ [b_1, b_2],\ \dots,\ [b_m, \infty).\]</div>
 <p>Equivalently, the interval lies within one band exactly when no boundary lies
-strictly inside it, which is what the implementation checks. With no administered
-items the interval is infinite, so the test does not stop.</p>
+strictly inside it, which is what the implementation checks. Before any response
+the standard error is infinite, and so is the interval, so the test does not
+stop. A context built by hand, such as one for
+<a class="reference internal" href="index.html#catsim.stopping.StopRule.satisfied" title="catsim.stopping.StopRule.satisfied"><code class="xref py py-meth docutils literal notranslate"><span class="pre">satisfied()</span></code></a> after a run, must pass the session’s
+<code class="docutils literal notranslate"><span class="pre">current_se</span></code> as <code class="docutils literal notranslate"><span class="pre">se</span></code>, whose default is infinite.</p>
 <p>Magis and Raîche (2012, p. 11) describe the classification criterion with a
 single ability threshold: a confidence interval for ability is built after every
 item, and the test stops once the threshold is no longer inside it. catsim
@@ -533,7 +544,7 @@ generalizes this to several boundaries; with one boundary the two rules agree.</
 <li><p><code class="docutils literal notranslate"><span class="pre">interval_bounds</span></code> must be nonempty and strictly increasing, and <code class="docutils literal notranslate"><span class="pre">confidence</span></code> must lie strictly between 0 and 1; otherwise the constructor raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p></li>
 <li><p>The stopper returns <code class="docutils literal notranslate"><span class="pre">True</span></code> exactly when the full confidence interval lies within a single induced classification interval.</p></li>
 <li><p>If the confidence interval crosses any configured boundary, the stopper returns <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
-<li><p>If no items have been administered, the stopper returns <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p>Before any response the standard error is infinite, so the stopper returns <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
 </ol>
 </section>
 <section id="references">
@@ -552,8 +563,10 @@ generalizes this to several boundaries; with one boundary the two rules agree.</
 <p>The bounds cut the ability scale into bands. For example, <code class="docutils literal notranslate"><span class="pre">[-2.0,</span> <span class="pre">-0.5,</span> <span class="pre">0.5,</span> <span class="pre">2.0]</span></code>
 gives five: <span class="math notranslate nohighlight">\((-\infty, -2.0]\)</span>, <span class="math notranslate nohighlight">\([-2.0, -0.5]\)</span>, <span class="math notranslate nohighlight">\([-0.5, 0.5]\)</span>,
 <span class="math notranslate nohighlight">\([0.5, 2.0]\)</span> and <span class="math notranslate nohighlight">\([2.0, \infty)\)</span>. The test stops once no bound lies strictly
-inside the interval from <a class="reference internal" href="../../irt.html#catsim.irt.confidence_interval" title="catsim.irt.confidence_interval"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.confidence_interval()</span></code></a>. With no administered
-items the interval is infinite, so the test does not stop.</p>
+inside the interval <span class="math notranslate nohighlight">\(\hat\theta \pm z \cdot SE\)</span>, where <span class="math notranslate nohighlight">\(SE\)</span> is the standard error
+the estimator reported, <code class="docutils literal notranslate"><span class="pre">context.se</span></code> (ADR-0004), and <span class="math notranslate nohighlight">\(z\)</span> the standard normal quantile
+of the confidence level. Before any response the standard error is infinite, so the test does
+not stop.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">

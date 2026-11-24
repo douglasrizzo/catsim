@@ -770,10 +770,11 @@ window.runMermaid = runMermaid;</script>
                 <article class="bd-article">
                   
   <h1>Source code for catsim.context</h1><div class="highlight"><pre>
-<span></span><span class="sd">"""What a per-step strategy may read about the session it serves."""</span>
+<span></span><span class="sd">"""What a per-step strategy may read about the session it serves, and what an estimator returns."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -810,8 +811,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  &gt;&gt;&gt; context = StepContext(</span>
 <span class="sd">  ...   item_bank=bank, rng=numpy.random.default_rng(0), administered_items=(3, 7), responses=(True, False)</span>
 <span class="sd">  ... )</span>
-<span class="sd">  &gt;&gt;&gt; round(EAPEstimator().estimate(context), 3)</span>
-<span class="sd">  -0.427</span>
+<span class="sd">  &gt;&gt;&gt; estimate = EAPEstimator().estimate(context)</span>
+<span class="sd">  &gt;&gt;&gt; round(estimate.theta, 3), round(estimate.se, 3), estimate.evaluations</span>
+<span class="sd">  (-0.427, 0.978, 121)</span>
 
 <span class="sd">  Wrappers pass a changed copy on with :func:`dataclasses.replace`, which checks it the same way.</span>
 
@@ -835,6 +837,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  theta : float, optional</span>
 <span class="sd">      The current ability estimate. For the estimator, it is the estimate before the newest</span>
 <span class="sd">      response, the starting point of its update. Default is 0.</span>
+<span class="sd">  se : float, optional</span>
+<span class="sd">      The standard error of ``theta``, as its estimator reported it. For the estimator, it is the</span>
+<span class="sd">      error before the newest response. Default is ``math.inf``, the error before any response.</span>
 <span class="sd">  exposure_rates : numpy.ndarray or None, optional</span>
 <span class="sd">      Each item's exposure rate over the other sessions of the run (ADR-0003), which selectors</span>
 <span class="sd">      compare with their ``r_max`` cap. None when the run has no exposure tracker, which means no</span>
@@ -859,6 +864,7 @@ window.runMermaid = runMermaid;</script>
   <span class="n">responses</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
   <span class="n">excluded_items</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
   <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+  <span class="n">se</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">inf</span>
   <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
   <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -873,6 +879,50 @@ window.runMermaid = runMermaid;</script>
       <span class="k">if</span> <span class="n">items</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">max</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">n_items</span><span class="p">):</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> must hold item indices between 0 and </span><span class="si">{</span><span class="n">n_items</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">items</span><span class="si">}</span><span class="s2">"</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Estimate">
+<a class="viewcode-back" href="../../api/context.html#catsim.context.Estimate">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Estimate</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""An ability estimate, as an estimator returns it and a session records it.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  theta : float</span>
+<span class="sd">      The ability estimate.</span>
+<span class="sd">  se : float</span>
+<span class="sd">      Its standard error, by the estimator's own formula (ADR-0004): finite, or ``math.inf`` when</span>
+<span class="sd">      the responses carry no information about the ability, as before any response.</span>
+<span class="sd">  evaluations : int or None, optional</span>
+<span class="sd">      How many times the estimator evaluated its objective (the likelihood, the posterior or the</span>
+<span class="sd">      estimating equation) for this estimate, for comparing the cost of estimators. None where the</span>
+<span class="sd">      count has no meaning. Default is None.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``theta`` is not finite, ``se`` is negative or NaN, or ``evaluations`` is negative.</span>
+<span class="sd">  """</span>
+
+  <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span>
+  <span class="n">se</span><span class="p">:</span> <span class="nb">float</span>
+  <span class="n">evaluations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Reject an estimate that the stoppers and the session could not use."""</span>
+    <span class="c1"># A NaN error would make every comparison False: a confidence-interval stopper would stop at</span>
+    <span class="c1"># once and a standard-error stopper never.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">):</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"theta must be finite, got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="si">}</span><span class="s2">"</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">se</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"se must be non-negative (math.inf allowed), got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">se</span><span class="si">}</span><span class="s2">"</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluations</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"evaluations must be non-negative, got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluations</span><span class="si">}</span><span class="s2">"</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 
 </pre></div>
 

@@ -386,7 +386,7 @@
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../state.html">Runtime State and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
@@ -522,7 +522,10 @@ p. 433), who suggested about 80 points between <span class="math notranslate noh
 a spacing of 0.1, to keep precision down to a posterior standard deviation of
 0.2.
 A coarser grid degrades sooner: with 41 nodes (spacing 0.3), errors reach about
-7% at a posterior standard deviation of 0.15 and about 44% at 0.11.</p>
+7% at a posterior standard deviation of 0.15 and about 44% at 0.11.
+<code class="docutils literal notranslate"><span class="pre">EAPEstimator</span></code> reports the posterior standard deviation as its standard error,
+so a precision stopper with a threshold below about 0.065 needs a finer grid
+than the default.</p>
 <p>Bock and Mislevy also applied Sheppard’s correction to the posterior variance
 (p. 433).
 catsim does not: the nodes are evaluated rather than grouped, so the

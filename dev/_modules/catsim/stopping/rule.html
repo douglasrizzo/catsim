@@ -827,13 +827,17 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  StopRule(StandardErrorStopper(max_se=0.5), MaxLengthStopper(max_items=20), min_items=5)</span>
 <span class="sd">  &gt;&gt;&gt; bank = ItemBank.generate_item_bank(100, seed=0)</span>
 <span class="sd">  &gt;&gt;&gt; rng = numpy.random.default_rng(0)</span>
-<span class="sd">  &gt;&gt;&gt; ten = StepContext(item_bank=bank, rng=rng, administered_items=tuple(range(10)), responses=(True,) * 10)</span>
+<span class="sd">  &gt;&gt;&gt; ten = StepContext(</span>
+<span class="sd">  ...   item_bank=bank, rng=rng, administered_items=tuple(range(10)), responses=(True,) * 10, se=0.6</span>
+<span class="sd">  ... )</span>
 <span class="sd">  &gt;&gt;&gt; rule.stop(ten)</span>
 <span class="sd">  False</span>
 
-<span class="sd">  After 20 items the standard error is still above 0.5, so the length cap is what ends the test:</span>
+<span class="sd">  If the standard error is still above 0.5 after 20 items, the length cap is what ends the test:</span>
 
-<span class="sd">  &gt;&gt;&gt; twenty = StepContext(item_bank=bank, rng=rng, administered_items=tuple(range(20)), responses=(True,) * 20)</span>
+<span class="sd">  &gt;&gt;&gt; twenty = StepContext(</span>
+<span class="sd">  ...   item_bank=bank, rng=rng, administered_items=tuple(range(20)), responses=(True,) * 20, se=0.6</span>
+<span class="sd">  ... )</span>
 <span class="sd">  &gt;&gt;&gt; rule.satisfied(twenty)</span>
 <span class="sd">  (MaxLengthStopper(max_items=20),)</span>
 <span class="sd">  """</span>
@@ -891,8 +895,10 @@ window.runMermaid = runMermaid;</script>
   <span class="k">def</span><span class="w"> </span><span class="nf">satisfied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">BaseStopper</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Return the stoppers that hold for a session, regardless of `min_items`.</span>
 
-<span class="sd">    Called with a finished session's items and final estimate, it tells which criteria</span>
-<span class="sd">    ended the session, for example precision or the length cap.</span>
+<span class="sd">    Called with a finished session's items, final estimate and its standard error</span>
+<span class="sd">    (``se=session.current_se``; a context built without it has an infinite error, which no</span>
+<span class="sd">    precision stopper accepts), it tells which criteria ended the session, for example precision</span>
+<span class="sd">    or the length cap.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>

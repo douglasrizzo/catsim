@@ -781,6 +781,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">cat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimate</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hashable</span>
@@ -811,19 +812,24 @@ window.runMermaid = runMermaid;</script>
 <span class="w">  </span><span class="sd">"""Mutable runtime state for a single examinee CAT session.</span>
 
 <span class="sd">  ``session_id`` is whatever hashable value the application identifies the session by, such as an</span>
-<span class="sd">  int, a str or a UUID. ``theta_history`` starts with the initial estimate and gains one estimate</span>
-<span class="sd">  per response; its last entry is the current estimate. A session runs while ``stop_reason`` is</span>
-<span class="sd">  None.</span>
+<span class="sd">  int, a str or a UUID. ``estimates`` starts with the initial estimate (which</span>
+<span class="sd">  :meth:`~catsim.engine.CatEngine.start_session` records with an infinite standard error and no</span>
+<span class="sd">  evaluations) and gains the :class:`~catsim.context.Estimate` the estimator returned for each</span>
+<span class="sd">  response; its last entry is the current estimate. A restored session's estimates are trusted</span>
+<span class="sd">  as given. A session runs</span>
+<span class="sd">  while ``stop_reason`` is None.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
 <span class="sd">      If the session does not have one response per administered item and one more estimate than</span>
 <span class="sd">      responses, or if ``stop_reason`` is not a :class:`StopReason` value.</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If an entry of ``estimates`` is not an :class:`~catsim.context.Estimate`.</span>
 <span class="sd">  """</span>
 
   <span class="n">session_id</span><span class="p">:</span> <span class="n">Hashable</span>
-  <span class="n">theta_history</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+  <span class="n">estimates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Estimate</span><span class="p">]</span>
   <span class="n">true_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
   <span class="n">administered_item_ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
   <span class="n">responses</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
@@ -835,7 +841,11 @@ window.runMermaid = runMermaid;</script>
     <span class="c1"># would fail half-way through a step, and a caller's lists would change under the caller.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">administered_item_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">responses</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">estimates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimates</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">estimate</span><span class="p">,</span> <span class="n">Estimate</span><span class="p">)</span> <span class="k">for</span> <span class="n">estimate</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimates</span><span class="p">):</span>
+      <span class="c1"># A session restored from storage needs its estimates rebuilt, not bare thetas or mappings.</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Session </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">session_id</span><span class="si">}</span><span class="s2"> needs Estimate entries in estimates, got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">estimates</span><span class="si">!r}</span><span class="s2">"</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_reason</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="c1"># A stop reason restored from storage comes back as its string value.</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">=</span> <span class="n">StopReason</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stop_reason</span><span class="p">)</span>
@@ -846,17 +856,27 @@ window.runMermaid = runMermaid;</script>
         <span class="sa">f</span><span class="s2">"len(administered_item_ids)=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> and len(responses)=</span><span class="si">{</span><span class="n">n_responses</span><span class="si">}</span><span class="s2">"</span>
       <span class="p">)</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n_responses</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimates</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n_responses</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s2">"Session </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">session_id</span><span class="si">}</span><span class="s2"> needs the initial estimate and one estimate per response in "</span>
-        <span class="sa">f</span><span class="s2">"theta_history, got len(theta_history)=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="p">)</span><span class="si">}</span><span class="s2"> and len(responses)=</span><span class="si">{</span><span class="n">n_responses</span><span class="si">}</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"estimates, got len(estimates)=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimates</span><span class="p">)</span><span class="si">}</span><span class="s2"> and len(responses)=</span><span class="si">{</span><span class="n">n_responses</span><span class="si">}</span><span class="s2">"</span>
       <span class="p">)</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
   <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">theta_history</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Return the ability estimates in order, the initial one first."""</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">theta</span> <span class="k">for</span> <span class="n">estimate</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimates</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">current_theta</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the current ability estimate, the last entry of ``theta_history``."""</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">"""Return the current ability estimate, that of the last entry of ``estimates``."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">theta</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">current_se</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the standard error of the current ability estimate."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">se</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">is_stopped</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -874,7 +894,7 @@ window.runMermaid = runMermaid;</script>
 <span class="w">    </span><span class="sd">"""Return an immutable copy of the current session state."""</span>
     <span class="k">return</span> <span class="n">CatSessionSnapshot</span><span class="p">(</span>
       <span class="n">session_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">session_id</span><span class="p">,</span>
-      <span class="n">theta_history</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="p">),</span>
+      <span class="n">estimates</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimates</span><span class="p">),</span>
       <span class="n">true_theta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">true_theta</span><span class="p">,</span>
       <span class="n">administered_item_ids</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">),</span>
       <span class="n">responses</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="p">),</span>
@@ -891,16 +911,26 @@ window.runMermaid = runMermaid;</script>
 <span class="w">  </span><span class="sd">"""Immutable, hashable copy of a session at a specific point in time."""</span>
 
   <span class="n">session_id</span><span class="p">:</span> <span class="n">Hashable</span>
-  <span class="n">theta_history</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+  <span class="n">estimates</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Estimate</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
   <span class="n">true_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span>
   <span class="n">administered_item_ids</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
   <span class="n">responses</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
   <span class="n">stop_reason</span><span class="p">:</span> <span class="n">StopReason</span> <span class="o">|</span> <span class="kc">None</span>
 
   <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">theta_history</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Return the ability estimates up to the snapshot, the initial one first."""</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">theta</span> <span class="k">for</span> <span class="n">estimate</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimates</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">current_theta</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the ability estimate at the time of the snapshot."""</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">theta</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">current_se</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the standard error of the ability estimate at the time of the snapshot."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">se</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">is_stopped</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -1031,7 +1061,7 @@ window.runMermaid = runMermaid;</script>
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">estimations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">"""Return theta history for each session."""</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">theta_history</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">theta_history</span><span class="p">)</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">response_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]]:</span>

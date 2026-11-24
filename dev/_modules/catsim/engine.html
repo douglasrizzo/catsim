@@ -775,13 +775,14 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">operator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Protocol</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimate</span><span class="p">,</span> <span class="n">StepContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoItemsAvailableError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.irt</span><span class="w"> </span><span class="kn">import</span> <span class="n">icc</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">CatStepResult</span><span class="p">,</span> <span class="n">ExposureTracker</span><span class="p">,</span> <span class="n">StopReason</span>
@@ -862,7 +863,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
 <span class="sd">  StepContext</span>
-<span class="sd">      The session's items, responses and current estimate, with no excluded items.</span>
+<span class="sd">      The session's items, responses and current estimate with its standard error, with no</span>
+<span class="sd">      excluded items.</span>
 <span class="sd">  """</span>
   <span class="n">tracker</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span>
   <span class="k">return</span> <span class="n">StepContext</span><span class="p">(</span>
@@ -871,6 +873,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">administered_items</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">),</span>
     <span class="n">responses</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">responses</span><span class="p">),</span>
     <span class="n">theta</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">current_theta</span><span class="p">,</span>
+    <span class="n">se</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">current_se</span><span class="p">,</span>
     <span class="n">exposure_rates</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">tracker</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tracker</span><span class="o">.</span><span class="n">rates</span><span class="p">(),</span>
   <span class="p">)</span>
 
@@ -920,12 +923,14 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    CatSessionState</span>
-<span class="sd">        A running session whose theta history holds the initial estimate.</span>
+<span class="sd">        A running session whose estimate history holds the initial estimate, with an infinite</span>
+<span class="sd">        standard error.</span>
 <span class="sd">    """</span>
     <span class="n">initial_theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span><span class="o">.</span><span class="n">start_session</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">CatSessionState</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="n">session_id</span><span class="p">,</span> <span class="n">theta_history</span><span class="o">=</span><span class="p">[</span><span class="n">initial_theta</span><span class="p">],</span> <span class="n">true_theta</span><span class="o">=</span><span class="n">true_theta</span><span class="p">)</span></div>
+    <span class="n">initial</span> <span class="o">=</span> <span class="n">Estimate</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="n">initial_theta</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">evaluations</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">CatSessionState</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="n">session_id</span><span class="p">,</span> <span class="n">estimates</span><span class="o">=</span><span class="p">[</span><span class="n">initial</span><span class="p">],</span> <span class="n">true_theta</span><span class="o">=</span><span class="n">true_theta</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="CatEngine.should_stop">
@@ -1035,7 +1040,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        If the session has stopped, the item index is outside the bank or the item was already</span>
 <span class="sd">        administered in this session.</span>
 <span class="sd">    TypeError</span>
-<span class="sd">        If the item index is not an integer, or the response is not a ``bool`` or ``numpy.bool_``.</span>
+<span class="sd">        If the item index is not an integer, the response is not a ``bool`` or ``numpy.bool_``, or</span>
+<span class="sd">        the estimator returns something other than an :class:`~catsim.context.Estimate`.</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Session </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">session_id</span><span class="si">}</span><span class="s2"> has stopped (reason: </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span><span class="si">}</span><span class="s2">) and accepts no more responses"</span>
@@ -1064,14 +1070,24 @@ window.runMermaid = runMermaid;</script>
       <span class="n">administered_items</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="n">current</span><span class="o">.</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">item_id</span><span class="p">),</span>
       <span class="n">responses</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="n">current</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span> <span class="n">response</span><span class="p">),</span>
     <span class="p">)</span>
-    <span class="n">updated_theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">answered</span><span class="p">))</span>
-    <span class="n">stopped</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">answered</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">updated_theta</span><span class="p">)))</span>
+    <span class="n">estimate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">answered</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">estimate</span><span class="p">,</span> <span class="n">Estimate</span><span class="p">):</span>
+      <span class="c1"># An estimator written for the float-returning contract would otherwise fail on .theta.</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.estimate must return an Estimate, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="c1"># The session holds Python scalars, whatever NumPy types a custom estimator puts in its Estimate.</span>
+    <span class="n">estimate</span> <span class="o">=</span> <span class="n">Estimate</span><span class="p">(</span>
+      <span class="n">theta</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">theta</span><span class="p">),</span>
+      <span class="n">se</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">se</span><span class="p">),</span>
+      <span class="n">evaluations</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">estimate</span><span class="o">.</span><span class="n">evaluations</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">evaluations</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">stopped</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">answered</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">estimate</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="n">estimate</span><span class="o">.</span><span class="n">se</span><span class="p">)))</span>
 
     <span class="n">state</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
     <span class="n">state</span><span class="o">.</span><span class="n">responses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">theta_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">updated_theta</span><span class="p">)</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">estimates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">stopped</span><span class="p">:</span>
       <span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">=</span> <span class="n">StopReason</span><span class="o">.</span><span class="n">STOPPER</span>
 

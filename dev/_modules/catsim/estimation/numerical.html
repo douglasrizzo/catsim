@@ -776,7 +776,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">minimize_scalar</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimate</span><span class="p">,</span> <span class="n">StepContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..irt</span><span class="w"> </span><span class="kn">import</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MIN_EXTENDED</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
@@ -864,7 +864,6 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ValueError</span>
 <span class="sd">        If ``tol`` is not positive, or if ``bounds`` is not a finite interval with low &lt; high.</span>
 <span class="sd">    """</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_tol</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_bounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span>
 
@@ -874,10 +873,14 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="NumericalSearchEstimator.estimate">
 <a class="viewcode-back" href="../../../api/techniques/estimation/numerical-search-estimator.html#catsim.estimation.NumericalSearchEstimator.estimate">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Estimate</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Return the maximum likelihood estimate, or Dodd's step from ``context.theta`` while every response is the same.</span>
 
-<span class="sd">    With no administered item, the estimate is ``context.theta``, unchanged.</span>
+<span class="sd">    The standard error is :math:`1/\sqrt{I(\hat\theta)}`, the inverse square root of the test</span>
+<span class="sd">    information at the estimate (:cite:t:`Magis12`, Eq. 3, p. 4), or ``math.inf`` where the</span>
+<span class="sd">    information is 0. The evaluation count is the number of log-likelihood evaluations SciPy's</span>
+<span class="sd">    search made; Dodd's step makes none. With no administered item, the estimate is</span>
+<span class="sd">    ``context.theta`` and ``context.se``, unchanged, after no evaluation.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -886,31 +889,29 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        The updated ability estimate :math:`\hat\theta`, inside ``bounds``.</span>
+<span class="sd">    Estimate</span>
+<span class="sd">        The updated ability estimate :math:`\hat\theta`, inside ``bounds``, its standard error and</span>
+<span class="sd">        the number of log-likelihood evaluations.</span>
 <span class="sd">    """</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">=</span> <span class="mi">0</span>
-
     <span class="n">responses</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">responses</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">responses</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">Estimate</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">),</span> <span class="n">se</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">se</span><span class="p">,</span> <span class="n">evaluations</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
+    <span class="n">items</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">responses</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">_dodd</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">responses</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="p">)</span>
+      <span class="n">theta</span> <span class="o">=</span> <span class="n">_dodd</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">responses</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">Estimate</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="n">irt</span><span class="o">.</span><span class="n">see</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">),</span> <span class="n">evaluations</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="n">res</span> <span class="o">=</span> <span class="n">minimize_scalar</span><span class="p">(</span>
       <span class="n">irt</span><span class="o">.</span><span class="n">negative_log_likelihood</span><span class="p">,</span>
       <span class="n">bounds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="p">,</span>
       <span class="n">method</span><span class="o">=</span><span class="s2">"bounded"</span><span class="p">,</span>
-      <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">responses</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)),</span>
+      <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">responses</span><span class="p">,</span> <span class="n">items</span><span class="p">),</span>
       <span class="c1"># SciPy's bounded method takes its absolute tolerance only through options</span>
       <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">"xatol"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span><span class="p">},</span>
     <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">nfev</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_total_evaluations</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span>
-
-    <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span></div>
+    <span class="n">theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Estimate</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="n">irt</span><span class="o">.</span><span class="n">see</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">),</span> <span class="n">evaluations</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">nfev</span><span class="p">))</span></div>
 </div>
 
 </pre></div>

@@ -775,10 +775,12 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseStopper</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -793,8 +795,9 @@ window.runMermaid = runMermaid;</script>
 <span class="k">class</span><span class="w"> </span><span class="nc">StandardErrorStopper</span><span class="p">(</span><span class="n">BaseStopper</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Stop once the standard error of the ability estimate is at most a target value.</span>
 
-<span class="sd">  The standard error is :func:`catsim.irt.see` of the administered items at the current</span>
-<span class="sd">  estimate. With no administered items it is infinite, so the test does not stop.</span>
+<span class="sd">  The standard error is the one the estimator reported with the current estimate,</span>
+<span class="sd">  ``context.se`` (ADR-0004): the posterior standard deviation for EAP, the Fisher standard error</span>
+<span class="sd">  for maximum likelihood. Before any response it is infinite, so the test does not stop.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -836,7 +839,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    bool</span>
 <span class="sd">        True if the standard error of the estimate is at most `max_se`, False otherwise.</span>
 <span class="sd">    """</span>
-    <span class="k">return</span> <span class="n">irt</span><span class="o">.</span><span class="n">see</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_se</span></div>
+    <span class="k">return</span> <span class="n">context</span><span class="o">.</span><span class="n">se</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_se</span></div>
 </div>
 
 
@@ -850,8 +853,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  The bounds cut the ability scale into bands. For example, ``[-2.0, -0.5, 0.5, 2.0]``</span>
 <span class="sd">  gives five: :math:`(-\infty, -2.0]`, :math:`[-2.0, -0.5]`, :math:`[-0.5, 0.5]`,</span>
 <span class="sd">  :math:`[0.5, 2.0]` and :math:`[2.0, \infty)`. The test stops once no bound lies strictly</span>
-<span class="sd">  inside the interval from :func:`catsim.irt.confidence_interval`. With no administered</span>
-<span class="sd">  items the interval is infinite, so the test does not stop.</span>
+<span class="sd">  inside the interval :math:`\hat\theta \pm z \cdot SE`, where :math:`SE` is the standard error</span>
+<span class="sd">  the estimator reported, ``context.se`` (ADR-0004), and :math:`z` the standard normal quantile</span>
+<span class="sd">  of the confidence level. Before any response the standard error is infinite, so the test does</span>
+<span class="sd">  not stop.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -905,8 +910,11 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    bool</span>
 <span class="sd">        True if no bound lies strictly inside the confidence interval, False otherwise.</span>
 <span class="sd">    """</span>
-    <span class="n">items</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span>
-    <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">confidence_interval</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence</span><span class="p">)</span>
+    <span class="c1"># Checked first: with a confidence near 0, z is 0 and 0 * inf would be NaN.</span>
+    <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">se</span><span class="p">):</span>
+      <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">margin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="n">context</span><span class="o">.</span><span class="n">se</span>
+    <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">theta</span> <span class="o">-</span> <span class="n">margin</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">theta</span> <span class="o">+</span> <span class="n">margin</span>
     <span class="k">return</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">lower</span> <span class="o">&lt;</span> <span class="n">bound</span> <span class="o">&lt;</span> <span class="n">upper</span> <span class="k">for</span> <span class="n">bound</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval_bounds</span><span class="p">)</span></div>
 </div>
 

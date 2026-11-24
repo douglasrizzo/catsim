@@ -386,7 +386,7 @@
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../state.html">Runtime State and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
@@ -513,6 +513,23 @@ prior the derivative of the log-posterior points toward the prior mean at the
 MLE and toward the MLE at the prior mean, and its single root lies between them
 (contract 2). With a uniform prior over a wide enough interval, MAP coincides
 with the MLE (Magis &amp; Raîche, 2012, p. 5).</p>
+<p>The estimator returns a <a class="reference internal" href="../../context.html#catsim.context.Estimate" title="catsim.context.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a>. Its
+standard error is</p>
+<div class="math notranslate nohighlight">
+\[SE(\hat{\theta}_{\mathrm{MAP}})
+=
+\frac{1}{\sqrt{I(\hat{\theta}) - (\log p)''(\hat{\theta})}},\]</div>
+<p>the test information plus the prior’s negative curvature at the mode. The
+curvature is a central difference, so any prior works. For a normal prior with
+variance <span class="math notranslate nohighlight">\(\sigma^2\)</span> the curvature is <span class="math notranslate nohighlight">\(-1/\sigma^2\)</span>, and this is the standard
+error catR gives the Bayes modal estimator,
+<span class="math notranslate nohighlight">\(1/\sqrt{I(\hat{\theta}) + 1/\sigma^2}\)</span> (Magis &amp; Raîche, 2012, p. 5, Equation
+6). Inside a uniform prior’s support the curvature is 0; at the support’s edge
+the difference is not finite and the prior adds nothing. Both give the Fisher
+standard error, <span class="math notranslate nohighlight">\(1/\sqrt{I(\hat{\theta})}\)</span>. Where the sum is not positive, as
+with a uniform prior and no responses, the standard error is infinite. The
+evaluation count is the 201 grid points plus the refinement’s posterior
+evaluations, or 201 alone when tied grid points leave no refinement to run.</p>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
@@ -555,6 +572,8 @@ with the MLE (Magis &amp; Raîche, 2012, p. 5).</p>
 <li><p>On long, information-rich tests, MAP and EAP should converge toward similar values because the posterior becomes sharply concentrated.</p></li>
 <li><p>The estimator returns finite values on extreme response patterns because the prior keeps the objective bounded.</p></li>
 <li><p>The estimate lies inside the prior’s support. A prior whose support contains none of the grid points, such as one outside the search bounds, raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p></li>
+<li><p>The standard error is <span class="math notranslate nohighlight">\(1/\sqrt{I(\hat{\theta}) + 1/\sigma^2}\)</span> with a normal prior of variance <span class="math notranslate nohighlight">\(\sigma^2\)</span>, the Fisher standard error with a uniform prior, and <code class="docutils literal notranslate"><span class="pre">math.inf</span></code> where the information plus the prior’s negative curvature is not positive.</p></li>
+<li><p>The evaluation count is the number of grid points plus the refinement’s posterior evaluations.</p></li>
 </ol>
 </section>
 <section id="references">
@@ -601,19 +620,26 @@ estimate inside the prior’s support and finds the global mode of a multimodal 
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.estimation.MAPEstimator.estimate">
-<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.context.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/estimation/bayesian.html#MAPEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.MAPEstimator.estimate" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.context.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../context.html#catsim.context.Estimate" title="catsim.context.Estimate"><span class="pre">Estimate</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/estimation/bayesian.html#MAPEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.MAPEstimator.estimate" title="Link to this definition">#</a></dt>
 <dd><p>Return the posterior mode within the search bounds, the prior mode when no item has been administered.</p>
+<p>The standard error is <span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta) - (\log p)''(\hat\theta)}\)</span>, the test
+information plus the prior’s negative curvature at the mode, taken by a central difference so
+any prior works. For a normal prior with variance <span class="math notranslate nohighlight">\(\sigma^2\)</span> that is
+<span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta) + 1/\sigma^2}\)</span> (<span class="bibtex-citation" id="id1">Magis and Raîche [<a class="reference internal" href="../../../references.html#id13" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the r package catr. Journal of Statistical Software, 48(8):1–31, 2012. doi:10.18637/jss.v048.i08.">2012</a>]</span>, Eq. 6, p. 5; catR’s
+default), and inside a uniform prior’s support the Fisher standard error. The evaluation count
+is the number of search points plus the refinement’s posterior evaluations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>context</strong><span class="classifier">StepContext</span></dt><dd><p>The session to estimate for. Its <code class="docutils literal notranslate"><span class="pre">theta</span></code> is not used: the search covers the whole bounds
-on every call.</p>
+<dt><strong>context</strong><span class="classifier">StepContext</span></dt><dd><p>The session to estimate for. Its <code class="docutils literal notranslate"><span class="pre">theta</span></code> and <code class="docutils literal notranslate"><span class="pre">se</span></code> are not used: the search covers the
+whole bounds on every call.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>float</dt><dd><p>The posterior mode of <span class="math notranslate nohighlight">\(\theta\)</span> within the search bounds.</p>
+<dt>Estimate</dt><dd><p>The posterior mode of <span class="math notranslate nohighlight">\(\theta\)</span> within the search bounds, its standard error and the
+number of posterior evaluations.</p>
 </dd>
 </dl>
 </dd>

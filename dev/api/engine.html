@@ -378,7 +378,7 @@
 <li class="toctree-l1"><a class="reference internal" href="techniques/index.html">Techniques</a></li>
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="state.html">Runtime State and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="context.html">Strategy Inputs – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
@@ -485,7 +485,8 @@ tracker, if it has one.</p>
 <dt>ValueError</dt><dd><p>If the session has stopped, the item index is outside the bank or the item was already
 administered in this session.</p>
 </dd>
-<dt>TypeError</dt><dd><p>If the item index is not an integer, or the response is not a <code class="docutils literal notranslate"><span class="pre">bool</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy.bool_</span></code>.</p>
+<dt>TypeError</dt><dd><p>If the item index is not an integer, the response is not a <code class="docutils literal notranslate"><span class="pre">bool</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy.bool_</span></code>, or
+the estimator returns something other than an <a class="reference internal" href="context.html#catsim.context.Estimate" title="catsim.context.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a>.</p>
 </dd>
 </dl>
 </dd>
@@ -577,7 +578,8 @@ has succeeded.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>CatSessionState</dt><dd><p>A running session whose theta history holds the initial estimate.</p>
+<dt>CatSessionState</dt><dd><p>A running session whose estimate history holds the initial estimate, with an infinite
+standard error.</p>
 </dd>
 </dl>
 </dd>

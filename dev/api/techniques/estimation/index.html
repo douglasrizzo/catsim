@@ -744,7 +744,7 @@ window.runMermaid = runMermaid;</script>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../state.html">Runtime State and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
@@ -818,6 +818,10 @@ window.runMermaid = runMermaid;</script>
 <p>Ability estimation techniques compute the examinee’s latent trait estimate
 <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> after each item response. The choice of estimator affects
 accuracy, bias, and the availability of uncertainty quantification.</p>
+<p>Every estimator returns a <a class="reference internal" href="../../context.html#catsim.context.Estimate" title="catsim.context.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a>: the estimate,
+its standard error by the estimator’s own formula, which the precision stoppers
+judge, and the number of objective evaluations it took. The session records one
+per step.</p>
 <section id="implemented">
 <h2>Implemented<a class="headerlink" href="#implemented" title="Link to this heading">#</a></h2>
 <div class="toctree-wrapper compound">

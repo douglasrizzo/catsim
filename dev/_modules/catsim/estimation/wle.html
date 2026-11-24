@@ -783,6 +783,8 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">brentq</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.special</span><span class="w"> </span><span class="kn">import</span> <span class="n">expit</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..irt</span><span class="w"> </span><span class="kn">import</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MIN_EXTENDED</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
 
@@ -839,7 +841,6 @@ window.runMermaid = runMermaid;</script>
     <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
     <span class="n">bounds</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">),</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_tol</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_bounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span>
 
@@ -887,8 +888,17 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="WarmLikelihoodEstimator.estimate">
 <a class="viewcode-back" href="../../../api/techniques/estimation/warm-wle.html#catsim.estimation.WarmLikelihoodEstimator.estimate">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the root of Warm's modified score equation, or ``context.theta`` when no item has been administered.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Estimate</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Return the root of Warm's modified score equation, or ``context.theta`` when no item has been administered.</span>
+
+<span class="sd">    The standard error is :math:`1/\sqrt{I(\hat\theta)}`, the inverse square root of the test</span>
+<span class="sd">    information at the estimate, or ``math.inf`` where the information is 0. This is catR's</span>
+<span class="sd">    default for the WLE (``semTheta`` with ``sem.type = "classic"``). :cite:t:`Magis12` (Eq. 14,</span>
+<span class="sd">    p. 6) add a term to the information, :math:`(I'J - IJ')/(2I^2)`, which catR has not used since</span>
+<span class="sd">    version 3.0 and which can make the sum negative; catsim follows catR. The evaluation count is</span>
+<span class="sd">    the number of modified-score evaluations: the scan, Brent's refinement and, when several roots</span>
+<span class="sd">    compete, the integration that ranks them. With no administered item, the estimate is</span>
+<span class="sd">    ``context.theta`` and ``context.se``, unchanged, after no evaluation.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -897,14 +907,12 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        The weighted likelihood estimate, within ``bounds``.</span>
+<span class="sd">    Estimate</span>
+<span class="sd">        The weighted likelihood estimate, within ``bounds``, its standard error and the number of</span>
+<span class="sd">        modified-score evaluations.</span>
 <span class="sd">    """</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">=</span> <span class="mi">0</span>
-
     <span class="k">if</span> <span class="ow">not</span> <span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">Estimate</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">),</span> <span class="n">se</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">se</span><span class="p">,</span> <span class="n">evaluations</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="n">response_vector</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">responses</span>
     <span class="n">items</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span>
@@ -945,9 +953,8 @@ window.runMermaid = runMermaid;</script>
           <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">IntegrationWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
       <span class="n">theta_hat</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">heights</span><span class="p">))]</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">=</span> <span class="n">evaluations</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_total_evaluations</span> <span class="o">+=</span> <span class="n">evaluations</span>
-    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">theta_hat</span><span class="p">)</span></div>
+    <span class="n">theta_hat</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">theta_hat</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Estimate</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="n">theta_hat</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="n">irt</span><span class="o">.</span><span class="n">see</span><span class="p">(</span><span class="n">theta_hat</span><span class="p">,</span> <span class="n">items</span><span class="p">),</span> <span class="n">evaluations</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">evaluations</span><span class="p">))</span></div>
 </div>
 
 </pre></div>

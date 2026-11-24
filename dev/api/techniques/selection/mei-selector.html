@@ -386,7 +386,7 @@
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../state.html">Runtime State and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
@@ -529,9 +529,9 @@ branches from the first item.</p>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">estimator</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">NumericalSearchEstimator()</span></code></p></td>
 <td><p>Estimator used to compute the hypothetical one-step-ahead ability updates. Any estimator can be
-passed; EAP, MAP or WLE avoid the limitation described above. Give the selector its own
-instance: it calls <code class="docutils literal notranslate"><span class="pre">estimate</span></code> twice per candidate, which would inflate the counters of an
-estimator shared with the engine.</p></td>
+passed; EAP, MAP or WLE avoid the limitation described above. It may be the engine’s own
+estimator: the selector reads only <code class="docutils literal notranslate"><span class="pre">.theta</span></code> from its look-ahead estimates, and the session
+never records them.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">r_max</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1.0</span></code></p></td>
@@ -580,9 +580,8 @@ of each response at the current estimate, and selects the highest score.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>estimator</strong><span class="classifier">BaseEstimator or None, optional</span></dt><dd><p>Estimator used for the one-step-ahead ability updates. Default is a new
-<a class="reference internal" href="../estimation/numerical-search-estimator.html#catsim.estimation.NumericalSearchEstimator" title="catsim.estimation.NumericalSearchEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.NumericalSearchEstimator</span></code></a>. Give the selector its own instance:
-it calls <code class="docutils literal notranslate"><span class="pre">estimate</span></code> twice per candidate item, which would inflate the call and evaluation
-counters of an estimator shared with the engine.</p>
+<a class="reference internal" href="../estimation/numerical-search-estimator.html#catsim.estimation.NumericalSearchEstimator" title="catsim.estimation.NumericalSearchEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.NumericalSearchEstimator</span></code></a>. It may be the engine’s own
+estimator: the look-ahead estimates are never recorded in the session.</p>
 </dd>
 <dt><strong>r_max</strong><span class="classifier">float, optional</span></dt><dd><p>Maximum exposure rate for items. Items with exposure rates &gt;= r_max are only selected when no
 other item remains. Default is 1 (no restriction).</p>

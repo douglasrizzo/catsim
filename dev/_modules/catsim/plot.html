@@ -1255,7 +1255,7 @@ window.runMermaid = runMermaid;</script>
       <span class="n">msg</span> <span class="o">=</span> <span class="s2">"index must be provided when simulation is passed"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="n">session</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
-    <span class="n">thetas</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">theta_history</span>
+    <span class="n">thetas</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">theta_history</span><span class="p">)</span>
     <span class="n">administered_items</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">)</span>
     <span class="n">true_theta</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">true_theta</span>
 

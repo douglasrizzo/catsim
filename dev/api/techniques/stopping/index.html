@@ -744,7 +744,7 @@ window.runMermaid = runMermaid;</script>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../state.html">Runtime State and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
@@ -852,8 +852,8 @@ maximal test length and forces the test to stop if this length is reached, even
 though the stopping rule is not yet satisfied” (Magis and Raîche, 2012, p. 18).</p>
 <p>Stoppers are pure, so a rule can be asked again after a run.
 <a class="reference internal" href="#catsim.stopping.StopRule.satisfied" title="catsim.stopping.StopRule.satisfied"><code class="xref py py-meth docutils literal notranslate"><span class="pre">satisfied()</span></code></a> returns the stoppers that hold for a
-session’s final items and estimate, which tells, for example, whether a session
-met its precision target or ran to the cap.</p>
+session’s final items, estimate and standard error, which tells, for example,
+whether a session met its precision target or ran to the cap.</p>
 <p>No stopper checks whether the item bank is exhausted: when the selector has no
 item left to give, the engine ends the session itself.</p>
 <dl class="py class">
@@ -896,13 +896,17 @@ nor greater than the <cite>max_items</cite> of a <a class="reference internal" h
 <span class="go">StopRule(StandardErrorStopper(max_se=0.5), MaxLengthStopper(max_items=20), min_items=5)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ten</span> <span class="o">=</span> <span class="n">StepContext</span><span class="p">(</span><span class="n">item_bank</span><span class="o">=</span><span class="n">bank</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span> <span class="n">administered_items</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)),</span> <span class="n">responses</span><span class="o">=</span><span class="p">(</span><span class="kc">True</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ten</span> <span class="o">=</span> <span class="n">StepContext</span><span class="p">(</span>
+<span class="gp">... </span>  <span class="n">item_bank</span><span class="o">=</span><span class="n">bank</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span> <span class="n">administered_items</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)),</span> <span class="n">responses</span><span class="o">=</span><span class="p">(</span><span class="kc">True</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="mf">0.6</span>
+<span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rule</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">ten</span><span class="p">)</span>
 <span class="go">False</span>
 </pre></div>
 </div>
-<p>After 20 items the standard error is still above 0.5, so the length cap is what ends the test:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">twenty</span> <span class="o">=</span> <span class="n">StepContext</span><span class="p">(</span><span class="n">item_bank</span><span class="o">=</span><span class="n">bank</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span> <span class="n">administered_items</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">)),</span> <span class="n">responses</span><span class="o">=</span><span class="p">(</span><span class="kc">True</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)</span>
+<p>If the standard error is still above 0.5 after 20 items, the length cap is what ends the test:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">twenty</span> <span class="o">=</span> <span class="n">StepContext</span><span class="p">(</span>
+<span class="gp">... </span>  <span class="n">item_bank</span><span class="o">=</span><span class="n">bank</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span> <span class="n">administered_items</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">)),</span> <span class="n">responses</span><span class="o">=</span><span class="p">(</span><span class="kc">True</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">20</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="mf">0.6</span>
+<span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rule</span><span class="o">.</span><span class="n">satisfied</span><span class="p">(</span><span class="n">twenty</span><span class="p">)</span>
 <span class="go">(MaxLengthStopper(max_items=20),)</span>
 </pre></div>
@@ -911,8 +915,10 @@ nor greater than the <cite>max_items</cite> of a <a class="reference internal" h
 <dt class="sig sig-object py" id="catsim.stopping.StopRule.satisfied">
 <span class="sig-name descname"><span class="pre">satisfied</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.context.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">BaseStopper</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/catsim/stopping/rule.html#StopRule.satisfied"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.stopping.StopRule.satisfied" title="Link to this definition">#</a></dt>
 <dd><p>Return the stoppers that hold for a session, regardless of <cite>min_items</cite>.</p>
-<p>Called with a finished session’s items and final estimate, it tells which criteria
-ended the session, for example precision or the length cap.</p>
+<p>Called with a finished session’s items, final estimate and its standard error
+(<code class="docutils literal notranslate"><span class="pre">se=session.current_se</span></code>; a context built without it has an infinite error, which no
+precision stopper accepts), it tells which criteria ended the session, for example precision
+or the length cap.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">

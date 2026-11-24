@@ -200,7 +200,7 @@ In {py:mod}`catsim`, item selection procedures can be found in the {py:mod}`cats
 
 #### Proficiency Estimation
 
-Proficiency estimation occurs whenever an examinee answers a new item. Given a dichotomous (binary) response vector and the parameters of the corresponding items that were answered, it is the job of an estimator to return a new value for the examinee's $\hat{\theta}$. This value reflects the examinee's ability, given his or hers answers up until that point of the test.
+Proficiency estimation occurs whenever an examinee answers a new item. Given a dichotomous (binary) response vector and the parameters of the corresponding items that were answered, it is the job of an estimator to return a new value for the examinee's $\hat{\theta}$. This value reflects the examinee's ability, given his or hers answers up until that point of the test. An estimator returns it as an {py:class}`~catsim.context.Estimate`, which also holds the estimate's standard error, by the estimator's own formula, and how many times the estimator evaluated its objective to find it.
 
 In Python, an example of a list that may be used as a valid dichotomous response vector is as follows:
 
@@ -214,7 +214,7 @@ In {py:mod}`catsim`, ability estimation procedures can be found in the {py:mod}`
 
 #### Stopping Criterion
 
-Since items in a CAT are selected on-the-fly, a stopping criterion must be chosen such that, when achieved, no new items are presented to the examinee and the test is deemed finished. These stopping criteria might be achieved when the test reaches a fixed number of items ({py:class}`catsim.stopping.MaxLengthStopper`), when the standard error of estimation ({py:func}`catsim.irt.see`) reaches a lower threshold ({py:class}`catsim.stopping.StandardErrorStopper`), or when a confidence interval for the ability estimate falls within one ability band ({py:class}`catsim.stopping.ConfidenceIntervalStopper`). A {py:class}`catsim.stopping.StopRule` combines several of them, ending the test as soon as any one holds, after an optional minimum number of items.
+Since items in a CAT are selected on-the-fly, a stopping criterion must be chosen such that, when achieved, no new items are presented to the examinee and the test is deemed finished. These stopping criteria might be achieved when the test reaches a fixed number of items ({py:class}`catsim.stopping.MaxLengthStopper`), when the standard error the estimator reports with its estimate (the $SEE$ above for maximum likelihood, the posterior standard deviation for EAP) reaches a lower threshold ({py:class}`catsim.stopping.StandardErrorStopper`), or when a confidence interval for the ability estimate falls within one ability band ({py:class}`catsim.stopping.ConfidenceIntervalStopper`). A {py:class}`catsim.stopping.StopRule` combines several of them, ending the test as soon as any one holds, after an optional minimum number of items.
 
 In {py:mod}`catsim`, test stopping criteria can be found in the {py:mod}`catsim.stopping` module.
 
@@ -236,7 +236,7 @@ In {py:mod}`catsim`, test stopping criteria can be found in the {py:mod}`catsim.
     ===============================  ==============
 ```
 
-The initializer runs once per session and receives the item bank and the run's random generator. The selector, the estimator and the stopper run at every step and receive one {py:class}`~catsim.context.StepContext`, which holds what they may read about the session: the item bank, the generator, the administered items and their responses, the items to pass over, the current estimate and the exposure rates. A custom strategy subclasses the base class and reads the fields it needs. The helpers that make the built-in selectors behave alike are listed in {py:class}`~catsim.selection.BaseSelector`, and {py:mod}`catsim.typing` holds the array types catsim annotates with ({doc}`/adr/0004-explicit-strategy-contracts`). For example, a selector that gives the easiest remaining item, breaking ties the way the built-in selectors do:
+The initializer runs once per session and receives the item bank and the run's random generator. The selector, the estimator and the stopper run at every step and receive one {py:class}`~catsim.context.StepContext`, which holds what they may read about the session: the item bank, the generator, the administered items and their responses, the items to pass over, the current estimate and its standard error, and the exposure rates. A custom strategy subclasses the base class and reads the fields it needs; a custom estimator returns an {py:class}`~catsim.context.Estimate`. The helpers that make the built-in selectors behave alike are listed in {py:class}`~catsim.selection.BaseSelector`, and {py:mod}`catsim.typing` holds the array types catsim annotates with ({doc}`/adr/0004-explicit-strategy-contracts`). For example, a selector that gives the easiest remaining item, breaking ties the way the built-in selectors do:
 
 ```python
 from catsim import StepContext
