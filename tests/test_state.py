@@ -49,6 +49,47 @@ def test_session_state_rejects_a_history_that_does_not_match_its_responses(
     )
 
 
+@pytest.mark.parametrize(
+  "estimates",
+  [
+    pytest.param([0.0], id="bare-theta"),
+    pytest.param([{"theta": 0.0, "se": math.inf, "evaluations": 0}], id="mapping"),
+    pytest.param([Estimate(0.0, math.inf), 0.5], id="one-bare-theta-among-estimates"),
+  ],
+)
+def test_session_state_rejects_estimates_that_are_not_estimate_objects(estimates: list[object]) -> None:
+  """A session restored with bare thetas or mappings in its estimates is rejected when it is built.
+
+  Fails if such a session is accepted: its theta history, its current SE and the engine's next step would fail on it
+  later with an AttributeError.
+  """
+  n_responses = len(estimates) - 1
+
+  with pytest.raises(TypeError, match="needs Estimate entries in estimates"):
+    CatSessionState(
+      session_id=0,
+      estimates=estimates,  # type: ignore[arg-type]
+      administered_item_ids=list(range(n_responses)),
+      responses=[True] * n_responses,
+    )
+
+
+def test_a_snapshot_keeps_the_estimates_and_both_derive_the_history_from_them() -> None:
+  """A snapshot holds the session's estimates, and session and snapshot read the history and current SE from them.
+
+  Fails if the snapshot drops the standard errors or evaluation counts, or if theta_history, current_theta or
+  current_se read another field or another entry than the last.
+  """
+  estimates = [Estimate(0.0, math.inf, 0), Estimate(0.6, 1.1, 14), Estimate(0.4, 0.8, 12)]
+  state = CatSessionState(session_id=0, estimates=estimates, administered_item_ids=[2, 5], responses=[True, False])
+
+  snapshot = state.snapshot()
+
+  assert snapshot.estimates == tuple(estimates)
+  for view in (state, snapshot):
+    assert (view.theta_history, view.current_theta, view.current_se) == ((0.0, 0.6, 0.4), 0.4, 0.8)
+
+
 def test_session_state_turns_a_persisted_stop_reason_back_into_the_enum() -> None:
   """A stop reason restored from storage as its string is the StopReason member again; an unknown one is rejected.
 
