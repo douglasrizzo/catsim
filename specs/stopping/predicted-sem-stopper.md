@@ -1,8 +1,8 @@
 **Status:** Planned
-**Module:** `catsim.stopping.stopping.PredictedSEMStopper` (planned)
+**Module:** `catsim.stopping.bank.PredictedSEMStopper` (planned)
 **Reference:** Choi, Grady, and Dodd (2011)
 **Last validated:** 2026-11-23, against Choi, Grady & Dodd (2011, PubMed Central author manuscript).
-**Implementation guidance:** not yet updated to the 1.0 strategy contract (M22).
+**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in, a single criterion for `StopRule`) on 2026-11-24.
 
 # Predicted-SEM Stopper
 
@@ -105,12 +105,6 @@ information at $\hat{\theta}$, and the rule works with any estimator.
      - ``0.01``
      - Threshold :math:`H^{-}`: before the target is met, the test stops if no remaining item is
        predicted to reduce the standard error by at least this much.
-   * - ``min_items``
-     - ``None``
-     - Minimum number of items before the rule is allowed to stop.
-   * - ``max_items``
-     - ``None``
-     - Hard maximum test length inherited from ``TestLengthStopper``.
 ```
 
 ## Behavioral Contracts
@@ -122,7 +116,7 @@ Any correct implementation must satisfy the following properties:
 3. If the current SE is at or above the target, the criterion stops the test if and only if no remaining item is predicted to reduce it by at least `hypo`.
 4. The stopper needs access to the full item bank because it depends on the remaining items, not only the administered set.
 5. With no administered items, the stopper does not terminate solely from the predicted-SEM criterion.
-6. The inherited minimum-length, maximum-length, and bank-exhaustion guards still apply.
+6. The stopper is a single criterion: the minimum test length and the length cap come from `StopRule`'s `min_items` and a `MaxLengthStopper` it is combined with. With no remaining item, no reduction is possible, and it stops.
 
 ## References
 
@@ -149,102 +143,115 @@ This section is for contributors and agents implementing this technique.
 It is removed when the spec is promoted to "Implemented" status.
 :::
 
-**Proposed location:** `src/catsim/stopping/stopping.py`
+**Proposed location:** `src/catsim/stopping/bank.py`, next to `MinInfoInBankStopper` and the
+`_remaining` helper its spec defines.
 
 **Mock implementation:**
 
 ```python
-# src/catsim/stopping/stopping.py  (alongside MinErrorStopper)
-"""Predicted-SEM stopping rule (Choi, Grady & Dodd, 2011)."""
+# src/catsim/stopping/bank.py (added to the module; the imports are those it does not have yet)
 
-import numpy
-
-from .. import irt
-from .._typing import FloatArray
-from ..item_bank import ItemBank
-from .stopping import TestLengthStopper
+import math
 
 
-class PredictedSEMStopper(TestLengthStopper):
-  """Stop when adding the best remaining item cannot drop SE below the target.
+@dataclass(frozen=True)
+class PredictedSEMStopper(BaseStopper):
+  """Stop once the best remaining item is not predicted to reduce the standard error enough.
+
+  The predicted standard error reduction rule of Choi, Grady and Dodd (2011): once the standard
+  error is below `min_error`, the test stops unless an item would still reduce it by `hyper`;
+  before that, it continues unless no item would reduce it by `hypo`.
 
   Parameters
   ----------
   min_error : float
-      Target standard error of estimation.
-  min_items : int or None
-      Minimum number of items before the test can stop.
-  max_items : int or None
-      Maximum number of items before the test must stop.
+      Target standard error. Must be positive.
+  hyper : float, optional
+      Reduction that keeps the test going once the target is met. Must not be negative. Default
+      is 0.03.
+  hypo : float, optional
+      Reduction below which the test stops before the target is met. Must not be negative.
+      Default is 0.01.
+
+  Raises
+  ------
+  ValueError
+      If `min_error` is not positive, or `hyper` or `hypo` is negative (NaN included).
   """
 
-  def __init__(
-    self,
-    min_error: float,
-    min_items: int | None = None,
-    max_items: int | None = None,
-  ) -> None:
-    if min_error <= 0:
-      raise ValueError(f"min_error must be positive, got {min_error}")
-    super().__init__(min_items=min_items, max_items=max_items)
-    self._min_error = float(min_error)
+  min_error: float
+  hyper: float = 0.03
+  hypo: float = 0.01
 
-  def __str__(self) -> str:
-    return f"PredictedSEMStopper(min_error={self._min_error})"
+  def __post_init__(self) -> None:
+    """Validate the target and the two thresholds."""
+    # written so that NaN fails the checks too
+    if not self.min_error > 0:
+      msg = f"min_error must be positive, got {self.min_error}"
+      raise ValueError(msg)
+    if not (self.hyper >= 0 and self.hypo >= 0):
+      msg = f"hyper and hypo must not be negative, got {self.hyper} and {self.hypo}"
+      raise ValueError(msg)
 
-  # Override the full stop() because we need access to the item bank to look up
-  # the most informative *remaining* item, not just the parameters of administered ones.
-  def stop(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    theta: float,
-  ) -> bool:
-    # Hard stops + min_items handled by the base class
-    base_decision = super().stop(item_bank, administered_items, theta)
-    if base_decision is True:
-      return True
+  def stop(self, context: StepContext) -> bool:
+    """Return whether the largest predicted reduction of the standard error is below its threshold.
 
-    if not administered_items:
+    Parameters
+    ----------
+    context : StepContext
+        The session to check.
+
+    Returns
+    -------
+    bool
+        True if the best remaining item is predicted to reduce the standard error by less than
+        `hyper` when it is below `min_error`, or by less than `hypo` otherwise, or if no item
+        remains; False otherwise, and always False before the first item.
+    """
+    if not context.administered_items:
       return False
-
-    administered_arr = item_bank.get_items(administered_items)
-    current_info = irt.test_info(theta, administered_arr)
-    current_sem = numpy.inf if current_info <= 0 else 1.0 / numpy.sqrt(current_info)
-    if current_sem <= self._min_error:
+    candidates = _remaining(context)
+    # Contract 6: with no item left, nothing can reduce the error, whatever the thresholds.
+    if candidates.size == 0:
       return True
-
-    # Predicted SEM: pretend the most informative remaining item is added next.
-    remaining_mask = numpy.ones(item_bank.n_items, dtype=bool)
-    remaining_mask[administered_items] = False
-    if not remaining_mask.any():
-      return True
-    remaining_info = item_bank.information(theta)[remaining_mask]
-    best_remaining_info = float(remaining_info.max())
-
-    predicted_info = current_info + best_remaining_info
-    predicted_sem = numpy.inf if predicted_info <= 0 else 1.0 / numpy.sqrt(predicted_info)
-    return predicted_sem > self._min_error
-
-  def _check_stopping_criterion(  # noqa: PLR6301
-    self,
-    administered_items: FloatArray,  # noqa: ARG002
-    theta: float,  # noqa: ARG002
-  ) -> bool:
-    # Logic lives in stop() because we need the item bank, not just admin params.
-    return False
+    theta, item_bank = context.theta, context.item_bank
+    # Open Question 1: the spec predicts from Fisher information at the estimate, for the current
+    # error as for the predicted one. Judging the estimator's own error would start from
+    # current = context.se and information = 1 / context.se**2; the posterior-variance prediction
+    # would replace `predicted` with MEPV's expected posterior variance.
+    information = irt.test_info(theta, item_bank.get_items(context.administered_items))
+    current = 1 / math.sqrt(information) if information > 0 else math.inf
+    best = float(irt.inf_hpc(theta, item_bank.get_items(candidates)).max())
+    predicted = 1 / math.sqrt(information + best) if information + best > 0 else math.inf
+    # Where no remaining item has information at the estimate, none can reduce the error.
+    reduction = current - predicted if math.isfinite(predicted) else 0.0
+    return reduction < (self.hyper if current < self.min_error else self.hypo)
 ```
 
 **Implementation notes:**
 
-- Override `stop()` instead of `_check_stopping_criterion()` because the rule needs the remaining items, not only the administered-item matrix.
-- This stopper subsumes `MinErrorStopper` by including the immediate `current_sem <= target` check.
-- No new dependencies are required.
-
-**Dependencies:** none
+- The sketch implements the spec's PSER rule (Definition), with the Fisher-information prediction
+  the spec assumes for Open Question 1. The comment above the computation marks the two lines the
+  other answers change. Under the Fisher choice the stopper does not read `context.se`, so with
+  EAP or MAP its current error is not the one `StandardErrorStopper` judges; that difference is
+  what the open question weighs.
+- The rule replaces `StandardErrorStopper` rather than adding to it: both branches compare with
+  the target. Combine it with a cap and a minimum length:
+  `StopRule(PredictedSEMStopper(0.3), MaxLengthStopper(15), min_items=3)`, Choi et al.'s 3 to 15
+  items.
+- `min_error` is the spec's name for the target; `StandardErrorStopper` calls its target
+  `max_se`. Choose one name for both when implementing.
+- A stopper is pure (`BaseStopper`): the same context gives the same answer.
 
 **Testing notes:**
 
-- A deliberately weak bank with an unreachable target SE should stop after a small constant number of items rather than running to `max_items`.
-- A well-targeted bank should produce stopping lengths similar to `MinErrorStopper` at the same threshold.
-- Exhausted-bank and `min_items` behavior should still match `TestLengthStopper`.
+- Hand-worked, on a bank of identical items with $a = 1$, $b = \hat\theta$ (information $1/4$
+  each): after $n$ items the error is $2/\sqrt{n}$ and the reduction $2/\sqrt{n} - 2/\sqrt{n+1}$.
+  With the defaults, it is $0.01003$ after 21 items (the test continues) and $0.00937$ after 22
+  (it stops, Contract 3, with the error still $0.426$, above the $0.3$ target).
+- Contract 1 and 2: after 45 such items the error is $0.298 < 0.3$; with only them remaining the
+  reduction is $0.0033 < 0.03$ and the test stops, and with one remaining item of information 4 at
+  $\hat\theta$ the reduction is $0.042$ and it continues.
+- Contract 5: no administered items never stop.
+- Contract 6: with every item administered, it stops.
+- Parameter validation, NaN included.
