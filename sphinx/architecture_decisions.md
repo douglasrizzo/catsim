@@ -7,12 +7,9 @@ This section captures durable technical decisions that shaped the current archit
 :maxdepth: 1
 
 adr/0001-explicit-cat-engine
-adr/0002-remove-legacy-simulator-apis
 adr/0003-runtime-state-ownership
 adr/0004-explicit-strategy-contracts
 adr/0005-immutable-step-results
-adr/0006-versioned-tutorial-notebooks
-adr/0007-release-gated-by-docs
 adr/0008-random-tie-breaking
 adr/0009-ability-scale-and-extreme-patterns
 adr/0010-published-progressive-schedule
