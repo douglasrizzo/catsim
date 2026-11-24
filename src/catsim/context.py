@@ -122,8 +122,27 @@ class Estimate:
       How many times the estimator evaluated its objective (the likelihood, the posterior or the
       estimating equation) for this estimate, for comparing the cost of estimators. None where the
       count has no meaning. Default is None.
+
+  Raises
+  ------
+  ValueError
+      If ``theta`` is not finite, ``se`` is negative or NaN, or ``evaluations`` is negative.
   """
 
   theta: float
   se: float
   evaluations: int | None = None
+
+  def __post_init__(self) -> None:
+    """Reject an estimate that the stoppers and the session could not use."""
+    # A NaN error would make every comparison False: a confidence-interval stopper would stop at
+    # once and a standard-error stopper never.
+    if not math.isfinite(self.theta):
+      msg = f"theta must be finite, got {self.theta}"
+      raise ValueError(msg)
+    if not self.se >= 0:
+      msg = f"se must be non-negative (math.inf allowed), got {self.se}"
+      raise ValueError(msg)
+    if self.evaluations is not None and self.evaluations < 0:
+      msg = f"evaluations must be non-negative, got {self.evaluations}"
+      raise ValueError(msg)

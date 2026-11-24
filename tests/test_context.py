@@ -5,7 +5,7 @@ import dataclasses
 import numpy as np
 import pytest
 
-from catsim import ItemBank, StepContext
+from catsim import Estimate, ItemBank, StepContext
 
 BANK = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0], [1.0, -1.0, 0.0, 1.0]]))
 
@@ -68,3 +68,19 @@ def test_rejects_item_indices_outside_the_bank(field: str, index: int) -> None:
   responses = (True,) if field == "administered_items" else ()
   with pytest.raises(ValueError, match=f"{field} must hold item indices between 0 and 2"):
     StepContext(item_bank=BANK, rng=np.random.default_rng(0), responses=responses, **{field: (index,)})
+
+
+@pytest.mark.parametrize(
+  ("fields", "match"),
+  [
+    pytest.param({"theta": float("nan"), "se": 0.3}, "theta must be finite", id="nan_theta"),
+    pytest.param({"theta": float("inf"), "se": 0.3}, "theta must be finite", id="infinite_theta"),
+    pytest.param({"theta": 0.0, "se": float("nan")}, "se must be non-negative", id="nan_se"),
+    pytest.param({"theta": 0.0, "se": -0.1}, "se must be non-negative", id="negative_se"),
+    pytest.param({"theta": 0.0, "se": 0.3, "evaluations": -1}, "evaluations must be non-negative", id="negative_count"),
+  ],
+)
+def test_estimate_rejects_values_no_stopper_can_judge(fields: dict[str, float], match: str) -> None:
+  """A NaN error fails every comparison: a confidence-interval stopper then stops at once, and an SE stopper never."""
+  with pytest.raises(ValueError, match=match):
+    Estimate(**fields)
