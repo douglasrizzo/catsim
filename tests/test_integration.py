@@ -7,10 +7,19 @@ from collections.abc import Callable
 import numpy as np
 import pytest
 
-from catsim.engine import CatEngine, RunContext
+from catsim import (
+  CatEngine,
+  Estimate,
+  ItemBank,
+  SimulatedResponseProvider,
+  SimulationResult,
+  SimulationRunner,
+  StepContext,
+  StopReason,
+)
+from catsim.compat import override
 from catsim.estimation import BaseEstimator, EAPEstimator, MAPEstimator, NumericalSearchEstimator
 from catsim.initialization import FixedPointInitializer, UniformInitializer
-from catsim.item_bank import ItemBank
 from catsim.selection import (
   AStratBBlockSelector,
   AStratSelector,
@@ -26,8 +35,6 @@ from catsim.selection import (
   The54321Selector,
   UrrySelector,
 )
-from catsim.simulation import SimulatedResponseProvider, SimulationResult, SimulationRunner
-from catsim.state import ExposureTracker, StopReason
 from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthStopper, StandardErrorStopper, StopRule
 
 
@@ -47,7 +54,7 @@ def run_simulation(
   true_thetas = np.random.default_rng(seed).normal(0, 1, examinees)
   result = SimulationRunner(engine).run(true_thetas, rng=seed)
   assert len(result.sessions) == examinees
-  assert all(session.is_stopped for session in result.sessions)
+  assert all(session.stop_reason is not None for session in result.sessions)
   assert result.exposure_counts.sum() == sum(len(session.administered_items) for session in result.sessions)
   return result
 
@@ -166,28 +173,47 @@ def test_a_session_whose_stopper_never_holds_ends_when_the_bank_runs_out() -> No
   assert all(sorted(session.administered_items) == [0, 1, 2, 3, 4] for session in result.sessions)
 
 
-@pytest.mark.integration
-def test_stepping_the_engine_by_hand_reproduces_a_simulation_runner_session() -> None:
-  """A session stepped through CatEngine matches the one SimulationRunner produces from the same seed.
+class DrawingEstimator(BaseEstimator):
+  """Estimator stub whose estimate is a draw from its context's generator."""
 
-  The randomesque selector and the simulated responses draw from the same generator in turn, so the two
-  paths agree only if they make the same draws in the same order.
+  @override
+  def estimate(self, context: StepContext) -> Estimate:
+    """Return a normal draw as the estimate."""
+    return Estimate(theta=float(context.rng.normal()), se=1.0)
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+  "make_estimator",
+  [pytest.param(NumericalSearchEstimator, id="numerical"), pytest.param(DrawingEstimator, id="drawing")],
+)
+def test_stepping_the_engine_by_hand_reproduces_a_simulation_runner_session(
+  make_estimator: Callable[[], BaseEstimator],
+) -> None:
+  """A session stepped through start, select and answer matches the one SimulationRunner produces from the same seed.
+
+  The randomesque selector and the simulated responses draw from the same generator in turn, so the two paths agree
+  only if they make the same draws in the same order: the runner's unchecked steps must be the public ones. Fails for
+  an estimator that draws if the runner gives it the run's generator, which answer does not.
   """
   item_bank = ItemBank.generate(40, rng=42)
 
-  def components() -> tuple[FixedPointInitializer, RandomesqueSelector, NumericalSearchEstimator, MaxLengthStopper]:
-    return FixedPointInitializer(0.0), RandomesqueSelector(3), NumericalSearchEstimator(), MaxLengthStopper(6)
+  def engine() -> CatEngine:
+    return CatEngine(
+      item_bank, FixedPointInitializer(0.0), RandomesqueSelector(3), make_estimator(), MaxLengthStopper(6)
+    )
 
-  batched = SimulationRunner(CatEngine(item_bank, *components())).run([0.3], rng=7).sessions[0]
+  batched = SimulationRunner(engine()).run([0.3], rng=7).sessions[0]
 
-  engine = CatEngine(item_bank, *components())
-  context = RunContext(rng=np.random.default_rng(7), exposure_tracker=ExposureTracker(item_bank.n_items))
-  manual = engine.start_session(session_id=0, context=context, true_theta=0.3)
-  # step one item at a time, as an interactive caller would, until a step reports the session stopped
-  while not engine.step(manual, SimulatedResponseProvider(), context).stopped:
-    pass
+  manual_engine = engine()
+  rng = np.random.default_rng(7)
+  examinee = SimulatedResponseProvider(0.3)
+  manual = manual_engine.start(rng=rng)
+  # one item at a time, as an interactive caller would, until select proposes none
+  while (selection := manual_engine.select(manual, rng=rng)).item is not None:
+    response = examinee.answer(item_bank, selection.item, selection.session, rng)
+    manual = manual_engine.answer(selection.session, selection.item, response)
+  manual = selection.session
 
-  assert manual.administered_items == batched.administered_items
-  assert manual.responses == batched.responses
-  assert manual.theta_history == pytest.approx(batched.theta_history)
-  assert manual.stop_reason == batched.stop_reason == StopReason.STOPPER
+  assert manual == batched
+  assert manual.stop_reason is StopReason.STOPPER

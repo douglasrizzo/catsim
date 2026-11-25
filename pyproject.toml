@@ -361,8 +361,9 @@ layers = [
   "simulation",
   "engine",
   "selection | estimation | initialization | stopping | exposure",  # "|": siblings that never import each other
-  "state",
-  "context",  # StepContext: below state and the strategies, which read it, and above the domain
+  "session",  # Session: built by the engine, read by the runner and the plots, never by a strategy
+  "context",  # StepContext: below the session and the strategies, which read it, and above the domain
+  "checks",  # the input checks of Session, StepContext and the engine's steps (ADR-0009)
   "metrics",
   "item_bank",
   "irt",
@@ -390,7 +391,7 @@ source_modules = [
   "catsim.stopping",
   "catsim.exposure",
 ]
-forbidden_modules = ["catsim.state", "catsim.engine", "catsim.simulation", "catsim.plot"]
+forbidden_modules = ["catsim.session", "catsim.engine", "catsim.simulation", "catsim.plot"]
 
 [[tool.importlinter.contracts]]
 id = "plot-only-matplotlib"
@@ -403,8 +404,9 @@ source_modules = [
   "catsim.irt",
   "catsim.item_bank",
   "catsim.metrics",
+  "catsim.checks",
   "catsim.context",
-  "catsim.state",
+  "catsim.session",
   "catsim.engine",
   "catsim.simulation",
   "catsim.selection",

@@ -8,14 +8,12 @@ from hypothesis import example, given, settings
 from hypothesis import strategies as st
 from hypothesis.strategies import DrawFn, composite
 
-from catsim import SimulatedResponseProvider
-from catsim.engine import CatEngine, RunContext
+from catsim import CatEngine, SimulationRunner, StopReason
 from catsim.estimation import NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
 from catsim.initialization import FixedPointInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import AStratBBlockSelector, AStratSelector, MaxInfoBBlockSelector, MaxInfoStratSelector
-from catsim.state import StopReason
 from catsim.stopping import MaxLengthStopper
 from tests.contexts import make_context
 
@@ -208,10 +206,7 @@ def test_a_session_administers_test_size_items(
     NumericalSearchEstimator(),
     MaxLengthStopper(test_size),
   )
-  context = RunContext(rng=np.random.default_rng(seed))
-  session = engine.start_session(0, context, true_theta=true_theta)
-
-  engine.run_session(session, SimulatedResponseProvider(), context)
+  session = SimulationRunner(engine).run([true_theta], rng=seed).sessions[0]
 
   assert session.stop_reason == StopReason.STOPPER
-  assert session.administered_count == test_size
+  assert len(session.administered_items) == test_size

@@ -20,7 +20,7 @@ except ImportError as error:
 
 from . import irt
 from .item_bank import ItemBank
-from .state import CatSessionSnapshot, CatSessionState
+from .session import Session
 from .typing import FloatArray
 
 
@@ -299,9 +299,10 @@ def _check_exposure_inputs(
 
 
 def session_progress(
-  session: CatSessionState | CatSessionSnapshot,
+  session: Session,
   item_bank: ItemBank,
   *,
+  true_theta: float | None = None,
   ax: Axes | None = None,
   title: str | None = None,
 ) -> Axes:
@@ -309,7 +310,7 @@ def session_progress(
 
   The x axis counts the items administered. The left y axis shows the ability estimate after each
   response, with a band of one standard error on each side, the difficulty of each administered
-  item and, when the session has one, the true ability. The right y axis shows the standard error
+  item and, when it is given, the true ability. The right y axis shows the standard error
   each estimate was recorded with, the one precision-based stoppers judge. Infinite standard
   errors, such as the initial estimate's, are left out.
 
@@ -335,15 +336,18 @@ def session_progress(
       true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)
       result = SimulationRunner(engine).run(true_thetas, rng=0)
       fig, ax = plt.subplots(figsize=(8, 5))
-      plot.session_progress(result.sessions[0], result.item_bank, ax=ax)
+      plot.session_progress(result.sessions[0], result.item_bank, true_theta=result.true_thetas[0], ax=ax)
       plt.show()
 
   Parameters
   ----------
-  session : CatSessionState or CatSessionSnapshot
-      The session to plot, such as an entry of ``SimulationResult.sessions`` or a live session.
+  session : Session
+      The session to plot, such as an entry of ``SimulationResult.sessions``.
   item_bank : ItemBank
       The item bank the session's items come from.
+  true_theta : float or None, optional
+      The examinee's true ability, drawn as a horizontal line, such as an entry of
+      ``SimulationResult.true_thetas``. Default is None, which draws none.
   ax : matplotlib.axes.Axes or None, optional
       The axes to draw on. Default is None, which draws on the axes of a new figure.
   title : str or None, optional
@@ -382,8 +386,8 @@ def session_progress(
     xs[finite], (thetas - ses)[finite], (thetas + ses)[finite], color="C0", alpha=0.2, label=r"$\hat{\theta} \pm SE$"
   )
   ax.plot(xs[1:], difficulties, "o", color="C1", label="Item difficulty")
-  if session.true_theta is not None:
-    ax.axhline(session.true_theta, color="black", linestyle="--", label=r"True ability $\theta$")
+  if true_theta is not None:
+    ax.axhline(true_theta, color="black", linestyle="--", label=r"True ability $\theta$")
   se_axes.plot(xs[finite], ses[finite], color="C2", label="Standard error")
 
   ax.set_xlabel("Items administered")

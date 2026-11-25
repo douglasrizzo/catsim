@@ -1,4 +1,4 @@
-"""Hypothesis stateful tests for :class:`catsim.engine.CatEngine` orchestration."""
+"""Hypothesis stateful tests for :class:`catsim.CatEngine`: sessions stepped through select and answer in any order."""
 
 from __future__ import annotations
 
@@ -7,40 +7,20 @@ from dataclasses import dataclass
 import numpy as np
 from hypothesis import settings
 from hypothesis import strategies as st
-from hypothesis.stateful import (
-  RuleBasedStateMachine,
-  initialize,
-  invariant,
-  rule,
-  run_state_machine_as_test,
-)
+from hypothesis.stateful import RuleBasedStateMachine, initialize, invariant, rule, run_state_machine_as_test
 
-from catsim import Estimate, StepContext
+from catsim import CatEngine, Estimate, ItemBank, Session, StepContext, StopReason
 from catsim.compat import override
-from catsim.engine import CatEngine, RunContext
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
 from catsim.exposure import BaseExposureControl
 from catsim.initialization import FixedPointInitializer
-from catsim.item_bank import ItemBank
 from catsim.selection import BaseSelector, MaxInfoSelector
-from catsim.state import CatSessionState, ExposureTracker, StopReason
 from catsim.stopping import MaxLengthStopper
 
 
 @dataclass
-class FixedResponseProvider:
-  """Deterministic response provider for state machine runs."""
-
-  response: bool
-
-  def answer(self, item_bank, item_id, session, rng) -> bool:  # noqa: ARG002
-    """Return the fixed response."""
-    return self.response
-
-
-@dataclass
-class RecordingEstimator(BaseEstimator):
+class FixedEstimator(BaseEstimator):
   """Estimator stub returning a fixed theta."""
 
   theta: float
@@ -72,194 +52,126 @@ class QueueOrderSelector(BaseSelector):
     raise NoItemsAvailableError(msg)
 
 
-class AlternatingResponseProvider:
-  """Responses alternate False/True across administrations."""
-
-  def __init__(self) -> None:
-    self._count = 0
-
-  def answer(self, item_bank, item_id, session, rng) -> bool:  # noqa: ARG002
-    """Answer incorrectly, then correctly, in turn."""
-    self._count += 1
-    return self._count % 2 == 0
-
-
 class RandomlyDecliningControl(BaseExposureControl):
-  """Exposure control that declines each proposal with a fixed probability, drawn from the run's generator."""
+  """Exposure control that declines each proposal with a fixed probability, drawn from the call's generator."""
 
   def __init__(self, probability: float) -> None:
     self._probability = probability
 
   @override
-  def accept(self, context, item_id) -> bool:
+  def accept(self, context: StepContext, item: int) -> bool:
     return bool(context.rng.random() >= self._probability)
 
 
-_ORCHESTRATION_SETTINGS = settings(
-  max_examples=25,
-  stateful_step_count=60,
-)
-
-_INTEGRATION_SETTINGS = settings(
-  max_examples=10,
-  stateful_step_count=40,
-)
+_ORCHESTRATION_SETTINGS = settings(max_examples=25, stateful_step_count=60)
+_INTEGRATION_SETTINGS = settings(max_examples=10, stateful_step_count=40)
 
 
-class CatEngineOrchestrationMachine(RuleBasedStateMachine):
-  """Layer A: deterministic stubs, random legal step counts and selection permutations."""
+class SteppedSessionMachine(RuleBasedStateMachine):
+  """One session stepped through select and answer, by an engine whose stopper alone can end it."""
+
+  engine: CatEngine
+  max_items: int
+
+  def __init__(self) -> None:
+    super().__init__()
+    self.rng = np.random.default_rng(12345)
+    self.responses_given = 0
+
+  def respond(self) -> bool:
+    """Answer incorrectly, then correctly, in turn."""
+    self.responses_given += 1
+    return self.responses_given % 2 == 0
+
+  def begin(self) -> None:
+    """Start the session, which begins running at the initializer's estimate."""
+    # Starting it in the initializer makes every rule valid at every step; rules guarded by mutually exclusive
+    # conditions made Hypothesis discard most rule draws.
+    self.session: Session = self.engine.start(rng=self.rng)
+    assert self.session.stop_reason is None
+    assert self.session.theta_history == (0.0,)
+
+  @rule()
+  def step(self) -> None:
+    """A step on a stopped session changes nothing; a running one records one item with its response and estimate.
+
+    Fails if a stopped session is given another item or changes its stop reason, if a step records an item without its
+    estimate or response, if the new session is not a session after the old one, or if the session stops before
+    max_items items or for a reason other than the stopper.
+    """
+    before = self.session
+    selection = self.engine.select(before, rng=self.rng)
+    if before.stop_reason is not None:
+      assert selection.item is None
+      assert selection.session is before
+      return
+    assert selection.item is not None
+    self.session = self.engine.answer(selection.session, selection.item, self.respond())
+    assert self.session.administered_items == (*before.administered_items, selection.item)
+    assert self.session.estimates[:-1] == before.estimates
+    assert np.isfinite(self.session.current_theta)
+    if self.session.stop_reason is not None:
+      assert self.session.stop_reason is StopReason.STOPPER
+      assert len(self.session.administered_items) == self.max_items
+
+  @invariant()
+  def session_lists_consistent(self) -> None:
+    """The administered items are distinct items of the bank, each with one response and one estimate after the first.
+
+    Fails if a step administers an item twice or from outside the bank, records an item without its response or
+    estimate, or ends the session for a reason other than the stopper.
+    """
+    s = self.session
+    assert all(0 <= item < self.engine.item_bank.n_items for item in s.administered_items)
+    assert len(s.responses) == len(s.administered_items)
+    assert len(set(s.administered_items)) == len(s.administered_items)
+    assert len(s.theta_history) == 1 + len(s.administered_items)
+    assert s.stop_reason in {None, StopReason.STOPPER}
+
+
+class StubbedEngineMachine(SteppedSessionMachine):
+  """Deterministic stubs, random test lengths and selection permutations."""
 
   @initialize(
     selection_order=st.permutations((0, 1, 2, 3, 4, 5, 6, 7)),
     max_items=st.integers(min_value=4, max_value=7),
   )
   def init_engine(self, selection_order: tuple[int, ...], max_items: int) -> None:
-    """Start a session with stub strategies, which begins unstopped at the initializer's estimate."""
-    self.item_bank = ItemBank.generate(8, rng=0)
-    # max_items stays below the bank size, so only the stopper can end the session
+    """Start a session with stub strategies, on an 8-item bank that outlasts the test."""
     self.max_items = max_items
-    self.selector = QueueOrderSelector(selection_order)
     self.engine = CatEngine(
-      self.item_bank,
+      ItemBank.generate(8, rng=0),
       FixedPointInitializer(0.0),
-      self.selector,
-      RecordingEstimator(theta=0.5),
+      QueueOrderSelector(selection_order),
+      FixedEstimator(theta=0.5),
       MaxLengthStopper(max_items),
     )
-    self.context = RunContext(rng=np.random.default_rng(12345))
-    self.response_provider = FixedResponseProvider(True)
-    # Start the session during initialization so every rule is valid at every step; rules
-    # guarded by mutually exclusive conditions made Hypothesis discard most rule draws.
-    self.session: CatSessionState = self.engine.start_session(
-      session_id=0,
-      context=self.context,
-      true_theta=0.0,
-    )
-    assert self.session.stop_reason is None
-    assert self.session.current_theta == 0.0
-    assert len(self.session.theta_history) == 1
-
-  @rule()
-  def step(self) -> None:
-    """Stepping a stopped session changes nothing; a live step records one item with its response and estimate.
-
-    Fails if a stopped session administers another item or changes its stop reason, if a step records an item
-    without its estimate or response, or if the session stops before max_items items or for a reason other than the
-    stopper.
-    """
-    prev_hist = len(self.session.theta_history)
-    prev_admin = len(self.session.administered_items)
-    was_stopped = self.session.is_stopped
-    prev_reason = self.session.stop_reason
-    result = self.engine.step(self.session, self.response_provider, self.context)
-    if was_stopped:
-      # Stepping a terminal session must be a no-op.
-      assert result.stopped is True
-      assert result.selected_item_id is None
-      assert len(self.session.administered_items) == prev_admin
-      assert self.session.stop_reason == prev_reason
-    elif not self.session.is_stopped:
-      if result.selected_item_id is not None:
-        assert len(self.session.theta_history) == prev_hist + 1
-        assert len(self.session.administered_items) == prev_admin + 1
-        assert result.response is True
-    else:
-      assert result.stopped is True
-      assert self.session.stop_reason is StopReason.STOPPER
-      assert self.session.administered_count == self.max_items
-
-  @invariant()
-  def session_lists_consistent(self) -> None:
-    """The administered items are distinct items of the bank, each with one response and one estimate after the first.
-
-    Fails if a step administers an item twice or from outside the bank, or records an item without its response or
-    estimate, or if the session stops for a reason other than the stopper.
-    """
-    s = self.session
-    n = self.item_bank.n_items
-    for i in s.administered_items:
-      assert 0 <= int(i) < n
-    assert len(s.responses) == len(s.administered_items)
-    assert len(set(s.administered_items)) == len(s.administered_items)
-    assert len(s.theta_history) == 1 + len(s.administered_items)
-    assert s.stop_reason in {None, StopReason.STOPPER}
+    self.begin()
 
 
-class CatEngineIntegrationMachine(RuleBasedStateMachine):
-  """Layer B: real MaxInfoSelector, bounded numerical estimator, alternating responses."""
+class RealStrategiesMachine(SteppedSessionMachine):
+  """The maximum-information selector and the numerical estimator on random banks."""
 
-  @initialize(
-    bank_seed=st.integers(min_value=0, max_value=500),
-    max_items=st.integers(min_value=3, max_value=5),
-  )
+  @initialize(bank_seed=st.integers(min_value=0, max_value=500), max_items=st.integers(min_value=3, max_value=5))
   def init_engine(self, bank_seed: int, max_items: int) -> None:
-    """Start a session with the maximum-information selector and the numerical estimator."""
-    self.item_bank = ItemBank.generate(12, rng=bank_seed)
-    # max_items stays below the bank size, so only the stopper can end the session
+    """Start a session with the real strategies, on a 12-item bank that outlasts the test."""
     self.max_items = max_items
     self.engine = CatEngine(
-      self.item_bank,
+      ItemBank.generate(12, rng=bank_seed),
       FixedPointInitializer(0.0),
       MaxInfoSelector(),
       NumericalSearchEstimator(),
       MaxLengthStopper(max_items),
     )
-    self.context = RunContext(rng=np.random.default_rng(999))
-    self.response_provider = AlternatingResponseProvider()
-    self.session: CatSessionState = self.engine.start_session(
-      session_id=0,
-      context=self.context,
-      true_theta=0.25,
-    )
-    assert self.session.stop_reason is None
-
-  @rule()
-  def step(self) -> None:
-    """With the real strategies, a step behaves as with the stubs and leaves a finite estimate.
-
-    Fails if a stopped session administers another item or changes its stop reason, if a step records an item
-    without its estimate, if the estimator returns a non-finite estimate, or if the session stops before max_items
-    items or for a reason other than the stopper.
-    """
-    prev_hist = len(self.session.theta_history)
-    prev_admin = len(self.session.administered_items)
-    was_stopped = self.session.is_stopped
-    prev_reason = self.session.stop_reason
-    result = self.engine.step(self.session, self.response_provider, self.context)
-    if was_stopped:
-      assert result.stopped is True
-      assert result.selected_item_id is None
-      assert len(self.session.administered_items) == prev_admin
-      assert self.session.stop_reason == prev_reason
-    elif not self.session.is_stopped:
-      if result.selected_item_id is not None:
-        assert len(self.session.theta_history) == prev_hist + 1
-        assert len(self.session.administered_items) == prev_admin + 1
-        assert np.isfinite(self.session.current_theta)
-    else:
-      assert result.stopped is True
-      assert self.session.stop_reason is StopReason.STOPPER
-      assert self.session.administered_count == self.max_items
-
-  @invariant()
-  def session_lists_consistent(self) -> None:
-    """The administered items are distinct items of the bank, each with one response and one estimate after the first.
-
-    Fails if a step administers an item twice or from outside the bank, or records an item without its response or
-    estimate, or if the session stops for a reason other than the stopper.
-    """
-    s = self.session
-    n = self.item_bank.n_items
-    for i in s.administered_items:
-      assert 0 <= int(i) < n
-    assert len(s.responses) == len(s.administered_items)
-    assert len(set(s.administered_items)) == len(s.administered_items)
-    assert len(s.theta_history) == 1 + len(s.administered_items)
-    assert s.stop_reason in {None, StopReason.STOPPER}
+    self.begin()
 
 
 class ExposureControlMachine(RuleBasedStateMachine):
-  """Sessions that share one tracker under a control that declines at random, stepped and reselected in any order."""
+  """Sessions under a control that declines at random, stepped, reselected and started in any order.
+
+  The machine plays an application that counts each session's proposals as ADR-0011 tells it to: the items a
+  selection declined, and the item it administers.
+  """
 
   @initialize(
     probability=st.floats(min_value=0.0, max_value=0.9),
@@ -268,45 +180,64 @@ class ExposureControlMachine(RuleBasedStateMachine):
   )
   def init_engine(self, probability: float, seed: int, max_items: int) -> None:
     """Start one session of an engine whose exposure control declines each proposal with the drawn probability."""
-    self.item_bank = ItemBank.generate(8, rng=0)
     self.engine = CatEngine(
-      self.item_bank,
+      ItemBank.generate(8, rng=0),
       FixedPointInitializer(0.0),
       MaxInfoSelector(),
-      RecordingEstimator(theta=0.5),
+      FixedEstimator(theta=0.5),
       MaxLengthStopper(max_items),
       exposure_control=RandomlyDecliningControl(probability),
     )
-    self.tracker = ExposureTracker(self.item_bank.n_items)
-    self.context = RunContext(rng=np.random.default_rng(seed), exposure_tracker=self.tracker)
-    self.sessions = [self.engine.start_session(session_id=0, context=self.context)]
+    self.rng = np.random.default_rng(seed)
+    self.sessions: list[Session] = []
+    self.proposals: list[np.ndarray] = []
+    self.start_another_session()
+
+  def _select(self) -> tuple[int | None, Session]:
+    """Select for the newest session, count the declines and keep the session the selection returned."""
+    selection = self.engine.select(self.sessions[-1], rng=self.rng)
+    self.proposals[-1][list(selection.declined)] += 1
+    self.sessions[-1] = selection.session
+    return selection.item, selection.session
 
   @rule()
   def step(self) -> None:
-    """Step the newest session, whose control may decline proposals first."""
-    self.engine.step(self.sessions[-1], FixedResponseProvider(True), self.context)
+    """Select for the newest session and answer the item, counting it as a proposal."""
+    item, session = self._select()
+    if item is not None:
+      self.proposals[-1][item] += 1
+      self.sessions[-1] = self.engine.answer(session, item, True)
 
   @rule()
   def select_without_answering(self) -> None:
-    """Select an item for the newest session and never answer it, as on a page reload."""
-    self.engine.select_next(self.sessions[-1], self.context)
+    """Select and keep the session, but never answer the item shown, as on a page reload."""
+    self._select()
+
+  @rule()
+  def select_and_discard(self) -> None:
+    """Select and keep nothing, as an application that loses the selection before storing it."""
+    self.engine.select(self.sessions[-1], rng=self.rng)
 
   @rule()
   def start_another_session(self) -> None:
-    """Start another session on the shared exposure tracker."""
-    self.sessions.append(self.engine.start_session(session_id=len(self.sessions), context=self.context))
+    """Start another session."""
+    self.sessions.append(self.engine.start(rng=self.rng))
+    self.proposals.append(np.zeros(self.engine.item_bank.n_items, dtype=int))
 
   @invariant()
   def proposals_are_administrations_plus_declines(self) -> None:
-    """Each item's proposals are its administrations plus its declines, and no more than the sessions started.
+    """Each session's counted proposals are its administered items plus its excluded ones, each at most once.
 
-    Fails if a decline is not recorded as an exclusion of the session, or if a selection left unanswered is counted,
-    so that its reselection counts the item twice.
+    Fails if a selection's declines are not its session's new exclusions (or the reverse), or if an item is proposed
+    twice for one examinee, as a selector reproposing a declined item, or a reselection counting a decline again,
+    would make it; Sympson-Hetter's calibration needs each item proposed at most once per examinee.
     """
-    declined = [item_id for session in self.sessions for item_id in session.excluded_items]
-    declines = np.bincount(declined, minlength=self.item_bank.n_items)
-    assert np.array_equal(self.tracker.proposals, self.tracker.counts + declines)
-    assert int(np.max(self.tracker.proposals)) <= self.tracker.n_sessions
+    for session, proposals in zip(self.sessions, self.proposals, strict=True):
+      expected = np.bincount(
+        [*session.administered_items, *session.excluded_items], minlength=self.engine.item_bank.n_items
+      )
+      assert proposals.tolist() == expected.tolist()
+      assert int(proposals.max()) <= 1
 
   @invariant()
   def no_item_is_both_administered_and_excluded(self) -> None:
@@ -319,29 +250,29 @@ class ExposureControlMachine(RuleBasedStateMachine):
       assert len(set(session.excluded_items)) == len(session.excluded_items)
 
 
-def test_cat_engine_orchestration_state_machine() -> None:
+def test_stepping_a_session_with_stub_strategies_keeps_its_history_in_line() -> None:
   """Stepping a session with stub strategies keeps its items, responses and estimates in line, in any step order.
 
   Fails if a step records an item without its response or estimate, administers an item twice, or changes a session
   that has already stopped.
   """
-  run_state_machine_as_test(CatEngineOrchestrationMachine, settings=_ORCHESTRATION_SETTINGS)
+  run_state_machine_as_test(StubbedEngineMachine, settings=_ORCHESTRATION_SETTINGS)
 
 
-def test_cat_engine_integration_state_machine() -> None:
+def test_stepping_a_session_with_real_strategies_keeps_its_history_in_line() -> None:
   """The same invariants hold with the real maximum-information selector and numerical estimator.
 
   Fails if a real strategy makes a step record an item without its response or estimate, give an item twice or a
   non-finite estimate, or change a session that has already stopped.
   """
-  run_state_machine_as_test(CatEngineIntegrationMachine, settings=_INTEGRATION_SETTINGS)
+  run_state_machine_as_test(RealStrategiesMachine, settings=_INTEGRATION_SETTINGS)
 
 
 def test_exposure_control_state_machine() -> None:
-  """Under a control that declines at random, the tracker's proposals are the administrations plus the declines.
+  """Under a control that declines at random, the declines a selection returns are its session's new exclusions.
 
-  Sessions are stepped, reselected without an answer and started in any order. Fails if a decline reaches the
-  tracker but not the session (or the session but not the tracker), if a second select_next before the answer
-  counts a proposal again, or if a session administers an item it excluded.
+  Sessions are stepped, reselected with and without keeping the selection, and started in any order. Fails if a
+  decline reaches the session but not the selection (or the reverse), if an item is proposed twice for one session,
+  or if a session administers an item it excluded.
   """
   run_state_machine_as_test(ExposureControlMachine, settings=_ORCHESTRATION_SETTINGS)

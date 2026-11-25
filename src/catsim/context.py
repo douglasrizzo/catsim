@@ -2,17 +2,22 @@
 
 from __future__ import annotations
 
+import dataclasses
+import functools
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeVar
 
 from . import irt
 
 if TYPE_CHECKING:
   import numpy
+  from _typeshed import DataclassInstance
 
   from .item_bank import ItemBank
   from .typing import FloatArray
+
+_T = TypeVar("_T", bound="DataclassInstance")
 
 
 # eq=False: a generated __eq__ would compare the exposure-rate arrays elementwise and raise, and a
@@ -67,9 +72,8 @@ class StepContext:
       The standard error of ``theta``, as its estimator reported it. For the estimator, it is the
       error before the newest response. Default is ``math.inf``, the error before any response.
   exposure_rates : numpy.ndarray or None, optional
-      Each item's exposure rate over the other sessions of the run, as
-      :meth:`ExposureTracker.rates` counts it, which selectors compare with their ``r_max`` cap.
-      None when the run has no exposure tracker, which means no cap applies. Default is None.
+      Each item's exposure rate, one value in [0, 1] per item of the bank, which selectors compare
+      with their ``r_max`` cap. None means that no cap applies. Default is None.
 
   Raises
   ------
@@ -148,3 +152,55 @@ class Estimate:
     if self.evaluations is not None and self.evaluations < 0:
       msg = f"evaluations must be non-negative, got {self.evaluations}"
       raise ValueError(msg)
+
+
+@functools.cache
+def _field_defaults(cls: type[DataclassInstance]) -> tuple[tuple[str, object], ...]:
+  """Return the name and default of every field of a dataclass, in order."""
+  return tuple((field.name, field.default) for field in dataclasses.fields(cls))
+
+
+def _unchecked(cls: type[_T], /, **fields: object) -> _T:
+  """Return an instance of a frozen dataclass built from checked fields, without checking them again.
+
+  The engine builds every session and step context from inputs it has already checked, and the
+  simulation runner from inputs it built itself (ADR-0009), so the checks of their ``__post_init__``
+  would only repeat work. A field left out takes its default; one without a default raises
+  ``KeyError``.
+
+  Parameters
+  ----------
+  cls : type
+      The dataclass, :class:`StepContext` or :class:`~catsim.Session`.
+  **fields : object
+      The values of its fields, in the types the class stores.
+
+  Returns
+  -------
+  object
+      The instance.
+  """
+  instance = object.__new__(cls)
+  for name, default in _field_defaults(cls):
+    value = fields[name] if name in fields or default is dataclasses.MISSING else default
+    object.__setattr__(instance, name, value)  # noqa: PLC2801 - the class is frozen
+  return instance
+
+
+def _replaced(instance: _T, /, **changes: object) -> _T:
+  """Return a copy of a frozen dataclass with some fields changed, as :func:`dataclasses.replace` does, unchecked.
+
+  Parameters
+  ----------
+  instance : object
+      A :class:`StepContext` or a :class:`~catsim.Session`.
+  **changes : object
+      The fields to change, in the types the class stores, already checked.
+
+  Returns
+  -------
+  object
+      The copy.
+  """
+  fields = {name: getattr(instance, name) for name, _ in _field_defaults(type(instance))}
+  return _unchecked(type(instance), **(fields | changes))
