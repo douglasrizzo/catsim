@@ -310,6 +310,32 @@
       ]
     },
     {
+      "administered": [],
+      "bin_size": 3,
+      "id": "randomesque/start",
+      "pool": [
+        3,
+        5,
+        2
+      ],
+      "responses": [],
+      "theta": 0
+    },
+    {
+      "administered": [],
+      "bin_size": 5,
+      "id": "the54321/start",
+      "pool": [
+        3,
+        5,
+        2,
+        11,
+        6
+      ],
+      "responses": [],
+      "theta": 0
+    },
+    {
       "administered": [
         5,
         2
@@ -541,6 +567,42 @@
     {
       "administered": [
         5,
+        2
+      ],
+      "bin_size": 3,
+      "id": "randomesque/two_items",
+      "pool": [
+        3,
+        11,
+        0
+      ],
+      "responses": [
+        true,
+        false
+      ],
+      "theta": -0.25
+    },
+    {
+      "administered": [
+        5,
+        2
+      ],
+      "bin_size": 3,
+      "id": "the54321/two_items",
+      "pool": [
+        3,
+        11,
+        0
+      ],
+      "responses": [
+        true,
+        false
+      ],
+      "theta": -0.25
+    },
+    {
+      "administered": [
+        5,
         2,
         3,
         8,
@@ -745,6 +807,52 @@
         0.050365183853114164,
         0.035820707726536248
       ]
+    },
+    {
+      "administered": [
+        5,
+        2,
+        3,
+        8,
+        11
+      ],
+      "bin_size": 3,
+      "id": "randomesque/five_items",
+      "pool": [
+        6,
+        4,
+        7
+      ],
+      "responses": [
+        true,
+        false,
+        true,
+        false,
+        true
+      ],
+      "theta": 0.65000000000000002
+    },
+    {
+      "administered": [
+        5,
+        2,
+        3,
+        8,
+        11
+      ],
+      "bin_size": 1,
+      "id": "the54321/five_items",
+      "pool": [
+        6
+      ],
+      "responses": [
+        true,
+        false,
+        true,
+        false,
+        true
+      ],
+      "theta": 0.65000000000000002
     },
     {
       "administered": [
@@ -967,6 +1075,45 @@
         0.051245829470842309,
         0.075845039420941743
       ]
+    },
+    {
+      "administered": [
+        4,
+        6,
+        0
+      ],
+      "bin_size": 3,
+      "id": "randomesque/all_correct",
+      "pool": [
+        8,
+        5,
+        7
+      ],
+      "responses": [
+        true,
+        true,
+        true
+      ],
+      "theta": 1.3999999999999999
+    },
+    {
+      "administered": [
+        4,
+        6,
+        0
+      ],
+      "bin_size": 2,
+      "id": "the54321/all_correct",
+      "pool": [
+        8,
+        5
+      ],
+      "responses": [
+        true,
+        true,
+        true
+      ],
+      "theta": 1.3999999999999999
     },
     {
       "administered": [

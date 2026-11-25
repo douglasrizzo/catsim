@@ -15,7 +15,7 @@ from __future__ import annotations
 import dataclasses
 import json
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pytest
@@ -40,6 +40,8 @@ from catsim.selection import (
   MLWISelector,
   ProgressiveSelector,
   ProportionalSelector,
+  RandomesqueSelector,
+  The54321Selector,
   UrrySelector,
 )
 from catsim.selection.progressive import _position_weight  # noqa: PLC2701 - the selectors expose no weight
@@ -47,6 +49,9 @@ from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthSto
 from catsim.typing import FloatArray
 from tests.banks import two_pl_bank
 from tests.generators import DeterministicRNG
+
+if TYPE_CHECKING:
+  from collections.abc import Callable
 
 Case = dict[str, Any]
 
@@ -325,6 +330,13 @@ _SELECTORS: dict[str, BaseSelector] = {
 }
 
 
+# The randomized selectors whose bin, the items they draw from, generate.R records as catR's randomesque bin.
+_POOL_SELECTORS: dict[str, Callable[[Case], BaseSelector]] = {
+  "randomesque": lambda case: RandomesqueSelector(case["bin_size"]),
+  "the54321": lambda _: The54321Selector(),
+}
+
+
 def _selector(case: Case) -> BaseSelector:
   return _SELECTORS[case["id"].split("/")[0]]
 
@@ -334,7 +346,8 @@ class TestSelectors:
 
   A case's ranking is the order in which catR picks every candidate when each pick is made unavailable for the next,
   its choice first; catsim's is the same with each pick excluded. The bank's parameters are continuous, and generate.R
-  checks that no two candidates nearly tie. The kl_window cases rank by catR's KL() over catsim's window.
+  checks that no two candidates nearly tie. The kl_window cases rank by catR's KL() over catsim's window. The
+  randomesque and the54321 cases compare the bin a randomized selector draws its item from.
   """
 
   @pytest.mark.parametrize("case", _cases(_SELECTION, "selection", tuple(f"{name}/" for name in _SELECTORS)))
@@ -350,6 +363,20 @@ class TestSelectors:
       ranking.append(_selector(case).select(dataclasses.replace(context, excluded_items=tuple(ranking))))
 
     assert ranking == case["ranking"]
+
+  @pytest.mark.parametrize("case", _cases(_SELECTION, "pool", tuple(f"{name}/" for name in _POOL_SELECTORS)))
+  def test_randomesque_pool(self, case: Case) -> None:
+    """A bin of the wrong size, or of other items than the most informative at the estimate, would draw elsewhere.
+
+    The pool is catR's randomesque bin, the items nextItem draws from with MFI and randomesque = k, best first. catR has
+    no 5-4-3-2-1 method; its bin at each position is catR's randomesque bin with k = max(1, 5 - administered items).
+    """
+    rng = DeterministicRNG([])
+    _POOL_SELECTORS[case["id"].split("/")[0]](case).select(_selection_context(case, rng=rng))
+    ((pool, probabilities),) = rng.choice_calls
+
+    assert probabilities is None
+    assert pool.tolist() == case["pool"]
 
   @pytest.mark.parametrize("case", _cases(_SELECTION, "values", ("mfi/",)))
   def test_information_values(self, case: Case) -> None:
