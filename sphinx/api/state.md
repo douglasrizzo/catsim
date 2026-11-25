@@ -1,18 +1,9 @@
-# Session State
+# Sessions
 
 ```{eval-rst}
-.. autoclass:: catsim.CatSessionState
-   :members:
-
-.. autoclass:: catsim.CatSessionSnapshot
-   :members:
-
-.. autoclass:: catsim.CatStepResult
+.. autoclass:: catsim.Session
    :members:
 
 .. autoclass:: catsim.StopReason
-   :members:
-
-.. autoclass:: catsim.ExposureTracker
    :members:
 ```
