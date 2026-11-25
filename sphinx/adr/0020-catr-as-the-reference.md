@@ -28,16 +28,17 @@ with another package.
 - Agreement is checked at three levels:
   1. single computations (probabilities, information, each estimator on fixed response patterns,
      each selector's scores and choice in a fixed context, stopping decisions, initial values):
-     closed forms to a relative $10^{-10}$, iterative estimators within the looser of the two
-     packages' tolerances;
+     closed forms to a relative $10^{-10}$, iterative estimators within the sum of the two
+     packages' tolerances, since their errors can point in opposite directions;
   2. whole tests on recorded responses, with no randomization: the same items in the same order,
      and the estimates as in level 1;
   3. simulations with generated responses, for the randomized selectors: bias, RMSE, mean test
      length, exposure and overlap within Monte Carlo error, since R and NumPy draw different
      numbers.
 - catsim keeps its own defaults. Every departure from catR either has a setting that reproduces
-  catR, which the parity tests use, or is stated on the technique page with its reason and skipped by
-  the parity tests with that reason.
+  catR, which the parity tests use, or is stated on the technique page with its reason and kept in
+  the parity tests as a strict expected failure with that reason, so a departure that closes fails
+  the run until it is removed from the list.
 
 ## Consequences
 
