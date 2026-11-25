@@ -14,9 +14,9 @@ from hypothesis.stateful import (
   rule,
   run_state_machine_as_test,
 )
-from typing_extensions import override
 
 from catsim import Estimate, StepContext
+from catsim.compat import override
 from catsim.engine import CatEngine, RunContext
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError

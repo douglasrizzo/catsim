@@ -40,7 +40,8 @@ dependencies = [
     "numpy>=2.3.1",
     "scipy>=1.16",
     "tqdm>=4.64",
-    "typing-extensions>=4.4",
+    # override, which typing has from Python 3.12 (ADR-0021); 4.4 is the first release with it.
+    "typing-extensions>=4.4; python_version < '3.12'",
 ]
 requires-python = ">=3.11"
 readme = "README.md"
@@ -139,6 +140,10 @@ unfixable = []
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+# Ruff treats catsim.compat.override as typing.override, so an override is exempt from the unused-argument,
+# no-self-use and docstring rules, as the base method already answers to them.
+typing-modules = ["catsim.compat"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
@@ -362,7 +367,7 @@ layers = [
   "metrics",
   "item_bank",
   "irt",
-  "typing : exceptions",
+  "typing : exceptions : compat",
 ]
 ignore_imports = [
   # MEISelector runs one-step-ahead ability updates with an estimator.
@@ -395,6 +400,7 @@ type = "forbidden"
 source_modules = [
   "catsim.typing",
   "catsim.exceptions",
+  "catsim.compat",
   "catsim.irt",
   "catsim.item_bank",
   "catsim.metrics",

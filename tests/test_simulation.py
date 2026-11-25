@@ -8,9 +8,9 @@ import sys
 
 import numpy as np
 import pytest
-from typing_extensions import override
 
 from catsim import Estimate, StepContext
+from catsim.compat import override
 from catsim.engine import CatEngine
 from catsim.estimation import NumericalSearchEstimator
 from catsim.exposure import BaseExposureControl

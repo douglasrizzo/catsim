@@ -2,9 +2,9 @@
 
 import numpy
 from scipy.optimize import minimize_scalar
-from typing_extensions import override
 
 from .. import irt
+from ..compat import override
 from ..context import Estimate, StepContext
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from ..item_bank import ItemBank

@@ -4,8 +4,8 @@ import operator
 from abc import abstractmethod
 
 import numpy
-from typing_extensions import override
 
+from ..compat import override
 from ..context import StepContext
 from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
