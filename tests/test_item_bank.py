@@ -6,6 +6,7 @@ import operator
 import pickle
 import re
 from collections.abc import Callable
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -567,3 +568,169 @@ class TestItemBankMethods:
     logistic = 1 / (1 + math.exp(-1.0))
 
     assert bank.total_information(0.0, indices=[0, 2]) == pytest.approx(0.25 + logistic * (1 - logistic), rel=1e-12)
+
+
+def _read_csv_text(tmp_path: Path, text: str) -> ItemBank:
+  """Write ``text`` to a file as it is, with no newline translation, and read it as a bank."""
+  path = tmp_path / "bank.csv"
+  path.write_text(text, encoding="utf-8", newline="")
+  return ItemBank.from_csv(path)
+
+
+class TestItemBankCsv:
+  """Tests for reading and writing a bank as CSV (ADR-0005)."""
+
+  def test_to_csv_writes_a_header_then_one_row_per_item(self, tmp_path: Path) -> None:
+    """The name column comes first, then a, b, c and d, each number as the shortest text that reads back as it.
+
+    Writing no header, the columns in another order, or the numbers with a fixed number of digits gives other text.
+    """
+    bank = ItemBank(np.array([[1.2, -0.5, 0.2, 1.0], [0.8, 1.1, 0.15, 0.98]]), names=["q1", "q2"])
+    path = tmp_path / "bank.csv"
+
+    bank.to_csv(path)
+
+    assert path.read_bytes() == b"name,a,b,c,d\nq1,1.2,-0.5,0.2,1.0\nq2,0.8,1.1,0.15,0.98\n"
+
+  def test_writing_then_reading_gives_back_the_same_bank(self, tmp_path: Path) -> None:
+    """Every float comes back bit for bit and every name as it was, with its commas, quotes and line breaks.
+
+    The floats need 17 significant digits (pi, 0.1 + 0.2, 1/3), are subnormal (5e-324) or are -0.0, whose sign
+    survives only if it is written; rounding to 15 digits, as R's write.csv does, changes the first three. Names left
+    unquoted split their row at a comma or a line break.
+    """
+    items = np.array([
+      [5e-324, -0.0, 5e-324, 0.9999999999999999],
+      [math.pi, 0.1 + 0.2, 1 / 3, 1.0],
+      [1.7976931348623157e308, -1e-300, 0.0, 1.0],
+    ])
+    bank = ItemBank(items, names=['comma, "quoted"', "line\nbreak", " 1.5"])
+    path = tmp_path / "bank.csv"
+
+    bank.to_csv(str(path))
+    loaded = ItemBank.from_csv(str(path))
+
+    assert loaded == bank
+    assert loaded.names == ('comma, "quoted"', "line\nbreak", " 1.5")
+    assert loaded.items.tobytes() == items.tobytes()
+
+  def test_reads_the_layout_of_r_write_csv(self, tmp_path: Path) -> None:
+    """R's write.csv quotes every string and heads the row names with an empty string; they become the names.
+
+    Treating the empty header as an unknown column, or requiring the header "name", rejects every bank saved from R.
+    """
+    text = '"","a","b","c","d"\n"q1",1.2,-0.5,0.2,1\n"q2",0.8,1.1,0.15,0.98\n'
+
+    bank = _read_csv_text(tmp_path, text)
+
+    assert bank.names == ("q1", "q2")
+    np.testing.assert_array_equal(bank.items, [[1.2, -0.5, 0.2, 1.0], [0.8, 1.1, 0.15, 0.98]])
+
+  def test_reads_the_columns_by_name_in_any_order(self, tmp_path: Path) -> None:
+    """Columns d, b, name, a, c are read by their headers; reading by position puts d in a and the name in c."""
+    text = "d,b,name,a,c\n0.98,1.1,q2,0.8,0.15\n1,-0.5,q1,1.2,0.2\n"
+
+    bank = _read_csv_text(tmp_path, text)
+
+    assert bank.names == ("q2", "q1")
+    np.testing.assert_array_equal(bank.items, [[0.8, 1.1, 0.15, 0.98], [1.2, -0.5, 0.2, 1.0]])
+
+  @pytest.mark.parametrize(
+    ("text", "items", "model"),
+    [
+      pytest.param("b\n-1\n0.5\n", [[1.0, -1.0, 0.0, 1.0], [1.0, 0.5, 0.0, 1.0]], IrtModel.PL1, id="1PL, b only"),
+      pytest.param("a,b\n0.8,-1\n1.2,0.5\n", [[0.8, -1.0, 0.0, 1.0], [1.2, 0.5, 0.0, 1.0]], IrtModel.PL2, id="a, b"),
+      pytest.param("b,c\n-1,0.2\n0.5,0.1\n", [[1.0, -1.0, 0.2, 1.0], [1.0, 0.5, 0.1, 1.0]], IrtModel.PL3, id="b, c"),
+      pytest.param("d,b\n0.9,-1\n1,0.5\n", [[1.0, -1.0, 0.0, 0.9], [1.0, 0.5, 0.0, 1.0]], IrtModel.PL4, id="d, b"),
+    ],
+  )
+  def test_a_missing_parameter_column_takes_its_default(
+    self, tmp_path: Path, text: str, items: list[list[float]], model: IrtModel
+  ) -> None:
+    """A missing a is 1, c is 0 and d is 1, by the column's name, and the items get generated names.
+
+    Completing the columns by position, as for a matrix, reads b, c as a and b; a default of 0 for d makes every item
+    invalid.
+    """
+    bank = _read_csv_text(tmp_path, text)
+
+    np.testing.assert_array_equal(bank.items, items)
+    assert bank.model is model
+    assert bank.names == ("item_0", "item_1")
+
+  @pytest.mark.parametrize(
+    ("text", "message"),
+    [
+      pytest.param("", "is empty; a bank's CSV file starts with a header row", id="empty file"),
+      pytest.param("a,c\n1.2,0.2\n", "has no 'b' column", id="no b"),
+      pytest.param("A,b\n1.2,0.5\n", "unknown column 'A'", id="upper-case A"),
+      pytest.param("disc,b\n1.2,0.5\n", "unknown column 'disc'", id="disc"),
+      pytest.param("1.2,0.5\n0.8,1.1\n", "unknown column '1.2'", id="no header"),
+      pytest.param("b,b\n0.5,0.6\n", "has two 'b' columns", id="repeated column"),
+      pytest.param(",name,b\nq1,q1,0.5\n", "has two name columns, '' and 'name'", id="two name columns"),
+    ],
+  )
+  def test_rejects_a_bad_header(self, tmp_path: Path, text: str, message: str) -> None:
+    """A header that is missing, lacks b, or holds an unknown or repeated column raises ValueError naming it.
+
+    Ignoring an unknown column, as a misspelled "A", silently gives every item a = 1; a repeated column keeps only
+    one of its values; a file without a header loses its first item to it.
+    """
+    with pytest.raises(ValueError, match=re.escape(message)):
+      _read_csv_text(tmp_path, text)
+
+  @pytest.mark.parametrize(
+    ("text", "message"),
+    [
+      pytest.param("name,b\nq1,0.5,7\n", "line 2: 3 values for 2 columns", id="extra value"),
+      pytest.param("name,b\nq1\n", "line 2: 1 values for 2 columns", id="missing value"),
+      pytest.param("b\n0.5\nNA\n", "line 3, column 'b': 'NA' is not a number", id="NA"),
+      pytest.param('b\n"0,5"\n', "line 2, column 'b': '0,5' is not a number", id="decimal comma"),
+      pytest.param("a,b\n,0.5\n", "line 2, column 'a': '' is not a number", id="empty value"),
+      pytest.param("b\n0\n\n1\n", "line 3: 0 values for 1 columns", id="blank line between items"),
+      pytest.param("b\n1_000\n", "line 2, column 'b': '1_000' is not a number", id="digit separator"),
+      pytest.param("b\n 0.5\n", "line 2, column 'b': ' 0.5' is not a number", id="leading space"),
+      pytest.param("b\n\u0663\n", "line 2, column 'b': '\u0663' is not a number", id="Arabic-Indic digit"),
+      pytest.param("b\ninf\n", "line 2, column 'b': 'inf' is not a number", id="inf"),
+    ],
+  )
+  def test_rejects_a_bad_row(self, tmp_path: Path, text: str, message: str) -> None:
+    """A row with too many or too few values, or a value that is not a number, raises ValueError naming its line.
+
+    Without the count check an extra value is dropped and a missing one raises IndexError; a missing value read as
+    the default would hide a gap in the file. A blank line between items is a row without values: skipping it drops
+    the item of a one-column file whose difficulty was left empty. float() alone reads "1_000" as 1000, " 0.5" as 0.5
+    and the Arabic-Indic digit three as 3.
+    """
+    with pytest.raises(ValueError, match=re.escape(message)):
+      _read_csv_text(tmp_path, text)
+
+  @pytest.mark.parametrize(
+    ("text", "message"),
+    [
+      pytest.param("a,b\n-1,0\n", "discrimination <= 0", id="a < 0"),
+      pytest.param("b\n", "no items", id="no rows"),
+      pytest.param("name,b\nq1,0\n,1\n", "names[1] is ''", id="empty name"),
+      pytest.param("name,b\nq1,0\nq1,1\n", "names[1] is 'q1', as is names[0]", id="repeated name"),
+    ],
+  )
+  def test_checks_what_it_reads_as_a_bank_checks_a_matrix(self, tmp_path: Path, text: str, message: str) -> None:
+    """A file's parameters and names pass the checks of ItemBank, and the error starts with the file's path.
+
+    A reader building the bank unchecked accepts them; passing the bank's error on as it is does not say which file
+    is wrong.
+    """
+    with pytest.raises(ValueError, match=re.escape(f"{tmp_path / 'bank.csv'}: ") + ".*" + re.escape(message)):
+      _read_csv_text(tmp_path, text)
+
+  def test_skips_blank_lines_at_the_end(self, tmp_path: Path) -> None:
+    """Blank lines after the last item, as an editor leaves, hold no item; reading them as rows raises."""
+    bank = _read_csv_text(tmp_path, "b\n0.5\n-1\n\n\n")
+
+    assert bank.difficulty.tolist() == [0.5, -1.0]
+
+  def test_reads_a_file_that_starts_with_a_byte_order_mark(self, tmp_path: Path) -> None:
+    """Excel starts UTF-8 CSV files with a byte order mark; read as text, it makes the header "b" an unknown column."""
+    bank = _read_csv_text(tmp_path, "\ufeffb\n0.5\n")
+
+    assert bank.difficulty.tolist() == [0.5]

@@ -1,11 +1,16 @@
 """Item Bank management for Computerized Adaptive Testing.
 
 This module provides the ItemBank class for managing calibrated item parameters and their names,
-and precomputing derived values that depend only on static item content.
+reading and writing them as CSV, and precomputing derived values that depend only on static item
+content.
 """
 
+import csv
+import os
+import re
 from collections.abc import Iterable
 from enum import StrEnum
+from pathlib import Path
 from typing import Any, Self, assert_never
 
 import numpy
@@ -18,6 +23,18 @@ from .typing import FloatArray, IntArray
 
 _N_PARAMS = 4
 """Columns of a complete item matrix: a, b, c and d."""
+
+_CSV_PARAMETERS = ("a", "b", "c", "d")
+"""The parameter columns of a bank's CSV file, in the order of the item matrix's columns."""
+
+_CSV_DEFAULTS = {"a": 1.0, "c": 0.0, "d": 1.0}
+"""The value of each parameter a bank's CSV file may leave out; b is required."""
+
+_CSV_NUMBER = re.compile(r"[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?")
+"""A number in a bank's CSV file: ASCII digits, a dot as the decimal mark and an optional exponent."""
+
+_CSV_NAME_HEADERS = ("name", "")
+"""The headers of the name column of a bank's CSV file; R's write.csv heads its row names with ""."""
 
 
 class IrtModel(StrEnum):
@@ -40,7 +57,7 @@ class IrtModel(StrEnum):
   PL4 = "4PL"
 
 
-class ItemBank:  # noqa: PLR0904 - the core type: parameters, names and derived values
+class ItemBank:  # noqa: PLR0904 - the core type: parameters, names, derived values and the CSV format
   r"""The calibrated items of a test, with their names and the values derived from their parameters.
 
   Every item has a name, a non-empty string unique within the bank. Computations refer to an item by
@@ -48,8 +65,8 @@ class ItemBank:  # noqa: PLR0904 - the core type: parameters, names and derived 
   :py:meth:`index` gives a name's row. A bank checks every parameter and name when it is built and
   caches the values that depend only on the parameters, such as each item's point of maximum
   information. Its arrays are read-only, so the cached values cannot go stale. Two banks are equal
-  when their parameters and names are. Build a bank from an item matrix, or draw one with
-  :py:meth:`generate`.
+  when their parameters and names are. Build a bank from an item matrix, read one with
+  :py:meth:`from_csv`, or draw one with :py:meth:`generate`.
 
   Parameters
   ----------
@@ -453,6 +470,64 @@ class ItemBank:  # noqa: PLR0904 - the core type: parameters, names and derived 
 
     return cls(numpy.array([a, b, c, d]).T)
 
+  @classmethod
+  def from_csv(cls, path: str | os.PathLike[str]) -> Self:
+    """Read a bank from a CSV file in the format :py:meth:`to_csv` writes.
+
+    The file is UTF-8 text, comma-separated, with numbers such as ``-1.25`` or ``1e-05``, a dot as
+    the decimal mark. Its first row is a header naming the columns, in any order:
+
+    * ``a``, ``b``, ``c`` and ``d``, the item parameters. ``b`` is required; a missing ``a`` is 1, a
+      missing ``c`` is 0 and a missing ``d`` is 1.
+    * An optional name column, headed ``name`` or left empty, as R's ``write.csv`` heads row names.
+      Without it, the items get generated names.
+
+    Each following row is one item, and only blank lines at the end of the file are skipped. The bank
+    checks what it reads as it checks a matrix, and its errors start with the file's path.
+
+    Parameters
+    ----------
+    path : str or os.PathLike
+        The file to read.
+
+    Returns
+    -------
+    ItemBank
+        The bank the file holds.
+
+    Raises
+    ------
+    ValueError
+        If the file is empty; if its header names another column, names a column twice, or has no
+        ``b``; if a row, a blank line before the last item included, does not hold one value per
+        column, or a parameter is not a number; or if the bank rejects the parameters or names read.
+    """
+    items, names = _read_csv(Path(path))
+    try:
+      bank = cls(items, names)
+    except ValueError as error:
+      msg = f"{path}: {error}"
+      raise ValueError(msg) from error
+    return bank
+
+  def to_csv(self, path: str | os.PathLike[str]) -> None:
+    """Write the bank to a CSV file that :py:meth:`from_csv` reads back as an equal bank.
+
+    The header is ``name,a,b,c,d``, followed by one row per item. Each parameter is written with the
+    fewest digits that read back as the same float, so the parameters come back exactly. A name is
+    quoted where it holds a comma, a quote or a line break. An existing file is overwritten.
+
+    Parameters
+    ----------
+    path : str or os.PathLike
+        The file to write.
+    """
+    with Path(path).open("w", encoding="utf-8", newline="") as file:
+      writer = csv.writer(file, lineterminator="\n")
+      writer.writerow(("name", *_CSV_PARAMETERS))
+      # repr of a float is the shortest text that reads back as that float
+      writer.writerows((name, *map(repr, row)) for name, row in zip(self._names, self._items.tolist(), strict=True))
+
   @override
   def __repr__(self) -> str:
     """Get string representation of the ItemBank."""
@@ -581,6 +656,131 @@ def _index_names(names: Iterable[str], n_items: int) -> dict[str, int]:
     # a plain str, so a name from a NumPy array does not print as np.str_('q1')
     index_by_name[str(name)] = item
   return index_by_name
+
+
+def _read_csv(path: Path) -> tuple[FloatArray, list[str] | None]:
+  """Return the n x 4 item matrix of a bank's CSV file, and its names, or None without a name column.
+
+  Parameters
+  ----------
+  path : pathlib.Path
+      The file, in the format of :py:meth:`ItemBank.from_csv`.
+
+  Returns
+  -------
+  tuple[numpy.ndarray, list[str] or None]
+      The item matrix, with the defaults of the missing parameters, and the names.
+
+  Raises
+  ------
+  ValueError
+      If the file is empty, its header is not a bank's, or a row does not hold one number per
+      parameter column.
+  """
+  # utf-8-sig drops the byte order mark that Excel writes at the start of a UTF-8 CSV file
+  with path.open(encoding="utf-8-sig", newline="") as file:
+    reader = csv.reader(file)
+    header = next(reader, None)
+    if header is None:
+      msg = f"{path} is empty; a bank's CSV file starts with a header row naming its columns"
+      raise ValueError(msg)
+    name_position, positions = _read_header(header, path)
+    rows = [(reader.line_num, row) for row in reader]
+  while rows and not rows[-1][1]:  # blank lines at the end of the file, as editors leave
+    rows.pop()
+  items: list[list[float]] = []
+  names: list[str] = []
+  for line, row in rows:
+    # a blank line before the last item has no values, and fails here rather than drop an item
+    if len(row) != len(header):
+      msg = (
+        f"{path}, line {line}: {len(row)} values for {len(header)} columns; "
+        "each row holds one value per column of the header"
+      )
+      raise ValueError(msg)
+    items.append(_read_parameters(row, positions, f"{path}, line {line}"))
+    if name_position is not None:
+      names.append(row[name_position])
+  return numpy.array(items, dtype=float).reshape(-1, _N_PARAMS), None if name_position is None else names
+
+
+def _read_header(header: list[str], path: Path) -> tuple[int | None, dict[str, int]]:
+  """Return the position of the name column, or None, and each parameter column's position by its name.
+
+  Parameters
+  ----------
+  header : list[str]
+      The first row of the file.
+  path : pathlib.Path
+      The file, for the error messages.
+
+  Returns
+  -------
+  tuple[int or None, dict[str, int]]
+      The position of the name column and those of the parameter columns, which include ``b``.
+
+  Raises
+  ------
+  ValueError
+      If the header names a column that is neither a parameter nor the name column, names a
+      parameter twice, has two name columns, or has no ``b``.
+  """
+  name_position: int | None = None
+  positions: dict[str, int] = {}
+  for position, column in enumerate(header):
+    if column in _CSV_NAME_HEADERS:
+      if name_position is not None:
+        msg = f"{path} has two name columns, {header[name_position]!r} and {column!r}"
+        raise ValueError(msg)
+      name_position = position
+    elif column in _CSV_PARAMETERS:
+      if column in positions:
+        msg = f"{path} has two {column!r} columns"
+        raise ValueError(msg)
+      positions[column] = position
+    else:
+      msg = (
+        f"{path} has an unknown column {column!r}; its header names the columns a, b, c and d, and an optional "
+        "name column headed 'name' or ''"
+      )
+      raise ValueError(msg)
+  if "b" not in positions:
+    msg = f"{path} has no 'b' column; every item needs its difficulty b"
+    raise ValueError(msg)
+  return name_position, positions
+
+
+def _read_parameters(row: list[str], positions: dict[str, int], where: str) -> list[float]:
+  """Return one item's [a, b, c, d] from a row, with the defaults of the columns the file lacks.
+
+  Parameters
+  ----------
+  row : list[str]
+      The row's values.
+  positions : dict[str, int]
+      Each parameter column's position in the row, by its name.
+  where : str
+      The file and line, for the error message.
+
+  Returns
+  -------
+  list[float]
+      The item's parameters.
+
+  Raises
+  ------
+  ValueError
+      If a parameter's value is not a number in the format of the file.
+  """
+  parameters = dict(_CSV_DEFAULTS)
+  for column, position in positions.items():
+    value = row[position]
+    # float() also takes " 1.5", "1_000", "inf" and digits of other scripts
+    if not _CSV_NUMBER.fullmatch(value):
+      msg = f"{where}, column {column!r}: {value!r} is not a number"
+      raise ValueError(msg)
+    parameters[column] = float(value)
+  return [parameters[column] for column in _CSV_PARAMETERS]
 
 
 def _validate(items: FloatArray) -> None:
