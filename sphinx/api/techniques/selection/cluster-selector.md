@@ -1,11 +1,11 @@
 # Cluster Selector
 
 :Class: {py:class}`catsim.selection.ClusterSelector`
-:Sources: Meneghetti (2015)
+:Sources: {cite:t}`Meneghetti2015`
 
 ## Motivation
 
-The method comes from Meneghetti (2015). Cluster-based selection is an
+The method comes from {cite:t}`Meneghetti2015`. Cluster-based selection is an
 exposure-management strategy that organizes items into externally supplied
 groups and chooses from those groups rather than from the entire bank at once.
 The aim is to distribute usage across groups of similar items while still
@@ -58,7 +58,7 @@ whenever such items exist. If none do, `r_control="passive"` falls back to the
 highest-information item in the cluster, whereas `r_control="aggressive"`
 chooses the lowest-exposure item in the cluster.
 
-Meneghetti and Aquino Junior (2018, pp. 9–10) describe the selector as one that
+{cite:t}`Meneghetti2018{pp. 9–10}` describe the selector as one that
 "clusters items according to their parameter values and selects items from the
 cluster that contains either the most informative item or the highest average
 information". They do not say whether administered items count toward a
@@ -141,9 +141,9 @@ and 50, the second with k = 25.
 
 ## References
 
-Meneghetti, D. R. (2015). *Metodologia de selecao de itens em testes adaptativos informatizados baseada em agrupamento por similaridade* (Master's thesis). Centro Universitario da FEI. <https://www.researchgate.net/publication/283944553_Metodologia_de_selecao_de_itens_em_Testes_Adaptativos_Informatizados_baseada_em_Agrupamento_por_Similaridade>
-
-Meneghetti, D. D. R., & Aquino Junior, P. T. (2018). *Application and simulation of computerized adaptive tests through the package catsim* (arXiv:1707.03012v2). <https://arxiv.org/abs/1707.03012> (open access).
+```{bibliography}
+:filter: docname in docnames
+```
 
 ## API Reference
 

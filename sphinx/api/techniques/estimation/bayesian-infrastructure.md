@@ -1,7 +1,7 @@
 # Bayesian Estimation Infrastructure
 
 :Class: {py:class}`catsim.estimation.QuadratureGrid`
-:Sources: Bock & Mislevy (1982); Bock & Aitkin (1981)
+:Sources: {cite:t}`Bock1982`; {cite:t}`Bock1981`
 
 ## Motivation
 
@@ -37,7 +37,7 @@ w_q\,p(\theta_q)\,L(\mathbf{u}\mid\theta_q),
 \sum_{q=1}^{Q}\tilde{p}(\theta_q \mid \mathbf{u}) = 1.
 $$
 
-The log-likelihoods are summed at each node, as Bock and Mislevy (1982, p. 432)
+The log-likelihoods are summed at each node, as {cite:t}`Bock1982{p. 432}`
 recommend for adaptive testing, and the posterior is normalized after
 subtracting the largest log-posterior value, so long response vectors do not
 underflow. Downstream techniques reuse the same posterior moments:
@@ -53,9 +53,9 @@ $$
 \tilde{p}(\theta_q \mid \mathbf{u}).
 $$
 
-These are Equations 4 and 5 of Bock and Mislevy (1982, p. 433), without the
-square root on the variance; they credit the quadrature formulas to Bock and
-Aitkin (1981) (p. 432). Like Bock and Mislevy, catsim uses evenly spaced nodes
+These are Equations 4 and 5 of {cite:t}`Bock1982{p. 433}`, without the
+square root on the variance; on p. 432 they credit the quadrature formulas to
+{cite:t}`Bock1981`. Like Bock and Mislevy, catsim uses evenly spaced nodes
 rather than Gauss–Hermite points, which offer little advantage here because the
 likelihood is not a polynomial (p. 433).
 
@@ -69,8 +69,8 @@ The grid is accurate while it resolves the posterior. Compared with a
 standard deviation to within about 0.25% while the posterior standard deviation
 is at least 0.065, which takes a test information of about 240. Below that it
 degrades: errors reach about 6% at a posterior standard deviation of 0.05 and
-about 44% at 0.035. The default follows the advice of Bock and Mislevy (1982,
-p. 433), who suggested about 80 points between $\pm 4$ standard deviations, also
+about 44% at 0.035. The default follows the advice of {cite:t}`Bock1982{p. 433}`,
+who suggested about 80 points between $\pm 4$ standard deviations, also
 a spacing of 0.1, to keep precision down to a posterior standard deviation of
 0.2.
 A coarser grid degrades sooner: with 41 nodes (spacing 0.3), errors reach about
@@ -126,9 +126,9 @@ rather than expands without bound.
 
 ## References
 
-Bock, R. D., & Aitkin, M. (1981). Marginal maximum likelihood estimation of item parameters: Application of an EM algorithm. *Psychometrika*, 46(4), 443-459. <https://doi.org/10.1007/BF02293801>. Not openly available; Bock and Mislevy (1982, p. 432) describe its quadrature formulas.
-
-Bock, R. D., & Mislevy, R. J. (1982). Adaptive EAP estimation of ability in a microcomputer environment. *Applied Psychological Measurement*, 6(4), 431-444. <https://doi.org/10.1177/014662168200600405>. Open copy: [University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/101546).
+```{bibliography}
+:filter: docname in docnames
+```
 
 :::{seealso}
 {doc}`/api/techniques/estimation/eap-estimator`,

@@ -1,7 +1,7 @@
 # Kullback-Leibler Selector
 
 :Class: {py:class}`catsim.selection.KLSelector`
-:Sources: Chang & Ying (1996)
+:Sources: {cite:t}`Chang1996`
 
 ## Motivation
 
@@ -16,8 +16,8 @@ so the method behaves more globally early in the test and more locally later on.
 ## Definition
 
 For candidate item $i$, current estimate $\hat{\theta}$, and a
-comparison point $\theta$, the item-level divergence (Chang & Ying, 1996,
-p. 217, Definition 2.1) is
+comparison point $\theta$, the item-level divergence
+{cite:p}`Chang1996{p. 217, Definition 2.1}` is
 
 $$
 K_i(\theta \,\|\, \hat{\theta})
@@ -76,7 +76,7 @@ nodes and the error grows, to about $2 \times 10^{-7}$ at $a\,\delta_n = 120$.
    * - ``window``
      - ``3.0``
      - Positive constant :math:`c` controlling the half-width :math:`\delta_n = c/\sqrt{n}`.
-       Chang and Ying (1996) chose :math:`c` from the coverage probability of a
+       :cite:t:`Chang1996` chose :math:`c` from the coverage probability of a
        confidence interval for :math:`\theta` (p. 221) and used :math:`c = 3` in
        their simulation (p. 223).
    * - ``r_max``
@@ -94,7 +94,9 @@ nodes and the error grows, to about $2 \times 10^{-7}$ at $a\,\delta_n = 120$.
 
 ## References
 
-Chang, H.-H., & Ying, Z. (1996). A global information approach to computerized adaptive testing. *Applied Psychological Measurement*, 20(3), 213-229. <https://doi.org/10.1177/014662169602000303>. Open copy: [University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/119092).
+```{bibliography}
+:filter: docname in docnames
+```
 
 :::{seealso}
 Posterior-weighted variant: a planned extension, KLP.

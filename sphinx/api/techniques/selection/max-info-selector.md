@@ -1,14 +1,14 @@
 # Maximum Fisher Information Selector
 
 :Class: {py:class}`catsim.selection.MaxInfoSelector`
-:Sources: Lord (1977); Lord (1980)
+:Sources: {cite:t}`Lord77`; {cite:t}`Lord1980`
 
 ## Motivation
 
 Maximum Fisher information is the canonical local item-selection rule in CAT. At
 each step it chooses the remaining item that is most informative at the current
 ability estimate $\hat{\theta}$, which makes it the natural baseline for both
-efficiency and implementation simplicity. Lord (1977, p. 97) describes the
+efficiency and implementation simplicity. {cite:t}`Lord77{p. 97}` describes the
 rule: after each response the ability is re-estimated, and the next item is "the
 item that gives the most information at his estimated ability level".
 
@@ -16,7 +16,7 @@ item that gives the most information at his estimated ability level".
 
 For each item $i$ that is neither administered nor excluded, the selector
 evaluates the item information $I_i(\hat{\theta})$ at the current estimate:
-the general item information of Magis and Raîche (2012, p. 4, Equation 4), which
+the general item information of {cite:t}`Magis12{p. 4, Equation 4}`, which
 {py:func}`catsim.irt.information` computes under the 4PL. The selected item is
 
 $$
@@ -69,11 +69,9 @@ extensions of this rule.
 
 ## References
 
-Lord, F. M. (1977). A broad-range tailored test of verbal ability. *Applied Psychological Measurement*, 1(1), 95-100. <https://doi.org/10.1177/014662167700100115>. Open copy: [University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/98423).
-
-Lord, F. M. (1980). *Applications of Item Response Theory to Practical Testing Problems*. Hillsdale, NJ: Lawrence Erlbaum Associates.
-
-Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
+```{bibliography}
+:filter: docname in docnames
+```
 
 ## API Reference
 

@@ -1,7 +1,7 @@
 # Numerical Search Estimator (MLE)
 
 :Class: {py:class}`catsim.estimation.NumericalSearchEstimator`
-:Sources: Birnbaum (1968); Lord (1980); Dodd (1990)
+:Sources: {cite:t}`Birnbaum1968`; {cite:t}`Lord1980`; {cite:t}`Dod90`
 
 ## Motivation
 
@@ -44,12 +44,12 @@ $$
 \end{cases}
 $$
 
-clipped to $[\theta_{\min}, \theta_{\max}]$. Dodd (1990, p. 359) introduced this
+clipped to $[\theta_{\min}, \theta_{\max}]$. {cite:t}`Dod90{p. 359}` introduced this
 "variable stepsize" for the rating scale model: after a response in the upper
 categories the estimate is incremented by half the distance to the highest scale
 value in the item pool, and after one in the lower categories it is decreased by
 half the distance to the lowest. The dichotomous form, with the bank's largest
-and smallest $b$, is the one Barrada et al. (2008, p. 499) use. Dodd's estimates
+and smallest $b$, is the one {cite:t}`Barrada2008{p. 499}` use. Dodd's estimates
 start near the middle of the pool (p. 360), so the step always points the way
 the responses do. catsim's estimates can start anywhere: beyond the bank's
 hardest item, half the distance to it would move the estimate down after a
@@ -57,8 +57,8 @@ correct answer, so the $\max$ and $\min$ keep it where it is instead. Dodd also
 studied fixed steps of 0.4 and 0.7, which catsim does not implement.
 
 The estimator returns a {py:class}`~catsim.Estimate`. Its standard error
-is the asymptotic standard error of the maximum likelihood estimate (Magis &
-Raîche, 2012, p. 4, Equation 3),
+is the asymptotic standard error of the maximum likelihood estimate
+{cite:p}`Magis12{p. 4, Equation 3}`,
 
 $$
 SE(\hat{\theta}) = \frac{1}{\sqrt{I(\hat{\theta})}},
@@ -71,8 +71,8 @@ stepped estimate.
 ### Computation
 
 For mixed response patterns, the implementation minimizes $-\log L(\theta)$ with
-SciPy's bounded Brent method, {py:func}`scipy.optimize.minimize_scalar` (Brent,
-2002), which never evaluates outside the bounds and takes `tol` as its absolute
+SciPy's bounded Brent method, {py:func}`scipy.optimize.minimize_scalar`
+{cite:p}`Brent2002`, which never evaluates outside the bounds and takes `tol` as its absolute
 tolerance on $\theta$ (SciPy's `xatol`).
 
 ## Parameters
@@ -96,8 +96,8 @@ tolerance on $\theta$ (SciPy's `xatol`).
 
 ## Behavior and Comparison
 
-With guessing, the likelihood can have several local maxima (Chang & Ying, 1996,
-p. 223; Veerkamp & Berger, 1994, p. 4), and the search returns one of them. With
+With guessing, the likelihood can have several local maxima {cite:p}`Chang1996{p. 223}`;
+{cite:p}`Veerkamp1994{p. 4}`, and the search returns one of them. With
 guessing or slipping parameters, the likelihood of a mixed pattern can also
 still be rising at a bound, and the estimate is then within `tol` of that bound.
 
@@ -109,21 +109,9 @@ still be rising at a bound, and the estimate is then within `tol` of that bound.
 
 ## References
 
-Birnbaum, A. (1968). Some latent trait models and their use in inferring an examinee's ability. In F. M. Lord & M. R. Novick (Eds.), *Statistical Theories of Mental Test Scores* (pp. 397-479). Reading, MA: Addison-Wesley.
-
-Lord, F. M. (1980). *Applications of Item Response Theory to Practical Testing Problems*. Hillsdale, NJ: Lawrence Erlbaum Associates.
-
-Dodd, B. G. (1990). The effect of item selection procedure and stepsize on computerized adaptive attitude measurement using the rating scale model. *Applied Psychological Measurement*, 14(4), 355-366. <https://doi.org/10.1177/014662169001400403>. Open copy: [University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/113936).
-
-Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating randomness in the Fisher information for improving item-exposure control in CATs. *British Journal of Mathematical and Statistical Psychology*, 61(2), 493-513. <https://doi.org/10.1348/000711007X230937>. Open copy: [first author's page](https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf).
-
-Chang, H.-H., & Ying, Z. (1996). A global information approach to computerized adaptive testing. *Applied Psychological Measurement*, 20(3), 213-229. <https://doi.org/10.1177/014662169602000303>. Open copy: [University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/119092).
-
-Veerkamp, W. J. J., & Berger, M. P. F. (1994). *Some new item selection criteria for adaptive testing* (Research Report 94-6). Enschede: University of Twente. Open copy: [University of Twente](https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf).
-
-Brent, R. P. (2002). *Algorithms for Minimization Without Derivatives*. Mineola, NY: Dover Publications. A reprint of the 1973 Prentice-Hall edition, a scan of which is on the [author's page](https://maths-people.anu.edu.au/~brent/pub/pub011.html).
-
-Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
+```{bibliography}
+:filter: docname in docnames
+```
 
 ## API Reference
 

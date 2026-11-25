@@ -189,9 +189,22 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
     docstrings and tests;
   - a quantity's formula (refer to its `catsim.irt` function);
   - history.
+- **References:** generated from `sphinx/references.bib`, never typed on the page.
+  - Cite with `` {cite:t}`key{p. N}` `` in a sentence and `` {cite:p}`key{p. N}` `` in parentheses,
+    one role per source when it carries a location (a role with several keys sorts them); inside an
+    eval-rst block use the reST role, `` :cite:t:`key` ``. The `:Sources:` field cites the keys.
+  - Add each source to `references.bib` with its DOI and a note: `Open copy: \url{...}`,
+    `Open access`, or `Not openly available; X (Year) describes the method`. Brace the title words
+    whose case matters (`{R}`, `{catR}`, `{IRT}`, `{Bayesian}`, proper names): the style lowercases
+    titles.
+    Enter a chapter of an edited book as `@inproceedings`: the style prints no note for `@incollection`.
+  - End the References section with a `{bibliography}` directive filtered to the page,
+    `:filter: docname in docnames`; a source the page lists without citing it in the text goes in
+    the directive's content.
 - **Length:** about 400-1,000 words before the references.
 - **Review:**
   - Is every formula cited to a page or equation that someone has read?
+  - Does every source the page relies on have a bib entry with its DOI and its note?
   - Does the page say where catsim departs from its sources?
   - Is every guarantee something a user can observe?
   - Does the class docstring rendered under "API Reference" repeat a formula from the page?
@@ -286,7 +299,9 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
   Guidance) and adds the API Reference. `specs/README.md` holds the workflow, the citation convention
   and the revalidation checklist.
 - **Rules:** a PR that renames something a sketch calls renames it in the sketch too. The sketch is
-  the first `python` block under `## Implementation Guidance`.
+  the first `python` block under `## Implementation Guidance`. A spec writes its citations and its
+  References list by hand, since GitHub does not render the citation roles; promoting it moves
+  each source into `sphinx/references.bib`.
 - **Review:** Does the sketch still run against the current API? Does the spec say when it was last
   validated, and against which sources?
 

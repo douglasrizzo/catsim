@@ -5,7 +5,7 @@
 :Class: {py:class}`catsim.selection.MaxInfoStratSelector`
 :Class: {py:class}`catsim.selection.MaxInfoBBlockSelector`
 :Class: {py:class}`catsim.selection.StratifiedSelector`
-:Sources: Chang & Ying (1999); Chang et al. (2001); Barrada et al. (2006)
+:Sources: {cite:t}`Chang1999`; {cite:t}`Chang2001`; {cite:t}`Barrada2006`
 
 ## Motivation
 
@@ -17,18 +17,18 @@ items, and the most informative items are kept for the last stages. Within the
 active stratum the selector still adapts, choosing the item located closest to
 the current estimate.
 
-The a-stratified method of Chang and Ying (1999) stratifies by discrimination and
+The a-stratified method of {cite:t}`Chang1999` stratifies by discrimination and
 matches difficulty to the estimate. Item discrimination and difficulty are often
 positively correlated, so strata formed on $a$ alone inherit skewed difficulty
 distributions: early strata lack hard items and late strata lack easy ones,
 which hurts both precision and exposure balance. The b-blocking refinement of
-Chang, Qian and Ying (2001) forces every stratum to cover the whole difficulty
+{cite:ts}`Chang2001` forces every stratum to cover the whole difficulty
 range before discrimination-based stratification is applied.
 
 The a-stratified method ignores the guessing parameter, both when stratifying
 and when selecting. Under the 3PL and 4PL models an item's discrimination does
 not rank its maximum information, and its information does not peak at $b$.
-Maximum-information stratification (MIS) of Barrada et al. (2006) stratifies by
+Maximum-information stratification (MIS) of {cite:t}`Barrada2006` stratifies by
 the item's maximum information and matches the ability at which that maximum is
 reached. MIS-B applies the blocking idea to MIS: it blocks on that ability, so
 that every stratum covers the whole ability range.
@@ -47,10 +47,10 @@ scale:
 
 | Selector | Method | $k_i$ | $\ell_i$ | Blocking |
 | --- | --- | --- | --- | --- |
-| {py:class}`~catsim.selection.AStratSelector` | a-stratified (Chang & Ying, 1999) | $a_i$ | $b_i$ | no |
-| {py:class}`~catsim.selection.AStratBBlockSelector` | a-stratified with b-blocking (Chang et al., 2001) | $a_i$ | $b_i$ | on $b_i$ |
-| {py:class}`~catsim.selection.MaxInfoStratSelector` | MIS (Barrada et al., 2006) | $I_i^{\max}$ | $\theta_i^{\max}$ | no |
-| {py:class}`~catsim.selection.MaxInfoBBlockSelector` | MIS-B (Barrada et al., 2006) | $I_i^{\max}$ | $\theta_i^{\max}$ | on $\theta_i^{\max}$ |
+| {py:class}`~catsim.selection.AStratSelector` | a-stratified {cite:p}`Chang1999` | $a_i$ | $b_i$ | no |
+| {py:class}`~catsim.selection.AStratBBlockSelector` | a-stratified with b-blocking {cite:p}`Chang2001` | $a_i$ | $b_i$ | on $b_i$ |
+| {py:class}`~catsim.selection.MaxInfoStratSelector` | MIS {cite:p}`Barrada2006` | $I_i^{\max}$ | $\theta_i^{\max}$ | no |
+| {py:class}`~catsim.selection.MaxInfoBBlockSelector` | MIS-B {cite:p}`Barrada2006` | $I_i^{\max}$ | $\theta_i^{\max}$ | on $\theta_i^{\max}$ |
 
 MIS and MIS-B use the ability at which item $i$ is most informative and its
 information there:
@@ -63,15 +63,15 @@ $$
 
 {py:func}`catsim.irt.max_info_theta` computes $\theta_i^{\max}$.
 
-Barrada et al. (2006, p. 157, Equations 1 and 2) give $I_i^{\max}$ and
+{cite:t}`Barrada2006{p. 157, Equations 1 and 2}` give $I_i^{\max}$ and
 $\theta_i^{\max}$ in closed form for the 3PL model, with the scaling constant
 $D = 1.7$; catsim's IRT functions use no scaling constant.
 
 **Strata without blocking.** Items are sorted by increasing $k_i$ and split
 into $S$ contiguous strata of $\lfloor M/S \rfloor$ items, the first
 $M \bmod S$ of them holding one item more. This is the a-stratified procedure
-of Chang and Ying (1999), as described step by step by Barrada et al. (2006,
-p. 157).
+of {cite:t}`Chang1999`, as described step by step by
+{cite:t}`Barrada2006{p. 157}`.
 
 ```{figure} /alpha-strat.svg
 :alt: A row of strata numbered 1 to k under an arrow labelled a, shading darker from stratum 1 to stratum k.
@@ -89,10 +89,11 @@ $1, \dots, k$.
 into strata $1, \dots, k$.
 ```
 
-**Strata with blocking** (Chang et al., 2001; described by Barrada et al., 2006,
-p. 157). Items are sorted by increasing $\ell_i$ and grouped into consecutive
-blocks of $S$ items. Each block is sorted by increasing $k_i$; its first item
-joins the first stratum, its second item the second stratum, and so on. Every
+**Strata with blocking** {cite:p}`Chang2001`;
+{cite:p}`{described by}Barrada2006{p. 157}`. Items are sorted by increasing
+$\ell_i$ and grouped into consecutive blocks of $S$ items. Each block is sorted
+by increasing $k_i$; its first item joins the first stratum, its second item
+the second stratum, and so on. Every
 full block therefore gives one item to every
 stratum, so each stratum spans the locations those blocks cover, while the
 strata still ascend in $k_i$. A trailing block of $r < S$ items, those of
@@ -132,7 +133,7 @@ h + \left\lfloor \dfrac{t - h(q + 1)}{q} \right\rfloor & \text{otherwise.}
 \end{cases}
 $$
 
-Barrada et al. (2006, pp. 157–158) use a bank and a test that divide evenly
+{cite:t}`Barrada2006{pp. 157–158}` use a bank and a test that divide evenly
 into strata; when they do not, catsim gives the extra items and positions to
 the first strata and stages. A test of at most $M$ items ($n \le M$) then
 never needs more items from a stratum than the stratum holds, so a session
@@ -141,7 +142,7 @@ position $n$ or later: asked for an item there, the selector raises
 `ValueError`.
 
 **Selection.** Within the active stratum, the selector takes the item whose
-location is closest to the estimate (Barrada et al., 2006, p. 157). With $R_t$
+location is closest to the estimate {cite:p}`Barrada2006{p. 157}`. With $R_t$
 the items neither administered nor excluded,
 
 $$
@@ -170,7 +171,7 @@ the same strata.
      - ``None``
      - Number of strata :math:`S`, between 1 and ``test_size``. ``None`` uses
        one stratum per test item (:math:`S = n`). The original studies used a
-       few strata with several items each: Barrada et al. (2006, pp. 157–158)
+       few strata with several items each: :cite:t:`Barrada2006{pp. 157–158}`
        split 250-item banks into 5 strata of 50 items and administered 6
        items from each in a 30-item test.
 ```
@@ -180,10 +181,10 @@ the same strata.
 Under the 1PL and 2PL models $\theta_i^{\max} = b_i$ and $I_i^{\max}$ ranks
 items like $a_i$, so MIS coincides with the a-stratified method.
 
-MIS improved precision over the a-stratified method in Barrada et al. (2006,
-pp. 158–159). They also found that blocking reduced the skewness of the exposure
-rates both with and without correlation between $a$ and $b$, and recommended
-MIS-B whenever a stratified method is used.
+MIS improved precision over the a-stratified method in
+{cite:t}`Barrada2006{pp. 158–159}`. They also found that blocking reduced the
+skewness of the exposure rates both with and without correlation between $a$
+and $b$, and recommended MIS-B whenever a stratified method is used.
 
 ## Guarantees
 
@@ -211,11 +212,9 @@ MIS-B whenever a stratified method is used.
 
 ## References
 
-Chang, H.-H., & Ying, Z. (1999). A-stratified multistage computerized adaptive testing. *Applied Psychological Measurement*, 23(3), 211-222. <https://doi.org/10.1177/01466219922031338>. Not openly available; Barrada et al. (2006) describe the method.
-
-Chang, H.-H., Qian, J., & Ying, Z. (2001). A-stratified multistage computerized adaptive testing with b blocking. *Applied Psychological Measurement*, 25(4), 333-341. <https://doi.org/10.1177/01466210122032181>. Not openly available; Barrada et al. (2006) describe the method.
-
-Barrada, J. R., Mazuela, P., & Olea, J. (2006). Maximum information stratification method for controlling item exposure in computerized adaptive testing. *Psicothema*, 18(1), 156-159. <https://www.psicothema.com/pdf/3191.pdf> (open access).
+```{bibliography}
+:filter: docname in docnames
+```
 
 ## API Reference
 

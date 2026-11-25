@@ -1,7 +1,7 @@
 # Standard Error Stopper
 
 :Class: {py:class}`catsim.stopping.StandardErrorStopper`
-:Sources: Samejima (1977); Thissen (2000); Magis and Raîche (2012)
+:Sources: {cite:t}`Samejima1977`; {cite:t}`Thissen00`; {cite:t}`Magis12`
 
 ## Motivation
 
@@ -13,7 +13,7 @@ the standard error of estimation falls to a target value.
 This is one of the most common adaptive stopping rules because its threshold is
 easy to interpret on the theta scale and directly reflects the information
 accumulated by the current administered set. catR calls it the precision
-criterion (Magis and Raîche, 2012, p. 10).
+criterion {cite:p}`Magis12{p. 10}`.
 
 ## Definition
 
@@ -26,7 +26,7 @@ SE(\hat{\theta}) \le \tau,
 $$
 
 where $\tau$ is the configured `max_se`. Each estimator computes that error by
-its own formula, as catR does (Magis and Raîche, 2012, pp. 4-6). For
+its own formula, as catR does {cite:p}`Magis12{pp. 4-6}`. For
 {doc}`maximum likelihood </api/techniques/estimation/numerical-search-estimator>`
 and the {doc}`WLE </api/techniques/estimation/warm-wle>` it is the Fisher
 standard error, $1/\sqrt{I(\hat{\theta})}$, with $I(\hat{\theta})$ the
@@ -40,9 +40,9 @@ infinite, so the test does not stop. To ask
 {meth}`engine.context(session) <catsim.CatEngine.context>`, which carries the session's
 standard error. As in catR, items are
 administered "until the standard error of the provisional ability estimate gets
-smaller than or equal to that threshold" (Magis and Raîche, 2012, p. 11).
+smaller than or equal to that threshold" {cite:p}`Magis12{p. 11}`.
 
-Samejima (1977, p. 238) suggests terminating an adaptive test when the test
+{cite:t}`Samejima1977{p. 238}` suggests terminating an adaptive test when the test
 information function reaches a criterion value, or equivalently when the
 standard error of estimation falls to a small value, which can be constant
 across ability or depend on it; catsim uses a constant. She argues that the
@@ -81,11 +81,9 @@ in a {class}`~catsim.stopping.StopRule` (see {ref}`combining-stopping-rules`).
 
 ## References
 
-Samejima, F. (1977). A use of the information function in tailored testing. *Applied Psychological Measurement*, 1(2), 233-247. <https://doi.org/10.1177/014662167700100209>. Open copy: [University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/98492).
-
-Thissen, D. (2000). Reliability and measurement precision. In H. Wainer (Ed.), *Computerized Adaptive Testing: A Primer* (2nd ed., pp. 159-184). Mahwah, NJ: Lawrence Erlbaum Associates.
-
-Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
+```{bibliography}
+:filter: docname in docnames
+```
 
 ## API Reference
 

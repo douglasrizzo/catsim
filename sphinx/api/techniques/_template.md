@@ -1,13 +1,16 @@
 # \<Technique Name>
 
 :Class: {py:class}`catsim.<family>.<ClassName>`
-:Sources: \<Author (Year)>; \<Author (Year)>
+:Sources: {cite:t}`<key>`; {cite:t}`<key>`
 
 % TECHNIQUE PAGE TEMPLATE. Copy this file into sphinx/api/techniques/<family>/, fill in each
 % section, delete these comments and add the page to the toctree of the family's index.md.
 % The rules for technique pages are in sphinx/AGENTS.md ("Technique pages"); the citation
 % convention is in specs/README.md. The header is a MyST field list, which needs "fieldlist" in
 % myst_enable_extensions (sphinx/conf.py). Give one :Class: line per class the page documents.
+% Every source is an entry of sphinx/references.bib, cited by its key: {cite:t} in a sentence,
+% {cite:p} in parentheses, one role per source when it carries a location, and :cite:t: (reST)
+% inside an eval-rst block.
 % Budget: about 400-1,000 words before the references.
 
 ## Motivation
@@ -25,9 +28,10 @@ $$
 $$
 
 \<What each component of the equation is. Cite the source of each formula where it appears, with
-its page and equation, e.g. "(Barrada et al., 2008, p. 498, Equation 12)", citing only locations
-you have read. Refer to the `catsim.irt` function for a quantity such as information or the
-log-likelihood rather than re-derive it. Use the symbols of terms-and-notation.md.>
+its page and equation, e.g. {cite:t}`Barrada2008{p. 498, Equation 12}` or
+{cite:p}`Barrada2008{p. 498, Equation 12}`, citing only locations you have read. Refer to the
+`catsim.irt` function for a quantity such as information or the log-likelihood rather than
+re-derive it. Use the symbols of terms-and-notation.md.>
 
 % Optional: how catsim solves the definition numerically (search range, grid, tolerance), when it
 % changes what users observe. Delete the subsection otherwise.
@@ -69,9 +73,17 @@ catR's implementation, with sources. Link the ADR for the reason behind a catsim
 
 ## References
 
-\<One full citation per source, with its DOI. When the published version is not open, add an open
-copy ("Open copy: ...") or, if there is none, say so and name an open source that describes the
-method ("Not openly available; X (Year) describes the method.").>
+% The list is generated from the keys the page cites. Add each source to sphinx/references.bib with
+% its DOI and a note: "Open copy: \url{...}" when the published version is not open and a copy is,
+% "Open access" when it is, or "Not openly available; X (Year) describes the method." Brace the
+% title words whose case matters ({R}, {catR}, {IRT}, {Bayesian}, proper names): the style
+% lowercases titles. Enter a chapter of an edited book as @inproceedings: the style prints no
+% note for @incollection. A source the page lists without citing it in the text goes in the directive's
+% content, one key per line after a blank line.
+
+```{bibliography}
+:filter: docname in docnames
+```
 
 ## API Reference
 

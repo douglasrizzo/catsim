@@ -3,7 +3,7 @@
 :Class: {py:class}`catsim.initialization.FixedPointInitializer`
 :Class: {py:class}`catsim.initialization.UniformInitializer`
 :Class: {py:class}`catsim.initialization.NormalInitializer`
-:Sources: Barrada et al. (2006); Barrada et al. (2008)
+:Sources: {cite:t}`Barrada2006`; {cite:t}`Barrada2008`
 
 ```{py:module} catsim.initialization
 ```
@@ -76,8 +76,8 @@ $$
      - Standard deviation of the distribution; must be positive.
 ```
 
-The default uniform range, $(-0.5, 0.5)$, is the starting rule of Barrada et
-al. (2006, p. 158) and Barrada et al. (2008, p. 499), who drew the first
+The default uniform range, $(-0.5, 0.5)$, is the starting rule of
+{cite:t}`Barrada2006{p. 158}` and {cite:t}`Barrada2008{p. 499}`, who drew the first
 estimate from it for examinees simulated from $\mathcal{N}(0, 1)$. The normal
 default, $\mathcal{N}(0, 1)$, is not taken from a source; it matches the
 ability distribution those studies simulate.
@@ -92,9 +92,9 @@ ability distribution those studies simulate.
 
 ## References
 
-Barrada, J. R., Mazuela, P., & Olea, J. (2006). Maximum information stratification method for controlling item exposure in computerized adaptive testing. *Psicothema*, 18(1), 156-159. <https://www.psicothema.com/pdf/3191.pdf> (open access).
-
-Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating randomness in the Fisher information for improving item-exposure control in CATs. *British Journal of Mathematical and Statistical Psychology*, 61(2), 493-513. <https://doi.org/10.1348/000711007X230937>. Open copy: [first author's page](https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf).
+```{bibliography}
+:filter: docname in docnames
+```
 
 ## API Reference
 

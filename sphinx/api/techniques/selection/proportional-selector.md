@@ -1,7 +1,7 @@
 # Proportional Selector
 
 :Class: {py:class}`catsim.selection.ProportionalSelector`
-:Sources: Segall (2004); Barrada et al. (2008)
+:Sources: {cite:t}`Segall2004`; {cite:t}`Barrada2008`
 
 ## Motivation
 
@@ -13,7 +13,7 @@ That gives the method a clean probabilistic interpretation: fully random at the
 start of the test and increasingly concentrated on high-information items as the
 test progresses. At the last item the information is raised to the test length,
 so the longer the test, the closer its last draws come to maximum-information
-selection; for the test lengths CATs use, Barrada et al. (2008, p. 498) expect
+selection; for the test lengths CATs use, {cite:t}`Barrada2008{p. 498}` expect
 items of low information to be drawn with negligible probability by then.
 
 ## Definition
@@ -49,9 +49,9 @@ The exponent is 0 at the first position, where selection is uniformly random,
 and grows to the test length $N$ at the last; with $s = 0$ it grows linearly.
 Past position $N$ it stays at $N$.
 
-Segall (2004) selects each item with probability proportional to $V_i$; in
+{cite:t}`Segall2004` selects each item with probability proportional to $V_i$; in
 his paper $V_i$ was an expected variance, and with Fisher information
-$V_i = I_i(\hat{\theta})$ (Barrada et al., 2008, p. 497, Equations 8–10).
+$V_i = I_i(\hat{\theta})$ {cite:p}`Barrada2008{p. 497, Equations 8–10}`.
 Barrada et al. raise the information to a power that grows during the test
 (p. 497, Equation 11): a power of 0 gives random selection, a power of 1
 Segall's method, and a large power approaches maximum information
@@ -113,9 +113,9 @@ At the last item of a 20-item test at $\theta = 0$, over 20 simulated 500-item
 
 ## References
 
-Segall, D. O. (2004). A sharing item response theory model for computerized adaptive testing. *Journal of Educational and Behavioral Statistics*, 29(4), 439-460. <https://doi.org/10.3102/10769986029004439>. Not openly available; Barrada et al. (2008) describe the method.
-
-Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating randomness in the Fisher information for improving item-exposure control in CATs. *British Journal of Mathematical and Statistical Psychology*, 61(2), 493-513. <https://doi.org/10.1348/000711007X230937>. Open copy: [first author's page](https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf).
+```{bibliography}
+:filter: docname in docnames
+```
 
 :::{seealso}
 Companion spec: {doc}`/api/techniques/selection/progressive-selector`

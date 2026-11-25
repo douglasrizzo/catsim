@@ -1,7 +1,7 @@
 # Progressive Selector
 
 :Class: {py:class}`catsim.selection.ProgressiveSelector`
-:Sources: Revuelta & Ponsoda (1998); Barrada et al. (2008, 2010)
+:Sources: {cite:t}`Revuelta1998`; {cite:t}`Barrada2008,Bar10`
 
 ## Motivation
 
@@ -44,13 +44,13 @@ $$
 with acceleration parameter $t$, any real number. The weight is 0 at the first
 position and 1 at the last. With $t = 0$ it is linear, $w_n = (n-1)/(N-1)$;
 positive $t$ keeps the random component longer and negative $t$ drops it sooner
-(Barrada et al., 2008, p. 498; Figure 1, p. 499, plots $t = -1, 0, 1, 2$).
-Dividing by the largest available information is equivalent to Revuelta and
-Ponsoda's (1998) random component drawn on $[0, \max_{j \in \mathcal{A}} I_j]$,
-as Barrada et al. (2008, p. 496, Equation 6) describe it. The selector chooses
-the available item with the largest score.
+{cite:p}`Barrada2008{p. 498}` (Figure 1, p. 499, plots $t = -1, 0, 1, 2$).
+Dividing by the largest available information is equivalent to
+{cite:author}`Revuelta1998`'s {cite:yearpar}`Revuelta1998` random component drawn on
+$[0, \max_{j \in \mathcal{A}} I_j]$, as {cite:t}`Barrada2008{p. 496, Equation 6}` describe
+it. The selector chooses the available item with the largest score.
 
-The schedule is Barrada et al.'s (2008, p. 498, Equation 12), with $m$ for their
+The schedule is that of {cite:t}`Barrada2008{p. 498, Equation 12}`, with $m$ for their
 $h - 1$ and $n$, $N$ for their $k$, $K$. As printed, both sums in Equation 12 run
 to $k$, and Equations 12 and 13 both use the exponent $s$; the text under them,
 which names $t$ and $s$ as the two acceleration parameters and gives a weight of
@@ -98,7 +98,7 @@ from both in three places:
 ## Behavior and Comparison
 
 Revuelta and Ponsoda's original schedule, $w = (n - 1)/N$, stops just short of 1
-at the last item (Barrada et al., 2008, p. 496, Equation 7); Barrada et al. did
+at the last item {cite:p}`Barrada2008{p. 496, Equation 7}`; Barrada et al. did
 not test it separately, since it differs little from Equation 12 with $t = 0$
 (p. 500).
 
@@ -115,11 +115,9 @@ not test it separately, since it differs little from Equation 12 with $t = 0$
 
 ## References
 
-Revuelta, J., & Ponsoda, V. (1998). A comparison of item exposure control methods in computerized adaptive testing. *Journal of Educational Measurement*, 35(4), 311-327. <https://doi.org/10.1111/j.1745-3984.1998.tb00541.x>. Not openly available; Barrada et al. (2008) describe the method.
-
-Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating randomness in the Fisher information for improving item-exposure control in CATs. *British Journal of Mathematical and Statistical Psychology*, 61(2), 493-513. <https://doi.org/10.1348/000711007X230937>. Open copy: [first author's page](https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf).
-
-Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2010). A method for the comparison of item selection rules in computerized adaptive testing. *Applied Psychological Measurement*, 34(6), 438-452. <https://doi.org/10.1177/0146621610370152>. Open copy: [first author's page](https://personal.unizar.es/barrada/papers/10_APM_Barrada.pdf).
+```{bibliography}
+:filter: docname in docnames
+```
 
 :::{seealso}
 Companion spec: {doc}`/api/techniques/selection/proportional-selector`
