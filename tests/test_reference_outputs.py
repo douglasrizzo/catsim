@@ -2,9 +2,10 @@
 
 Each case of ``tests/reference/cases.py`` is recomputed with the current code and compared with its
 output recorded in ``tests/reference/data/``: exactly for integers, Booleans and strings, and to
-1e-12 of their magnitude for floats, or of the ability scale's unit for abilities and standard
-errors (see ``tests/reference/records.py``). The recorded data changes only where an ADR changes a
-result; see ``tests/reference/__init__.py``.
+1e-12 for floats, relative to their magnitude or their unit; the outputs of an estimator's search
+compare to its tolerance away from the environment that recorded them (see
+``tests/reference/records.py``). The recorded data changes only where an ADR changes a result; see
+``tests/reference/__init__.py``.
 
 The generator, not a test, checks that every public strategy and computation of adda72dc has a
 case: public API added later is not part of the baseline.
@@ -31,6 +32,12 @@ def _recorded(family: str) -> dict[str, object]:
 
 
 @functools.cache
+def _in_recording_environment() -> bool:
+  """Return whether this platform and these NumPy and SciPy versions are those that recorded the data."""
+  return records.load(records.PROVENANCE_FILE)["environment"] == environment()
+
+
+@functools.cache
 def _computed(family: str, name: str) -> object:
   """Return a case's output as the current code computes it, computed once per test run."""
   return records.normalize(cases.FAMILIES[family][name]())
@@ -45,8 +52,9 @@ def test_case_matches_its_recorded_output(family: str, name: str) -> None:
   """
   recorded = _recorded(family)
   assert name in recorded, f"{family} has no recorded output for {name!r}; see tests/reference/__init__.py"
-  unit = 1.0 if cases.on_ability_scale(family, name) else 0.0
-  found = records.differences(recorded[name], _computed(family, name), unit=unit)
+  how = cases.comparison(family, name)
+  absolute = records.SEARCH_TOLERANCE if how.searched and not _in_recording_environment() else 0.0
+  found = records.differences(recorded[name], _computed(family, name), unit=how.unit, absolute=absolute)
   assert not found, f"{len(found)} differences, the first ones:\n" + "\n".join(found[:20])
 
 
@@ -75,8 +83,8 @@ def test_regenerating_in_the_recorded_environment_reproduces_the_data() -> None:
   Only the platform and the NumPy and SciPy versions that recorded the data reproduce it bit for
   bit, so elsewhere the test is skipped and the tolerance of the case tests applies.
   """
-  recorded_environment = records.load(records.PROVENANCE_FILE)["environment"]
-  if recorded_environment != environment():
+  if not _in_recording_environment():
+    recorded_environment = records.load(records.PROVENANCE_FILE)["environment"]
     pytest.skip(f"the data was recorded on {recorded_environment}, and this is {environment()}")
   for family, family_cases in cases.FAMILIES.items():
     expected = family_text({name: _computed(family, name) for name in family_cases})
@@ -145,3 +153,25 @@ def test_data_reads_back_the_floats_it_was_written_from() -> None:
   read = records.load_text(text)["cases"]["values"]
   assert read == values
   assert math.isnan(records.load_text(records.dumps([math.nan]))[0])
+
+
+@pytest.mark.parametrize(("expected", "actual"), [(0.5, 0.5 + 9e-6), (-2.0, -2.0 - 9e-6)])
+def test_comparison_of_a_search_accepts_its_tolerance(expected: float, actual: float) -> None:
+  """A comparison that held a search's estimate to 1e-12 off the recording platform would fail on Linux and Windows."""
+  assert records.differences(expected, actual, unit=1.0, absolute=records.SEARCH_TOLERANCE) == []
+
+
+@pytest.mark.parametrize(("expected", "actual"), [(0.5, 0.5 + 2e-5), (2, 1)])
+def test_comparison_of_a_search_reports_more_than_its_tolerance(expected: float, actual: float) -> None:
+  """A search tolerance that let a changed estimate or a changed item through would hide a lost computation."""
+  assert records.differences(expected, actual, unit=1.0, absolute=records.SEARCH_TOLERANCE)
+
+
+def test_searches_are_told_apart_from_closed_forms() -> None:
+  """Marking EAP or a closed form as a search would loosen it elsewhere; missing a search would fail elsewhere."""
+  assert cases.comparison("estimation", "MAPEstimator()|4pl") == cases.Comparison(unit=1.0, searched=True)
+  assert cases.comparison("estimation", "EAPEstimator()|4pl") == cases.Comparison(unit=1.0, searched=False)
+  assert cases.comparison("whole_tests", "KL|WLE|MaxLength(10)").searched
+  assert not cases.comparison("whole_tests", "MEI(EAP)|EAP|MaxLength(6)").searched
+  assert cases.comparison("irt", "information|4pl") == cases.Comparison(unit=0.0, searched=False)
+  assert cases.comparison("irt", "log_likelihood|3pl").unit == 1.0

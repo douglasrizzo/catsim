@@ -1,5 +1,5 @@
 {
-  "about": "Reference outputs of catsim, recorded by tests/reference/generate.py from the source that provenance.json names. They change only where an ADR changes a result, and the pull request that changes them names the ADR and the outputs. Floats compare to 1e-12 of their magnitude, or of the ability scale's unit for abilities, standard errors and the accuracy of estimates; everything else exactly.",
+  "about": "Reference outputs of catsim, recorded by tests/reference/generate.py from the source that provenance.json names. They change only where an ADR changes a result, and the pull request that changes them names the ADR and the outputs. Floats compare to 1e-12 of their magnitude or unit, and the estimates of a numerical search, away from the recording environment, to its tolerance; everything else exactly (see tests/reference/records.py).",
   "cases": {
     "AStratBBlockSelector(test_size=8, n_strata=4)|4pl|after_3|no_rates": [
       7,
@@ -1243,22 +1243,6 @@
       11,
       2
     ],
-    "KLSelector()|tie_bank|after_2": [
-      4,
-      5,
-      1,
-      2,
-      6,
-      7
-    ],
-    "KLSelector()|tie_bank|start": [
-      4,
-      3,
-      5,
-      1,
-      2,
-      6
-    ],
     "KLSelector(r_max=0.3)|4pl|after_3|no_rates": [
       10,
       5,
@@ -1352,22 +1336,6 @@
       11,
       2
     ],
-    "KLSelector(r_max=0.3)|tie_bank|after_2": [
-      4,
-      5,
-      1,
-      2,
-      6,
-      7
-    ],
-    "KLSelector(r_max=0.3)|tie_bank|start": [
-      4,
-      3,
-      5,
-      1,
-      2,
-      6
-    ],
     "KLSelector(window=1.5)|4pl|after_3|no_rates": [
       10,
       5,
@@ -1429,22 +1397,6 @@
       2,
       11,
       3
-    ],
-    "KLSelector(window=1.5)|tie_bank|after_2": [
-      4,
-      5,
-      2,
-      1,
-      6,
-      7
-    ],
-    "KLSelector(window=1.5)|tie_bank|start": [
-      4,
-      3,
-      5,
-      1,
-      2,
-      6
     ],
     "LinearSelector(every third, from the last)|4pl|after_3|no_rates": [
       11,

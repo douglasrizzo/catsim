@@ -4,7 +4,8 @@ The rescoping of catsim rewrites its core API and much of its test suite. These 
 no computation is lost on the way, independently of the tests that the rewrite changes:
 ``tests/test_reference_outputs.py`` recomputes every case of :mod:`tests.reference.cases` with the
 current code and compares the result with the data in ``tests/reference/data/``, exactly for
-integers, Booleans and strings and to a relative 1e-12 for floats.
+integers, Booleans and strings and to 1e-12 for floats, relative to their magnitude or their unit
+(see :mod:`tests.reference.records`).
 
 Rules for later changes:
 

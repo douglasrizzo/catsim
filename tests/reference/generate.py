@@ -33,8 +33,9 @@ from tests.reference import cases, records
 ABOUT = (
   "Reference outputs of catsim, recorded by tests/reference/generate.py from the source that "
   "provenance.json names. They change only where an ADR changes a result, and the pull request that "
-  "changes them names the ADR and the outputs. Floats compare to 1e-12 of their magnitude, or of the ability "
-  "scale's unit for abilities, standard errors and the accuracy of estimates; everything else exactly."
+  "changes them names the ADR and the outputs. Floats compare to 1e-12 of their magnitude or unit, and the "
+  "estimates of a numerical search, away from the recording environment, to its tolerance; everything else "
+  "exactly (see tests/reference/records.py)."
 )
 OTHER_SEED = 20261125
 

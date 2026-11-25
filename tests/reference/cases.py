@@ -37,6 +37,7 @@ import importlib
 import inspect
 import math
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy
@@ -532,8 +533,12 @@ def _selection_contexts(selector: str) -> dict[str, tuple[ItemBank, dict[str, An
   for name, settings in SELECTION_CONTEXTS.items():
     for rates in rate_labels:
       contexts[f"4pl|{name}|{rates}"] = (BANKS["4pl"], {**settings, "exposure_rates": EXPOSURE_RATES[rates]})
-  for name, settings in TIE_CONTEXTS.items():
-    contexts[f"tie_bank|{name}"] = (TIE_BANK, settings)
+  # KL integrates its divergence over quadrature nodes in node order, so an item mirrored around the
+  # estimate adds the same terms in reverse order, and whether the two tie depends on how the sums
+  # round (ADR-0017). That differs between platforms, so the tie bank leaves KL out.
+  if not selector.startswith("KLSelector"):
+    for name, settings in TIE_CONTEXTS.items():
+      contexts[f"tie_bank|{name}"] = (TIE_BANK, settings)
   return contexts
 
 
@@ -948,11 +953,40 @@ FAMILIES: dict[str, dict[str, Case]] = {
 }
 
 
-def on_ability_scale(family: str, name: str) -> bool:
-  """Return whether a case's floats are abilities, standard errors or the accuracy of estimates.
+# The estimators whose estimate ends a numerical search, so that it is defined only to within the
+# search's tolerance (see tests/reference/records.py).
+SEARCHING_ESTIMATORS = (NumericalSearchEstimator, MAPEstimator, WarmLikelihoodEstimator)
+# Cases whose floats are logarithms of probabilities or densities.
+_LOG_SCALE = (
+  "log_response_probabilities",
+  "log_likelihood",
+  "log_likelihood_function",
+  "normal_log_prior",
+  "uniform_log_prior",
+)
 
-  Such floats compare to a share of the ability scale's unit, since they can cancel to rounding
-  noise near 0; every other float compares relatively (see :mod:`tests.reference.records`).
+
+@dataclass(frozen=True, slots=True)
+class Comparison:
+  """How a case's floats compare with their recorded values (see :mod:`tests.reference.records`).
+
+  Parameters
+  ----------
+  unit : float
+      1 for abilities, standard errors, the accuracy of estimates, log-probabilities and
+      log-densities, which can cancel to rounding noise near 0; 0 for every other float, which
+      compares relatively.
+  searched : bool
+      Whether the floats come from an estimator's numerical search, which is defined only to
+      within its tolerance.
+  """
+
+  unit: float
+  searched: bool
+
+
+def comparison(family: str, name: str) -> Comparison:
+  """Return how the floats of a case compare with their recorded values.
 
   Parameters
   ----------
@@ -963,15 +997,16 @@ def on_ability_scale(family: str, name: str) -> bool:
 
   Returns
   -------
-  bool
-      True for the estimators' cases, the whole tests and the accuracy metrics.
+  Comparison
+      The case's unit, and whether its floats come from a numerical search.
   """
   head = name.split("|", 1)[0]
-  return (
-    (family == "estimation" and head in ESTIMATORS)
-    or (family == "whole_tests" and name in WHOLE_TESTS)
-    or (family == "metrics" and head in {"bias", "mse", "rmse"})
-  )
+  if family == "estimation" and head in ESTIMATORS:
+    return Comparison(unit=1.0, searched=isinstance(ESTIMATORS[head](), SEARCHING_ESTIMATORS))
+  if family == "whole_tests" and name in WHOLE_TESTS:
+    return Comparison(unit=1.0, searched=isinstance(WHOLE_TESTS[name]()["estimator"], SEARCHING_ESTIMATORS))
+  on_scale = (family == "metrics" and head in {"bias", "mse", "rmse"}) or name.startswith(_LOG_SCALE)
+  return Comparison(unit=1.0 if on_scale else 0.0, searched=False)
 
 
 def _named(family: str, name: str) -> bool:
