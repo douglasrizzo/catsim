@@ -1,0 +1,1583 @@
+{
+  "bank": [
+    [
+      1.2,
+      -1.5,
+      0,
+      1
+    ],
+    [
+      0.80000000000000004,
+      -0.59999999999999998,
+      0,
+      1
+    ],
+    [
+      1.6000000000000001,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      0.69999999999999996,
+      0.20000000000000001,
+      1
+    ],
+    [
+      2,
+      1.3,
+      0.14999999999999999,
+      1
+    ],
+    [
+      1.3999999999999999,
+      -0.29999999999999999,
+      0.10000000000000001,
+      0.94999999999999996
+    ],
+    [
+      0.90000000000000002,
+      1.8999999999999999,
+      0.25,
+      0.90000000000000002
+    ],
+    [
+      1.7,
+      0.40000000000000002,
+      0,
+      0.92000000000000004
+    ]
+  ],
+  "cases": [
+    {
+      "current_theta": 0,
+      "id": "ml/two_mixed",
+      "items": [
+        0,
+        2
+      ],
+      "method": "ML",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        false
+      ],
+      "se": 1.1596133508136954,
+      "se_slope": -0.19234170283155547,
+      "theta": -0.78141968140360207
+    },
+    {
+      "current_theta": 0,
+      "id": "ml/four_mixed",
+      "items": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "method": "ML",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        false,
+        true,
+        false
+      ],
+      "se": 1.0238778821591099,
+      "se_slope": -0.36127872133917543,
+      "theta": -0.79795155716473021
+    },
+    {
+      "current_theta": 0,
+      "id": "ml/five_mixed",
+      "items": [
+        0,
+        1,
+        2,
+        3,
+        5
+      ],
+      "method": "ML",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "se": 1.1343844489906953,
+      "se_slope": 0.48846221543108465,
+      "theta": 1.1030014811167999
+    },
+    {
+      "current_theta": 0,
+      "id": "ml/eight_mixed",
+      "items": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "method": "ML",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "se": 0.69681077345962494,
+      "se_slope": -0.078017800098084678,
+      "theta": -0.10977776389459726
+    },
+    {
+      "current_theta": 0,
+      "id": "ml/rising_at_bound",
+      "items": [
+        5,
+        4,
+        6
+      ],
+      "method": "ML",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        false,
+        true,
+        true
+      ],
+      "se": 1.5117525694757652,
+      "se_slope": -0.24622001699725612,
+      "theta": -0.014014759586405232
+    },
+    {
+      "current_theta": 0,
+      "id": "ml/two_stationary_points",
+      "items": [
+        1,
+        4,
+        6
+      ],
+      "method": "ML",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        false,
+        true,
+        true
+      ],
+      "se": 2.3240030488835846,
+      "se_slope": -0.36406605579131218,
+      "theta": -0.52905023763282488
+    },
+    {
+      "constant_pattern": "var",
+      "current_theta": 0,
+      "id": "ml_dodd/one_correct",
+      "items": [
+        2
+      ],
+      "method": "ML",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true
+      ],
+      "se": "Inf",
+      "se_slope": 0,
+      "theta": 0.94999999999999996
+    },
+    {
+      "constant_pattern": "var",
+      "current_theta": -0.20000000000000001,
+      "id": "ml_dodd/three_incorrect",
+      "items": [
+        3,
+        4,
+        5
+      ],
+      "method": "ML",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        false,
+        false,
+        false
+      ],
+      "se": "Inf",
+      "se_slope": 0,
+      "theta": -0.84999999999999998
+    },
+    {
+      "constant_pattern": "var",
+      "current_theta": 0.94999999999999996,
+      "id": "ml_dodd/three_correct",
+      "items": [
+        0,
+        1,
+        2
+      ],
+      "method": "ML",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        true,
+        true
+      ],
+      "se": "Inf",
+      "se_slope": 0,
+      "theta": 1.4249999999999998
+    },
+    {
+      "constant_pattern": "var",
+      "current_theta": 2.5,
+      "id": "ml_dodd_past_hardest/three_correct",
+      "items": [
+        0,
+        1,
+        2
+      ],
+      "method": "ML",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        true,
+        true
+      ],
+      "se": "Inf",
+      "se_slope": 0,
+      "theta": 2.2000000000000002
+    },
+    {
+      "current_theta": 0,
+      "id": "ml_constant_default/three_correct",
+      "items": [
+        0,
+        1,
+        2
+      ],
+      "method": "ML",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        true,
+        true
+      ],
+      "se": 6.8118258385005861,
+      "se_slope": 3.2841208958078734,
+      "theta": 4
+    },
+    {
+      "current_theta": 0,
+      "id": "ml_constant_default/three_incorrect",
+      "items": [
+        3,
+        4,
+        5
+      ],
+      "method": "ML",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        false,
+        false,
+        false
+      ],
+      "se": 35.840304112602844,
+      "se_slope": -43.074470999115988,
+      "theta": -4
+    },
+    {
+      "current_theta": 0,
+      "id": "bm/one_correct",
+      "items": [
+        2
+      ],
+      "method": "BM",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0,
+          1
+        ]
+      },
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true
+      ],
+      "se": 0.80361935104457793,
+      "se_slope": 0.086120366682429492,
+      "theta": 0.49744742853290125
+    },
+    {
+      "current_theta": 0,
+      "id": "bm/one_incorrect",
+      "items": [
+        2
+      ],
+      "method": "BM",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0,
+          1
+        ]
+      },
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        false
+      ],
+      "se": 0.80361935104457793,
+      "se_slope": -0.086120366676878377,
+      "theta": -0.49744742853290119
+    },
+    {
+      "current_theta": 0,
+      "id": "bm/three_correct",
+      "items": [
+        0,
+        1,
+        2
+      ],
+      "method": "BM",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0,
+          1
+        ]
+      },
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        true,
+        true
+      ],
+      "se": 0.76847571860593777,
+      "se_slope": 0.11923769581700937,
+      "theta": 0.68962949610643076
+    },
+    {
+      "current_theta": 0,
+      "id": "bm/three_incorrect",
+      "items": [
+        3,
+        4,
+        5
+      ],
+      "method": "BM",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0,
+          1
+        ]
+      },
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        false,
+        false,
+        false
+      ],
+      "se": 0.84808826709176,
+      "se_slope": -0.083148001134292215,
+      "theta": -0.69978805378442188
+    },
+    {
+      "current_theta": 0,
+      "id": "bm/two_mixed",
+      "items": [
+        0,
+        2
+      ],
+      "method": "BM",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0,
+          1
+        ]
+      },
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        false
+      ],
+      "se": 0.74041954045740432,
+      "se_slope": -0.018196982803919681,
+      "theta": -0.34477203343989182
+    },
+    {
+      "current_theta": 0,
+      "id": "bm/four_mixed",
+      "items": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "method": "BM",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0,
+          1
+        ]
+      },
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        false,
+        true,
+        false
+      ],
+      "se": 0.67686216536769772,
+      "se_slope": -0.065310950986274818,
+      "theta": -0.398073862181203
+    },
+    {
+      "current_theta": 0,
+      "id": "bm/five_mixed",
+      "items": [
+        0,
+        1,
+        2,
+        3,
+        5
+      ],
+      "method": "BM",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0,
+          1
+        ]
+      },
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "se": 0.68186229925509112,
+      "se_slope": 0.10974396452145817,
+      "theta": 0.57702168142126042
+    },
+    {
+      "current_theta": 0,
+      "id": "bm/eight_mixed",
+      "items": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "method": "BM",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0,
+          1
+        ]
+      },
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "se": 0.57027574100778733,
+      "se_slope": -0.038813593505881983,
+      "theta": -0.074877933294646856
+    },
+    {
+      "current_theta": 0,
+      "id": "bm/rising_at_bound",
+      "items": [
+        5,
+        4,
+        6
+      ],
+      "method": "BM",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0,
+          1
+        ]
+      },
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        false,
+        true,
+        true
+      ],
+      "se": 0.83307893222700924,
+      "se_slope": -0.042657276833057971,
+      "theta": 0.0088756070442732229
+    },
+    {
+      "current_theta": 0,
+      "id": "bm_shifted_prior/one_incorrect",
+      "items": [
+        2
+      ],
+      "method": "BM",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0.5,
+          1.5
+        ]
+      },
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        false
+      ],
+      "se": 1.0132241304550043,
+      "se_slope": -0.18303026154686816,
+      "theta": -0.55248094527682501
+    },
+    {
+      "current_theta": 0,
+      "id": "bm_shifted_prior/three_correct",
+      "items": [
+        0,
+        1,
+        2
+      ],
+      "method": "BM",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0.5,
+          1.5
+        ]
+      },
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        true,
+        true
+      ],
+      "se": 1.0942458397630703,
+      "se_slope": 0.27045984313245341,
+      "theta": 1.3071818163434001
+    },
+    {
+      "current_theta": 0,
+      "id": "bm_shifted_prior/four_mixed",
+      "items": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "method": "BM",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0.5,
+          1.5
+        ]
+      },
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        false,
+        true,
+        false
+      ],
+      "se": 0.7838696981549983,
+      "se_slope": -0.101274041297561,
+      "theta": -0.3973723379569577
+    },
+    {
+      "current_theta": 0,
+      "id": "bm_shifted_prior/eight_mixed",
+      "items": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "method": "BM",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0.5,
+          1.5
+        ]
+      },
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "se": 0.62682217329707401,
+      "se_slope": -0.040981206644863377,
+      "theta": -0.0062332782636437649
+    },
+    {
+      "current_theta": 0,
+      "id": "bm_uniform_prior/three_correct",
+      "items": [
+        0,
+        1,
+        2
+      ],
+      "method": "BM",
+      "prior": {
+        "distribution": "unif",
+        "parameters": [
+          -3,
+          3
+        ]
+      },
+      "range": [
+        -3,
+        3
+      ],
+      "responses": [
+        true,
+        true,
+        true
+      ],
+      "se": 4.1037462625295333,
+      "se_slope": 2.18776899987283,
+      "theta": 3
+    },
+    {
+      "current_theta": 0,
+      "id": "bm_uniform_prior/three_incorrect",
+      "items": [
+        3,
+        4,
+        5
+      ],
+      "method": "BM",
+      "prior": {
+        "distribution": "unif",
+        "parameters": [
+          -3,
+          3
+        ]
+      },
+      "range": [
+        -3,
+        3
+      ],
+      "responses": [
+        false,
+        false,
+        false
+      ],
+      "se": 10.844593227289565,
+      "se_slope": -12.630384208911492,
+      "theta": -3
+    },
+    {
+      "current_theta": 0,
+      "id": "bm_uniform_prior/four_mixed",
+      "items": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "method": "BM",
+      "prior": {
+        "distribution": "unif",
+        "parameters": [
+          -3,
+          3
+        ]
+      },
+      "range": [
+        -3,
+        3
+      ],
+      "responses": [
+        true,
+        false,
+        true,
+        false
+      ],
+      "se": 1.0238748092687608,
+      "se_slope": -0.36127431011223615,
+      "theta": -0.79794305151818157
+    },
+    {
+      "current_theta": 0,
+      "id": "bm_uniform_prior/eight_mixed",
+      "items": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "method": "BM",
+      "prior": {
+        "distribution": "unif",
+        "parameters": [
+          -3,
+          3
+        ]
+      },
+      "range": [
+        -3,
+        3
+      ],
+      "responses": [
+        true,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "se": 0.69681122705594412,
+      "se_slope": -0.078019140736795833,
+      "theta": -0.10978357785527568
+    },
+    {
+      "current_theta": 0,
+      "grid": {
+        "high": 4,
+        "low": -4,
+        "nodes": 33
+      },
+      "id": "eap/one_correct",
+      "items": [
+        2
+      ],
+      "method": "EAP",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0,
+          1
+        ]
+      },
+      "responses": [
+        true
+      ],
+      "se": 0.83595097329683832,
+      "se_slope": -5.5511151231257819e-12,
+      "theta": 0.54776217517520975
+    },
+    {
+      "current_theta": 0,
+      "grid": {
+        "high": 4,
+        "low": -4,
+        "nodes": 33
+      },
+      "id": "eap/one_incorrect",
+      "items": [
+        2
+      ],
+      "method": "EAP",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0,
+          1
+        ]
+      },
+      "responses": [
+        false
+      ],
+      "se": 0.83595097329683832,
+      "se_slope": 0,
+      "theta": -0.54776217517520931
+    },
+    {
+      "current_theta": 0,
+      "grid": {
+        "high": 4,
+        "low": -4,
+        "nodes": 33
+      },
+      "id": "eap/three_correct",
+      "items": [
+        0,
+        1,
+        2
+      ],
+      "method": "EAP",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0,
+          1
+        ]
+      },
+      "responses": [
+        true,
+        true,
+        true
+      ],
+      "se": 0.78776539110504462,
+      "se_slope": -5.5511151231257819e-12,
+      "theta": 0.76546805031504073
+    },
+    {
+      "current_theta": 0,
+      "grid": {
+        "high": 4,
+        "low": -4,
+        "nodes": 33
+      },
+      "id": "eap/three_incorrect",
+      "items": [
+        3,
+        4,
+        5
+      ],
+      "method": "EAP",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0,
+          1
+        ]
+      },
+      "responses": [
+        false,
+        false,
+        false
+      ],
+      "se": 0.79784308024873263,
+      "se_slope": -5.5511151231257819e-12,
+      "theta": -0.75966793183793291
+    },
+    {
+      "current_theta": 0,
+      "grid": {
+        "high": 4,
+        "low": -4,
+        "nodes": 33
+      },
+      "id": "eap/two_mixed",
+      "items": [
+        0,
+        2
+      ],
+      "method": "EAP",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0,
+          1
+        ]
+      },
+      "responses": [
+        true,
+        false
+      ],
+      "se": 0.76765863811833435,
+      "se_slope": 0,
+      "theta": -0.34861830313508058
+    },
+    {
+      "current_theta": 0,
+      "grid": {
+        "high": 4,
+        "low": -4,
+        "nodes": 33
+      },
+      "id": "eap/four_mixed",
+      "items": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "method": "EAP",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0,
+          1
+        ]
+      },
+      "responses": [
+        true,
+        false,
+        true,
+        false
+      ],
+      "se": 0.73334446882957705,
+      "se_slope": 0,
+      "theta": -0.43059471952143491
+    },
+    {
+      "current_theta": 0,
+      "grid": {
+        "high": 4,
+        "low": -4,
+        "nodes": 33
+      },
+      "id": "eap/five_mixed",
+      "items": [
+        0,
+        1,
+        2,
+        3,
+        5
+      ],
+      "method": "EAP",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0,
+          1
+        ]
+      },
+      "responses": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "se": 0.6854021088998139,
+      "se_slope": 0,
+      "theta": 0.63396878012444713
+    },
+    {
+      "current_theta": 0,
+      "grid": {
+        "high": 4,
+        "low": -4,
+        "nodes": 33
+      },
+      "id": "eap/eight_mixed",
+      "items": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "method": "EAP",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0,
+          1
+        ]
+      },
+      "responses": [
+        true,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "se": 0.58874606614856317,
+      "se_slope": 5.5511151231257819e-12,
+      "theta": -0.11637221789430906
+    },
+    {
+      "current_theta": 0,
+      "grid": {
+        "high": 4,
+        "low": -4,
+        "nodes": 33
+      },
+      "id": "eap/rising_at_bound",
+      "items": [
+        5,
+        4,
+        6
+      ],
+      "method": "EAP",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0,
+          1
+        ]
+      },
+      "responses": [
+        false,
+        true,
+        true
+      ],
+      "se": 1.0536539312342299,
+      "se_slope": 0,
+      "theta": 0.049989450538991093
+    },
+    {
+      "current_theta": 0,
+      "grid": {
+        "high": 6,
+        "low": -6,
+        "nodes": 121
+      },
+      "id": "eap_catsim_grid/one_incorrect",
+      "items": [
+        2
+      ],
+      "method": "EAP",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0.5,
+          1.5
+        ]
+      },
+      "responses": [
+        false
+      ],
+      "se": 1.1133927124758762,
+      "se_slope": 1.1102230246251564e-11,
+      "theta": -0.68757398993086327
+    },
+    {
+      "current_theta": 0,
+      "grid": {
+        "high": 6,
+        "low": -6,
+        "nodes": 121
+      },
+      "id": "eap_catsim_grid/three_correct",
+      "items": [
+        0,
+        1,
+        2
+      ],
+      "method": "EAP",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0.5,
+          1.5
+        ]
+      },
+      "responses": [
+        true,
+        true,
+        true
+      ],
+      "se": 1.1146107867838677,
+      "se_slope": -1.1102230246251564e-11,
+      "theta": 1.5386045033396769
+    },
+    {
+      "current_theta": 0,
+      "grid": {
+        "high": 6,
+        "low": -6,
+        "nodes": 121
+      },
+      "id": "eap_catsim_grid/four_mixed",
+      "items": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "method": "EAP",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0.5,
+          1.5
+        ]
+      },
+      "responses": [
+        true,
+        false,
+        true,
+        false
+      ],
+      "se": 0.90684907437611562,
+      "se_slope": -1.1102230246251564e-11,
+      "theta": -0.4592894261448604
+    },
+    {
+      "current_theta": 0,
+      "grid": {
+        "high": 6,
+        "low": -6,
+        "nodes": 121
+      },
+      "id": "eap_catsim_grid/eight_mixed",
+      "items": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "method": "EAP",
+      "prior": {
+        "distribution": "norm",
+        "parameters": [
+          0.5,
+          1.5
+        ]
+      },
+      "responses": [
+        true,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "se": 0.65908697217124612,
+      "se_slope": -1.1102230246251564e-11,
+      "theta": -0.061271740739697114
+    },
+    {
+      "current_theta": 0,
+      "grid": {
+        "high": 4,
+        "low": -4,
+        "nodes": 33
+      },
+      "id": "eap_uniform_prior/three_correct",
+      "items": [
+        0,
+        1,
+        2
+      ],
+      "method": "EAP",
+      "prior": {
+        "distribution": "unif",
+        "parameters": [
+          -3,
+          3
+        ]
+      },
+      "responses": [
+        true,
+        true,
+        true
+      ],
+      "se": 0.99114350534110196,
+      "se_slope": 5.5511151231257819e-12,
+      "theta": 1.6626539577993262
+    },
+    {
+      "current_theta": 0,
+      "grid": {
+        "high": 4,
+        "low": -4,
+        "nodes": 33
+      },
+      "id": "eap_uniform_prior/four_mixed",
+      "items": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "method": "EAP",
+      "prior": {
+        "distribution": "unif",
+        "parameters": [
+          -3,
+          3
+        ]
+      },
+      "responses": [
+        true,
+        false,
+        true,
+        false
+      ],
+      "se": 1.0752058783121528,
+      "se_slope": 0,
+      "theta": -0.94112089429303192
+    },
+    {
+      "current_theta": 0,
+      "grid": {
+        "high": 4,
+        "low": -4,
+        "nodes": 33
+      },
+      "id": "eap_uniform_prior/eight_mixed",
+      "items": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "method": "EAP",
+      "prior": {
+        "distribution": "unif",
+        "parameters": [
+          -3,
+          3
+        ]
+      },
+      "responses": [
+        true,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "se": 0.77162021510694545,
+      "se_slope": 0,
+      "theta": -0.2246598292617292
+    },
+    {
+      "current_theta": 0,
+      "id": "wl/one_correct",
+      "items": [
+        2
+      ],
+      "method": "WL",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true
+      ],
+      "se": 1.4433772778053291,
+      "se_slope": 0.57735283690574235,
+      "theta": 0.68663546006067555
+    },
+    {
+      "current_theta": 0,
+      "id": "wl/one_incorrect",
+      "items": [
+        2
+      ],
+      "method": "WL",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        false
+      ],
+      "se": 1.4433772778053291,
+      "se_slope": -0.57735283690574235,
+      "theta": -0.68663546006067566
+    },
+    {
+      "current_theta": 0,
+      "id": "wl/three_correct",
+      "items": [
+        0,
+        1,
+        2
+      ],
+      "method": "WL",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        true,
+        true
+      ],
+      "se": 1.3970314334570635,
+      "se_slope": 0.66958459856714114,
+      "theta": 1.0391734539073445
+    },
+    {
+      "current_theta": 0,
+      "id": "wl/three_incorrect",
+      "items": [
+        3,
+        4,
+        5
+      ],
+      "method": "WL",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        false,
+        false,
+        false
+      ],
+      "se": 2.0933546233092382,
+      "se_slope": -1.2886822014168686,
+      "theta": -1.257074443131875
+    },
+    {
+      "current_theta": 0,
+      "id": "wl/two_mixed",
+      "items": [
+        0,
+        2
+      ],
+      "method": "WL",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        false
+      ],
+      "se": 1.1298442448935755,
+      "se_slope": -0.14951533902074488,
+      "theta": -0.60824416021082606
+    },
+    {
+      "current_theta": 0,
+      "id": "wl/four_mixed",
+      "items": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "method": "WL",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        false,
+        true,
+        false
+      ],
+      "se": 0.95369847312345712,
+      "se_slope": -0.24440036039408139,
+      "theta": -0.56577944316441242
+    },
+    {
+      "current_theta": 0,
+      "id": "wl/five_mixed",
+      "items": [
+        0,
+        1,
+        2,
+        3,
+        5
+      ],
+      "method": "WL",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "se": 0.99190804416638512,
+      "se_slope": 0.35481150286176261,
+      "theta": 0.76513645785884199
+    },
+    {
+      "current_theta": 0,
+      "id": "wl/eight_mixed",
+      "items": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "method": "WL",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "se": 0.69416018755216036,
+      "se_slope": -0.069802104035732171,
+      "theta": -0.073910818946493539
+    },
+    {
+      "current_theta": 0,
+      "id": "wl/rising_at_bound",
+      "items": [
+        5,
+        4,
+        6
+      ],
+      "method": "WL",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        false,
+        true,
+        true
+      ],
+      "se": 1.0563321172756248,
+      "se_slope": 0.11862502080628444,
+      "theta": 1.4703124811649746
+    },
+    {
+      "current_theta": 0,
+      "id": "wl/three_wl_roots",
+      "items": [
+        0,
+        4
+      ],
+      "method": "WL",
+      "range": [
+        -4,
+        4
+      ],
+      "responses": [
+        true,
+        false
+      ],
+      "se": 1.8895414386577738,
+      "se_slope": 0.42382690350617475,
+      "theta": -0.58520140496579331
+    }
+  ],
+  "catr_version": "3.17",
+  "r_version": "R version 4.6.1 (2026-06-24)"
+}

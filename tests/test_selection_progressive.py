@@ -6,46 +6,12 @@ from fractions import Fraction
 import numpy as np
 import pytest
 
-from catsim.compat import override
 from catsim.item_bank import ItemBank
 from catsim.selection import BaseSelector, ProgressiveSelector, ProportionalSelector
-from catsim.typing import FloatArray, IntArray
+from catsim.typing import FloatArray
 from tests.banks import two_pl_bank
 from tests.contexts import make_context
-
-
-class _DeterministicRNG(np.random.Generator):
-  """Deterministic stand-in for numpy's Generator in selector tests."""
-
-  def __init__(self, uniform_values: list[float] | FloatArray) -> None:
-    super().__init__(np.random.PCG64(0))
-    self._uniform_values = np.asarray(uniform_values, dtype=float)
-    self.choice_calls: list[tuple[IntArray, FloatArray | None]] = []
-
-  # The overrides are unannotated: Generator's methods are overloads that these stubs do not reproduce.
-  @override
-  def uniform(self, low=0.0, high=1.0, size=None):
-    del low, high
-    if size is None:
-      return float(self._uniform_values[0])
-    expected_size = int(np.prod(size)) if isinstance(size, tuple) else int(size)
-    if expected_size != self._uniform_values.size:
-      msg = f"expected {expected_size} uniform values, got {self._uniform_values.size}"
-      raise ValueError(msg)
-    return self._uniform_values.copy()
-
-  @override
-  def choice(self, a, size=None, replace=True, p=None, axis=0, shuffle=True):
-    del size, replace, axis, shuffle
-    candidate_indices = np.asarray(a, dtype=int)
-    probabilities = None if p is None else np.asarray(p, dtype=float)
-    self.choice_calls.append((
-      candidate_indices.copy(),
-      probabilities.copy() if probabilities is not None else None,
-    ))
-    if probabilities is None:
-      return int(candidate_indices[0])
-    return int(candidate_indices[np.argmax(probabilities)])
+from tests.generators import DeterministicRNG
 
 
 def _progressive_item_bank() -> ItemBank:
@@ -75,7 +41,7 @@ class TestPositionWeight:
 
   def _draw_probabilities(self, test_size: int, acceleration: float, position: int) -> FloatArray:
     """Return the probabilities ProportionalSelector draws with at a position, the earlier items administered."""
-    rng = _DeterministicRNG([])
+    rng = DeterministicRNG([])
     ProportionalSelector(test_size=test_size, acceleration=acceleration).select(
       make_context(two_pl_bank([1.0] * 8, self.DIFFICULTIES.tolist()), list(range(position - 1)), theta=0.0, rng=rng)
     )
@@ -153,7 +119,7 @@ class TestProgressiveSelector:
     selector = ProgressiveSelector(test_size=3)
 
     selected = selector.select(
-      make_context(_progressive_item_bank(), administered, theta=0.0, rng=_DeterministicRNG(draws))
+      make_context(_progressive_item_bank(), administered, theta=0.0, rng=DeterministicRNG(draws))
     )
 
     assert selected == expected
@@ -166,7 +132,7 @@ class TestProgressiveSelector:
 
     selected = selector.select(
       make_context(
-        item_bank, [0, 1], theta=0.0, rng=_DeterministicRNG([0.1, 0.2, 0.3, 0.4]), exposure_rates=exposure_rates
+        item_bank, [0, 1], theta=0.0, rng=DeterministicRNG([0.1, 0.2, 0.3, 0.4]), exposure_rates=exposure_rates
       )
     )
 
@@ -192,7 +158,7 @@ class TestProgressiveSelector:
     )
     selector = ProgressiveSelector(test_size=3)
 
-    selected = selector.select(make_context(item_bank, [0], theta=0.0, rng=_DeterministicRNG([0.9, 0.1, 0.4])))
+    selected = selector.select(make_context(item_bank, [0], theta=0.0, rng=DeterministicRNG([0.9, 0.1, 0.4])))
 
     assert selected == 1
 
@@ -222,7 +188,7 @@ class TestProportionalSelector:
     position and the test length N at the last. An exponent of 6 ((n - 1) / (N - 1)) ** t would raise the information
     to 4 in the positive_acceleration row, and requiring a positive acceleration would reject the other rows.
     """
-    rng = _DeterministicRNG([0.0, 0.0, 0.0, 0.0])
+    rng = DeterministicRNG([0.0, 0.0, 0.0, 0.0])
 
     ProportionalSelector(test_size=test_size, acceleration=acceleration).select(
       make_context(_progressive_item_bank(), administered, theta=0.0, rng=rng)
@@ -242,7 +208,7 @@ class TestProportionalSelector:
     last position of a two-item test, is below the smallest float. Unscaled weights would all be 0, and the draw would
     fall back to uniform sampling, or divide 0 by 0, where it should favor the most informative item.
     """
-    rng = _DeterministicRNG([0.0, 0.0, 0.0, 0.0])
+    rng = DeterministicRNG([0.0, 0.0, 0.0, 0.0])
 
     ProportionalSelector(test_size=2).select(
       make_context(two_pl_bank([1.0] * 4, [0.0, 1.0, 2.0, 3.0]), [3], theta=-400.0, rng=rng)
