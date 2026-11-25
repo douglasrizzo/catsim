@@ -2,89 +2,230 @@
 
 from __future__ import annotations
 
+import enum
+import secrets
 import time
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 import numpy
 
 from . import metrics
-from .compat import override
-from .irt import icc
+from .engine import CatEngine
 
 if TYPE_CHECKING:
+  from collections.abc import Callable, Iterator
+
   import numpy.typing as npt
 
-  from .engine import CatEngine
   from .item_bank import ItemBank
   from .session import Session
   from .typing import FloatArray, IntArray
 
 
-class ResponseProvider(Protocol):
-  """Source of an examinee's responses in a run of :class:`SimulationRunner`.
+class _Stream(enum.IntEnum):
+  """The last entry of an examinee's spawn key, which says which of its two random streams it is (ADR-0013)."""
 
-  :class:`SimulatedResponseProvider` draws them from a simulated examinee's true ability.
-  """
-
-  def answer(self, item_bank: ItemBank, item: int, session: Session, rng: numpy.random.Generator) -> bool:
-    """Return whether the examinee answers the item correctly.
-
-    Parameters
-    ----------
-    item_bank : ItemBank
-        The engine's item bank.
-    item : int
-        Index of the item the engine selected.
-    session : Session
-        The session the item was selected in, before its response.
-    rng : numpy.random.Generator
-        The run's random generator, the one the strategies draw from.
-
-    Returns
-    -------
-    bool
-        True for a correct response.
-    """
+  PATTERN = 0  # the examinee's response pattern, drawn before its test
+  SESSION = 1  # the generator of its session's steps
 
 
-class SimulatedResponseProvider(ResponseProvider):
-  """Draw a simulated examinee's responses from their true ability.
+def simulate(
+  engine: CatEngine,
+  *,
+  true_thetas: npt.ArrayLike | None = None,
+  responses: npt.ArrayLike | None = None,
+  rng: int | numpy.random.Generator | None = None,
+  progress: Callable[[int, int], object] | None = None,
+) -> SimulationResult:
+  r"""Run one CAT session per examinee on an engine, one after another.
 
-  The response to an item is correct with the probability the item's 4PL model gives at the true
-  ability, decided by one uniform draw from the run's generator.
+  An examinee is a response pattern, one answer per item of the bank, and its session takes the
+  answer to every item it is given from that pattern (ADR-0014). The examinees are given in one of
+  three ways:
+
+  - ``true_thetas`` alone: generated examinees. Before its test, examinee ``i`` draws one uniform
+    number :math:`u_j` per item of the bank, and its answer to item :math:`j` is correct when
+    :math:`u_j < P_j(\theta_i)`, the item's probability of a correct answer at the true ability
+    :math:`\theta_i` (``true_thetas[i]``).
+  - ``responses`` alone: recorded examinees, whose true abilities are unknown. Row ``i`` holds
+    examinee ``i``'s answers. The items whose answer is missing are excluded from the start of the
+    session (ADR-0011), so a recorded examinee is given only items they answered, and one who runs
+    out of them ends with ``StopReason.NO_ITEMS``.
+  - Both: recorded examinees whose true abilities are known, as when a study draws its own response
+    matrix with a response model of its choice.
+
+  Every random draw comes from ``rng`` (ADR-0013). The run takes one root entropy from it, and
+  examinee ``i``, at position ``i`` of the run, draws from two streams of its own:
+  ``SeedSequence(entropy, spawn_key=(i, 0))`` for its response pattern, and
+  ``SeedSequence(entropy, spawn_key=(i, 1))`` for its session, the generator of its ``start``,
+  ``select`` and ``answer`` steps, from which the initializer, the selector and the exposure control
+  draw. A generated examinee therefore gives the same answer to an item whatever the engine and
+  whenever the item comes, so two engines run on the same seed and examinees are compared on common
+  random numbers.
+
+  Each session's selections are capped against catR's exposure rates: each item's administrations
+  over the sessions before it (ADR-0012), so the first session sees no rates. This exposure feedback
+  is the only way one session depends on another: without an ``r_max`` cap, an examinee's session
+  does not depend on the other examinees.
 
   Parameters
   ----------
-  true_theta : float
-      The examinee's true ability.
+  engine : CatEngine
+      The engine whose item bank and strategies every session uses.
+  true_thetas : array-like or None, optional
+      The examinees' true abilities: a non-empty, one-dimensional sequence of finite numbers. To
+      simulate ``n`` examinees from a population, draw their abilities, e.g.
+      ``numpy.random.default_rng(1).normal(0, 1, n)``. Default is None, for recorded examinees whose
+      abilities are unknown.
+  responses : array-like or None, optional
+      The recorded examinees' answers: a matrix with one row per examinee and one column per item of
+      the bank, of Booleans, of the integers 0 and 1, or of the floats 0.0 and 1.0 with NaN where an
+      answer is missing. Default is None, for generated examinees.
+  rng : int, numpy.random.Generator or None, optional
+      The source of the run's root entropy. None, the default, takes fresh entropy, so every call
+      gives other tests. A non-negative int is the entropy itself, so the same seed gives the same
+      result. From a generator, one 128-bit number is drawn as the entropy, which advances it, so
+      passing the same generator to another run gives other results; a call whose inputs fail
+      their checks draws nothing from it.
+  progress : callable or None, optional
+      Called as ``progress(finished, total)`` after each session ends, with the number of sessions
+      finished and the number of examinees, such as ``lambda finished, total: bar.update(1)`` for a
+      progress bar ``bar``. Default is None.
+
+  Returns
+  -------
+  SimulationResult
+      The sessions, in examinee order, with the true abilities (None for recorded examinees whose
+      abilities are unknown), the run's exposure and proposal counts and its duration.
+
+  Raises
+  ------
+  TypeError
+      If ``engine`` is not a :class:`~catsim.CatEngine`; neither ``true_thetas`` nor ``responses``
+      is given; ``true_thetas`` is a single number, holds values that are not real numbers or has
+      more than one dimension; ``responses`` is not two-dimensional or holds values that are neither
+      Booleans nor real numbers; ``rng`` is neither None, an integer nor a generator; or ``progress``
+      is neither None nor callable.
+  ValueError
+      If ``true_thetas`` or ``responses`` is empty; a true ability is not finite; ``responses`` does
+      not have one column per item of the bank, or holds a response other than 0, 1 and NaN; the two
+      inputs have different numbers of examinees; or ``rng`` is a negative integer.
+
+  Examples
+  --------
+  Generated examinees, drawn from a standard normal population:
+
+  >>> import numpy
+  >>> from catsim import CatEngine, ItemBank, simulate
+  >>> from catsim.estimation import EAPEstimator
+  >>> from catsim.initialization import FixedPointInitializer
+  >>> from catsim.selection import MaxInfoSelector
+  >>> from catsim.stopping import MaxLengthStopper
+  >>> bank = ItemBank.generate(50, rng=0)
+  >>> engine = CatEngine(bank, FixedPointInitializer(0.0), MaxInfoSelector(), EAPEstimator(), MaxLengthStopper(10))
+  >>> result = simulate(engine, true_thetas=numpy.random.default_rng(1).normal(0, 1, 100), rng=0)
+  >>> len(result.sessions), result.test_lengths.tolist() == [10] * 100
+  (100, True)
+
+  Two recorded examinees: the first answered every item correctly, the second only items 3, 8 and
+  15, so the second runs out of answered items after three:
+
+  >>> responses = numpy.full((2, bank.n_items), numpy.nan)
+  >>> responses[0] = 1.0
+  >>> responses[1, [3, 8, 15]] = [1.0, 0.0, 1.0]
+  >>> result = simulate(engine, responses=responses, rng=0)
+  >>> [(len(session.administered_items), str(session.stop_reason)) for session in result.sessions]
+  [(10, 'stopper'), (3, 'no_items')]
+  >>> sorted(result.sessions[1].administered_items)
+  [3, 8, 15]
+  >>> result.rmse  # doctest: +ELLIPSIS
+  Traceback (most recent call last):
+  ...
+  ValueError: bias, mse and rmse need the examinees' true abilities, and this result has none; ...
   """
+  if not isinstance(engine, CatEngine):
+    msg = f"engine is a {type(engine).__name__}; it must be a CatEngine"
+    raise TypeError(msg)
+  if progress is not None and not callable(progress):
+    msg = f"progress is {progress!r}; it must be None or a callable, called as progress(finished, total)"
+    raise TypeError(msg)
+  thetas, matrix, n_examinees = _examinees(true_thetas, responses, engine.item_bank.n_items)
+  # Last, so that a call that fails its checks does not advance a generator passed as rng.
+  entropy = _entropy(rng)
 
-  def __init__(self, true_theta: float) -> None:
-    self._true_theta = true_theta
+  exposure_counts = numpy.zeros(engine.item_bank.n_items, dtype=int)
+  proposal_counts = numpy.zeros(engine.item_bank.n_items, dtype=int)
+  sessions: list[Session] = []
+  start = time.perf_counter()
+  for i, row in enumerate(_rows(engine.item_bank, thetas, matrix, entropy)):
+    # catR's rate: each item's administrations over the sessions started before this one, so the
+    # first session sees none (ADR-0012). Only this session changes the counts until it ends, and
+    # it is never offered an item again once given it, so its rates are fixed when it starts.
+    rates = exposure_counts / i if i else None
+    if rates is not None:
+      rates.flags.writeable = False
+    session, declined = _run_session(engine, row, _stream(entropy, i, _Stream.SESSION), rates)
+    for item in session.administered_items:
+      exposure_counts[item] += 1
+    for item in (*session.administered_items, *declined):
+      proposal_counts[item] += 1
+    sessions.append(session)
+    if progress is not None:
+      progress(i + 1, n_examinees)
+  duration = time.perf_counter() - start
 
-  @override
-  def answer(self, item_bank: ItemBank, item: int, session: Session, rng: numpy.random.Generator) -> bool:
-    """Return a correct response with the item's probability of a correct answer at the true ability.
+  return SimulationResult(
+    item_bank=engine.item_bank,
+    sessions=sessions,
+    exposure_counts=exposure_counts,
+    duration=duration,
+    proposal_counts=proposal_counts,
+    true_thetas=thetas,
+  )
 
-    Parameters
-    ----------
-    item_bank : ItemBank
-        The engine's item bank.
-    item : int
-        Index of the item the engine selected.
-    session : Session
-        The session the item was selected in, which the response does not depend on.
-    rng : numpy.random.Generator
-        The run's random generator.
 
-    Returns
-    -------
-    bool
-        True for a correct response.
-    """
-    probability = icc(self._true_theta, item_bank[item])
-    return bool(probability >= rng.uniform())
+def _examinees(
+  true_thetas: npt.ArrayLike | None, responses: npt.ArrayLike | None, n_items: int
+) -> tuple[FloatArray | None, FloatArray | None, int]:
+  """Return a run's checked true abilities and recorded responses, either None when not given, and how many examinees.
+
+  Parameters
+  ----------
+  true_thetas : array-like or None
+      The true abilities passed to :func:`simulate`.
+  responses : array-like or None
+      The recorded responses passed to :func:`simulate`.
+  n_items : int
+      The number of items in the engine's bank.
+
+  Returns
+  -------
+  tuple[numpy.ndarray or None, numpy.ndarray or None, int]
+      The true abilities as a float array, the responses as a float matrix with NaN where an answer
+      is missing, and the number of examinees.
+
+  Raises
+  ------
+  TypeError
+      If neither input is given.
+  ValueError
+      If both are given, with different numbers of examinees.
+  """
+  matrix = None if responses is None else _response_matrix(responses, n_items)
+  if true_thetas is None:
+    if matrix is None:
+      msg = "simulate needs examinees: true_thetas for generated ones, responses for recorded ones, or both"
+      raise TypeError(msg)
+    return None, matrix, len(matrix)
+  thetas = _true_thetas(true_thetas)
+  if matrix is not None and len(thetas) != len(matrix):
+    msg = (
+      f"true_thetas has {len(thetas)} entries and responses {len(matrix)} rows; with both, there must be one "
+      "true ability per row of responses"
+    )
+    raise ValueError(msg)
+  return thetas, matrix, len(thetas)
 
 
 def _true_thetas(true_thetas: npt.ArrayLike) -> FloatArray:
@@ -93,7 +234,7 @@ def _true_thetas(true_thetas: npt.ArrayLike) -> FloatArray:
   Parameters
   ----------
   true_thetas : array-like
-      The true abilities passed to :meth:`SimulationRunner.run`.
+      The true abilities passed to :func:`simulate`.
 
   Returns
   -------
@@ -103,16 +244,21 @@ def _true_thetas(true_thetas: npt.ArrayLike) -> FloatArray:
   Raises
   ------
   TypeError
-      If ``true_thetas`` is a single number or has more than one dimension.
+      If ``true_thetas`` is a single number, holds values that are not real numbers or has more than
+      one dimension.
   ValueError
       If ``true_thetas`` is empty or holds a value that is not finite.
   """
-  thetas = numpy.asarray(true_thetas, dtype=float)
+  thetas = numpy.asarray(true_thetas)
   if thetas.ndim == 0:
     msg = (
       f"true_thetas must hold one true ability per examinee, not a single number ({true_thetas!r}); "
       "to simulate n examinees, pass their abilities, e.g. rng.normal(0, 1, n)"
     )
+    raise TypeError(msg)
+  # Booleans would be read as abilities 0 and 1, and None as NaN.
+  if thetas.size and thetas.dtype.kind not in "iuf":
+    msg = f"true_thetas holds {thetas.dtype} values; true abilities must be real numbers"
     raise TypeError(msg)
   if thetas.ndim != 1:
     msg = f"true_thetas must be one-dimensional, one true ability per examinee, got shape {thetas.shape}"
@@ -120,18 +266,207 @@ def _true_thetas(true_thetas: npt.ArrayLike) -> FloatArray:
   if thetas.size == 0:
     msg = "true_thetas cannot be empty"
     raise ValueError(msg)
+  thetas = thetas.astype(float)
+  # The probability of a correct answer at NaN is NaN, so every generated answer would be wrong.
   if not numpy.isfinite(thetas).all():
-    msg = "true_thetas must be finite numbers"
+    position = int(numpy.flatnonzero(~numpy.isfinite(thetas))[0])
+    msg = f"true_thetas[{position}] is {thetas[position].item()!r}; true abilities must be finite numbers"
     raise ValueError(msg)
   return thetas
+
+
+def _response_matrix(responses: npt.ArrayLike, n_items: int) -> FloatArray:
+  """Return recorded responses as a float matrix of 1.0 (correct), 0.0 (incorrect) and NaN (missing), checking them.
+
+  Parameters
+  ----------
+  responses : array-like
+      The recorded responses passed to :func:`simulate`.
+  n_items : int
+      The number of items in the engine's bank.
+
+  Returns
+  -------
+  numpy.ndarray
+      A copy of the responses, one row per examinee and one column per item.
+
+  Raises
+  ------
+  TypeError
+      If the responses are not two-dimensional, or hold values that are neither Booleans nor real
+      numbers.
+  ValueError
+      If there is no row, not one column per item, or a response other than 0, 1 and, among floats,
+      NaN.
+  """
+  matrix = numpy.asarray(responses)
+  # Before the shape check: an empty list has one dimension, and is empty like true_thetas=[].
+  if matrix.ndim in {1, 2} and len(matrix) == 0:
+    msg = "responses cannot be empty"
+    raise ValueError(msg)
+  if matrix.ndim != 2:  # noqa: PLR2004 - a matrix
+    msg = (
+      "responses must be two-dimensional, one row per examinee and one column per item of the bank, got shape "
+      f"{matrix.shape}"
+    )
+    raise TypeError(msg)
+  if matrix.shape[1] != n_items:
+    msg = f"responses has shape {matrix.shape}; there must be one column per item of the bank ({n_items})"
+    raise ValueError(msg)
+  kind = matrix.dtype.kind
+  if kind == "b":
+    return matrix.astype(float)
+  # Strings and objects are no responses: None would mark a missing answer that NaN marks.
+  if kind not in "iuf":
+    msg = (
+      f"responses holds {matrix.dtype} values; responses must be bools, the integers 0 and 1, or the floats 0.0 "
+      "and 1.0 with NaN for a missing response"
+    )
+    raise TypeError(msg)
+  valid = (matrix == 0) | (matrix == 1)
+  if kind == "f":
+    valid |= numpy.isnan(matrix)
+  if not valid.all():
+    row, column = (int(index) for index in numpy.argwhere(~valid)[0])
+    rule = (
+      "an integer response must be 0 or 1" if kind in "iu" else "a response must be 0 or 1, or NaN where it is missing"
+    )
+    msg = f"responses[{row}, {column}] is {matrix[row, column].item()!r}; {rule}"
+    raise ValueError(msg)
+  return matrix.astype(float)
+
+
+def _entropy(rng: object) -> int:
+  """Return a run's root entropy: the seed itself, a number drawn once from a generator, or fresh entropy (ADR-0013).
+
+  Parameters
+  ----------
+  rng : object
+      The ``rng`` passed to :func:`simulate`.
+
+  Returns
+  -------
+  int
+      The root entropy of the examinees' seed sequences.
+
+  Raises
+  ------
+  TypeError
+      If ``rng`` is neither None, an integer nor a generator.
+  ValueError
+      If ``rng`` is a negative integer.
+  """
+  if rng is None:
+    # The size of SeedSequence's own fresh entropy.
+    return secrets.randbits(128)
+  if isinstance(rng, numpy.random.Generator):
+    return int.from_bytes(rng.bytes(16), "little")
+  # A bool is an int, but True passed as a seed is a flag passed by mistake.
+  if isinstance(rng, (bool, numpy.bool_)) or not isinstance(rng, (int, numpy.integer)):
+    msg = f"rng is {rng!r}; it must be None, an integer seed or a numpy.random.Generator"
+    raise TypeError(msg)
+  if rng < 0:
+    msg = f"rng is {rng}; a seed must not be negative"
+    raise ValueError(msg)
+  return int(rng)
+
+
+def _stream(entropy: int, examinee: int, stream: _Stream) -> numpy.random.Generator:
+  """Return the generator of one of an examinee's two random streams (ADR-0013).
+
+  Parameters
+  ----------
+  entropy : int
+      The run's root entropy.
+  examinee : int
+      The examinee's position in the run.
+  stream : _Stream
+      Which of the examinee's streams.
+
+  Returns
+  -------
+  numpy.random.Generator
+      A generator seeded by ``SeedSequence(entropy, spawn_key=(examinee, stream))``.
+  """
+  return numpy.random.default_rng(numpy.random.SeedSequence(entropy, spawn_key=(examinee, stream)))
+
+
+def _rows(
+  item_bank: ItemBank, true_thetas: FloatArray | None, responses: FloatArray | None, entropy: int
+) -> Iterator[FloatArray]:
+  """Yield each examinee's answers to every item, in examinee order: the recorded row, or one drawn before the test.
+
+  A generated examinee draws one uniform number per item from its pattern stream, and its answer to
+  an item is correct when the number falls below the item's probability at its true ability
+  (ADR-0014).
+
+  Parameters
+  ----------
+  item_bank : ItemBank
+      The engine's item bank.
+  true_thetas : numpy.ndarray or None
+      The examinees' true abilities, or None for recorded examinees whose abilities are unknown.
+  responses : numpy.ndarray or None
+      The recorded responses, or None for generated examinees.
+  entropy : int
+      The run's root entropy.
+
+  Yields
+  ------
+  numpy.ndarray
+      The examinee's row: 1.0 for a correct answer, 0.0 for an incorrect one and NaN for a missing
+      one.
+  """
+  if responses is not None:
+    yield from responses
+  elif true_thetas is not None:
+    for i, true_theta in enumerate(true_thetas.tolist()):
+      draws = _stream(entropy, i, _Stream.PATTERN).random(item_bank.n_items)
+      yield (draws < item_bank.icc(true_theta)).astype(float)
+
+
+def _run_session(
+  engine: CatEngine, row: FloatArray, rng: numpy.random.Generator, exposure_rates: FloatArray | None
+) -> tuple[Session, list[int]]:
+  """Run one session to its end, answering from ``row``, and return it with the items the exposure control declined.
+
+  The items whose answer is missing are excluded from the start. :func:`simulate` builds every
+  input of the engine's steps itself, so it takes the engine's unchecked path (ADR-0009).
+
+  Parameters
+  ----------
+  engine : CatEngine
+      The engine.
+  row : numpy.ndarray
+      The examinee's answers to every item: 1.0 for correct, 0.0 for incorrect and NaN for missing.
+  rng : numpy.random.Generator
+      The generator of the session's steps.
+  exposure_rates : numpy.ndarray or None
+      The exposure rates the session's selections are capped against.
+
+  Returns
+  -------
+  tuple[Session, list[int]]
+      The finished session, and the items the exposure control declined in it, in order.
+  """
+  session = engine._start(rng, tuple(numpy.flatnonzero(numpy.isnan(row)).tolist()))  # noqa: SLF001
+  declined: list[int] = []
+  while True:
+    selection = engine._select(session, rng, exposure_rates)  # noqa: SLF001
+    session = selection.session
+    declined.extend(selection.declined)
+    if selection.item is None:
+      return session, declined
+    # The row holds 1.0 or 0.0 for every item the session may be given; its NaNs are excluded.
+    session = engine._answer(session, selection.item, bool(row[selection.item]), rng)  # noqa: SLF001
 
 
 @dataclass(slots=True)
 class SimulationResult:
   """The sessions of a simulated run, with the run's item exposure and duration.
 
-  :meth:`SimulationRunner.run` returns one; one can also be built from sessions an application ran
-  itself, whose true abilities may be unknown.
+  :func:`simulate` returns one; one can also be built from sessions an application ran itself,
+  whose true abilities may be unknown.
 
   Parameters
   ----------
@@ -147,14 +482,14 @@ class SimulationResult:
       Each item's proposals: its administrations plus the times the engine's exposure control
       declined it. Default is None, for a result built without them.
   true_thetas : array-like or None, optional
-      Each session's true ability, in session order, NaN for a session whose true ability is
-      unknown, or None when none is known. A session does not hold its examinee's true ability, so
-      the result does. Default is None.
+      Each session's true ability, a finite number, in session order, or None when the true
+      abilities are unknown, as for recorded examinees. A session does not hold its examinee's true
+      ability, so the result does. Default is None.
 
   Raises
   ------
   ValueError
-      If ``true_thetas`` does not hold one value per session.
+      If ``true_thetas`` does not hold one finite number per session.
   """
 
   item_bank: ItemBank
@@ -165,7 +500,7 @@ class SimulationResult:
   true_thetas: FloatArray | None = None
 
   def __post_init__(self) -> None:
-    """Store the true abilities as a float array, checking that there is one per session."""
+    """Store the true abilities as a float array, checking that there is one finite number per session."""
     if self.true_thetas is None:
       return
     self.true_thetas = numpy.asarray(self.true_thetas, dtype=float)
@@ -173,6 +508,14 @@ class SimulationResult:
       msg = (
         f"true_thetas has shape {self.true_thetas.shape}; there must be one true ability per session "
         f"({len(self.sessions)})"
+      )
+      raise ValueError(msg)
+    # The true abilities are known for every session or for none (ADR-0016): NaN does not mark an unknown one.
+    if not numpy.isfinite(self.true_thetas).all():
+      position = int(numpy.flatnonzero(~numpy.isfinite(self.true_thetas))[0])
+      msg = (
+        f"true_thetas[{position}] is {self.true_thetas[position].item()!r}; true abilities must be finite, and "
+        "true_thetas None when they are unknown"
       )
       raise ValueError(msg)
 
@@ -260,7 +603,7 @@ class SimulationResult:
     return float(numpy.mean(counts)) if counts else None
 
   def _known_true_thetas(self) -> FloatArray:
-    """Return the true abilities, raising if a session has none.
+    """Return the true abilities, raising if the result has none.
 
     Returns
     -------
@@ -270,18 +613,15 @@ class SimulationResult:
     Raises
     ------
     ValueError
-        If the result has no session, or any session has no true ability.
+        If the result has no session, or its true abilities are unknown.
     """
     if not self.sessions:
       msg = "bias, mse and rmse need at least one session, and the result has none"
       raise ValueError(msg)
     if self.true_thetas is None:
-      msg = "bias, mse and rmse need the sessions' true abilities, and the result has none"
-      raise ValueError(msg)
-    missing = int(numpy.isnan(self.true_thetas).sum())
-    if missing:
       msg = (
-        f"bias, mse and rmse need every session's true theta, but {missing} of {len(self.sessions)} sessions have none"
+        "bias, mse and rmse need the examinees' true abilities, and this result has none; pass true_thetas to "
+        "simulate with the responses when they are known"
       )
       raise ValueError(msg)
     return self.true_thetas
@@ -293,7 +633,7 @@ class SimulationResult:
     Raises
     ------
     ValueError
-        If the result has no session, or any session has no true ability.
+        If the result has no session, or its true abilities are unknown.
     """
     return metrics.bias(self._known_true_thetas(), self.final_thetas)
 
@@ -306,7 +646,7 @@ class SimulationResult:
     Raises
     ------
     ValueError
-        If the result has no session, or any session has no true ability.
+        If the result has no session, or its true abilities are unknown.
     """
     return metrics.mse(self._known_true_thetas(), self.final_thetas)
 
@@ -317,7 +657,7 @@ class SimulationResult:
     Raises
     ------
     ValueError
-        If the result has no session, or any session has no true ability.
+        If the result has no session, or its true abilities are unknown.
     """
     return metrics.rmse(self._known_true_thetas(), self.final_thetas)
 
@@ -336,136 +676,3 @@ class SimulationResult:
     if test_size == 0 or numpy.any(lengths != test_size):
       return None
     return metrics.overlap_rate(self.exposure_rates, test_size)
-
-
-class SimulationRunner:
-  """Run a simulated CAT session on an engine for each of a set of examinees.
-
-  Parameters
-  ----------
-  engine : CatEngine
-      The engine whose item bank and strategies every simulated session uses.
-  """
-
-  def __init__(self, engine: CatEngine) -> None:
-    self._engine = engine
-
-  @property
-  def engine(self) -> CatEngine:
-    """Return the engine the runner simulates sessions on."""
-    return self._engine
-
-  def run(
-    self,
-    true_thetas: npt.ArrayLike,
-    *,
-    rng: int | numpy.random.Generator | None = None,
-    progress: bool = False,
-  ) -> SimulationResult:
-    """Run one simulated session per true ability, one after another.
-
-    One random generator serves the whole run: every step of every session is given it, and the
-    initializer, the selectors' tie-breaking and randomization and the simulated responses draw
-    from it, in session order. It
-    is built from ``rng`` at the start of every call, so the same seed gives the same result however
-    many times the runner has run; see :doc:`/reproducibility`. Each session's selections are capped
-    against catR's exposure rates: each item's administrations over the sessions before it
-    (ADR-0012), so the first session sees no rates.
-
-    Parameters
-    ----------
-    true_thetas : array-like
-        True abilities of the simulated examinees: a non-empty, one-dimensional sequence of finite
-        numbers. Session ``i`` simulates the examinee of ability ``true_thetas[i]``. To simulate
-        ``n`` examinees from a population, draw their abilities, e.g.
-        ``numpy.random.default_rng(1).normal(0, 1, n)``.
-    rng : int, numpy.random.Generator or None, optional
-        The source of the run's random draws. None, the default, draws fresh randomness, so every
-        call gives other tests. An int seeds a new generator, so the same seed gives the same result.
-        A generator is drawn from as is, and the run advances it, so passing the same generator to
-        another run gives other results.
-    progress : bool, optional
-        Whether to show a ``tqdm`` progress bar over the sessions. Default is False.
-
-    Returns
-    -------
-    SimulationResult
-        The sessions, in the order of ``true_thetas``, with their true abilities, the run's exposure
-        and proposal counts and its duration.
-
-    Raises
-    ------
-    TypeError
-        If ``true_thetas`` is a single number or has more than one dimension.
-    ValueError
-        If ``true_thetas`` is empty or holds a value that is not finite.
-    """
-    thetas = _true_thetas(true_thetas)
-    engine = self._engine
-    generator = numpy.random.default_rng(rng)
-    exposure_counts = numpy.zeros(engine.item_bank.n_items, dtype=int)
-    proposal_counts = numpy.zeros(engine.item_bank.n_items, dtype=int)
-    abilities = thetas.tolist()
-    if progress:
-      # A progress bar is rarely asked for, so importing catsim does not pay for tqdm's import.
-      from tqdm import tqdm  # noqa: PLC0415  # pylint: disable=import-outside-toplevel
-
-      abilities = tqdm(abilities)
-
-    start = time.perf_counter()
-    sessions: list[Session] = []
-    for true_theta in abilities:
-      # catR's rate: each item's administrations over the sessions started before this one, so the
-      # first session sees none (ADR-0012). Only this session changes the counts until it ends, and
-      # it is never offered an item again once given it, so its rates are fixed when it starts.
-      rates = exposure_counts / len(sessions) if sessions else None
-      if rates is not None:
-        rates.flags.writeable = False
-      session = self._run_session(SimulatedResponseProvider(true_theta), generator, rates)
-      for item in session.administered_items:
-        exposure_counts[item] += 1
-      for item in (*session.administered_items, *session.excluded_items):
-        proposal_counts[item] += 1
-      sessions.append(session)
-    duration = time.perf_counter() - start
-
-    return SimulationResult(
-      item_bank=engine.item_bank,
-      sessions=sessions,
-      exposure_counts=exposure_counts,
-      duration=duration,
-      proposal_counts=proposal_counts,
-      true_thetas=thetas,
-    )
-
-  def _run_session(
-    self, examinee: ResponseProvider, rng: numpy.random.Generator, exposure_rates: FloatArray | None
-  ) -> Session:
-    """Run one session to its end, every draw from ``rng``: the strategies' and the examinee's, in turn.
-
-    The runner builds every input of the engine's steps itself, so it takes the engine's unchecked
-    path (ADR-0009).
-
-    Parameters
-    ----------
-    examinee : ResponseProvider
-        The examinee who answers the session's items.
-    rng : numpy.random.Generator
-        The run's generator.
-    exposure_rates : numpy.ndarray or None
-        The exposure rates the session's selections are capped against.
-
-    Returns
-    -------
-    Session
-        The finished session, whose excluded items are the items the exposure control declined.
-    """
-    engine = self._engine
-    session = engine._start(rng, ())  # noqa: SLF001
-    while True:
-      selection = engine._select(session, rng, exposure_rates)  # noqa: SLF001
-      session = selection.session
-      if selection.item is None:
-        return session
-      response = examinee.answer(engine.item_bank, selection.item, session, rng)
-      session = engine._answer(session, selection.item, response, rng)  # noqa: SLF001

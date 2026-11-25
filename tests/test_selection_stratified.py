@@ -8,7 +8,7 @@ from hypothesis import example, given, settings
 from hypothesis import strategies as st
 from hypothesis.strategies import DrawFn, composite
 
-from catsim import CatEngine, SimulationRunner, StopReason
+from catsim import CatEngine, StopReason, simulate
 from catsim.estimation import NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
 from catsim.initialization import FixedPointInitializer
@@ -206,7 +206,7 @@ def test_a_session_administers_test_size_items(
     NumericalSearchEstimator(),
     MaxLengthStopper(test_size),
   )
-  session = SimulationRunner(engine).run([true_theta], rng=seed).sessions[0]
+  session = simulate(engine, true_thetas=[true_theta], rng=seed).sessions[0]
 
   assert session.stop_reason == StopReason.STOPPER
   assert len(session.administered_items) == test_size

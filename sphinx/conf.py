@@ -219,9 +219,9 @@ numpydoc_validation_checks = {"PR01"}
 # A class documents its constructor's parameters; autodoc renders the class docstring alone, so
 # __init__ is never checked.
 numpydoc_validation_exclude = {
-  # numpydoc reads the call signature of an Enum's or a Protocol's metaclass as the class's
+  # numpydoc reads the call signature of an Enum's metaclass as the class's
   # parameters, and that of an array alias as the alias's.
-  r"^catsim\.(IrtModel|StopReason|ResponseProvider)$",
+  r"^catsim\.(IrtModel|StopReason)$",
   r"^catsim\.selection\.(CapFallback|ClusterMethod)$",
   r"^catsim\.plot\.PlotType$",
   r"^catsim\.typing\.(FloatArray|IntArray)$",

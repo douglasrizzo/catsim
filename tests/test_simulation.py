@@ -1,32 +1,20 @@
-"""Tests for the simulation runner, its simulated responses and its results."""
+"""Tests for simulate, its generated and recorded examinees and their random streams, and its results."""
 
 from __future__ import annotations
 
 import math
 import re
-import subprocess
-import sys
 
 import numpy as np
 import pytest
 
-from catsim import (
-  CatEngine,
-  Estimate,
-  ItemBank,
-  Session,
-  SimulatedResponseProvider,
-  SimulationResult,
-  SimulationRunner,
-  StepContext,
-  StopReason,
-)
+from catsim import CatEngine, Estimate, ItemBank, Session, SimulationResult, StepContext, StopReason, simulate
 from catsim.compat import override
-from catsim.estimation import NumericalSearchEstimator
+from catsim.estimation import EAPEstimator, NumericalSearchEstimator
 from catsim.exposure import BaseExposureControl
-from catsim.initialization import FixedPointInitializer
-from catsim.selection import BaseSelector, RandomesqueSelector, RandomSelector
-from catsim.stopping import MaxLengthStopper
+from catsim.initialization import BaseInitializer, FixedPointInitializer, UniformInitializer
+from catsim.selection import BaseSelector, MaxInfoSelector, RandomesqueSelector, RandomSelector
+from catsim.stopping import BaseStopper, MaxLengthStopper, StandardErrorStopper, StopRule
 from catsim.typing import FloatArray
 
 
@@ -44,19 +32,6 @@ class FirstRemainingSelector(BaseSelector):
     return next(i for i in range(context.item_bank.n_items) if i not in context.administered_items)
 
 
-class RngRecordingSelector(BaseSelector):
-  """Select the lowest-index remaining item and record the generator each call was given."""
-
-  def __init__(self) -> None:
-    super().__init__()
-    self.seen_rngs: list[np.random.Generator] = []
-
-  @override
-  def select(self, context: StepContext) -> int:
-    self.seen_rngs.append(context.rng)
-    return next(i for i in range(context.item_bank.n_items) if i not in context.administered_items)
-
-
 class AcceptingControl(BaseExposureControl):
   """Exposure control that accepts every proposal without drawing a random number."""
 
@@ -67,7 +42,7 @@ class AcceptingControl(BaseExposureControl):
 
 
 class CoinControl(BaseExposureControl):
-  """Exposure control that accepts each proposal with probability one half, drawn from the run's generator."""
+  """Exposure control that accepts each proposal with probability one half, drawn from the session's generator."""
 
   @override
   def accept(self, context: StepContext, item: int) -> bool:
@@ -75,185 +50,327 @@ class CoinControl(BaseExposureControl):
     return bool(context.rng.random() < 0.5)
 
 
-def make_runner(
-  item_bank: ItemBank, selector: BaseSelector, max_items: int, exposure_control: BaseExposureControl | None = None
-) -> SimulationRunner:
-  """Return a runner whose sessions start at 0, use the given selector and control and stop after max_items items."""
-  return SimulationRunner(
-    CatEngine(
-      item_bank,
-      FixedPointInitializer(0.0),
-      selector,
-      NumericalSearchEstimator(),
-      MaxLengthStopper(max_items),
-      exposure_control=exposure_control,
-    )
+def make_engine(
+  item_bank: ItemBank,
+  selector: BaseSelector,
+  stopper: BaseStopper | int,
+  exposure_control: BaseExposureControl | None = None,
+  initializer: BaseInitializer | None = None,
+) -> CatEngine:
+  """Return an engine with the given selector and control, starting at 0 unless told otherwise.
+
+  An int stopper stops after that many items.
+  """
+  return CatEngine(
+    item_bank,
+    initializer or FixedPointInitializer(0.0),
+    selector,
+    NumericalSearchEstimator(),
+    MaxLengthStopper(stopper) if isinstance(stopper, int) else stopper,
+    exposure_control=exposure_control,
   )
 
 
-class TestSimulationRunnerRun:
-  """Tests for SimulationRunner.run()."""
+@pytest.fixture
+def random_engine(item_bank: ItemBank) -> CatEngine:
+  """Provide an engine that gives every examinee 10 random items."""
+  return make_engine(item_bank, RandomSelector(), 10)
 
-  def test_run_keeps_the_true_abilities_in_session_order(self, simulation_runner: SimulationRunner) -> None:
+
+@pytest.fixture
+def simulation_result(random_engine: CatEngine) -> SimulationResult:
+  """Provide a completed simulation result for five generated examinees."""
+  return simulate(random_engine, true_thetas=[-1.0, -0.5, 0.0, 0.5, 1.0], rng=42)
+
+
+def probabilities(item_bank: ItemBank, theta: float) -> FloatArray:
+  """Return each item's 4PL probability of a correct answer at ``theta``, computed here rather than by catsim."""
+  a, b, c, d = item_bank.items.T
+  return c + (d - c) / (1.0 + np.exp(-a * (theta - b)))
+
+
+def stream(seed: int, examinee: int, kind: int) -> np.random.Generator:
+  """Return the generator ADR-0013 gives examinee ``examinee``: kind 0 for its pattern, 1 for its session."""
+  return np.random.default_rng(np.random.SeedSequence(seed, spawn_key=(examinee, kind)))
+
+
+def shared_answers(first: SimulationResult, second: SimulationResult) -> list[tuple[bool, bool]]:
+  """Return, for every examinee and every item both runs gave them, the two runs' answers to it."""
+  pairs = []
+  for one, other in zip(first.sessions, second.sessions, strict=True):
+    answers = dict(zip(other.administered_items, other.responses, strict=True))
+    pairs += [
+      (response, answers[item])
+      for item, response in zip(one.administered_items, one.responses, strict=True)
+      if item in answers
+    ]
+  return pairs
+
+
+class TestGeneratedExaminees:
+  """Tests for runs of examinees given by their true abilities."""
+
+  def test_the_result_keeps_the_true_abilities_in_examinee_order(self, random_engine: CatEngine) -> None:
     """Session i simulates true_thetas[i]; fails if the result reorders, rounds or drops the true abilities."""
     thetas = [0.25, -1.5, 1.0]
-    result = simulation_runner.run(thetas)
+    result = simulate(random_engine, true_thetas=thetas)
 
     assert result.true_thetas is not None
     assert result.true_thetas.tolist() == thetas
     assert len(result.sessions) == 3
 
-  @pytest.mark.parametrize("count", [5, np.int64(5)], ids=["int", "numpy_int"])
-  def test_run_rejects_a_number_of_examinees(self, simulation_runner: SimulationRunner, count: int) -> None:
-    """run takes the true abilities, not how many examinees to draw.
-
-    Fails if a single number is accepted, either as a count of examinees to draw or as the one
-    true ability of a one-examinee run.
-    """
-    with pytest.raises(TypeError, match=r"one true ability per examinee, not a single number .*rng\.normal\(0, 1, n\)"):
-      simulation_runner.run(count)
-
-  def test_run_with_empty_examinee_array_raises(self, simulation_runner: SimulationRunner) -> None:
-    """A run with no examinee fails rather than returning an empty result."""
-    with pytest.raises(ValueError, match="true_thetas cannot be empty"):
-      simulation_runner.run([])
-
-  def test_run_with_multidimensional_examinees_raises(self, simulation_runner: SimulationRunner) -> None:
-    """A two-dimensional array of abilities fails rather than being read as one examinee per row."""
-    with pytest.raises(
-      TypeError, match=r"true_thetas must be one-dimensional, one true ability per examinee, got shape \(1, 2\)"
-    ):
-      simulation_runner.run(np.array([[0.0, 1.0]]))
-
-  @pytest.mark.parametrize("bad", [np.nan, np.inf], ids=["nan", "inf"])
-  def test_run_rejects_a_true_ability_that_is_not_finite(self, simulation_runner: SimulationRunner, bad: float) -> None:
-    """A NaN or infinite true ability fails before any session runs.
-
-    Fails if the runner simulates it: the response probability at NaN is NaN, so every simulated
-    response would silently be wrong.
-    """
-    with pytest.raises(ValueError, match="true_thetas must be finite numbers"):
-      simulation_runner.run([0.0, bad])
-
-  def test_two_runs_with_the_same_seed_give_the_same_sessions(self, simulation_runner: SimulationRunner) -> None:
-    """Every run builds its generator from its seed, so the same seed gives the same tests on the same runner.
-
-    Fails if the runner keeps one generator across runs, so the second run continues the first
-    one's stream, or ignores the seed (a different seed would then give the same tests).
-    """
-    thetas = [-1.0, 0.0, 1.0]
-    first = simulation_runner.run(thetas, rng=3)
-    second = simulation_runner.run(thetas, rng=3)
-    other_seed = simulation_runner.run(thetas, rng=4)
-
-    assert second.administered_items == first.administered_items
-    assert second.responses == first.responses
-    assert second.theta_histories == first.theta_histories
-    assert np.array_equal(second.exposure_counts, first.exposure_counts)
-    assert other_seed.administered_items != first.administered_items
-
-  def test_a_seeded_run_without_a_control_gives_the_tests_it_always_gave(self, item_bank: ItemBank) -> None:
-    """A seeded run of random selection without an exposure control gives fixed, pinned items and responses.
-
-    Fails if the engine draws from the run's generator when there is no exposure control, or passes the selector
-    another set of items to choose from: every later draw, and so every item and response, would move.
-    """
-    result = make_runner(item_bank, RandomSelector(), max_items=5).run([-1.0, 0.0, 1.0], rng=7)
-
-    assert result.administered_items == [(47, 30, 41, 10, 44), (0, 6, 24, 36, 13), (29, 27, 35, 31, 42)]
-    assert result.responses == [
-      (False, False, True, False, False),
-      (False, True, True, True, False),
-      (False, True, False, True, True),
-    ]
-
-  def test_a_control_that_accepts_without_drawing_reproduces_the_run_without_one(self, item_bank: ItemBank) -> None:
-    """With a control that accepts every proposal and draws nothing, a seeded run gives the run without a control.
-
-    Fails if asking the control changes what the selector is given or draws from the generator, or if accepted
-    proposals are counted twice (the proposal counts would exceed the exposure counts).
-    """
-    thetas = [-1.0, 0.0, 1.0]
-    without = make_runner(item_bank, RandomesqueSelector(bin_size=3), max_items=5).run(thetas, rng=7)
-    accepting = make_runner(item_bank, RandomesqueSelector(bin_size=3), 5, AcceptingControl()).run(thetas, rng=7)
-
-    assert accepting.administered_items == without.administered_items
-    assert accepting.responses == without.responses
-    assert accepting.theta_histories == without.theta_histories
-    assert [session.excluded_items for session in accepting.sessions] == [(), (), ()]
-    assert accepting.proposal_counts is not None
-    assert np.array_equal(accepting.proposal_counts, accepting.exposure_counts)
-
-  def test_a_runs_proposals_are_its_administrations_plus_its_declines(self, item_bank: ItemBank) -> None:
-    """Under a control that declines at random, each item's proposals are its administrations plus its declines.
-
-    The declines are read from the sessions' excluded items. Fails if the runner reports the tracker's counts as the
-    proposals, if a decline is not recorded in the tracker or is recorded as an administration, or if proposal_rates
-    divides by anything but the number of sessions.
-    """
-    result = make_runner(item_bank, RandomSelector(), 5, CoinControl()).run(np.zeros(20), rng=3)
-
-    declines = np.bincount(
-      [item for session in result.sessions for item in session.excluded_items], minlength=item_bank.n_items
-    )
-    assert int(declines.sum()) > 0
-    assert result.test_lengths.tolist() == [5] * 20
-    assert result.proposal_counts is not None
-    assert result.proposal_rates is not None
-    assert np.array_equal(result.proposal_counts, result.exposure_counts + declines)
-    assert np.allclose(result.proposal_rates, (result.exposure_counts + declines) / 20)
-
-  def test_two_runs_without_rng_give_other_tests(self, simulation_runner: SimulationRunner) -> None:
-    """A run without rng draws fresh randomness, so two such runs give other final estimates.
-
-    Each of the three sessions draws 10 of 50 items at random, so equal final estimates for all three are
-    practically impossible. Fails if rng defaults to a fixed seed, which makes every unseeded run the same.
-    """
-    thetas = [-1.0, 0.0, 1.0]
-
-    assert not np.array_equal(simulation_runner.run(thetas).final_thetas, simulation_runner.run(thetas).final_thetas)
-
-  def test_a_generator_passed_as_rng_is_the_one_every_session_draws_from(self, item_bank: ItemBank) -> None:
-    """A Generator passed as rng is used as is, and every session of the run gets that same one.
-
-    Fails if the runner reseeds or copies the generator, or gives each session a generator of its own.
-    """
-    selector = RngRecordingSelector()
-    rng = np.random.default_rng(5)
-
-    make_runner(item_bank, selector, max_items=2).run([0.0, 1.0], rng=rng)
-
-    assert len(selector.seen_rngs) == 4
-    assert all(seen is rng for seen in selector.seen_rngs)
-
-  def test_a_run_with_a_progress_bar_matches_a_quiet_run(self, simulation_runner: SimulationRunner) -> None:
-    """progress=True only adds a progress bar: fails if it changes the sessions or the run does not complete."""
-    thetas = [-0.5, 0.0, 0.5]
-    quiet = simulation_runner.run(thetas, rng=0, progress=False)
-    shown = simulation_runner.run(thetas, rng=0, progress=True)
-
-    assert shown.administered_items == quiet.administered_items
-    assert shown.theta_histories == quiet.theta_histories
-
-  def test_importing_the_simulation_module_does_not_import_tqdm(self) -> None:
-    """tqdm is imported only for a run that shows a progress bar; fails if catsim imports it at module level."""
-    code = "import sys, catsim, catsim.simulation; print('tqdm' in sys.modules)"
-    completed = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True)
-
-    assert completed.stdout.strip() == "False"
-
-  def test_run_populates_sessions(self, simulation_result: SimulationResult) -> None:
+  def test_every_session_runs_to_its_stopper(self, simulation_result: SimulationResult) -> None:
     """Every session of a run is run to its stopper: 10 items, 10 responses and 11 estimates.
 
-    Fails if run returns sessions before they end, or loses part of a session's history.
+    Fails if simulate returns sessions before they end, or loses part of a session's history.
     """
     assert len(simulation_result.sessions) == 5
     for session in simulation_result.sessions:
       assert session.stop_reason is StopReason.STOPPER
       assert (len(session.administered_items), len(session.responses), len(session.theta_history)) == (10, 10, 11)
 
+  def test_an_examinee_answers_from_a_pattern_drawn_from_its_own_stream(self) -> None:
+    """Examinee i answers item j correctly when uniform j of ``SeedSequence(seed, spawn_key=(i, 0))`` is below P_j.
+
+    The probabilities are the 4PL's at the true ability, computed here. Fails if the answers are drawn as the items are
+    given, from the session's generator or one shared by the run, if the pattern comes from another stream (the
+    session's, or one keyed by anything but the examinee's position), or if the answers use the estimate instead of
+    the true ability or leave out an item's guessing or upper asymptote.
+    """
+    item_bank = ItemBank.generate(40, rng=3)
+    thetas = [-1.2, 0.4, 2.0, -0.3]
+
+    result = simulate(make_engine(item_bank, RandomSelector(), 15), true_thetas=thetas, rng=11)
+
+    expected = []
+    for i, (theta, session) in enumerate(zip(thetas, result.sessions, strict=True)):
+      correct = stream(11, i, 0).random(item_bank.n_items) < probabilities(item_bank, theta)
+      expected.append(tuple(bool(correct[item]) for item in session.administered_items))
+    assert result.responses == expected
+
+  def test_two_engines_give_an_examinee_the_same_answer_to_every_item_both_give(self, item_bank: ItemBank) -> None:
+    """Common random numbers: on the same seed and examinees, the answer to an item does not depend on the engine.
+
+    Maximum information and random selection give the items in different orders, so fails if an answer is drawn when
+    its item is given rather than from a pattern drawn before the test (ADR-0013).
+    """
+    thetas = np.random.default_rng(2).normal(0, 1, 20)
+
+    by_information = simulate(make_engine(item_bank, MaxInfoSelector(), 20), true_thetas=thetas, rng=9)
+    at_random = simulate(make_engine(item_bank, RandomSelector(), 20), true_thetas=thetas, rng=9)
+
+    pairs = shared_answers(by_information, at_random)
+    assert len(pairs) > 100
+    assert {first for first, _ in pairs} == {True, False}
+    assert all(first == second for first, second in pairs)
+
+  def test_without_exposure_feedback_a_session_does_not_depend_on_the_other_examinees(
+    self, item_bank: ItemBank
+  ) -> None:
+    """Examinee 2's session is the same whoever examinees 0 and 1 are, when no session sees exposure rates.
+
+    The initializer and the randomesque selector draw from the session's generator, and the examinees before it give
+    tests of other lengths in the two runs, so they make other numbers of draws. Fails if the sessions draw from one
+    generator in turn, as the runner before ADR-0013 did, so that each session's draws depend on the sessions before it.
+    """
+    engine = CatEngine(
+      item_bank,
+      UniformInitializer(-1.0, 1.0),
+      RandomesqueSelector(bin_size=4),
+      EAPEstimator(),
+      StopRule(StandardErrorStopper(0.6), MaxLengthStopper(15)),
+    )
+
+    first = simulate(engine, true_thetas=[-2.5, 2.8, 0.3], rng=4)
+    second = simulate(engine, true_thetas=[0.1, -0.2, 0.3], rng=4)
+
+    assert first.test_lengths[:2].sum() != second.test_lengths[:2].sum()
+    assert first.sessions[2] == second.sessions[2]
+
+  def test_the_examinees_before_a_session_are_all_that_its_exposure_feedback_depends_on(
+    self, item_bank: ItemBank
+  ) -> None:
+    """A run's first four sessions are those of a run of its first four examinees, even under an exposure cap.
+
+    The cap holds back the first session's items from the second (its rates are 1), so the feedback acts. Fails if the
+    rates divide the counts by the planned number of examinees (ADR-0012's rejected rate), or if an examinee's streams
+    depend on how many examinees the run has.
+    """
+    engine = make_engine(item_bank, MaxInfoSelector(r_max=0.3), 5)
+    thetas = np.random.default_rng(6).normal(0, 1, 8)
+
+    whole = simulate(engine, true_thetas=thetas, rng=1)
+    prefix = simulate(engine, true_thetas=thetas[:4], rng=1)
+
+    assert set(whole.sessions[0].administered_items).isdisjoint(whole.sessions[1].administered_items)
+    assert prefix.sessions == whole.sessions[:4]
+
+
+class TestRecordedExaminees:
+  """Tests for runs of examinees given by their recorded responses."""
+
+  ROWS = np.random.default_rng(0).random((3, 50)) < 0.5
+
+  @pytest.mark.parametrize(
+    "responses",
+    [ROWS, ROWS.astype(int), ROWS.astype(float)],
+    ids=["bools", "integers", "floats"],
+  )
+  def test_recorded_examinees_answer_from_their_rows(self, item_bank: ItemBank, responses: np.ndarray) -> None:
+    """Every response of session i is row i's entry for that item, whether the rows hold bools, 0 and 1, or 0.0 and 1.0.
+
+    Fails if a session answers from another row or draws its answers, or if the integer or float rows are read
+    differently from the Boolean ones.
+    """
+    result = simulate(make_engine(item_bank, MaxInfoSelector(), 12), responses=responses, rng=0)
+
+    assert result.true_thetas is None
+    assert result.responses == [
+      tuple(bool(self.ROWS[i, item]) for item in session.administered_items)
+      for i, session in enumerate(result.sessions)
+    ]
+
+  def test_items_without_a_recorded_answer_are_excluded_from_the_start(self, item_bank: ItemBank) -> None:
+    """A NaN marks an item the examinee did not answer: their session excludes it from the start and never gives it.
+
+    Examinee 0 answered the odd items and examinee 1 the even ones. Fails if a NaN is read as an answer (bool(nan) is
+    True), or if the exclusions are not the NaN items in item order.
+    """
+    responses = self.ROWS[:2].astype(float)
+    responses[0, ::2] = np.nan
+    responses[1, 1::2] = np.nan
+
+    result = simulate(make_engine(item_bank, MaxInfoSelector(), 12), responses=responses, rng=0)
+
+    assert [session.excluded_items for session in result.sessions] == [tuple(range(0, 50, 2)), tuple(range(1, 50, 2))]
+    assert [sorted({item % 2 for item in items}) for items in result.administered_items] == [[1], [0]]
+
+  def test_an_examinee_who_runs_out_of_answered_items_ends_with_no_items(self, item_bank: ItemBank) -> None:
+    """An examinee who answered three items gets those three, in a test planned for ten, and ends with NO_ITEMS.
+
+    Fails if the session goes on past its answers, or ends with STOPPER as if its planned length were reached.
+    """
+    responses = np.full((1, item_bank.n_items), np.nan)
+    responses[0, [2, 9, 14]] = [1.0, 0.0, 1.0]
+
+    session = simulate(make_engine(item_bank, MaxInfoSelector(), 10), responses=responses, rng=0).sessions[0]
+
+    assert sorted(zip(session.administered_items, session.responses, strict=True)) == [
+      (2, True),
+      (9, False),
+      (14, True),
+    ]
+    assert session.stop_reason is StopReason.NO_ITEMS
+
+  def test_recorded_examinees_with_known_abilities_answer_from_their_rows(self, item_bank: ItemBank) -> None:
+    """With both inputs, the rows give the answers and the true abilities only the metrics.
+
+    An examinee of true ability 3 who answered every item incorrectly, and one of -3 who answered every item correctly,
+    keep their recorded answers. The bias is the mean error of the final estimates, worked out by hand. Fails if
+    simulate draws the answers from the true abilities when the rows are given.
+    """
+    responses = np.array([[0] * item_bank.n_items, [1] * item_bank.n_items])
+
+    result = simulate(make_engine(item_bank, MaxInfoSelector(), 6), true_thetas=[3.0, -3.0], responses=responses, rng=0)
+
+    assert result.responses == [(False,) * 6, (True,) * 6]
+    low, high = result.final_thetas.tolist()
+    assert result.bias == pytest.approx(((low - 3.0) + (high + 3.0)) / 2)
+
+  @pytest.mark.parametrize("metric", ["bias", "mse", "rmse"])
+  def test_the_metrics_of_examinees_with_unknown_abilities_raise(self, item_bank: ItemBank, metric: str) -> None:
+    """Recorded examinees alone have no true abilities, so the metrics that need them raise and say how to give them.
+
+    Fails if a metric compares the estimates with zeros or NaN instead.
+    """
+    result = simulate(make_engine(item_bank, MaxInfoSelector(), 5), responses=self.ROWS, rng=0)
+
+    with pytest.raises(
+      ValueError, match="need the examinees' true abilities, and this result has none; pass true_thetas"
+    ):
+      getattr(result, metric)
+
+
+class TestRandomNumbers:
+  """Tests for the run's root entropy (ADR-0013)."""
+
+  def test_the_same_seed_gives_the_same_run(self, random_engine: CatEngine) -> None:
+    """The streams derive from the seed alone, so the same seed gives the same tests on the same engine.
+
+    Fails if simulate keeps random state across runs, or ignores the seed (a different seed would then give the
+    same tests).
+    """
+    thetas = [-1.0, 0.0, 1.0]
+    first = simulate(random_engine, true_thetas=thetas, rng=3)
+    second = simulate(random_engine, true_thetas=thetas, rng=3)
+    other_seed = simulate(random_engine, true_thetas=thetas, rng=4)
+
+    assert second.sessions == first.sessions
+    assert np.array_equal(second.exposure_counts, first.exposure_counts)
+    assert other_seed.administered_items != first.administered_items
+
+  def test_without_a_control_the_selectors_draws_are_the_only_ones_of_a_session(self, item_bank: ItemBank) -> None:
+    """Session i's items are random selection's choices from stream (i, 1), drawn here one after another.
+
+    The fixed initializer, the estimator and the stopper draw nothing, so random selection, which picks uniformly among
+    the remaining items, makes every draw of the session. Fails if the engine draws from the session's generator when
+    there is no exposure control, or passes the selector another set of items to choose from: every later draw, and so
+    every item, would move.
+    """
+    result = simulate(make_engine(item_bank, RandomSelector(), 5), true_thetas=[-1.0, 0.0, 1.0], rng=7)
+
+    expected = []
+    for i in range(3):
+      session_rng, items = stream(7, i, 1), []
+      for _ in range(5):
+        items.append(int(session_rng.choice([item for item in range(item_bank.n_items) if item not in items])))
+      expected.append(tuple(items))
+    assert result.administered_items == expected
+
+  def test_two_runs_without_rng_give_other_tests(self, random_engine: CatEngine) -> None:
+    """A run without rng takes fresh entropy, so two such runs give other final estimates.
+
+    Each of the three sessions draws 10 of 50 items at random, so equal final estimates for all three are
+    practically impossible. Fails if rng defaults to a fixed seed, which makes every unseeded run the same.
+    """
+    thetas = [-1.0, 0.0, 1.0]
+
+    assert not np.array_equal(
+      simulate(random_engine, true_thetas=thetas).final_thetas, simulate(random_engine, true_thetas=thetas).final_thetas
+    )
+
+  def test_a_generator_passed_as_rng_is_drawn_from_once_per_run(self, random_engine: CatEngine) -> None:
+    """A run takes one number from a generator as its root entropy, so the generator advances and a second run differs.
+
+    Runs of five examinees and of one advance equal generators to the same state, and equal generators give equal runs.
+    Fails if the generator is read without being drawn from, which makes replications in a loop identical, or if the
+    sessions draw from it directly, which advances it by an amount that grows with the run.
+    """
+    thetas = [-1.0, 0.0, 1.0, 0.5, -0.5]
+    five, one = np.random.default_rng(5), np.random.default_rng(5)
+
+    first = simulate(random_engine, true_thetas=thetas, rng=five)
+    simulate(random_engine, true_thetas=thetas[:1], rng=one)
+
+    assert five.bit_generator.state == one.bit_generator.state != np.random.default_rng(5).bit_generator.state
+    assert simulate(random_engine, true_thetas=thetas, rng=np.random.default_rng(5)).sessions == first.sessions
+    assert simulate(random_engine, true_thetas=thetas, rng=five).administered_items != first.administered_items
+
+  def test_a_call_that_fails_its_checks_leaves_the_generator_as_it_was(self, random_engine: CatEngine) -> None:
+    """A call rejected for its inputs draws nothing; fails if the entropy is drawn before the inputs are checked."""
+    rng = np.random.default_rng(5)
+
+    with pytest.raises(ValueError, match="finite"):
+      simulate(random_engine, true_thetas=[0.0, math.nan], rng=rng)
+
+    assert rng.random() == np.random.default_rng(5).random()
+
+
+class TestExposure:
+  """Tests for the exposure feedback and the proposal counts of a run (ADR-0011, ADR-0012)."""
+
   def test_each_session_sees_the_exposure_of_the_sessions_before_it(self, item_bank: ItemBank) -> None:
-    """The runner counts exposure across its sessions, so each sees catR's rates of the examinees before it.
+    """simulate counts exposure across its sessions, so each sees catR's rates of the examinees before it.
 
     Every session administers items 0 and 1, so from the second session on both have gone to every earlier
     examinee: rate 1 at both of the session's selections, and 0 for every other item. The first session sees no
@@ -262,7 +379,7 @@ class TestSimulationRunnerRun:
     """
     selector = FirstRemainingSelector()
 
-    result = make_runner(item_bank, selector, max_items=2).run(np.zeros(4))
+    result = simulate(make_engine(item_bank, selector, 2), true_thetas=np.zeros(4))
 
     first_session, later_sessions = selector.seen_exposure_rates[:2], selector.seen_exposure_rates[2:]
     assert first_session == [None, None]
@@ -270,6 +387,194 @@ class TestSimulationRunnerRun:
     expected[:2] = 1.0
     assert [None if rates is None else rates.tolist() for rates in later_sessions] == [expected.tolist()] * 6
     assert result.exposure_rates[:2].tolist() == [1.0, 1.0]
+
+  def test_a_control_that_accepts_without_drawing_reproduces_the_run_without_one(self, item_bank: ItemBank) -> None:
+    """With a control that accepts every proposal and draws nothing, a seeded run gives the run without a control.
+
+    Fails if asking the control changes what the selector is given or draws from the generator, or if accepted
+    proposals are counted twice (the proposal counts would exceed the exposure counts).
+    """
+    thetas = [-1.0, 0.0, 1.0]
+    without = simulate(make_engine(item_bank, RandomesqueSelector(bin_size=3), 5), true_thetas=thetas, rng=7)
+    accepting = simulate(
+      make_engine(item_bank, RandomesqueSelector(bin_size=3), 5, AcceptingControl()), true_thetas=thetas, rng=7
+    )
+
+    assert accepting.sessions == without.sessions
+    assert [session.excluded_items for session in accepting.sessions] == [(), (), ()]
+    assert accepting.proposal_counts is not None
+    assert np.array_equal(accepting.proposal_counts, accepting.exposure_counts)
+
+  @pytest.mark.parametrize("recorded", [False, True], ids=["generated", "recorded-with-missing-answers"])
+  def test_a_runs_proposals_are_its_administrations_plus_its_declines(
+    self, item_bank: ItemBank, recorded: bool
+  ) -> None:
+    """Under a control that declines at random, each item's proposals are its administrations plus its declines.
+
+    A session excludes its examinee's missing answers first and adds each decline after them, so the declines are its
+    excluded items past the missing ones. Fails if a decline is not counted or is counted as an administration, if the
+    missing answers are counted as proposals, which only the selector and the exposure control make, or if
+    proposal_rates divides by anything but the number of sessions.
+    """
+    rows = (np.random.default_rng(8).random((20, item_bank.n_items)) < 0.5).astype(float)
+    rows[:, :10] = np.nan
+    engine = make_engine(item_bank, RandomSelector(), 5, CoinControl())
+    examinees = {"responses": rows} if recorded else {"true_thetas": np.zeros(20)}
+    missing = 10 if recorded else 0
+
+    result = simulate(engine, rng=3, **examinees)  # ty: ignore[invalid-argument-type]
+
+    declines = np.bincount(
+      [item for session in result.sessions for item in session.excluded_items[missing:]], minlength=item_bank.n_items
+    )
+    assert [session.excluded_items[:missing] for session in result.sessions] == [tuple(range(missing))] * 20
+    assert int(declines.sum()) > 0
+    assert result.test_lengths.tolist() == [5] * 20
+    assert result.proposal_counts is not None
+    assert result.proposal_rates is not None
+    assert np.array_equal(result.proposal_counts, result.exposure_counts + declines)
+    assert np.allclose(result.proposal_rates, (result.exposure_counts + declines) / 20)
+
+
+def test_progress_is_told_after_each_session_how_many_have_finished(random_engine: CatEngine) -> None:
+  """progress is called once per session, in order, with the sessions finished and the total, and changes nothing.
+
+  Fails if it is called before the first session ends or not after the last, with the examinee's index rather than
+  the count of finished sessions, or if passing it changes the sessions.
+  """
+  calls: list[tuple[int, int]] = []
+  thetas = [-0.5, 0.0, 0.5]
+
+  shown = simulate(
+    random_engine, true_thetas=thetas, rng=0, progress=lambda finished, total: calls.append((finished, total))
+  )
+
+  assert calls == [(1, 3), (2, 3), (3, 3)]
+  assert shown.sessions == simulate(random_engine, true_thetas=thetas, rng=0).sessions
+
+
+@pytest.mark.parametrize(
+  ("arguments", "error", "message"),
+  [
+    pytest.param({}, TypeError, "simulate needs examinees: true_thetas for generated ones", id="no-examinees"),
+    pytest.param(
+      {"true_thetas": 5},
+      TypeError,
+      r"one true ability per examinee, not a single number \(5\).*rng\.normal\(0, 1, n\)",
+      id="a-number-of-examinees",
+    ),
+    pytest.param({"true_thetas": np.int64(5)}, TypeError, r"not a single number", id="a-numpy-number-of-examinees"),
+    pytest.param({"true_thetas": []}, ValueError, "true_thetas cannot be empty", id="no-true-abilities"),
+    pytest.param(
+      {"true_thetas": [[0.0, 1.0]]},
+      TypeError,
+      r"true_thetas must be one-dimensional, one true ability per examinee, got shape \(1, 2\)",
+      id="true-abilities-in-rows",
+    ),
+    pytest.param(
+      {"true_thetas": [0.0, math.nan]},
+      ValueError,
+      r"true_thetas\[1\] is nan; true abilities must be finite numbers",
+      id="nan-true-ability",
+    ),
+    pytest.param(
+      {"true_thetas": [0.0, -math.inf]},
+      ValueError,
+      r"true_thetas\[1\] is -inf; true abilities must be finite numbers",
+      id="infinite-true-ability",
+    ),
+    pytest.param(
+      {"true_thetas": [True, False]},
+      TypeError,
+      "true_thetas holds bool values; true abilities must be real numbers",
+      id="boolean-true-abilities",
+    ),
+    pytest.param(
+      {"responses": [1, 0, 1]},
+      TypeError,
+      r"responses must be two-dimensional, one row per examinee and one column per item of the bank, got shape \(3,\)",
+      id="one-row-of-responses-flat",
+    ),
+    pytest.param({"responses": np.zeros((0, 50))}, ValueError, "responses cannot be empty", id="no-response-rows"),
+    pytest.param({"responses": []}, ValueError, "responses cannot be empty", id="no-responses"),
+    pytest.param(
+      {"responses": np.zeros((2, 49))},
+      ValueError,
+      r"responses has shape \(2, 49\); there must be one column per item of the bank \(50\)",
+      id="a-missing-column",
+    ),
+    pytest.param(
+      {"responses": np.where(np.arange(100).reshape(2, 50) == 54, 2, 0)},
+      ValueError,
+      r"responses\[1, 4\] is 2; an integer response must be 0 or 1",
+      id="integer-response-2",
+    ),
+    pytest.param(
+      {"responses": np.where(np.arange(100).reshape(2, 50) == 7, 0.5, 1.0)},
+      ValueError,
+      r"responses\[0, 7\] is 0.5; a response must be 0 or 1, or NaN where it is missing",
+      id="float-response-one-half",
+    ),
+    pytest.param(
+      {"responses": np.where(np.arange(100).reshape(2, 50) == 60, np.inf, 0.0)},
+      ValueError,
+      r"responses\[1, 10\] is inf; a response must be 0 or 1, or NaN where it is missing",
+      id="infinite-response",
+    ),
+    pytest.param(
+      {"responses": [[None] * 50]},
+      TypeError,
+      "responses holds object values; responses must be bools, the integers 0 and 1, or the floats 0.0 and 1.0 with "
+      "NaN for a missing response",
+      id="none-for-missing",
+    ),
+    pytest.param(
+      {"true_thetas": [0.0, 1.0, 2.0], "responses": np.zeros((2, 50))},
+      ValueError,
+      "true_thetas has 3 entries and responses 2 rows; with both, there must be one true ability per row of responses",
+      id="abilities-for-other-rows",
+    ),
+    pytest.param(
+      {"true_thetas": [0.0], "rng": 1.5},
+      TypeError,
+      r"rng is 1.5; it must be None, an integer seed or a numpy.random.Generator",
+      id="float-seed",
+    ),
+    pytest.param(
+      {"true_thetas": [0.0], "rng": True},
+      TypeError,
+      r"rng is True; it must be None, an integer seed or a numpy.random.Generator",
+      id="boolean-seed",
+    ),
+    pytest.param(
+      {"true_thetas": [0.0], "rng": -1}, ValueError, "rng is -1; a seed must not be negative", id="negative-seed"
+    ),
+    pytest.param(
+      {"true_thetas": [0.0], "progress": True},
+      TypeError,
+      r"progress is True; it must be None or a callable, called as progress\(finished, total\)",
+      id="progress-flag",
+    ),
+  ],
+)
+def test_a_bad_input_fails_before_any_session_runs(
+  random_engine: CatEngine, arguments: dict[str, object], error: type[Exception], message: str
+) -> None:
+  """Each malformed input raises, naming the input, the position and value where there is one, and the rule.
+
+  Fails if simulate reads a bad input silently: a single number as a count or as one ability, a NaN ability whose
+  answers would all be wrong, booleans as abilities 0 and 1, a response of 0.5 or 2 as correct, a missing column that
+  shifts every item, None as a missing answer, true abilities paired with the wrong rows, a float or boolean seed, or
+  the old ``progress=True`` flag.
+  """
+  with pytest.raises(error, match=message):
+    simulate(random_engine, **arguments)  # ty: ignore[invalid-argument-type]
+
+
+def test_simulate_rejects_what_is_not_an_engine(item_bank: ItemBank) -> None:
+  """An item bank passed as the engine fails with a message naming the type, not an AttributeError deep in the run."""
+  with pytest.raises(TypeError, match="engine is a ItemBank; it must be a CatEngine"):
+    simulate(item_bank, true_thetas=[0.0])  # ty: ignore[invalid-argument-type]
 
 
 def finished_session(items: tuple[int, ...]) -> Session:
@@ -384,24 +689,12 @@ class TestSimulationResult:
     assert result.rmse == pytest.approx(math.sqrt(0.025))
 
   @pytest.mark.parametrize("metric", ["bias", "mse", "rmse"])
-  def test_metrics_need_every_true_theta(self, metric: str) -> None:
-    """Bias, MSE and RMSE raise for a result with a session whose true theta is NaN, naming how many lack one.
-
-    Fails if a metric silently compares the estimate with a stand-in such as 0 (bias 0.5 for estimates [1, 1] against
-    true [unknown, 1]) or ignores the session.
-    """
-    result = result_of(TWO_SESSIONS, true_thetas=[0.5, math.nan])
-
-    with pytest.raises(ValueError, match="need every session's true theta, but 1 of 2 sessions have none"):
-      getattr(result, metric)
-
-  @pytest.mark.parametrize("metric", ["bias", "mse", "rmse"])
   def test_metrics_of_a_result_without_true_thetas_raise(self, metric: str) -> None:
-    """A result of recorded examinees has no true abilities, so its accuracy metrics cannot be computed.
+    """A result built without true abilities cannot give its accuracy metrics.
 
     Fails if a metric compares the estimates with zeros or NaN instead of saying that the true abilities are missing.
     """
-    with pytest.raises(ValueError, match="need the sessions' true abilities, and the result has none"):
+    with pytest.raises(ValueError, match="need the examinees' true abilities, and this result has none"):
       getattr(result_of(TWO_SESSIONS), metric)
 
   def test_a_result_rejects_true_thetas_that_do_not_match_its_sessions(self) -> None:
@@ -409,6 +702,16 @@ class TestSimulationResult:
     message = "true_thetas has shape (3,); there must be one true ability per session (2)"
     with pytest.raises(ValueError, match=re.escape(message)):
       result_of(TWO_SESSIONS, true_thetas=[0.5, -1.0, 0.2])
+
+  def test_a_result_rejects_a_true_ability_that_is_not_finite(self) -> None:
+    """The true abilities are known for every session or for none (ADR-0016), so NaN does not mark an unknown one.
+
+    Fails if a result accepts a NaN true ability, whose bias, MSE and RMSE would then be NaN.
+    """
+    with pytest.raises(
+      ValueError, match=r"true_thetas\[1\] is nan; true abilities must be finite, and true_thetas None"
+    ):
+      result_of(TWO_SESSIONS, true_thetas=[0.5, math.nan])
 
 
 def test_simulation_result_empty_sessions_exposure_and_overlap(item_bank) -> None:
@@ -467,47 +770,3 @@ def test_simulation_result_overlap_requires_uniform_non_zero_test_lengths() -> N
 
   assert heterogeneous.overlap_rate is None
   assert zero_length.overlap_rate is None
-
-
-class FakeRng(np.random.Generator):
-  """Generator whose uniform draw is always the given sample, for deterministic response-provider tests."""
-
-  def __init__(self, sample: float) -> None:
-    super().__init__(np.random.PCG64(0))
-    self.sample = sample
-
-  # Unannotated: Generator.uniform's overloads return an array for a size, which this stub never takes.
-  @override
-  def uniform(self, low=0.0, high=1.0, size=None):
-    """Return the fixed sample."""
-    del low, high, size
-    return self.sample
-
-
-@pytest.mark.parametrize(
-  ("item", "draw", "expected"),
-  [
-    # 2PL item at b = 0: P = 0.82; the estimate (-1.5) or item 0 would both give P below 0.2
-    pytest.param(1, 0.5, True, id="2pl-correct"),
-    pytest.param(1, 0.9, False, id="2pl-incorrect"),
-    # 4PL item with c = 0.2, d = 0.9: P = 0.2 + 0.7 * 0.82 = 0.77; without c and d it would be 0.82
-    pytest.param(2, 0.79, False, id="4pl-upper-asymptote"),
-    # 3PL item at b = 5 with c = 0.3: P = 0.3 + 0.7 * 0.03 = 0.32; without c it would be 0.03
-    pytest.param(3, 0.31, True, id="3pl-guessing"),
-  ],
-)
-def test_simulated_response_is_correct_when_the_draw_is_below_the_true_theta_probability(
-  item: int, draw: float, expected: bool
-) -> None:
-  """The response is correct when the uniform draw falls below the chosen item's 4PL probability at the true theta.
-
-  Together the cases fail if the response used the estimate instead of the true theta (1.5), another item,
-  or dropped the item's guessing or upper-asymptote parameter.
-  """
-  item_bank = ItemBank(
-    np.array([[1.0, 5.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.2, 0.9], [1.0, 5.0, 0.3, 1.0]])
-  )
-  session = Session(estimates=(Estimate(-1.5, math.inf),))
-  rng = FakeRng(sample=draw)
-
-  assert SimulatedResponseProvider(1.5).answer(item_bank, item, session, rng) is expected

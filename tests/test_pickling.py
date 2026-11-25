@@ -8,7 +8,7 @@ from typing import TypeVar
 import numpy as np
 import pytest
 
-from catsim import CatEngine, ItemBank, SimulationRunner, StepContext
+from catsim import CatEngine, ItemBank, StepContext, simulate
 from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,
@@ -208,7 +208,7 @@ def test_every_built_in_strategy_has_a_pickle_case() -> None:
 
 def _run(engine: CatEngine) -> tuple[list[tuple[int, ...]], list[list[float]], list[float]]:
   """Return the items, the estimates and the final standard errors of a seeded run of three examinees."""
-  result = SimulationRunner(engine).run([-1.0, 0.0, 1.5], rng=5)
+  result = simulate(engine, true_thetas=[-1.0, 0.0, 1.5], rng=5)
   return result.administered_items, result.theta_histories, result.final_ses.tolist()
 
 

@@ -295,7 +295,7 @@ class CatEngine:
 
     Examples
     --------
-    >>> from catsim import CatEngine, ItemBank, SimulationRunner
+    >>> from catsim import CatEngine, ItemBank, simulate
     >>> from catsim.estimation import EAPEstimator
     >>> from catsim.initialization import FixedPointInitializer
     >>> from catsim.selection import MaxInfoSelector
@@ -303,7 +303,7 @@ class CatEngine:
     >>> rule = StopRule(StandardErrorStopper(0.2), MaxLengthStopper(5))
     >>> bank = ItemBank.generate(50, rng=0)
     >>> engine = CatEngine(bank, FixedPointInitializer(0.0), MaxInfoSelector(), EAPEstimator(), rule)
-    >>> session = SimulationRunner(engine).run([0.0], rng=0).sessions[0]
+    >>> session = simulate(engine, true_thetas=[0.0], rng=0).sessions[0]
     >>> rule.satisfied(engine.context(session))
     (MaxLengthStopper(max_items=5),)
     """
@@ -360,7 +360,7 @@ class CatEngine:
       raise ExcludedItemError(msg)
     return item
 
-  # The steps below take checked inputs and check nothing again, so the simulation runner calls
+  # The steps below take checked inputs and check nothing again, so simulate calls
   # them directly with the inputs it builds itself (ADR-0009).
 
   def _start(self, rng: numpy.random.Generator, excluded_items: tuple[int, ...]) -> Session:

@@ -7,19 +7,10 @@ from collections.abc import Callable
 import numpy as np
 import pytest
 
-from catsim import (
-  CatEngine,
-  Estimate,
-  ItemBank,
-  SimulatedResponseProvider,
-  SimulationResult,
-  SimulationRunner,
-  StepContext,
-  StopReason,
-)
+from catsim import CatEngine, Estimate, ItemBank, SimulationResult, StepContext, StopReason, simulate
 from catsim.compat import override
 from catsim.estimation import BaseEstimator, EAPEstimator, MAPEstimator, NumericalSearchEstimator
-from catsim.initialization import FixedPointInitializer, UniformInitializer
+from catsim.initialization import UniformInitializer
 from catsim.selection import (
   AStratBBlockSelector,
   AStratSelector,
@@ -52,7 +43,7 @@ def run_simulation(
     item_bank, UniformInitializer(low=-2.0, high=2.0), selector, estimator or NumericalSearchEstimator(), stopper
   )
   true_thetas = np.random.default_rng(seed).normal(0, 1, examinees)
-  result = SimulationRunner(engine).run(true_thetas, rng=seed)
+  result = simulate(engine, true_thetas=true_thetas, rng=seed)
   assert len(result.sessions) == examinees
   assert all(session.stop_reason is not None for session in result.sessions)
   assert result.exposure_counts.sum() == sum(len(session.administered_items) for session in result.sessions)
@@ -91,7 +82,7 @@ def test_bayesian_estimators_complete_simulation(factory: Callable[[], BaseEstim
   ],
 )
 def test_selectors_complete_fixed_length_runs(factory: Callable[[], BaseSelector]) -> None:
-  """Each selector drives SimulationRunner through eight-item sessions.
+  """Each selector drives simulate through eight-item sessions.
 
   A selector that raises mid-run, such as a stratified selector built for eight items that runs out of strata, or a
   run that stops a session before its eighth item, fails.
@@ -123,7 +114,7 @@ def test_selectors_complete_variable_length_runs(selector: BaseSelector) -> None
 @pytest.mark.integration
 @pytest.mark.parametrize("method", ["item_info", "cluster_info", "weighted_info"])
 def test_cluster_selector_completes_runs(method: str) -> None:
-  """A cluster-selection method that raises or stops before six items under SimulationRunner fails the run.
+  """A cluster-selection method that raises or stops before six items under simulate fails the run.
 
   The selector treats cluster ids as labels, and this test checks only that each method completes a run, so four
   fixed groups of 15 items are enough. Four groups for six items also make each session reuse a cluster.
@@ -187,33 +178,34 @@ class DrawingEstimator(BaseEstimator):
 
 
 @pytest.mark.integration
-def test_stepping_the_engine_by_hand_reproduces_a_simulation_runner_session() -> None:
-  """A session stepped through start, select and answer matches the one SimulationRunner produces from the same seed.
+def test_stepping_the_engine_by_hand_reproduces_a_simulated_session() -> None:
+  """A session stepped through start, select and answer on stream (i, 1) is the session simulate gives examinee i.
 
-  The randomesque selector, the simulated responses and an estimator that draws all draw from one generator in turn,
-  so the two paths agree only if they make the same draws in the same order: the runner's unchecked steps must be
-  the public ones. Fails if answer ignores the generator it is given, so that the estimator draws from another one,
-  or if the runner gives the estimator another generator than the run's.
+  The uniform initializer, the randomesque selector and an estimator that draws all draw from the session's generator,
+  in start, select and answer, so the two paths agree only if simulate gives examinee 2 the generator of
+  ``SeedSequence(seed, spawn_key=(2, 1))`` for all three steps (ADR-0013) and its unchecked steps are the public ones.
+  The examinees are recorded, so the answers come from their rows and draw nothing. Fails if a step of simulate draws
+  from another generator, or if answer ignores the generator it is given.
   """
   item_bank = ItemBank.generate(40, rng=42)
+  responses = (np.random.default_rng(1).random((3, item_bank.n_items)) < 0.5).astype(float)
+  responses[2, ::3] = np.nan
 
   def engine(estimator: BaseEstimator) -> CatEngine:
-    return CatEngine(item_bank, FixedPointInitializer(0.0), RandomesqueSelector(3), estimator, MaxLengthStopper(6))
+    return CatEngine(item_bank, UniformInitializer(), RandomesqueSelector(3), estimator, MaxLengthStopper(6))
 
-  batched = SimulationRunner(engine(DrawingEstimator())).run([0.3], rng=7).sessions[0]
+  simulated = simulate(engine(DrawingEstimator()), responses=responses, rng=7).sessions[2]
 
   estimator = DrawingEstimator()
   manual_engine = engine(estimator)
-  rng = np.random.default_rng(7)
-  examinee = SimulatedResponseProvider(0.3)
-  manual = manual_engine.start(rng=rng)
+  rng = np.random.default_rng(np.random.SeedSequence(7, spawn_key=(2, 1)))
+  manual = manual_engine.start(rng=rng, excluded_items=range(0, item_bank.n_items, 3))
   # one item at a time, as an interactive caller would, until select proposes none
   while (selection := manual_engine.select(manual, rng=rng)).item is not None:
-    response = examinee.answer(item_bank, selection.item, selection.session, rng)
-    manual = manual_engine.answer(selection.session, selection.item, response, rng=rng)
+    manual = manual_engine.answer(selection.session, selection.item, bool(responses[2, selection.item]), rng=rng)
   manual = selection.session
 
-  assert manual == batched
+  assert manual == simulated
   assert manual.stop_reason is StopReason.STOPPER
   assert len(estimator.seen) == 6
   assert all(seen is rng for seen in estimator.seen)
