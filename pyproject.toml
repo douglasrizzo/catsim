@@ -39,7 +39,6 @@ description = "Computerized adaptive testing toolkit"
 dependencies = [
     "numpy>=2.3.1",
     "scipy>=1.16",
-    "tqdm>=4.64",
     # override, which typing has from Python 3.12 (ADR-0021); 4.4 is the first release with it.
     "typing-extensions>=4.4; python_version < '3.12'",
 ]
