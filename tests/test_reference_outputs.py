@@ -5,6 +5,9 @@ output recorded in ``tests/reference/data/``: exactly for integers, Booleans and
 1e-12 of their magnitude for floats, or of the ability scale's unit for abilities and standard
 errors (see ``tests/reference/records.py``). The recorded data changes only where an ADR changes a
 result; see ``tests/reference/__init__.py``.
+
+The generator, not a test, checks that every public strategy and computation of adda72dc has a
+case: public API added later is not part of the baseline.
 """
 
 from __future__ import annotations
@@ -64,11 +67,6 @@ def test_data_was_recorded_from_committed_source() -> None:
   provenance = records.load(records.PROVENANCE_FILE)
   assert re.fullmatch(r"[0-9a-f]{40}", provenance["catsim_commit"])
   assert provenance["catsim_source_modified"] is False
-
-
-def test_every_public_strategy_and_computation_has_a_case() -> None:
-  """A public strategy class or computational function that no case exercises would escape the baseline."""
-  assert cases.uncovered() == []
 
 
 def test_regenerating_in_the_recorded_environment_reproduces_the_data() -> None:

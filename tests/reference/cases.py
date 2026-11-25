@@ -304,6 +304,11 @@ ITEM_BANK_EXEMPT = {
   "pseudo_guessing": "a column of items, which the derived cases record",
   "upper_asymptote": "a column of items, which the derived cases record",
   "get_items": "rows of items, which the derived cases record",
+  # Added after adda72dc by ADR-0004 and ADR-0005, and tested by tests/test_item_bank.py.
+  "names": "item names, added after adda72dc",
+  "index": "translates item names into indices, added after adda72dc",
+  "from_csv": "reads a bank from CSV, added after adda72dc",
+  "to_csv": "writes a bank to CSV, added after adda72dc",
 }
 
 # The estimation family.
