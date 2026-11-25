@@ -47,6 +47,9 @@ with open questions show the option each spec assumes for now.
      `sphinx/api/techniques/_template.md`, pointing at the class with `{py:class}`;
    - remove the "Tests", "Open Questions" and "Implementation Guidance" sections and add an "API
      Reference" section with the class's `autoclass`, as the template has;
+   - move its references into `sphinx/references.bib` (see the citation convention below): add an
+     entry for each source the bib lacks, turn each citation into a role with its location, and
+     replace the References list with the template's filtered `{bibliography}`;
    - link the page from the class docstring ("For full algorithmic details, see :doc:`...`");
    - remove the technique's row from the Planned techniques page of the documentation.
 
@@ -56,12 +59,20 @@ The placeholders in [`_template.md`](_template.md) set the convention for specs 
 pages:
 
 - Cite each formula and design choice where it appears, with its location in the source (page,
-  equation, table or figure), e.g. "(Barrada et al., 2008, p. 498, Equation 12)".
+  equation, table or figure).
 - Cite only locations you have read in the source.
 - Say where the spec departs from its sources.
-- In "References", give each source in full with its DOI. When the published version is not open,
-  link an open copy ("Open copy: ...") or, if there is none, say so and name an open source that
-  describes the method ("Not openly available; X (Year) describes the method.").
+- Give each source its DOI. When the published version is not open, give an open copy ("Open
+  copy: ...") or, if there is none, say so and name an open source that describes the method
+  ("Not openly available; X (Year) describes the method.").
+
+Specs write their citations by hand, e.g. "(Barrada et al., 2008, p. 498, Equation 12)", and give
+each source in full in "References", because GitHub does not render the citation roles. Technique
+pages generate theirs from `sphinx/references.bib`: a citation is a role with its location,
+`` {cite:p}`Barrada2008{p. 498, Equation 12}` ``; each source is a bib entry with its DOI and its
+note (`Open copy: \url{...}`, `Open access` or `Not openly available; ...`); and the References
+section is a `{bibliography}` filtered to the page's citations, as the technique-page template,
+`sphinx/api/techniques/_template.md`, shows. Promoting a spec moves its references into the bib.
 
 ## Revalidation checklist
 
