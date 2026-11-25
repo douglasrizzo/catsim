@@ -8,8 +8,8 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from scipy import stats
-from typing_extensions import override
 
+from ..compat import override
 from .base import BaseStopper
 
 if TYPE_CHECKING:

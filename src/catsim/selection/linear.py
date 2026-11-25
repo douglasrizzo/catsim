@@ -1,7 +1,6 @@
 """Linear selector implementation."""
 
-from typing_extensions import override
-
+from ..compat import override
 from ..context import StepContext
 from ..exceptions import NoItemsAvailableError
 from .base import BaseSelector, remaining

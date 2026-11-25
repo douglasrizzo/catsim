@@ -5,8 +5,8 @@ from collections.abc import Callable
 
 import numpy as np
 import pytest
-from typing_extensions import override
 
+from catsim.compat import override
 from catsim.item_bank import ItemBank
 from catsim.selection import (
   AStratSelector,

@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import tempfile
 from itertools import starmap
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -129,3 +131,23 @@ def test_get_items_gives_one_row_per_index_in_order(params: np.ndarray, data: st
   assert subset.shape == (len(indices), 4)
   for row, index in zip(subset, indices, strict=True):
     np.testing.assert_array_equal(row, params[index])
+
+
+@given(params=item_params_matrix(), data=st.data())
+@BANK_SETTINGS
+def test_csv_round_trip_gives_back_the_same_bank(params: np.ndarray, data: st.DataObject) -> None:
+  """A bank written to CSV and read back has the same parameters, bit for bit, and the same names.
+
+  Names of any text, with delimiters, quotes, line breaks, leading spaces or other scripts, survive only if they are
+  quoted where needed and decoded as written; parameters survive only if every digit their floats need is written.
+  """
+  names = data.draw(st.lists(st.text(min_size=1), min_size=len(params), max_size=len(params), unique=True))
+  bank = ItemBank(params, names=names)
+
+  with tempfile.TemporaryDirectory() as directory:
+    path = Path(directory) / "bank.csv"
+    bank.to_csv(path)
+    loaded = ItemBank.from_csv(path)
+
+  assert loaded.names == tuple(names)
+  assert loaded.items.tobytes() == params.tobytes()

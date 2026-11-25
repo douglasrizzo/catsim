@@ -5,8 +5,8 @@ from fractions import Fraction
 
 import numpy as np
 import pytest
-from typing_extensions import override
 
+from catsim.compat import override
 from catsim.item_bank import ItemBank
 from catsim.selection import BaseSelector, ProgressiveSelector, ProportionalSelector
 from catsim.typing import FloatArray, IntArray

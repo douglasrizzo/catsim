@@ -3,9 +3,9 @@
 import dataclasses
 
 import numpy
-from typing_extensions import override
 
 from .. import irt
+from ..compat import override
 from ..context import StepContext
 from ..estimation.base import BaseEstimator
 from ..estimation.numerical import NumericalSearchEstimator

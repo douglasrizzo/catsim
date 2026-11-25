@@ -98,5 +98,6 @@ Check each spec against its sources before it is implemented or its references a
      the responses instead of keeping `self._state`;
    - each stopper is a single criterion, combined with others by `StopRule`;
    - no `[:, :4]` slices of the item matrix;
-   - the MPWI and MEPV per-node tables are cached in `ItemBank._selector_cache`.
+   - the MPWI and MEPV per-node tables are cached by the selector, keyed by the item bank, as the
+     stratified selectors cache their strata (ADR-0008); the item bank caches nothing for strategies.
 6. **Status.** The top of the spec says when it was last validated and against which sources.

@@ -3,8 +3,8 @@
 import math
 
 import numpy
-from typing_extensions import override
 
+from ..compat import override
 from ..item_bank import ItemBank
 from .base import BaseInitializer
 
