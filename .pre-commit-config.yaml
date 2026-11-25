@@ -100,6 +100,10 @@ repos:
         files: \.ipynb$
         types: [file]
         require_serial: true
+        # RESCOPE: notebooks are brought up to date at the end of the rescoping, so they do not run on
+        # the rescope branch; `pre-commit run --hook-stage manual pytest-nbmake` still runs them. Revert
+        # this commit before rescope merges into dev.
+        stages: [manual]
 
   # Dead code in src and tests; [tool.vulture] in pyproject.toml holds the paths and the whitelist.
   - repo: https://github.com/jendrikseipp/vulture
