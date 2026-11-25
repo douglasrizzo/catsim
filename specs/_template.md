@@ -11,6 +11,10 @@
 % template, sphinx/api/techniques/_template.md, and follow its rules (sphinx/AGENTS.md, "Technique
 % pages"): promoting the spec moves them onto a technique page. The sections after References are
 % for contributors and are removed on promotion. specs/README.md describes the workflow.
+%
+% Specs cite by hand, "Author (Year, p. N)", with a hand-written References list: specs are not
+% built by Sphinx, and GitHub does not render the {cite} roles of technique pages. Promotion moves
+% each source into sphinx/references.bib and turns the citations into roles.
 
 # \<Technique Name>
 
@@ -73,7 +77,9 @@ compares with its alternatives and with catR's implementation, with sources.>
 the implementation follows or was checked against, with its DOI. When the
 published version is not open, add a link to an open copy ("Open copy: ...") or,
 if there is none, say so and name the open source that describes the method
-("Not openly available; X (Year) describes the method.").>
+("Not openly available; X (Year) describes the method."). When the spec is promoted,
+these entries move into sphinx/references.bib and this list becomes the technique
+page's generated one.>
 
 % -----------------------------------------------------------------------
 % CONTRIBUTOR-ONLY SECTIONS: Tests, Open Questions and Implementation Guidance are removed when the
