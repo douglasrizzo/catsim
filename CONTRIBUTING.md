@@ -64,6 +64,20 @@ A release is ready only when its documentation is online, so a documentation dep
 
 Each implemented technique has a page under `sphinx/api/techniques/` with its definition, its parameters and its Guarantees section. A new technique starts as a spec in [`specs/`](https://github.com/douglasrizzo/catsim/tree/dev/specs), written from the [spec template](https://github.com/douglasrizzo/catsim/blob/dev/specs/_template.md); [`specs/README.md`](https://github.com/douglasrizzo/catsim/blob/dev/specs/README.md) explains how a spec is revalidated, implemented and then promoted into the documentation. The template's Definition and References sections set the citation convention: cite the page, equation, table or figure of each formula where the formula appears, cite only locations you have read, say where the implementation departs from its sources, and give every reference its DOI and an open copy when one exists. A spec writes its references by hand; a technique page generates them from [`sphinx/references.bib`](https://github.com/douglasrizzo/catsim/blob/dev/sphinx/references.bib). On a technique page, cite with `` {cite:t}`key{p. N}` `` (or `{cite:p}` in parentheses), add each source to `references.bib` with its DOI and an `Open copy: \url{...}`, `Open access` or `Not openly available; ...` note, and end the page's References section with a `{bibliography}` filtered to the page (`:filter: docname in docnames`), as the [technique-page template](https://github.com/douglasrizzo/catsim/blob/dev/sphinx/api/techniques/_template.md) shows.
 
+## Parity with catR
+
+The R package [catR](https://cran.r-project.org/package=catR) is catsim's reference implementation ([ADR-0020](sphinx/adr/0020-catr-as-the-reference.md)). `tests/test_parity_catr.py` compares catsim with catR's outputs on fixed cases: response probabilities and information, each estimator on fixed response patterns, the selection rules in fixed contexts, the progressive and proportional schedules, and the stopping rules. The outputs are JSON files in `tests/parity/catr/`, which the R scripts beside them write together with the R and catR versions, so the test runs with the rest of the suite and needs no R.
+
+Each case records catR's settings, and the test builds the catsim strategy that matches them, such as an estimator on catR's ability range or an EAP grid with catR's trapezoid weights. Where catsim departs from catR on purpose and no setting reproduces catR, the case is a strict expected failure with the reason, listed in the test's `_DEPARTURES`, and the technique page states the departure: if catsim comes to agree with catR there, the run fails until the departure is removed from the list and the page. A new technique with a catR counterpart comes with its parity cases.
+
+Regenerate the files when the cases change or the pinned catR version (`CATR_VERSION` in `generate.R`, now 3.17) moves:
+
+```bash
+Rscript tests/parity/catr/generate.R
+```
+
+The script needs R. The first time, it installs the pinned catR from CRAN into `~/.cache/catsim-parity/R-lib`, a library outside the repository and outside your own R library; set `CATSIM_CATR_LIB` to use another directory. Moving to another catR version is a deliberate change of the recorded outputs: review the diff of the JSON files.
+
 ## How to contribute
 
 **Contributing code:** create a fork on GitHub, make your changes on your own repo and then send a pull request to our **dev** branch so that we can check your contributions. Make sure your changes pass the quality gate above.
