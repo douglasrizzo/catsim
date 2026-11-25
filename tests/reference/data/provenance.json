@@ -1,0 +1,12 @@
+{
+  "catsim_commit": "adda72dc888b46319681f11bf9d45c5323672918",
+  "catsim_source_modified": false,
+  "catsim_version": "0.21.0",
+  "environment": {
+    "machine": "arm64",
+    "numpy": "2.5.5",
+    "scipy": "1.18.1",
+    "system": "Darwin"
+  },
+  "python": "3.13.6"
+}
