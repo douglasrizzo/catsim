@@ -1,7 +1,7 @@
 # Confidence Interval Stopper
 
 :Class: {py:class}`catsim.stopping.ConfidenceIntervalStopper`
-:Sources: Thissen (2000); Wainer (2000)
+:Sources: {cite:t}`Thissen00`; {cite:t}`Wainer2000`
 
 ## Motivation
 
@@ -75,7 +75,7 @@ carries the session's standard error.
 A smaller standard error narrows the interval, so EAP and MAP sessions are
 usually classified sooner than they would be on the Fisher error.
 
-Magis and Raîche (2012, p. 11) describe the classification criterion with a
+{cite:t}`Magis12{p. 11}` describe the classification criterion with a
 single ability threshold: a confidence interval for ability is built after every
 item, and the test stops once the threshold is no longer inside it. catsim
 generalizes this to several boundaries; with one boundary the two rules agree.
@@ -88,11 +88,9 @@ generalizes this to several boundaries; with one boundary the two rules agree.
 
 ## References
 
-Thissen, D. (2000). Reliability and measurement precision. In H. Wainer (Ed.), *Computerized Adaptive Testing: A Primer* (2nd ed., pp. 159-184). Mahwah, NJ: Lawrence Erlbaum Associates.
-
-Wainer, H. (Ed.). (2000). *Computerized Adaptive Testing: A Primer* (2nd ed.). Mahwah, NJ: Lawrence Erlbaum Associates.
-
-Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
+```{bibliography}
+:filter: docname in docnames
+```
 
 ## API Reference
 

@@ -45,7 +45,7 @@ is itself a stopper, so it goes wherever a stopper does, another rule included.
 
 catR caps its stopping rule the same way: its `maxItems` meta-argument "imposes a
 maximal test length and forces the test to stop if this length is reached, even
-though the stopping rule is not yet satisfied" (Magis and Raîche, 2012, p. 18).
+though the stopping rule is not yet satisfied" {cite:p}`Magis12{p. 18}`.
 
 Stoppers are pure, so a rule can be asked again after a run.
 {meth}`~catsim.stopping.StopRule.satisfied` returns the stoppers that hold for a
@@ -71,7 +71,9 @@ item left to give, the engine ends the session itself.
 
 ## References
 
-Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
+```{bibliography}
+:filter: docname in docnames
+```
 
 ## Base Class
 
