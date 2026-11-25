@@ -78,7 +78,7 @@ posterior of {doc}`/api/techniques/estimation/bayesian-infrastructure`.
 - **An estimator's estimate is finite** once an item has been administered, whatever the responses,
   all correct and all incorrect included.
 
-{doc}`/adr/0005-explicit-strategy-contracts` explains why the strategies are shaped this way.
+{doc}`/adr/0007-strategy-contracts` explains why the strategies are shaped this way.
 
 ## The Selector Helpers
 

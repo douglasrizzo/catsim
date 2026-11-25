@@ -19,7 +19,7 @@ criterion {cite:p}`Magis12{p. 10}`.
 
 The stopper judges the standard error the estimator reported with the current
 estimate, the context's `se`
-({doc}`ADR-0005 </adr/0005-explicit-strategy-contracts>`). It stops when
+({doc}`ADR-0007 </adr/0007-strategy-contracts>`). It stops when
 
 $$
 SE(\hat{\theta}) \le \tau,

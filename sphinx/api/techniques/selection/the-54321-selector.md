@@ -26,7 +26,7 @@ review of exposure-control strategies.
 With `initial_bin_size` $s$, the item at 0-indexed test position $k$ is drawn
 from the $\max(1, s - k)$ most informative items that are neither administered
 nor excluded, plus any item tied in information with the last of them
-({doc}`/adr/0011-random-tie-breaking`).
+({doc}`/adr/0017-random-tie-breaking`).
 
 ## Parameters
 

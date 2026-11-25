@@ -10,13 +10,14 @@ this file from the build. Read it before writing or reviewing documentation of a
 In order of priority:
 
 1. **Researchers** running simulation studies to compare selection, estimation and stopping methods.
-2. **Application developers** running live CAT sessions in a product. Nearly as important as
-   researchers.
-3. **Method authors** writing custom strategies.
+2. **Method authors** writing custom strategies.
+3. **Integrators** embedding catsim's computations in a live testing application. catsim does not
+   serve tests (ADR-0001): integrators get one guide on the boundary, "Embedding catsim", and no
+   recipes for storing, resuming or serving sessions.
 4. **Contributors** changing catsim itself.
 
 Each kind of document below names its audience. Write for that reader only. Researchers know IRT
-and may not know software design; application developers know Python and may not know IRT.
+and may not know software design; integrators know Python and may not know IRT.
 
 ## Rules for every document
 
@@ -78,11 +79,12 @@ do not re-explain it. The map names ADRs by topic.
 | Install, quickstart, citation | README | landing page |
 | Running a simulation study; reading `SimulationResult` | "Running simulations" guide | the getting-started notebook |
 | Comparing strategies over replications | "Running simulations" guide | the comparing-strategies notebook |
-| Live sessions: the `select_next`/`apply_response` loop, `step`, stop reasons | "Live CAT sessions" guide | the live-sessions notebook |
-| Persisting and resuming a session | "Live CAT sessions" guide | the live-sessions notebook |
-| Seeds, the run's generator, parallel studies | "Reproducibility" guide | the random-numbers ADR for why |
+| A test step by step: the `start`/`select`/`answer` loop, stop reasons | "Embedding catsim" guide | the step-by-step notebook |
+| What catsim checks in its inputs, and what the application owns (sessions, the item shown, exposure counts, concurrency) | "Embedding catsim" guide | the explicit-inputs and input-checking ADRs for why |
+| Seeds, each examinee's streams, parts and workers | "Reproducibility" guide | the random-numbers and parallel-runs ADRs for why |
+| Item names; reading and writing a bank as CSV | `ItemBank` docstring | "Running simulations" |
 | Custom strategies: `StepContext`, `Estimate`, the base classes and their helpers | "Extending catsim" guide | the custom-strategies notebook |
-| How an exposure rate is counted (its denominator) | `ExposureTracker` docstring | the runtime-state ADR for why; "Live CAT sessions" for sharing and saving a tracker |
+| How a simulation counts exposure rates (their denominator) | `simulate` docstring | the exposure-rates ADR for why; "Embedding catsim" for the rates an application passes |
 | A method's definition, parameters and behaviour | its technique page | its docstring (one link) |
 | Each estimator's standard error | the estimator's technique page | the estimation index compares them |
 | The WLE's standard error against Warm's corrected one | WLE technique page | |
@@ -93,6 +95,7 @@ do not re-explain it. The map names ADRs by topic.
 | A metric's formula (bias, MSE, RMSE, overlap rate) | the metric function's docstring | "Running simulations" |
 | Planned methods | Planned techniques page | their specs in `specs/` |
 | How to contribute; the gate; the release process | `CONTRIBUTING.md` | |
+| How catsim is checked against catR (the parity tests) | `CONTRIBUTING.md` | the catR ADR for why; each technique page states its departures |
 | Why the architecture is shaped this way | the ADR | guides, technique pages |
 | What changed in a release | the GitHub release notes | the 1.0 notice |
 
@@ -120,11 +123,11 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
 
 ### Landing page (`sphinx/index.md`)
 
-- **Job:** the website's front door, with two entry paths: running a simulation study ("Running
-  simulations") and running CAT in an application ("Live CAT sessions"). It links the guides, the
-  techniques, the tutorials and the API reference. It has its own source, separate from the
-  README.
-- **Audience and level:** researchers and application developers; introductory.
+- **Job:** the website's front door, with an entry path for each audience: running a simulation
+  study ("Running simulations"), writing a strategy ("Extending catsim") and embedding catsim's
+  computations in an application ("Embedding catsim"). It links the guides, the techniques, the
+  tutorials and the API reference. It has its own source, separate from the README.
+- **Audience and level:** researchers, method authors and integrators; introductory.
 - **Not here:** install minutiae and badges (README).
 - **Length:** one screen, about 150-300 words.
 - **Review:**
@@ -134,10 +137,10 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
 ### Concept pages (introduction, terms and notation)
 
 - **Job:** the introduction is the CAT and IRT primer: what a test measures, the logistic models,
-  the CAT loop (start, select, respond, estimate, stop), and a short map of catsim's parts (engine,
-  strategies, runner, result) that links the guides. "Terms and notation" gives one term per concept
+  the CAT loop (start, select, respond, estimate, stop), and a short map of catsim's parts (item
+  bank, engine and session, strategies, `simulate` and its result) that links the guides. "Terms and notation" gives one term per concept
   and the symbols.
-- **Audience and level:** researchers and application developers new to CAT; introductory.
+- **Audience and level:** researchers and integrators new to CAT; introductory.
 - **Belongs:** concepts, $P(\theta)$ and $I(\theta)$ as illustrations, figures, textbook citations.
 - **Not here:** internal types and their fields (`StepContext`), helpers (`pick_best`), validation
   rules and invariants, how exposure rates are counted, custom strategies ("Extending catsim").
@@ -150,12 +153,13 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
 
 ### Guides
 
-"Running simulations", "Live CAT sessions", "Reproducibility" and "Extending catsim".
+"Running simulations", "Reproducibility", "Extending catsim" and "Embedding catsim".
 
 - **Job:** how to do one task end to end, with code the reader can copy.
-- **Audience and level:** "Running simulations" and "Reproducibility" serve researchers, "Live CAT
-  sessions" application developers; all three are intermediate. "Extending catsim" serves method
-  authors and is advanced.
+- **Audience and level:** "Running simulations" and "Reproducibility" serve researchers and are
+  intermediate. "Extending catsim" serves method authors and is advanced. "Embedding catsim" serves
+  integrators and is intermediate: the step loop, what catsim checks and what the application owns,
+  with no recipes for storing or serving sessions.
 - **Belongs:** the steps in order; runnable code; what the output means; the choices the reader
   makes, each linked to the page that explains it; the pitfalls readers meet, such as a precision
   target the bank cannot reach, or an overlap rate that is `None` for tests of different lengths.
@@ -224,8 +228,8 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
   ADR), history, comparisons with other packages such as catR unless a caller needs them (the
   technique page's Behavior and Comparison section).
 - **Length:** about 80 words of prose, counting the text before the first numpydoc section. Only the
-  core types (`CatEngine`, `CatSessionState`, `SimulationRunner`, `SimulationResult`, `ItemBank`,
-  `StepContext`, `ExposureTracker`) may run longer, and only with what a caller needs.
+  core types and functions (`CatEngine`, `Session`, `simulate`, `SimulationResult`, `ItemBank`,
+  `StepContext`) may run longer, and only with what a caller needs.
 - **Review:**
   - Could a caller use the object correctly from the docstring alone?
   - Is any sentence rationale, history or method math?
@@ -257,8 +261,8 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
 ### Notebooks (`notebooks/*.ipynb`)
 
 - **Job:** learning by doing, as a ladder by level and audience: getting started (beginner
-  researcher), comparing strategies (intermediate researcher), live sessions (application
-  developer), custom strategies (method author, advanced).
+  researcher), comparing strategies (intermediate researcher), a test step by step (researcher or
+  integrator), custom strategies (method author, advanced).
 - **Audience and level:** set per notebook, stated in its first cell.
 - **Belongs:**
   - one example of each technique family, not every class (the technique pages list them);

@@ -1,4 +1,4 @@
-# ADR-0012: Ability Scale and Extreme Response Patterns
+# ADR-0018: Ability Scale and Extreme Response Patterns
 
 ## Status
 
@@ -14,7 +14,7 @@ the extended range, but only `MAPEstimator` let its range be changed: `Numerical
 After an all-correct or all-incorrect response pattern the likelihood keeps rising toward one end of
 the scale, and the maximum likelihood estimate is infinite. `NumericalSearchEstimator(dodd=False)`
 returned that infinity. The engine stored it as the session's estimate, every item then had zero
-information at it, and the selectors picked uniformly from the whole bank (ADR-0011); a session that
+information at it, and the selectors picked uniformly from the whole bank (ADR-0017); a session that
 ended on such a pattern reported an infinite estimate, and `MEISelector` needed a special case for
 infinite look-ahead estimates. With `dodd=True`, the default, the estimator took Dodd's step half
 the distance to the bank's hardest or easiest item, which moved the estimate down after correct

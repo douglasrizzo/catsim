@@ -724,7 +724,7 @@ def test_a_step_result_keeps_the_session_as_the_step_left_it(item_bank) -> None:
 def test_a_step_result_cannot_be_changed(item_bank) -> None:
   """Neither a step result's fields nor the sequences in its session snapshot can be changed.
 
-  Fails if CatStepResult is not frozen, or if the snapshot holds lists: ADR-0009 promises immutable
+  Fails if CatStepResult is not frozen, or if the snapshot holds lists: ADR-0006 promises immutable
   step results, but ``result.response = False`` and ``result.session.responses.append(True)`` both
   worked.
   """

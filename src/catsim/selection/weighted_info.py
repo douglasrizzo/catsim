@@ -91,7 +91,7 @@ class MLWISelector(BaseSelector):
     weights = posterior(context.responses, item_bank.get_items(context.administered_items), self._grid, self._log_prior)
     information = irt.information(self._grid.nodes, item_bank.get_items(candidates))
     # a sum over the node axis adds each column in the same order, so identical items tie exactly
-    # (ADR-0011); a matrix product may round columns differently
+    # (ADR-0017); a matrix product may round columns differently
     return (weights[:, None] * information).sum(axis=0)
 
   @override

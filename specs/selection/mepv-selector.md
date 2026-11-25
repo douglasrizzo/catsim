@@ -231,7 +231,7 @@ class MEPVSelector(BaseSelector):
   `irt.icc(context.theta, item_bank.get_items(candidates))`; a comparison with catR needs that
   variant, and its rankings can differ.
 - The posterior comes from the context's responses at every call, as in MPWI; estimators keep no
-  per-session posterior ({doc}`ADR-0005 </adr/0005-explicit-strategy-contracts>`). Each call costs two
+  per-session posterior ({doc}`ADR-0007 </adr/0007-strategy-contracts>`). Each call costs two
   passes over a $Q \times$ candidates table, about twice MPWI's.
 - The import-linter exception MPWI's spec names (`catsim.selection.weighted_info ->
   catsim.estimation.bayesian`) covers this selector too.
