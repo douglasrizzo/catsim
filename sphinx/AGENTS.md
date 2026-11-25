@@ -197,6 +197,7 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
     `Open access`, or `Not openly available; X (Year) describes the method`. Brace the title words
     whose case matters (`{R}`, `{catR}`, `{IRT}`, `{Bayesian}`, proper names): the style lowercases
     titles.
+    Enter a chapter of an edited book as `@inproceedings`: the style prints no note for `@incollection`.
   - End the References section with a `{bibliography}` directive filtered to the page,
     `:filter: docname in docnames`; a source the page lists without citing it in the text goes in
     the directive's content.

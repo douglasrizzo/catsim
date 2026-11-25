@@ -77,7 +77,8 @@ catR's implementation, with sources. Link the ADR for the reason behind a catsim
 % its DOI and a note: "Open copy: \url{...}" when the published version is not open and a copy is,
 % "Open access" when it is, or "Not openly available; X (Year) describes the method." Brace the
 % title words whose case matters ({R}, {catR}, {IRT}, {Bayesian}, proper names): the style
-% lowercases titles. A source the page lists without citing it in the text goes in the directive's
+% lowercases titles. Enter a chapter of an edited book as @inproceedings: the style prints no
+% note for @incollection. A source the page lists without citing it in the text goes in the directive's
 % content, one key per line after a blank line.
 
 ```{bibliography}
