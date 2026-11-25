@@ -102,7 +102,7 @@ With an estimator that maximizes the likelihood, such as `NumericalSearchEstimat
 likelihood of a short test's responses can keep rising toward the edge of the ability scale, which
 catsim keeps within $[-6, 6]$. A few examinees then end with an estimate of $-6$ or $6$, and their
 errors dominate the RMSE of the run. A Bayesian estimator, such as the EAP above, keeps estimates
-near its prior ({doc}`/adr/0012-ability-scale-and-extreme-patterns`).
+near its prior ({doc}`/adr/0018-ability-scale-and-extreme-patterns`).
 
 ## Compare Strategies over Replications
 

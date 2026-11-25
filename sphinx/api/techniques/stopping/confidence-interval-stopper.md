@@ -32,7 +32,7 @@ $$
 where $\gamma$ is the configured confidence level, $z_{(1+\gamma)/2}$ the
 standard normal quantile, and $SE(\hat{\theta})$ the standard error the
 estimator reported with the current estimate, the context's `se`
-({doc}`ADR-0005 </adr/0005-explicit-strategy-contracts>`). Each estimator
+({doc}`ADR-0007 </adr/0007-strategy-contracts>`). Each estimator
 computes it by its own formula: the Fisher standard error
 $1/\sqrt{I(\hat{\theta})}$ for maximum likelihood and the WLE, the posterior
 standard deviation for EAP, and for MAP the information plus the prior's

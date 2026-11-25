@@ -224,7 +224,7 @@ class MPWISelector(BaseSelector):
 - `_selector_cache` is private to `ItemBank`, so Ruff's SLF001 flags the access from a selector;
   the sketch exempts that one line.
 - The posterior comes from the context's responses at every call: estimators keep no per-session
-  posterior ({doc}`ADR-0005 </adr/0005-explicit-strategy-contracts>`), and `posterior()` is one
+  posterior ({doc}`ADR-0007 </adr/0007-strategy-contracts>`), and `posterior()` is one
   vectorized pass over the grid. With no responses it is the prior on the grid (Contract 2).
 - The selection and estimation layers do not import each other (`[tool.importlinter]` in
   `pyproject.toml`). Add `"catsim.selection.weighted_info -> catsim.estimation.bayesian"` to that

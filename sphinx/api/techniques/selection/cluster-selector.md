@@ -45,7 +45,7 @@ All three scores use every item of the cluster, including items already
 administered. The selector first picks the best cluster according to the
 configured scoring rule among clusters that still contain remaining items
 (neither administered nor excluded); clusters whose scores tie exactly are chosen between uniformly at random,
-as tied items are (see {doc}`/adr/0011-random-tie-breaking`). It then chooses an
+as tied items are (see {doc}`/adr/0017-random-tie-breaking`). It then chooses an
 item inside that cluster:
 
 $$

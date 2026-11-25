@@ -24,7 +24,7 @@ $$
 
 where $R_k$ is the set of items neither administered nor excluded. Items at
 exactly the same distance tie, and one of them is drawn at random
-({doc}`/adr/0011-random-tie-breaking`).
+({doc}`/adr/0017-random-tie-breaking`).
 
 ## Parameters
 

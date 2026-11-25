@@ -165,7 +165,7 @@ the item, divided by the number of sessions started so far other than its own. S
 progress count too, so sessions that run side by side see each other's items as they are given,
 and the first session sees every rate at 0. When sessions run one after another, as in a
 simulation, this is the share of the examinees tested before the current one
-({doc}`/adr/0004-runtime-state-ownership`). Above, `attempt-2` starts with a different item from
+({doc}`/adr/0012-exposure-rates`). Above, `attempt-2` starts with a different item from
 `attempt-1`: with two sessions started, each item `attempt-1` was given has a rate of 1 for
 `attempt-2`. The {py:class}`~catsim.ExposureTracker` reference gives the exact count.
 
