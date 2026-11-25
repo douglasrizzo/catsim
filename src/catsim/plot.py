@@ -1,10 +1,17 @@
 """Plots of items, exposure rates and CAT sessions, drawn with matplotlib.
 
 The module needs matplotlib, which the plot extra installs: ``pip install 'catsim[plot]'``. Each
-function takes its data first and its options as keyword-only arguments, draws on the ``ax`` it is
-given or on the axes of a new figure, and returns the axes it drew on.
+function takes its data first, as plain catsim objects, and its options as keyword-only arguments,
+draws on the ``ax`` it is given or on the axes of a new figure, and returns the axes it drew on
+(ADR-0022).
+
+Plots label items by their names in the item bank (ADR-0004), drawn as given: a dollar sign in a
+name does not start mathtext. An x axis with one tick per item names each item while it has at most
+30, the most names that stay apart at matplotlib's default figure width; a longer one ticks whole
+numbers, as each function's description says.
 """
 
+from collections.abc import Sequence
 from enum import StrEnum
 from typing import assert_never
 
@@ -19,9 +26,13 @@ except ImportError as error:
   raise ImportError(_missing) from error
 
 from . import irt
+from .checks import _check_in_bank, _item
 from .item_bank import ItemBank
 from .session import Session
-from .typing import FloatArray
+from .typing import FloatArray, IntArray
+
+# The most items an x axis names, one tick each: at matplotlib's default figure width, more names overlap.
+_MAX_NAMED_TICKS = 30
 
 
 class PlotType(StrEnum):
@@ -43,7 +54,8 @@ class PlotType(StrEnum):
 
 
 def item_curve(
-  item: FloatArray,
+  item: int,
+  item_bank: ItemBank,
   *,
   kind: PlotType | str = PlotType.ICC,
   max_info: bool = True,
@@ -53,8 +65,8 @@ def item_curve(
   r"""Plot an item's characteristic curve, its information curve, or both.
 
   The curves span four units of ability on each side of the item's difficulty, and a box in the
-  upper left corner gives the item's parameters. With ``PlotType.BOTH`` the information curve has
-  its own y axis, on the right, and the plot has no grid.
+  upper left corner gives the item's name and parameters. With ``PlotType.BOTH`` the information
+  curve has its own y axis, on the right, and the plot has no grid.
 
   .. plot::
       :caption: One item's characteristic and information curves, apart and together. The dot marks its peak.
@@ -62,18 +74,20 @@ def item_curve(
       import matplotlib.pyplot as plt
       from catsim import ItemBank
       from catsim.plot import PlotType, item_curve
-      item = ItemBank.generate(1, rng=7).items[0]
+      item_bank = ItemBank.generate(1, rng=7)
       fig, axes = plt.subplots(3, 1, figsize=(7, 15))
-      item_curve(item, kind=PlotType.ICC, ax=axes[0])
-      item_curve(item, kind=PlotType.IIC, ax=axes[1])
-      item_curve(item, kind=PlotType.BOTH, ax=axes[2])
+      item_curve(0, item_bank, kind=PlotType.ICC, ax=axes[0])
+      item_curve(0, item_bank, kind=PlotType.IIC, ax=axes[1])
+      item_curve(0, item_bank, kind=PlotType.BOTH, ax=axes[2])
       plt.tight_layout()
       plt.show()
 
   Parameters
   ----------
-  item : numpy.ndarray
-      One item's parameters ``[a, b, c, d]``, such as a row of ``ItemBank.items``.
+  item : int
+      The item's index in ``item_bank``; ``item_bank.index(name)`` gives the index of a named item.
+  item_bank : ItemBank
+      The item bank that holds the item's name and parameters.
   kind : PlotType or str, optional
       Which curves to draw, as a :class:`PlotType` or its value (``"icc"``, ``"iic"`` or
       ``"both"``). Default is ``PlotType.ICC``.
@@ -93,25 +107,25 @@ def item_curve(
 
   Raises
   ------
+  TypeError
+      If ``item`` is not an integer, before any figure is created.
   ValueError
-      If ``item`` is not one row of four parameters or ``kind`` is neither a :class:`PlotType`
-      nor one of its values, before any figure is created.
+      If ``item`` is not an index of ``item_bank`` or ``kind`` is neither a :class:`PlotType` nor
+      one of its values, before any figure is created.
   """
-  item = numpy.asarray(item, dtype=float)
-  if item.shape != (4,):
-    msg = f"item must be one row of four parameters [a, b, c, d], got shape {item.shape}."
-    raise ValueError(msg)
+  item = _item("item", item, item_bank.n_items)
   kind = PlotType(kind)
+  parameters = item_bank.items[item]
   ax = _prepare_axes(ax, title)
-  thetas = numpy.linspace(item[1] - 4, item[1] + 4, 161)
+  thetas = numpy.linspace(parameters[1] - 4, parameters[1] + 4, 161)
 
   match kind:
     case PlotType.ICC:
-      _draw_icc(ax, thetas, item)
+      _draw_icc(ax, thetas, parameters)
       ax.grid()
       box_axes = ax
     case PlotType.IIC:
-      _draw_information(ax, thetas, item, max_info=max_info)
+      _draw_information(ax, thetas, parameters, max_info=max_info)
       ax.grid()
       box_axes = ax
     case PlotType.BOTH:
@@ -119,13 +133,13 @@ def item_curve(
       for axes, color in ((ax, "C0"), (box_axes, "C3")):
         axes.yaxis.label.set_color(color)
         axes.tick_params(axis="y", colors=color)
-      _draw_icc(ax, thetas, item, color="C0")
-      _draw_information(box_axes, thetas, item, max_info=max_info, color="C3")
+      _draw_icc(ax, thetas, parameters, color="C0")
+      _draw_information(box_axes, thetas, parameters, max_info=max_info, color="C3")
     case _:
       assert_never(kind)
 
   ax.set_xlabel(r"$\theta$")
-  _annotate_parameters(box_axes, item)
+  _annotate_item(box_axes, item_bank.names[item], parameters)
   return ax
 
 
@@ -138,33 +152,47 @@ def _prepare_axes(ax: Axes | None, title: str | None) -> Axes:
   return ax
 
 
-def _draw_icc(ax: Axes, thetas: FloatArray, item: FloatArray, *, color: str | None = None) -> None:
+def _label_items(ax: Axes, positions: IntArray, names: Sequence[str]) -> None:
+  """Tick the x axis at ``positions`` with the ``names`` of the items there, or at whole numbers if there are too many.
+
+  Names are drawn as given, vertically so that long ones fit. With more than ``_MAX_NAMED_TICKS`` names, matplotlib
+  picks the ticks among the whole numbers, which also holds in a view zoomed in to a few positions.
+  """
+  if len(names) <= _MAX_NAMED_TICKS:
+    ax.set_xticks(positions, names, rotation=90, parse_math=False)
+  else:
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+
+
+def _draw_icc(ax: Axes, thetas: FloatArray, parameters: FloatArray, *, color: str | None = None) -> None:
   """Draw the item's characteristic curve, in ``color`` or the next colour of the axes' cycle."""
-  ax.plot(thetas, irt.icc(thetas, item), color=color, label=r"$P(\theta)$")
+  ax.plot(thetas, irt.icc(thetas, parameters), color=color, label=r"$P(\theta)$")
   ax.set_ylabel(r"$P(\theta)$")
 
 
 def _draw_information(
-  ax: Axes, thetas: FloatArray, item: FloatArray, *, max_info: bool, color: str | None = None
+  ax: Axes, thetas: FloatArray, parameters: FloatArray, *, max_info: bool, color: str | None = None
 ) -> None:
   """Draw the item's information curve and, with ``max_info``, a dot of the curve's colour at its peak."""
-  (line,) = ax.plot(thetas, irt.information(thetas, item), color=color, label=r"$I(\theta)$")
+  (line,) = ax.plot(thetas, irt.information(thetas, parameters), color=color, label=r"$I(\theta)$")
   ax.set_ylabel(r"$I(\theta)$")
   if max_info:
-    peak = irt.max_info_theta(item)
-    ax.plot(peak, irt.information(peak, item), "o", color=line.get_color(), label="Maximum information")
+    peak = irt.max_info_theta(parameters)
+    ax.plot(peak, irt.information(peak, parameters), "o", color=line.get_color(), label="Maximum information")
 
 
-def _annotate_parameters(ax: Axes, item: FloatArray) -> None:
-  """Write the item parameters, to three significant digits, in a box in the upper left corner of the axes.
+def _annotate_item(ax: Axes, name: str, parameters: FloatArray) -> None:
+  """Write the item's name and parameters, to three significant digits, in a box in the upper left corner of the axes.
 
   The curves of typical items keep clear of that corner: at the low end of the ability range the ICC is near its
   lower asymptote and the IIC near zero. A very flat item (a of 0.2 or less) with c = 0 and d < 1 is the exception:
   its information curve falls from the left edge of the plot, under the box.
   """
-  a, b, c, d = item
+  a, b, c, d = parameters
+  # The parameters are mathtext, so a dollar sign in the name would pair up with theirs.
+  shown_name = name.replace("$", r"\$")
   ax.annotate(
-    f"$a = {a:.3g}$\n$b = {b:.3g}$\n$c = {c:.3g}$\n$d = {d:.3g}$",
+    f"{shown_name}\n$a = {a:.3g}$\n$b = {b:.3g}$\n$c = {c:.3g}$\n$d = {d:.3g}$",
     bbox={"facecolor": "white", "alpha": 1},
     xy=(0.02, 0.97),
     xycoords="axes fraction",
@@ -184,8 +212,8 @@ _ITEM_PARAMETERS = {
 
 def item_exposure(
   exposure_rates: FloatArray,
+  item_bank: ItemBank,
   *,
-  item_bank: ItemBank | None = None,
   par: str | None = None,
   hist: bool = False,
   ax: Axes | None = None,
@@ -193,9 +221,11 @@ def item_exposure(
 ) -> Axes:
   """Plot the exposure rate of each item: in item order, against an item parameter, or as a histogram.
 
+  In item order, the x axis names each item, or ticks item indices in a bank of more than 30 items.
   With ``par``, the items are sorted by that parameter and each item's exposure rate is drawn at its
-  value, which shows which items a selector favours. With ``hist=True``, the plot counts the items
-  in each range of exposure rates.
+  value, which shows which items a selector favours; items of close parameters crowd together there,
+  so their names are left out. With ``hist=True``, the plot counts the items in each range of
+  exposure rates.
 
   .. plot::
       :caption: The exposure rates of a simulation, as a histogram and against the item difficulty.
@@ -219,8 +249,8 @@ def item_exposure(
       true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)
       result = SimulationRunner(engine).run(true_thetas, rng=0)
       fig, axes = plt.subplots(2, 1, figsize=(7, 12))
-      plot.item_exposure(result.exposure_rates, hist=True, ax=axes[0], title="Exposure rates")
-      plot.item_exposure(result.exposure_rates, item_bank=result.item_bank, par="b", ax=axes[1])
+      plot.item_exposure(result.exposure_rates, result.item_bank, hist=True, ax=axes[0], title="Exposure rates")
+      plot.item_exposure(result.exposure_rates, result.item_bank, par="b", ax=axes[1])
       plt.tight_layout()
       plt.show()
 
@@ -228,8 +258,8 @@ def item_exposure(
   ----------
   exposure_rates : numpy.ndarray
       The exposure rate of each item, in item bank order, such as ``SimulationResult.exposure_rates``.
-  item_bank : ItemBank or None, optional
-      The item bank the rates belong to, needed with ``par``. Default is None.
+  item_bank : ItemBank
+      The item bank the rates belong to, which holds the items' names and parameters.
   par : str or None, optional
       The item parameter to plot the rates against: ``"a"``, ``"b"``, ``"c"`` or ``"d"``. Default is
       None, which plots the rates in item bank order.
@@ -248,9 +278,9 @@ def item_exposure(
   Raises
   ------
   ValueError
-      If ``exposure_rates`` is not one-dimensional, ``par`` is not one of ``"a"``, ``"b"``, ``"c"``
-      and ``"d"``, ``par`` is given with ``hist=True`` or without ``item_bank``, or the rates and
-      the item bank differ in length; always before any figure is created.
+      If ``exposure_rates`` is not one rate per item of ``item_bank``, ``par`` is not one of
+      ``"a"``, ``"b"``, ``"c"`` and ``"d"``, or ``par`` is given with ``hist=True``; always before
+      any figure is created.
   """
   exposure_rates = numpy.asarray(exposure_rates, dtype=float)
   _check_exposure_inputs(exposure_rates, item_bank, par, hist=hist)
@@ -262,28 +292,28 @@ def item_exposure(
     ax.set_ylabel("Items")
     return ax
 
-  if par is None or item_bank is None:
-    values = numpy.arange(len(exposure_rates))
-    xlabel = "Items"
+  if par is None:
+    indices = numpy.arange(item_bank.n_items)
+    ax.plot(indices, exposure_rates, marker="o")
+    _label_items(ax, indices, item_bank.names)
+    ax.set_xlabel("Items")
   else:
     column, xlabel = _ITEM_PARAMETERS[par]
     values = item_bank.items[:, column]
-  order = values.argsort(kind="stable")
-  ax.plot(values[order], exposure_rates[order], marker="o")
-  ax.set_xlabel(xlabel)
+    order = values.argsort(kind="stable")
+    ax.plot(values[order], exposure_rates[order], marker="o")
+    ax.set_xlabel(xlabel)
   ax.set_ylabel("Exposure rate")
   return ax
 
 
-def _check_exposure_inputs(
-  exposure_rates: FloatArray, item_bank: ItemBank | None, par: str | None, *, hist: bool
-) -> None:
+def _check_exposure_inputs(exposure_rates: FloatArray, item_bank: ItemBank, par: str | None, *, hist: bool) -> None:
   """Raise ValueError for inputs of :func:`item_exposure` that cannot give a true plot."""
-  if exposure_rates.ndim != 1:
-    msg = f"exposure_rates must hold one rate per item, got an array of shape {exposure_rates.shape}."
-    raise ValueError(msg)
-  if item_bank is not None and len(exposure_rates) != item_bank.n_items:
-    msg = f"exposure_rates has {len(exposure_rates)} values but the item bank has {item_bank.n_items} items."
+  if exposure_rates.shape != (item_bank.n_items,):
+    msg = (
+      f"exposure_rates has shape {exposure_rates.shape}; there must be one exposure rate per item of the bank "
+      f"({item_bank.n_items})"
+    )
     raise ValueError(msg)
   if par is None:
     return
@@ -292,9 +322,6 @@ def _check_exposure_inputs(
     raise ValueError(msg)
   if hist:
     msg = f"A histogram of exposure rates has no parameter axis: pass par={par!r} or hist=True, not both."
-    raise ValueError(msg)
-  if item_bank is None:
-    msg = f"item_bank must be passed to plot exposure rates against parameter {par!r}."
     raise ValueError(msg)
 
 
@@ -308,11 +335,13 @@ def session_progress(
 ) -> Axes:
   r"""Plot how a session's ability estimate and its standard error change as items are administered.
 
-  The x axis counts the items administered. The left y axis shows the ability estimate after each
-  response, with a band of one standard error on each side, the difficulty of each administered
-  item and, when it is given, the true ability. The right y axis shows the standard error
-  each estimate was recorded with, the one precision-based stoppers judge. Infinite standard
-  errors, such as the initial estimate's, are left out.
+  The x axis counts the items administered. While the session has at most 30 items, its ticks name
+  the item given at each step instead, and the initial estimate, at 0, has none, so a session with
+  no items has no ticks. The left y axis shows the ability estimate after each response, with a
+  band of one standard error on each side, the difficulty of each administered item and, when it is
+  given, the true ability. The right y axis shows the standard error each estimate was recorded
+  with, the one precision-based stoppers judge. Infinite standard errors, such as the initial
+  estimate's, are left out.
 
   .. plot::
       :caption: One simulated session: the ability estimate after each item, with its standard error.
@@ -361,15 +390,12 @@ def session_progress(
 
   Raises
   ------
-  IndexError
-      If an administered item is not in ``item_bank``, before any figure is created.
+  ValueError
+      If an administered item is not an item of ``item_bank``, before any figure is created.
   """
+  # The session checked its indices when it was built, but it does not know the bank.
+  _check_in_bank("administered_items", session.administered_items, item_bank.n_items)
   administered = numpy.asarray(session.administered_items, dtype=int)
-  # checked by hand: numpy indexing would wrap a negative index around to the bank's last items
-  outside = administered[(administered < 0) | (administered >= item_bank.n_items)]
-  if outside.size > 0:
-    msg = f"Items {outside.tolist()} of the session are not items of the bank, which has {item_bank.n_items} items"
-    raise IndexError(msg)
   difficulties = item_bank.difficulty[administered]
   thetas = numpy.array(session.theta_history)
   ses = numpy.array([estimate.se for estimate in session.estimates])
@@ -391,7 +417,7 @@ def session_progress(
   se_axes.plot(xs[finite], ses[finite], color="C2", label="Standard error")
 
   ax.set_xlabel("Items administered")
-  ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+  _label_items(ax, xs[1:], [item_bank.names[item] for item in session.administered_items])
   ax.set_ylabel(r"$\theta$")
   se_axes.set_ylabel("Standard error", color="C2")
   se_axes.tick_params(axis="y", colors="C2")
