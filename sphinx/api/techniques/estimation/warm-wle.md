@@ -1,7 +1,7 @@
 # Warm Weighted Likelihood Estimator
 
 :Class: {py:class}`catsim.estimation.WarmLikelihoodEstimator`
-:Sources: Warm (1989)
+:Sources: {cite:t}`Warm1989`
 
 ## Motivation
 
@@ -19,8 +19,8 @@ short-test behavior that matters most in adaptive testing.
 Warm's estimator maximizes the likelihood multiplied by a weight function
 $w(\theta)$ chosen so that the first-order ($O(n^{-1})$) bias of the MLE cancels.
 The weight is defined through its log-derivative,
-$\frac{d}{d\theta}\ln w(\theta) = J(\theta) / [2 I(\theta)]$ (Warm, 1985, p. 8,
-Equations 9 and 10), so the estimate is the root of the modified score equation
+$\frac{d}{d\theta}\ln w(\theta) = J(\theta) / [2 I(\theta)]$
+{cite:p}`Warm1985{p. 8, Equations 9 and 10}`, so the estimate is the root of the modified score equation
 
 $$
 \sum_i \frac{\bigl[u_i - P_i(\theta)\bigr] P_i'(\theta)}{P_i(\theta)\,[1-P_i(\theta)]}
@@ -29,8 +29,8 @@ $$
 = 0,
 $$
 
-(Warm, 1985, p. 8, Equation 11; Magis & Raîche, 2012, p. 6, Equations 12 and
-13), where $I(\theta)$ is test information and
+{cite:p}`Warm1985{p. 8, Equation 11}`; {cite:p}`Magis12{p. 6, Equations 12 and 13}`,
+where $I(\theta)$ is test information and
 
 $$
 J(\theta)
@@ -42,23 +42,23 @@ $$
 
 For models without guessing or slipping ($c = 0$, $d = 1$), $J = I'$ and the
 weight is $w(\theta) = \sqrt{I(\theta)}$: the WLE then maximizes
-$L(\theta)\sqrt{I(\theta)}$, the likelihood under a Jeffreys prior (Warm, 1985,
-p. 9; Magis & Raîche, 2012, p. 6). With guessing
+$L(\theta)\sqrt{I(\theta)}$, the likelihood under a Jeffreys prior
+{cite:p}`Warm1985{p. 9}`; {cite:p}`Magis12{p. 6}`. With guessing
 or slipping, $J \neq I'$, so the WLE is defined by the equation above and not by
 the $\sqrt{I}$-weighted likelihood.
 
 Expanding the equation around the MLE gives the familiar approximation
 $\hat{\theta}_{\mathrm{WLE}} \approx \hat{\theta}_{\mathrm{MLE}} + J/(2I^2)$, which
-is why $-J/(2I^2)$ is the MLE's first-order bias (Lord, 1983, as given by Warm,
-1985, p. 7, Equation 6). The implementation
+is why $-J/(2I^2)$ is the MLE's first-order bias {cite:p}`Lord1983`, as given by
+{cite:t}`Warm1985{p. 7, Equation 6}`. The implementation
 does not use this approximation: it fails exactly where WLE matters most, because
 the MLE is infinite for all-correct and all-incorrect patterns, and with guessing it
 can sit on the search bound, where $I \approx 0$ makes the correction explode.
 
 The estimator returns a {py:class}`~catsim.Estimate`. Its standard error
 is the Fisher one at the estimate, $1/\sqrt{I(\hat{\theta})}$, infinite where
-the information is 0. This departs from Magis and Raîche (2012, p. 6, Equation
-14), who add $(I'J - IJ')/(2I^2)$ to the information, and follows catR: since
+the information is 0. This departs from {cite:t}`Magis12{p. 6, Equation 14}`,
+who add $(I'J - IJ')/(2I^2)$ to the information, and follows catR: since
 version 3.0 its `semTheta` gives the WLE the maximum likelihood formula, because
 the corrected one sometimes led to mathematical problems ([catR's
 NEWS](https://github.com/cran/catR/blob/master/NEWS), version 3.0), and its
@@ -79,8 +79,8 @@ of the weighted likelihood and is refined with Brent's method. If several maxima
 exist, which can happen with guessing, the one with the largest weighted
 likelihood is returned; candidates are ranked by integrating the modified score,
 the derivative of the weighted log-likelihood. If the modified score never changes
-sign, the estimate is the bound it points to. This mirrors `catR` (Magis and
-Raîche, 2012), whose
+sign, the estimate is the bound it points to. This mirrors `catR`
+{cite:p}`Magis12`, whose
 [`thetaEst.R`](https://github.com/cran/catR/blob/master/R/thetaEst.R) solves the
 same equation with `uniroot`; catsim adds the explicit handling of multiple
 roots.
@@ -109,8 +109,8 @@ Against the WLE's sampling spread at a known ability (every response pattern for
 and 10 items, 3,000 simulated ones for 20 and 40), the classic formula
 overestimates the error in short tests, by 10% under the 2PL and 28% under the 3PL
 at 5 items. That is conservative: a standard-error stopper runs a few items longer
-than needed. Equation 14 roughly halves that gap. The sandwich formula of Magis
-(2016), catR's `sem.type = "new"`, is closest under the 3PL but underestimates the
+than needed. Equation 14 roughly halves that gap. The sandwich formula of
+{cite:t}`Magis2016`, catR's `sem.type = "new"`, is closest under the 3PL but underestimates the
 error under the 2PL (by 8% at 5 items), which would stop tests too early. From 20
 items on, the three agree within about 3%.
 
@@ -129,15 +129,9 @@ items on, the three agree within about 3%.
 
 ## References
 
-Warm, T. A. (1989). Weighted likelihood estimation of ability in item response theory. *Psychometrika*, 54(3), 427-450. <https://doi.org/10.1007/BF02294627>. Not openly available; Warm (1985) derives the same estimator.
-
-Warm, T. A. (1985). *Weighted likelihood estimation of ability in item response theory with tests of finite length* (Doctoral dissertation). University of Oklahoma. <https://shareok.org/handle/11244/5356> (open access).
-
-Lord, F. M. (1983). Unbiased estimators of ability parameters, of their variance, and of their parallel-forms reliability. *Psychometrika*, 48(2), 233-245. <https://doi.org/10.1007/BF02294018>. Not openly available; Warm (1985, p. 7) gives its bias formula.
-
-Magis, D. (2016). Efficient standard error formulas of ability estimators with dichotomous item response models. *Psychometrika*, 81(1), 184-200. <https://doi.org/10.1007/s11336-015-9443-3>.
-
-Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
+```{bibliography}
+:filter: docname in docnames
+```
 
 ## API Reference
 

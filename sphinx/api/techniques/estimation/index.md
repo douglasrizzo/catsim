@@ -14,7 +14,7 @@ per step.
 
 | Estimator | Standard error |
 |---|---|
-| {py:class}`~catsim.estimation.NumericalSearchEstimator` | $1/\sqrt{I(\hat\theta)}$, the Fisher standard error (Magis and Raîche 2012, Eq. 3, p. 4) |
+| {py:class}`~catsim.estimation.NumericalSearchEstimator` | $1/\sqrt{I(\hat\theta)}$, the Fisher standard error {cite:p}`Magis12{Eq. 3, p. 4}` |
 | {py:class}`~catsim.estimation.EAPEstimator` | the posterior standard deviation (Eq. 11, p. 6) |
 | {py:class}`~catsim.estimation.MAPEstimator` | $1/\sqrt{I(\hat\theta) - (\log p)''(\hat\theta)}$, where $\log p$ is the prior's log-density; $1/\sqrt{I(\hat\theta) + 1/\sigma^2}$ for a normal prior of variance $\sigma^2$ (Eq. 6, p. 5) |
 | {py:class}`~catsim.estimation.WarmLikelihoodEstimator` | $1/\sqrt{I(\hat\theta)}$, catR's default |

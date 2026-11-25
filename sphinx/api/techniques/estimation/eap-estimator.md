@@ -1,7 +1,7 @@
 # Expected A Posteriori Estimator
 
 :Class: {py:class}`catsim.estimation.EAPEstimator`
-:Sources: Bock & Mislevy (1982)
+:Sources: {cite:t}`Bock1982`
 
 ## Motivation
 
@@ -9,15 +9,15 @@ EAP estimates ability by taking the mean of the posterior distribution rather
 than the maximizer of a likelihood. In CAT practice this is attractive because
 it always returns a finite value, even for all-correct or all-incorrect patterns
 where the MLE does not exist, so no heuristic such as Dodd's is needed early in
-the test; Bock and Mislevy (1982, p. 443) conclude that it is stable at all
+the test; {cite:t}`Bock1982{p. 443}` conclude that it is stable at all
 adaptive test lengths, including the first few items.
 
 EAP's posterior also yields the posterior variance at no extra cost, and that
-variance serves as the error variance of the estimate (Bock & Mislevy, 1982,
-p. 432); in their simulations the posterior standard deviation behaved like the
+variance serves as the error variance of the estimate {cite:p}`Bock1982{p. 432}`;
+in their simulations the posterior standard deviation behaved like the
 standard error of measurement (p. 431). The estimator reports the posterior
-standard deviation as the estimate's standard error, as catR does (Magis &
-Raîche, 2012, p. 6, Equation 11), and the precision stoppers judge it.
+standard deviation as the estimate's standard error, as catR does
+{cite:p}`Magis12{p. 6, Equation 11}`, and the precision stoppers judge it.
 
 ## Definition
 
@@ -52,7 +52,7 @@ $$
 \tilde{p}(\theta_q \mid \mathbf{u}).
 $$
 
-These are Equations 4 and 5 of Bock and Mislevy (1982, p. 433); catsim returns
+These are Equations 4 and 5 of {cite:t}`Bock1982{p. 433}`; catsim returns
 the variance, the square of their Equation 5, without Sheppard's correction (see
 {doc}`/api/techniques/estimation/bayesian-infrastructure`).
 
@@ -95,11 +95,11 @@ about 0.065; longer tests need a finer grid (see
 
 ## References
 
-Bock, R. D., & Mislevy, R. J. (1982). Adaptive EAP estimation of ability in a microcomputer environment. *Applied Psychological Measurement*, 6(4), 431-444. <https://doi.org/10.1177/014662168200600405>. Open copy: [University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/101546).
+```{bibliography}
+:filter: docname in docnames
 
-Wang, T., & Vispoel, W. P. (1998). Properties of ability estimation methods in computerized adaptive testing. *Journal of Educational Measurement*, 35(2), 109-135. <https://doi.org/10.1111/j.1745-3984.1998.tb00530.x>. Not openly available.
-
-Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
+Wang1998
+```
 
 :::{seealso}
 Depends on {doc}`/api/techniques/estimation/bayesian-infrastructure`
