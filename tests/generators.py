@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import numpy as np
-from typing_extensions import override
 
+from catsim.compat import override
 from catsim.typing import FloatArray, IntArray
 
 
