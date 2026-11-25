@@ -66,7 +66,13 @@ Each implemented technique has a page under `sphinx/api/techniques/` with its de
 
 ## Parity with catR
 
-The R package [catR](https://cran.r-project.org/package=catR) is catsim's reference implementation ([ADR-0020](sphinx/adr/0020-catr-as-the-reference.md)). `tests/test_parity_catr.py` compares catsim with catR's outputs on fixed cases: response probabilities and information, each estimator on fixed response patterns, the selection rules in fixed contexts, the progressive and proportional schedules, and the stopping rules. The outputs are JSON files in `tests/parity/catr/`, which the R scripts beside them write together with the R and catR versions, so the test runs with the rest of the suite and needs no R.
+The R package [catR](https://cran.r-project.org/package=catR) is catsim's reference implementation ([ADR-0020](sphinx/adr/0020-catr-as-the-reference.md)). `tests/test_parity_catr.py` compares catsim with catR's outputs on fixed cases, at ADR-0020's three levels:
+
+1. **Single computations** (`irt.R`, `estimation.R`, `selection.R`, `stopping.R`): response probabilities and information, each estimator on fixed response patterns, the selection rules and the randomesque and 5-4-3-2-1 bins in fixed contexts, the progressive and proportional schedules, and the stopping rules.
+1. **Whole tests on recorded responses** (`whole_tests.R`): catR's `randomCAT` with `responses`, for MFI, bOpt and MLWI selection with each estimator and the precision and length rules, against `catsim.simulate` with the same response patterns. The items must be the same, in the same order, and every estimate and standard error must agree as at level 1.
+1. **Simulations of the randomized selectors** (`simulations.R`): catR's `simulateRespondents` with randomesque, progressive and proportional selection, against `catsim.simulate` with the same true abilities. R and NumPy draw different numbers, so the bias, RMSE, mean test length, overlap rate and every item's exposure rate are compared within their Monte Carlo error: catsim's and catR's values may differ by at most 4.5 standard errors of their difference.
+
+The outputs are JSON files in `tests/parity/catr/`, which the R scripts beside them write together with the R and catR versions, so the test runs with the rest of the suite and needs no R.
 
 Each case records catR's settings, and the test builds the catsim strategy that matches them, such as an estimator on catR's ability range or an EAP grid with catR's trapezoid weights. Where catsim departs from catR on purpose and no setting reproduces catR, the case is a strict expected failure with the reason, listed in the test's `_DEPARTURES`, and the technique page states the departure: if catsim comes to agree with catR there, the run fails until the departure is removed from the list and the page. A new technique with a catR counterpart comes with its parity cases.
 
@@ -76,7 +82,7 @@ Regenerate the files when the cases change or the pinned catR version (`CATR_VER
 Rscript tests/parity/catr/generate.R
 ```
 
-The script needs R. The first time, it installs the pinned catR from CRAN into `~/.cache/catsim-parity/R-lib`, a library outside the repository and outside your own R library; set `CATSIM_CATR_LIB` to use another directory. Moving to another catR version is a deliberate change of the recorded outputs: review the diff of the JSON files.
+The script needs R and takes about two minutes, most of them in the level-3 simulations. The first time, it installs the pinned catR from CRAN into `~/.cache/catsim-parity/R-lib`, a library outside the repository and outside your own R library; set `CATSIM_CATR_LIB` to use another directory. Every run writes the same files, since every random draw comes from a seeded stream; the header of `simulations.R` says how it stops catR from re-seeding R's generator from the clock. Moving to another catR version is a deliberate change of the recorded outputs: review the diff of the JSON files.
 
 ## How to contribute
 
