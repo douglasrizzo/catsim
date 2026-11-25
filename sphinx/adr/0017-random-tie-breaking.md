@@ -1,4 +1,4 @@
-# ADR-0011: Break Ties Between Items Uniformly at Random
+# ADR-0017: Break Ties Between Items Uniformly at Random
 
 ## Status
 
@@ -28,15 +28,15 @@ cutoff joins the pool.
 ## Decision
 
 Every selector that picks the best item by a score uses one rule, catR's: the candidates whose
-score equals the best score exactly are tied, and one of them is drawn uniformly with the session's
-random generator. Randomesque and 5-4-3-2-1 bins hold every candidate tied with the bin's least
+score equals the best score exactly are tied, and one of them is drawn uniformly with the generator of
+the call. Randomesque and 5-4-3-2-1 bins hold every candidate tied with the bin's least
 informative item. `pick_best` and `best_pool`, exported from `catsim.selection`, implement the
 rule.
 
 The rule is fixed. There is no parameter, enum or package setting to change it.
 
-When there is no tie, no random number is drawn. The generator is the run's, which every step
-context carries (ADR-0005), so a selector called directly breaks ties the same way as under
+When there is no tie, no random number is drawn. The generator is the call's, which every step
+context carries (ADR-0007), so a selector called directly breaks ties the same way as under
 `CatEngine`.
 
 Ties are exact equality of each selector's own score, as in catR, so they depend on how the score
