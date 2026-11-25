@@ -1,0 +1,21 @@
+{
+  "about": "Reference outputs of catsim, recorded by tests/reference/generate.py from the source that provenance.json names. They change only where an ADR changes a result, and the pull request that changes them names the ADR and the outputs. Floats compare to 1e-12 of their magnitude, or of the ability scale's unit for abilities, standard errors and the accuracy of estimates; everything else exactly.",
+  "cases": {
+    "bias|fifty": 0.03839732261042719,
+    "bias|five": 0.010000000000000004,
+    "bias|identical": 0.0,
+    "bias|one": -2.0,
+    "mse|fifty": 5.3825780080263605,
+    "mse|five": 0.050499999999999975,
+    "mse|identical": 0.0,
+    "mse|one": 4.0,
+    "overlap_rate|even": 0.25,
+    "overlap_rate|four_items": 0.75,
+    "overlap_rate|rates": 0.37573333333333336,
+    "overlap_rate|same_test": 1.0,
+    "rmse|fifty": 2.3200383634815958,
+    "rmse|five": 0.22472205054244226,
+    "rmse|identical": 0.0,
+    "rmse|one": 2.0
+  }
+}
