@@ -54,8 +54,8 @@ $$
 $$
 
 These are Equations 4 and 5 of {cite:t}`Bock1982{p. 433}`, without the
-square root on the variance; they credit the quadrature formulas to
-{cite:t}`Bock1981` (p. 432). Like Bock and Mislevy, catsim uses evenly spaced nodes
+square root on the variance; on p. 432 they credit the quadrature formulas to
+{cite:t}`Bock1981`. Like Bock and Mislevy, catsim uses evenly spaced nodes
 rather than Gauss–Hermite points, which offer little advantage here because the
 likelihood is not a polynomial (p. 433).
 

@@ -46,6 +46,12 @@ warm-wle
 :namespace: catsim
 ```
 
+## References
+
+```{bibliography}
+:filter: docname in docnames
+```
+
 ## Base Class
 
 ```{eval-rst}
