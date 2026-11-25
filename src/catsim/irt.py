@@ -505,8 +505,8 @@ def max_info_theta(items: FloatArray) -> FloatArray:
       from catsim.plot import PlotType, item_curve
       item_bank = ItemBank.generate(2, rng=0)
       fig, axes = plt.subplots(2, 1, figsize=(6.4, 8))
-      for item, ax in zip(item_bank.items, axes):
-        item_curve(item, kind=PlotType.IIC, ax=ax)
+      for item, ax in enumerate(axes):
+        item_curve(item, item_bank, kind=PlotType.IIC, ax=ax)
       plt.tight_layout()
       plt.show()
 

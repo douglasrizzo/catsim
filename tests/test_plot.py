@@ -16,15 +16,30 @@ from catsim.plot import PlotType
 from catsim.typing import FloatArray
 
 if TYPE_CHECKING:
+  from matplotlib.axes import Axes
   from matplotlib.lines import Line2D
 
 
 class _ExposureOptions(TypedDict, total=False):
   """The keyword options of plot.item_exposure that the rejection tests pass."""
 
-  item_bank: ItemBank
   par: str
   hist: bool
+
+
+def _x_tick_labels(ax: Axes) -> list[tuple[float, str, bool]]:
+  """Return each x tick of a drawn plot as its position, its label and whether the label is read as mathtext."""
+  ax.figure.canvas.draw()
+  return [(float(label.get_position()[0]), label.get_text(), label.get_parse_math()) for label in ax.get_xticklabels()]
+
+
+def _check_ticks_count(ax: Axes, names: tuple[str, ...]) -> None:
+  """Check that the drawn x axis ticks whole numbers labelled as numbers, none with an item's name."""
+  ticks = _x_tick_labels(ax)
+  positions = [position for position, _, _ in ticks]
+  assert len(positions) > 1
+  np.testing.assert_array_equal(positions, np.round(positions))
+  assert not {label for _, label, _ in ticks} & set(names)
 
 
 def _run_python(code: str) -> subprocess.CompletedProcess[str]:
@@ -68,8 +83,10 @@ class TestOptionalMatplotlib:
 class TestItemCurve:
   """Tests for item_curve()."""
 
-  # A three-parameter item whose discrimination has more digits than the parameter box should show.
+  # A three-parameter item whose discrimination has more digits than the parameter box should show, as item 1 of a
+  # bank whose item 0 differs in every parameter. Its name has a lone dollar sign, which mathtext would pair up.
   ITEM = np.array([1.1669737841771746, -0.4321, 0.2, 1.0])
+  ITEM_BANK = ItemBank(np.array([[2.0, 1.5, 0.0, 0.9], ITEM]), names=["other", "fee $5"])
   A, B, C = ITEM[:3]
 
   @classmethod
@@ -84,12 +101,12 @@ class TestItemCurve:
     return cls.A**2 * (p - cls.C) ** 2 * (1 - p) / ((1 - cls.C) ** 2 * p)
 
   def test_item_curve_draws_the_items_characteristic_curve(self) -> None:
-    """The curve spans four units around the difficulty and passes through (c + d) / 2 = 0.6 at it.
+    """The curve spans four units around the item's difficulty and passes through (c + d) / 2 = 0.6 at it.
 
-    Fails if the parameters are read in another order than [a, b, c, d], if the curve is centred elsewhere, or if the
-    information is drawn instead.
+    Fails if the parameters are read in another order than [a, b, c, d] or from another item of the bank, if the curve
+    is centred elsewhere, or if the information is drawn instead.
     """
-    ax = plot.item_curve(self.ITEM, kind=PlotType.ICC)
+    ax = plot.item_curve(1, self.ITEM_BANK, kind=PlotType.ICC)
     (line,) = ax.get_lines()
     x, y = np.asarray(line.get_xdata()), np.asarray(line.get_ydata())
 
@@ -104,7 +121,7 @@ class TestItemCurve:
     For d = 1 the peak is at b + log((1 + sqrt(1 + 8c)) / 2) / a. Fails if the dot is off the peak or off the curve, or
     if it takes the next colour of the axes' cycle instead of the curve's.
     """
-    ax = plot.item_curve(self.ITEM, kind=PlotType.IIC)
+    ax = plot.item_curve(1, self.ITEM_BANK, kind=PlotType.IIC)
     curve, dot = ax.get_lines()
     x, y = np.asarray(curve.get_xdata()), np.asarray(curve.get_ydata())
     peak = self.B + np.log((1 + np.sqrt(1 + 8 * self.C)) / 2) / self.A
@@ -130,19 +147,20 @@ class TestItemCurve:
     Fails if a kind draws another curve, if max_info=False still marks the peak, or if BOTH draws both curves against
     one y axis, whose scale cannot suit a probability and an information at once.
     """
-    ax = plot.item_curve(self.ITEM, kind=kind, max_info=max_info)
+    ax = plot.item_curve(1, self.ITEM_BANK, kind=kind, max_info=max_info)
     assert [[line.get_label() for line in axes.get_lines()] for axes in ax.figure.axes] == expected
 
   @pytest.mark.parametrize("kind", list(PlotType))
-  def test_item_curve_rounds_the_parameters(self, kind: PlotType) -> None:
-    """The parameter box shows each parameter to three significant digits.
+  def test_item_curve_box_names_the_item_and_rounds_its_parameters(self, kind: PlotType) -> None:
+    """The box gives the item's name, its dollar sign escaped, then each parameter to three significant digits.
 
-    Fails if a parameter is printed at full float precision (a = 1.1669737841771746), which made the
-    box wider than the axes.
+    Fails if the box leaves the item unnamed or names another item, if a parameter is printed at full float precision
+    (a = 1.1669737841771746), which made the box wider than the axes, or if the name's lone dollar sign is left to
+    mathtext, which then finds an odd number of them and prints the parameters' as literal dollar signs.
     """
-    ax = plot.item_curve(self.ITEM, kind=kind)
+    ax = plot.item_curve(1, self.ITEM_BANK, kind=kind)
     texts = [text.get_text() for axis in ax.figure.axes for text in axis.texts]
-    assert texts == ["$a = 1.17$\n$b = -0.432$\n$c = 0.2$\n$d = 1$"]
+    assert texts == ["fee \\$5\n$a = 1.17$\n$b = -0.432$\n$c = 0.2$\n$d = 1$"]
 
   @pytest.mark.parametrize("kind", list(PlotType))
   def test_item_curve_parameter_box_stays_inside_the_axes_and_off_the_curves(self, kind: PlotType) -> None:
@@ -151,7 +169,7 @@ class TestItemCurve:
     Fails if the box sticks out past the edge of the axes, or sits where a curve passes, as the
     information curve's tail does in the lower right corner.
     """
-    ax = plot.item_curve(self.ITEM, kind=kind)
+    ax = plot.item_curve(1, self.ITEM_BANK, kind=kind)
     figure = ax.figure
     figure.canvas.draw()
     (annotation,) = [text for axis in figure.axes for text in axis.texts]
@@ -167,36 +185,42 @@ class TestItemCurve:
         assert box.count_contains(line.get_transform().transform(line.get_xydata())) == 0
 
   @pytest.mark.parametrize(
-    ("item", "kind", "message"),
+    ("item", "kind", "error", "message"),
     [
-      (ITEM[:3], PlotType.ICC, r"one row of four parameters \[a, b, c, d\], got shape \(3,\)"),
-      (np.array([ITEM, ITEM]), PlotType.ICC, r"got shape \(2, 4\)"),
-      (ITEM, "pdf", "'pdf' is not a valid PlotType"),
+      (-1, PlotType.ICC, ValueError, r"item is -1; item indices must be between 0 and 1"),
+      (2, PlotType.ICC, ValueError, r"item is 2; item indices must be between 0 and 1"),
+      (1.0, PlotType.ICC, TypeError, r"item is 1.0; item indices must be integers"),
+      (ITEM, PlotType.ICC, TypeError, r"item is array\(.*\); item indices must be integers"),
+      (1, "pdf", ValueError, "'pdf' is not a valid PlotType"),
     ],
-    ids=["three-parameters", "two-items", "unknown-kind"],
+    ids=["negative-item", "item-past-the-bank", "float-item", "parameter-row", "unknown-kind"],
   )
-  def test_item_curve_rejects_bad_input_before_drawing(self, item: np.ndarray, kind: str, message: str) -> None:
-    """An item that is not one row of four parameters, or an unknown kind, raises before any figure exists.
+  def test_item_curve_rejects_bad_input_before_drawing(
+    self, item: object, kind: str, error: type[Exception], message: str
+  ) -> None:
+    """An index that is not an item of the bank, a non-integer, or an unknown kind raises before any figure exists.
 
-    Fails if a matrix of items draws one curve per item under a box that cannot show their parameters, or if a bad call
-    leaves an empty figure open behind the error.
+    Fails if a negative index draws an item counted from the end of the bank, if a float such as 1.0 or a row of
+    parameters, the argument item_curve once took, is read as an index, or if a bad call leaves an empty figure open
+    behind the error.
     """
-    with pytest.raises(ValueError, match=message):
-      plot.item_curve(item, kind=kind)
+    with pytest.raises(error, match=message):
+      plot.item_curve(item, self.ITEM_BANK, kind=kind)  # ty: ignore[invalid-argument-type]
     assert plt.get_fignums() == []
 
 
 class TestItemExposure:
   """Tests for item_exposure()."""
 
-  # Each parameter column orders the four items differently.
+  # Each parameter column orders the four items differently, and the names are neither generated nor sorted.
   ITEM_BANK = ItemBank(
     np.array([
       [1.2, 0.5, 0.10, 0.95],
       [0.8, -1.0, 0.25, 0.90],
       [2.0, 2.0, 0.00, 1.00],
       [1.5, 0.0, 0.15, 0.85],
-    ])
+    ]),
+    names=["vocab_9", "$x$ + 1", "algebra", "reading"],
   )
   RATES = np.array([0.1, 0.2, 0.3, 0.4])
 
@@ -217,22 +241,45 @@ class TestItemExposure:
     Fails if the x axis carries ranks (0, 1, 2, ...) under a parameter label, if a rate is paired with
     another item's parameter, or if a parameter reads the wrong item bank column.
     """
-    ax = plot.item_exposure(self.RATES, item_bank=self.ITEM_BANK, par=par)
+    ax = plot.item_exposure(self.RATES, self.ITEM_BANK, par=par)
     (line,) = ax.get_lines()
     assert (ax.get_xlabel(), ax.get_ylabel()) == (xlabel, "Exposure rate")
     np.testing.assert_allclose(np.asarray(line.get_xdata()), expected_x)
     np.testing.assert_allclose(np.asarray(line.get_ydata()), expected_y)
 
-  def test_item_exposure_rates_alone_plot_in_item_order(self) -> None:
-    """Exposure rates without an item bank plot against the item index when no parameter is asked for.
+  def test_item_exposure_names_each_item_in_item_order(self) -> None:
+    """Without a parameter, each rate is drawn at its item's index, which the x axis ticks with the item's name.
 
-    Fails if the call demands an item bank it does not need, or reorders the items.
+    Fails if the items are reordered, if a tick gives an index or another item's name, or if a name of two dollar signs
+    is read as mathtext, which would draw "x + 1" in italics without them.
     """
-    ax = plot.item_exposure(self.RATES)
+    ax = plot.item_exposure(self.RATES, self.ITEM_BANK)
     (line,) = ax.get_lines()
+
     assert ax.get_xlabel() == "Items"
     np.testing.assert_array_equal(np.asarray(line.get_xdata()), [0, 1, 2, 3])
     np.testing.assert_allclose(np.asarray(line.get_ydata()), self.RATES)
+    assert _x_tick_labels(ax) == [
+      (0.0, "vocab_9", False),
+      (1.0, "$x$ + 1", False),
+      (2.0, "algebra", False),
+      (3.0, "reading", False),
+    ]
+
+  @pytest.mark.parametrize("n_items", [30, 31])
+  def test_item_exposure_names_items_while_they_fit_on_the_axis(self, n_items: int) -> None:
+    """Thirty items get one named tick each; a bank of 31 ticks item indices, whole numbers, instead.
+
+    Fails if a large bank crowds one name per item onto the axis, where they overlap, or if a bank of 30 loses its
+    names.
+    """
+    item_bank = ItemBank.generate(n_items, rng=0)
+    ax = plot.item_exposure(np.zeros(n_items), item_bank)
+
+    if n_items == 30:
+      assert [label for _, label, _ in _x_tick_labels(ax)] == list(item_bank.names)
+    else:
+      _check_ticks_count(ax, item_bank.names)
 
   def test_item_exposure_histogram(self) -> None:
     """The histogram counts the items in each exposure bin, with at least three bins.
@@ -240,32 +287,30 @@ class TestItemExposure:
     Rates [0, 0, 0.5, 1] in three equal bins over [0, 1] give counts [2, 1, 1]. Fails if the histogram
     is drawn from other data, with another number of bins, or with patches other than bars.
     """
-    ax = plot.item_exposure(np.array([0.0, 0.0, 0.5, 1.0]), hist=True)
+    ax = plot.item_exposure(np.array([0.0, 0.0, 0.5, 1.0]), self.ITEM_BANK, hist=True)
     heights = [patch.get_height() if isinstance(patch, Rectangle) else None for patch in ax.patches]
     assert heights == [2, 1, 1]
 
   @pytest.mark.parametrize(
     ("rates", "kwargs", "message"),
     [
-      (RATES, {"par": "b"}, "item_bank must be passed"),
-      (RATES, {"item_bank": ITEM_BANK, "par": "b", "hist": True}, "pass par='b' or hist=True, not both"),
-      (RATES[:3], {"item_bank": ITEM_BANK}, "3 values but the item bank has 4"),
-      (RATES, {"item_bank": ITEM_BANK, "par": "e"}, "Unsupported parameter 'e'"),
-      (np.array([RATES, RATES]), {}, r"one rate per item, got an array of shape \(2, 4\)"),
+      (RATES, {"par": "b", "hist": True}, "pass par='b' or hist=True, not both"),
+      (RATES[:3], {}, r"has shape \(3,\); there must be one exposure rate per item of the bank \(4\)"),
+      (RATES, {"par": "e"}, "Unsupported parameter 'e'"),
+      (np.array([RATES, RATES]), {}, r"has shape \(2, 4\); there must be one exposure rate per item"),
     ],
-    ids=["par-without-item-bank", "par-with-hist", "length-mismatch", "unknown-par", "two-dimensional-rates"],
+    ids=["par-with-hist", "length-mismatch", "unknown-par", "two-dimensional-rates"],
   )
   def test_item_exposure_rejects_inputs_that_cannot_give_a_true_plot(
     self, rates: FloatArray, kwargs: _ExposureOptions, message: str
   ) -> None:
     """Inputs that cannot give a true plot raise a ValueError before any figure is created.
 
-    Fails if a parameter is plotted without the item bank that holds it, if a histogram silently ignores the parameter
-    it was given, if rates and items of different lengths are paired, if an unknown parameter or a matrix of rates is
-    accepted, or if a figure is left open behind the error.
+    Fails if a histogram silently ignores the parameter it was given, if rates and items of different lengths are
+    paired, if an unknown parameter or a matrix of rates is accepted, or if a figure is left open behind the error.
     """
     with pytest.raises(ValueError, match=message):
-      plot.item_exposure(rates, **kwargs)
+      plot.item_exposure(rates, self.ITEM_BANK, **kwargs)
     assert plt.get_fignums() == []
 
 
@@ -273,7 +318,9 @@ class TestSessionProgress:
   """Tests for session_progress()."""
 
   # Three items whose difficulties differ from every estimate and standard error below.
-  ITEM_BANK = ItemBank(np.array([[1.0, -0.5, 0.0, 1.0], [1.0, 0.3, 0.0, 1.0], [1.0, 1.2, 0.0, 1.0]]))
+  ITEM_BANK = ItemBank(
+    np.array([[1.0, -0.5, 0.0, 1.0], [1.0, 0.3, 0.0, 1.0], [1.0, 1.2, 0.0, 1.0]]), names=["easy", "medium", "hard"]
+  )
   # The initial estimate has an infinite standard error, as CatEngine.start records it.
   SESSION = Session(
     estimates=(Estimate(0.0, np.inf, 0), Estimate(0.8, 1.1, 3), Estimate(0.5, 0.9, 4), Estimate(0.6, 0.7, 5)),
@@ -329,17 +376,42 @@ class TestSessionProgress:
 
     assert set(self._lines(ax)) == {r"Ability estimate $\hat{\theta}$", "Item difficulty", "Standard error"}
 
-  def test_session_progress_ticks_whole_numbers_of_items(self) -> None:
-    """The x axis counts items, so its ticks are whole numbers.
+  def test_session_progress_names_the_item_given_at_each_step(self) -> None:
+    """Each step's tick gives the name of the item administered at it, and the initial estimate gets no tick.
 
-    Fails if a short test gets fractional ticks such as 0.5 or 2.5 items.
+    Fails if the names come in bank order rather than administration order, if a tick gives an index, if the names
+    are shifted by one step, so that the initial estimate is named after the first item, or if they are read as
+    mathtext.
     """
     ax = plot.session_progress(self.SESSION, self.ITEM_BANK)
-    ax.figure.canvas.draw()
 
-    ticks = ax.get_xticks()
-    assert len(ticks) > 1
-    np.testing.assert_array_equal(ticks, np.round(ticks))
+    assert _x_tick_labels(ax) == [(1.0, "hard", False), (2.0, "easy", False), (3.0, "medium", False)]
+
+  def test_session_progress_counts_the_items_of_a_long_session(self) -> None:
+    """A session of 31 items ticks whole numbers of items administered instead of one name per step.
+
+    Fails if 31 names crowd onto the axis, where they overlap, or if a view zoomed in to a few of its steps gets
+    fractional ticks such as 2.5 items.
+    """
+    item_bank = ItemBank.generate(31, rng=0)
+    session = Session(
+      administered_items=tuple(range(31)),
+      responses=tuple(item % 2 == 0 for item in range(31)),
+      estimates=(Estimate(0.0, np.inf, 0),) + (Estimate(0.1, 0.5, 1),) * 31,
+    )
+    ax = plot.session_progress(session, item_bank)
+    ax.set_xlim(10, 13)
+
+    _check_ticks_count(ax, item_bank.names)
+
+  def test_session_progress_of_a_session_without_items_has_no_x_ticks(self) -> None:
+    """A session that has given no item has no step to name or count, so its x axis has no ticks.
+
+    Fails if the lone initial estimate gets ticks at fractions of an item around 0, such as -0.06 and 0.015.
+    """
+    ax = plot.session_progress(Session(estimates=self.SESSION.estimates[:1]), self.ITEM_BANK)
+
+    assert _x_tick_labels(ax) == []
 
   def test_session_progress_rejects_items_outside_the_bank_before_drawing(self) -> None:
     """A session whose items are not in the item bank raises before any figure exists.
@@ -355,8 +427,8 @@ class TestSessionProgress:
 @pytest.mark.parametrize(
   "draw",
   [
-    lambda ax, title: plot.item_curve(TestItemCurve.ITEM, ax=ax, title=title),
-    lambda ax, title: plot.item_exposure(TestItemExposure.RATES, ax=ax, title=title),
+    lambda ax, title: plot.item_curve(1, TestItemCurve.ITEM_BANK, ax=ax, title=title),
+    lambda ax, title: plot.item_exposure(TestItemExposure.RATES, TestItemExposure.ITEM_BANK, ax=ax, title=title),
     lambda ax, title: plot.session_progress(
       TestSessionProgress.SESSION, TestSessionProgress.ITEM_BANK, ax=ax, title=title
     ),
