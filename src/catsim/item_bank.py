@@ -1,9 +1,10 @@
 """Item Bank management for Computerized Adaptive Testing.
 
-This module provides the ItemBank class for managing calibrated item parameters
+This module provides the ItemBank class for managing calibrated item parameters and their names,
 and precomputing derived values that depend only on static item content.
 """
 
+from collections.abc import Iterable
 from enum import StrEnum
 from typing import Any, Self, assert_never
 
@@ -39,12 +40,15 @@ class IrtModel(StrEnum):
   PL4 = "4PL"
 
 
-class ItemBank:
-  r"""The calibrated items of a test, with the values derived from their parameters.
+class ItemBank:  # noqa: PLR0904 - the core type: parameters, names and derived values
+  r"""The calibrated items of a test, with their names and the values derived from their parameters.
 
-  A bank checks every parameter when it is built and caches the values that depend only on the
-  parameters, such as each item's point of maximum information. Its arrays are read-only, so the
-  cached values cannot go stale. Build a bank from an item matrix, or draw one with
+  Every item has a name, a non-empty string unique within the bank. Computations refer to an item by
+  its row index, from 0 to ``n_items - 1``: ``names[item]`` is the item's name and
+  :py:meth:`index` gives a name's row. A bank checks every parameter and name when it is built and
+  caches the values that depend only on the parameters, such as each item's point of maximum
+  information. Its arrays are read-only, so the cached values cannot go stale. Two banks are equal
+  when their parameters and names are. Build a bank from an item matrix, or draw one with
   :py:meth:`generate`.
 
   Parameters
@@ -53,6 +57,10 @@ class ItemBank:
       Item parameter matrix, one row per item, with columns [a, b, c, d]. A matrix with one column
       is read as [b], two as [a, b] and three as [a, b, c], filled with :math:`a = 1`, :math:`c = 0`
       and :math:`d = 1`; a 1-D array is one item.
+  names : iterable of str or None, optional
+      One name per item, in row order. Default is None, which names each item ``item_`` followed by
+      its index, zero-padded to the width of the last index: ``item_000`` to ``item_499`` in a
+      500-item bank.
 
   Attributes
   ----------
@@ -63,6 +71,8 @@ class ItemBank:
       is a property of a run, kept in :py:class:`catsim.SimulationResult`.
   n_items : int
       Number of items in the bank.
+  names : tuple of str
+      The items' names, in row order.
   max_info_thetas : numpy.ndarray
       Cached, read-only theta values where each item provides maximum information.
   max_info_values : numpy.ndarray
@@ -72,9 +82,10 @@ class ItemBank:
   ------
   ValueError
       If the matrix does not have 1 to 4 columns, has no items, or has a parameter that is NaN,
-      infinite or outside :math:`a > 0` and :math:`0 \leq c < d \leq 1`.
+      infinite or outside :math:`a > 0` and :math:`0 \leq c < d \leq 1`; or if ``names`` does not
+      hold one name per item, or holds an empty or repeated name.
   TypeError
-      If items is not a numpy.ndarray.
+      If items is not a numpy.ndarray, or ``names`` is a string or holds a value that is not one.
 
   Examples
   --------
@@ -82,11 +93,16 @@ class ItemBank:
   >>> from catsim import ItemBank
   >>> ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.2, -0.5, 0.1, 1.0]]))
   ItemBank(n_items=2, model=3PL)
-  >>> ItemBank.generate(100, model="3PL", rng=7)
-  ItemBank(n_items=100, model=3PL)
+  >>> bank = ItemBank(np.array([[0.0], [-0.5], [1.1]]), names=["q7", "q2", "q4"])
+  >>> bank.names
+  ('q7', 'q2', 'q4')
+  >>> bank.index("q2")
+  1
+  >>> ItemBank.generate(100, model="3PL", rng=7).names[:2]
+  ('item_00', 'item_01')
   """
 
-  def __init__(self, items: FloatArray) -> None:
+  def __init__(self, items: FloatArray, names: Iterable[str] | None = None) -> None:
     # a float copy the caller cannot change afterwards
     self._items = _normalize(items)
     n_columns = self._items.shape[1]
@@ -102,6 +118,10 @@ class ItemBank:
     # Read-only, together with the column views below, so the cached values derived from the
     # parameters cannot go stale
     self._items.flags.writeable = False
+
+    self._index_by_name = _index_names(_generated_names(self.n_items) if names is None else names, self.n_items)
+    # dicts keep their insertion order, which is the row order
+    self._names = tuple(self._index_by_name)
 
     # Lazy-loaded cached values (computed on first access)
     self._max_info_thetas: FloatArray | None = None
@@ -130,6 +150,41 @@ class ItemBank:
         Number of items in the bank.
     """
     return self._items.shape[0]
+
+  @property
+  def names(self) -> tuple[str, ...]:
+    """Get the items' names.
+
+    Returns
+    -------
+    tuple of str
+        One name per item, in row order, so ``names[item]`` is the name of item ``item``.
+    """
+    return self._names
+
+  def index(self, name: str) -> int:
+    """Return the row index of the item with the given name.
+
+    Parameters
+    ----------
+    name : str
+        An item's name.
+
+    Returns
+    -------
+    int
+        The item's index, from 0 to ``n_items - 1``.
+
+    Raises
+    ------
+    ValueError
+        If no item of the bank has that name.
+    """
+    try:
+      return self._index_by_name[name]
+    except KeyError:
+      msg = f"no item of the bank is named {name!r}"
+      raise ValueError(msg) from None
 
   @property
   def max_info_thetas(self) -> FloatArray:
@@ -403,6 +458,19 @@ class ItemBank:
     """Get string representation of the ItemBank."""
     return f"ItemBank(n_items={self.n_items}, model={self.model})"
 
+  @override
+  def __eq__(self, other: object) -> bool:
+    """Return whether ``other`` is a bank with the same parameters and names, in the same order."""
+    if not isinstance(other, ItemBank):
+      return NotImplemented
+    return self._names == other._names and bool(numpy.array_equal(self._items, other._items))
+
+  @override
+  def __hash__(self) -> int:
+    """Return a hash of the parameters and names, equal for equal banks."""
+    # -0.0 equals 0.0 but differs in its bytes; adding 0.0 turns it into 0.0
+    return hash((self._names, (self._items + 0.0).tobytes()))
+
   def __len__(self) -> int:
     """Get number of items (allows len(bank))."""
     return self.n_items
@@ -462,6 +530,57 @@ def _normalize(items: FloatArray) -> FloatArray:
   else:
     complete[:, :n_columns] = matrix
   return complete
+
+
+def _generated_names(n_items: int) -> list[str]:
+  """Return ``item_`` followed by each index, zero-padded to the width of the last index."""
+  width = len(str(n_items - 1))
+  return [f"item_{item:0{width}d}" for item in range(n_items)]
+
+
+def _index_names(names: Iterable[str], n_items: int) -> dict[str, int]:
+  """Return each item's index by its name, after checking that ``names`` holds one non-empty, unique string per item.
+
+  Parameters
+  ----------
+  names : iterable of str
+      The names, in row order.
+  n_items : int
+      The number of items.
+
+  Returns
+  -------
+  dict[str, int]
+      Each name's index, in row order.
+
+  Raises
+  ------
+  TypeError
+      If ``names`` is a string, or holds a value that is not one.
+  ValueError
+      If ``names`` does not hold ``n_items`` names, or holds an empty or repeated one.
+  """
+  if isinstance(names, str):
+    msg = f"names is the string {names!r}; pass one name per item, such as a list of strings"
+    raise TypeError(msg)
+  given: tuple[object, ...] = tuple(names)
+  if len(given) != n_items:
+    msg = f"len(names) is {len(given)}, for {n_items} items; names must hold one name per item"
+    raise ValueError(msg)
+  index_by_name: dict[str, int] = {}
+  for item, name in enumerate(given):
+    if not isinstance(name, str):
+      msg = f"names[{item}] is {name!r}; item names must be strings"
+      raise TypeError(msg)
+    if not name:
+      msg = f"names[{item}] is ''; item names must be non-empty"
+      raise ValueError(msg)
+    if name in index_by_name:
+      msg = f"names[{item}] is {name!r}, as is names[{index_by_name[name]}]; item names must be unique"
+      raise ValueError(msg)
+    # a plain str, so a name from a NumPy array does not print as np.str_('q1')
+    index_by_name[str(name)] = item
+  return index_by_name
 
 
 def _validate(items: FloatArray) -> None:

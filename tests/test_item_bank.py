@@ -147,6 +147,149 @@ class TestItemBankCreation:
     with pytest.raises(ValueError, match="read-only"):
       array(copied)[0] = 99.0
 
+  @pytest.mark.parametrize(
+    "duplicate",
+    [
+      pytest.param(copy.deepcopy, id="deepcopy"),
+      pytest.param(lambda bank: pickle.loads(pickle.dumps(bank)), id="pickle"),
+    ],
+  )
+  def test_copies_keep_the_names_and_their_indices(self, duplicate: Callable[[ItemBank], ItemBank]) -> None:
+    """A copy sent to a worker process equals the original and finds each item by its name.
+
+    A copy that dropped the names or the name-to-index map would fall back to generated names or fail to find "q2".
+    """
+    bank = ItemBank(np.array([[1.0, 0.5, 0.0, 1.0], [1.3, -0.2, 0.0, 1.0]]), names=["q7", "q2"])
+
+    copied = duplicate(bank)
+
+    assert copied == bank
+    assert copied.names == ("q7", "q2")
+    assert copied.index("q2") == 1
+
+
+class TestItemBankNames:
+  """Tests for item names: generated, given, checked and translated to indices."""
+
+  @pytest.mark.parametrize(
+    ("n_items", "expected"),
+    [
+      pytest.param(1, {0: "item_0"}, id="1"),
+      pytest.param(9, {0: "item_0", 8: "item_8"}, id="9"),
+      pytest.param(10, {0: "item_0", 9: "item_9"}, id="10"),
+      pytest.param(11, {0: "item_00", 7: "item_07", 10: "item_10"}, id="11"),
+      pytest.param(100, {0: "item_00", 42: "item_42", 99: "item_99"}, id="100"),
+      pytest.param(101, {0: "item_000", 5: "item_005", 100: "item_100"}, id="101"),
+      pytest.param(1000, {0: "item_000", 37: "item_037", 999: "item_999"}, id="1000"),
+    ],
+  )
+  def test_generated_names_are_zero_based_and_padded_to_the_last_index(
+    self, n_items: int, expected: dict[int, str]
+  ) -> None:
+    """Item i is named item_ and i, zero-padded to the width of the last index, n_items - 1.
+
+    Padding to the width of n_items gives item_00 in a 10-item bank and item_000 in a 100-item one; one-based names
+    start at item_1; no padding sorts item_10 before item_2.
+    """
+    names = ItemBank(np.zeros((n_items, 1))).names
+
+    assert len(names) == n_items
+    assert {item: names[item] for item in expected} == expected
+
+  def test_given_names_are_kept_in_row_order(self) -> None:
+    """The names passed are the bank's, in the order of the rows; sorting them would name row 0 "q1"."""
+    bank = ItemBank(np.zeros((3, 1)), names=["q3", "q1", "q2"])
+
+    assert bank.names == ("q3", "q1", "q2")
+
+  def test_names_from_a_numpy_array_are_plain_strings(self) -> None:
+    """Names taken from a NumPy array of strings are kept as str; kept as numpy.str_, they print as np.str_('x')."""
+    bank = ItemBank(np.zeros((2, 1)), names=np.array(["x", "y"]))
+
+    assert repr(bank.names) == "('x', 'y')"
+
+  def test_generated_banks_have_generated_names(self) -> None:
+    """ItemBank.generate names its items as ItemBank does; naming them by a rule of its own, as item_1, fails here."""
+    assert ItemBank.generate(12, rng=0).names[::11] == ("item_00", "item_11")
+
+  @pytest.mark.parametrize(
+    ("names", "error", "message"),
+    [
+      pytest.param(["q1"], ValueError, "len(names) is 1, for 2 items; names must hold one name per item", id="too few"),
+      pytest.param(
+        ["q1", "q2", "q3"], ValueError, "len(names) is 3, for 2 items; names must hold one name per item", id="too many"
+      ),
+      pytest.param(["q1", ""], ValueError, "names[1] is ''; item names must be non-empty", id="empty"),
+      pytest.param(
+        ["q1", "q1"], ValueError, "names[1] is 'q1', as is names[0]; item names must be unique", id="repeat"
+      ),
+      pytest.param(["q1", 2], TypeError, "names[1] is 2; item names must be strings", id="int"),
+      pytest.param([None, "q2"], TypeError, "names[0] is None; item names must be strings", id="None"),
+      pytest.param("q1", TypeError, "names is the string 'q1'; pass one name per item", id="one string"),
+    ],
+  )
+  def test_rejects_names_that_break_a_rule(self, names: object, error: type[Exception], message: str) -> None:
+    """Each broken rule raises, naming the position, the value and the rule.
+
+    Without the checks, a short list leaves items unnamed, a repeated name makes the name-to-index map point to one
+    of the two items, 2 becomes the name "2", and the string "q1" names two items "q" and "1".
+    """
+    with pytest.raises(error, match=re.escape(message)):
+      ItemBank(np.zeros((2, 1)), names=names)  # ty: ignore[invalid-argument-type]
+
+  def test_index_gives_the_row_of_a_name(self) -> None:
+    """index(name) is the name's row, and names[row] the row's name; with names out of order, a sorted lookup fails.
+
+    The rows are named q3, q1 and q2, so q1 is row 1 and q2 row 2, not their places in sorted order.
+    """
+    bank = ItemBank(np.zeros((3, 1)), names=["q3", "q1", "q2"])
+
+    assert [bank.index("q3"), bank.index("q1"), bank.index("q2")] == [0, 1, 2]
+    assert bank.names[2] == "q2"
+
+  def test_index_of_an_unknown_name_raises(self) -> None:
+    """A name no item has raises ValueError naming it; returning -1 or None would read the last item or crash later."""
+    bank = ItemBank(np.zeros((2, 1)), names=["q1", "q2"])
+
+    with pytest.raises(ValueError, match=re.escape("no item of the bank is named 'q3'")):
+      bank.index("q3")
+
+
+class TestItemBankEquality:
+  """Tests for comparing and hashing banks."""
+
+  def test_banks_with_the_same_parameters_and_names_are_equal(self) -> None:
+    """Two banks built from equal matrices and names are equal and hash alike; comparing by identity makes them differ.
+
+    0.0 and -0.0 are equal floats, so banks differing only there are equal too; hashing the raw bytes would hash them
+    apart.
+    """
+    first = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.2, -0.5, 0.1, 1.0]]), names=["q1", "q2"])
+    second = ItemBank(np.array([[1.0, -0.0, 0.0, 1.0], [1.2, -0.5, 0.1, 1.0]]), names=["q1", "q2"])
+
+    assert first == second
+    assert hash(first) == hash(second)
+
+  @pytest.mark.parametrize(
+    ("items", "names"),
+    [
+      pytest.param([[1.0, 0.0, 0.0, 1.0], [1.2, -0.5, 0.1, 0.99]], ["q1", "q2"], id="one parameter"),
+      pytest.param([[1.0, 0.0, 0.0, 1.0], [1.2, -0.5, 0.1, 1.0]], ["q1", "q3"], id="one name"),
+      pytest.param([[1.0, 0.0, 0.0, 1.0]], ["q1"], id="one item fewer"),
+    ],
+  )
+  def test_banks_that_differ_in_a_parameter_or_a_name_are_unequal(
+    self, items: list[list[float]], names: list[str]
+  ) -> None:
+    """A bank differs from one with another parameter, name or number of items; comparing one part alone misses it."""
+    bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.2, -0.5, 0.1, 1.0]]), names=["q1", "q2"])
+
+    assert bank != ItemBank(np.array(items), names=names)
+
+  def test_a_bank_is_not_equal_to_another_kind_of_object(self) -> None:
+    """Comparing with a string is False; reading the other object's names or items would raise AttributeError."""
+    assert ItemBank(np.zeros((1, 1))) != "item_0"
+
 
 class TestItemBankValidation:
   """Tests for the parameter checks a bank runs when it is built."""
