@@ -2,8 +2,7 @@
 
 import operator
 
-from typing_extensions import override
-
+from ..compat import override
 from ..context import StepContext
 from .base import BaseSelector, best_pool, remaining
 

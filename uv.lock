@@ -100,7 +100,7 @@ dependencies = [
     { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11.5' and python_full_version < '3.12'" },
     { name = "scipy", version = "1.18.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "tqdm", marker = "python_full_version >= '3.11.5'" },
-    { name = "typing-extensions", marker = "python_full_version >= '3.11.5'" },
+    { name = "typing-extensions", marker = "python_full_version >= '3.11.5' and python_full_version < '3.12'" },
 ]
 
 [package.optional-dependencies]
@@ -141,7 +141,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=2.3.1" },
     { name = "scipy", specifier = ">=1.16" },
     { name = "tqdm", specifier = ">=4.64" },
-    { name = "typing-extensions", specifier = ">=4.4" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.4" },
 ]
 provides-extras = ["plot"]
 

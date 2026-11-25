@@ -9,9 +9,9 @@ from dataclasses import FrozenInstanceError, dataclass
 
 import numpy as np
 import pytest
-from typing_extensions import override
 
 from catsim import Estimate, ExcludedItemError, StepContext
+from catsim.compat import override
 from catsim.engine import CatEngine, RunContext
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError

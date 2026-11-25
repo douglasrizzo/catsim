@@ -10,9 +10,9 @@ from typing import Any, Self, assert_never
 import numpy
 import numpy.typing as npt
 from numpy.random import Generator
-from typing_extensions import override
 
 from . import irt
+from .compat import override
 from .typing import FloatArray, IntArray
 
 _N_PARAMS = 4
