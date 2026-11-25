@@ -344,10 +344,10 @@ class TestSessionProgress:
   def test_session_progress_rejects_items_outside_the_bank_before_drawing(self) -> None:
     """A session whose items are not in the item bank raises before any figure exists.
 
-    A session cannot hold a negative index, but it is built without the bank, so it can hold one past it. Fails if a
-    bad call leaves an empty figure open behind the error, or reads past the bank's parameters.
+    The session is built without the bank, so it can hold an index past the bank's last item. Fails if a bad call
+    leaves an empty figure open behind the error, or reads past the bank's parameters.
     """
-    with pytest.raises(IndexError, match="not items of the bank"):
+    with pytest.raises(ValueError, match=r"administered_items\[0\] is 2; item indices must be between 0 and 1"):
       plot.session_progress(self.SESSION, ItemBank(self.ITEM_BANK.items[:2]))
     assert plt.get_fignums() == []
 

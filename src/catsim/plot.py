@@ -19,6 +19,7 @@ except ImportError as error:
   raise ImportError(_missing) from error
 
 from . import irt
+from .checks import _check_in_bank
 from .item_bank import ItemBank
 from .session import Session
 from .typing import FloatArray
@@ -361,15 +362,12 @@ def session_progress(
 
   Raises
   ------
-  IndexError
-      If an administered item is not in ``item_bank``, before any figure is created.
+  ValueError
+      If an administered item is not an item of ``item_bank``, before any figure is created.
   """
+  # The session checked its indices when it was built, but it does not know the bank.
+  _check_in_bank("administered_items", session.administered_items, item_bank.n_items)
   administered = numpy.asarray(session.administered_items, dtype=int)
-  # checked by hand: numpy indexing would wrap a negative index around to the bank's last items
-  outside = administered[(administered < 0) | (administered >= item_bank.n_items)]
-  if outside.size > 0:
-    msg = f"Items {outside.tolist()} of the session are not items of the bank, which has {item_bank.n_items} items"
-    raise IndexError(msg)
   difficulties = item_bank.difficulty[administered]
   thetas = numpy.array(session.theta_history)
   ses = numpy.array([estimate.se for estimate in session.estimates])
