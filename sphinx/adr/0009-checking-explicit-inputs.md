@@ -31,7 +31,8 @@ names of its criterion and model, and `thetaEst` silently drops missing response
   - item indices are integers, in range, with no repeats, and no item is both administered and
     excluded;
   - there is one response per administered item, each a Boolean or the integer 0 or 1;
-  - estimates are finite, and standard errors are positive, or infinite before any response;
+  - estimates are finite, and standard errors are positive, possibly infinite: an estimator returns
+    an infinite error before any response and after responses that carry no information;
   - exposure rates hold one value per item, each in $[0, 1]$.
 - A failed check raises `TypeError` or `ValueError`, naming the input, the position, the value and
   the rule: "administered_items[1] is 3.7; item indices must be integers". Nothing is converted

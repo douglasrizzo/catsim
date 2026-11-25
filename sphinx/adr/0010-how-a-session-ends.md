@@ -37,7 +37,7 @@ while True:
   session = selection.session
   if selection.item is None:
     break
-  session = engine.answer(session, selection.item, respond(selection.item))
+  session = engine.answer(session, selection.item, respond(selection.item), rng=rng)
 ```
 
 ## Consequences
