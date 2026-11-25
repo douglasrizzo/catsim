@@ -10,9 +10,9 @@ import numpy.typing as npt
 from scipy.integrate import IntegrationWarning, quad
 from scipy.optimize import brentq
 from scipy.special import expit
-from typing_extensions import override
 
 from .. import irt
+from ..compat import override
 from ..context import Estimate
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from .base import BaseEstimator

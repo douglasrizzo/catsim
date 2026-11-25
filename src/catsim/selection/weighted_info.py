@@ -2,9 +2,8 @@
 
 import math
 
-from typing_extensions import override
-
 from .. import irt
+from ..compat import override
 from ..context import StepContext
 from ..estimation import QuadratureGrid, posterior, uniform_log_prior
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED

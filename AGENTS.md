@@ -66,8 +66,9 @@ their PRs target it.
 - Keep type annotations accurate; this repository uses `ty` as part of its quality gates.
 - Annotate NumPy arrays with the public aliases in `catsim.typing` (`FloatArray`, `IntArray`).
   Ruff bans `numpy.typing.NDArray` elsewhere; for another dtype, add an alias there.
-- A method that overrides a base-class method carries `@override` (from `typing_extensions`); ty's
-  `missing-override-decorator` enforces it in `src/` and `tests/`.
+- A method that overrides a base-class method carries `@override`, imported from `catsim.compat` in
+  `src/` and `tests/` (typing-extensions is installed only below Python 3.12); ty's
+  `missing-override-decorator` enforces it in both.
 - Closed option sets are `StrEnum`s, like `IrtModel`; code that branches on one uses `match`, with
   a final `case _`.
 - No backward-compatibility aliases or deprecation shims before 1.0: a renamed or removed name is
