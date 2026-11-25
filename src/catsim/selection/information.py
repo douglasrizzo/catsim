@@ -114,8 +114,8 @@ class IntervalInfoSelector(BaseSelector):
 
   By default the interval is a confidence interval for the estimate, built from the estimator's
   standard error (``context.se``) :cite:p:`Veerkamp1997`. It spans the whole ability scale before the
-  first response and narrows as the standard error falls; a standard error of zero, or nearly zero,
-  selects by the items' information at the estimate. Setting ``interval`` fixes the half-width. The
+  first response and narrows as the standard error falls; a standard error so small that the interval
+  vanishes selects by the items' information at the estimate. Setting ``interval`` fixes the half-width. The
   selector applies no exposure cap: ``context.exposure_rates`` is ignored.
 
   Parameters

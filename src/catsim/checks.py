@@ -5,12 +5,14 @@ position, the value and the rule, such as "administered_items[1] is 3.7; item in
 integers". Nothing is converted silently: an accepted value is only stored in catsim's own types,
 such as a ``numpy.int64`` index as an ``int`` and a response of 1 as ``True``.
 
-The functions are internal: :class:`~catsim.Session` and :class:`~catsim.CatEngine` call them on
-the inputs they receive.
+The functions are internal: :class:`~catsim.Session`, :class:`~catsim.StepContext` and
+:class:`~catsim.CatEngine` call them on the inputs they receive.
 """
 
 from __future__ import annotations
 
+import math
+import numbers
 import operator
 from typing import TYPE_CHECKING
 
@@ -216,6 +218,78 @@ def _responses(values: Iterable[object], n_items: int) -> tuple[bool, ...]:
     )
     raise ValueError(msg)
   return checked
+
+
+def _check_real(name: str, value: object, kind: str) -> None:
+  """Check that a value is a real number, not a bool.
+
+  Parameters
+  ----------
+  name : str
+      The input the value is, for the message.
+  value : object
+      The value.
+  kind : str
+      What the value is, in the plural, for the message.
+
+  Raises
+  ------
+  TypeError
+      If the value is not a real number.
+  """
+  # math.isfinite("0.5") raises "must be real number, not str", which names no input.
+  if isinstance(value, (bool, numpy.bool_)) or not isinstance(value, numbers.Real):
+    msg = f"{name} is {value!r}; {kind} must be real numbers"
+    raise TypeError(msg)
+
+
+def _check_theta(name: str, value: float) -> None:
+  """Check that an ability estimate is a finite number.
+
+  Parameters
+  ----------
+  name : str
+      The input the estimate is, for the message.
+  value : float
+      The estimate.
+
+  Raises
+  ------
+  TypeError
+      If the estimate is not a real number.
+  ValueError
+      If the estimate is NaN or infinite.
+  """
+  _check_real(name, value, "ability estimates")
+  # A NaN estimate makes every item's information NaN, which changes the selected item.
+  if not math.isfinite(value):
+    msg = f"{name} is {value!r}; ability estimates must be finite"
+    raise ValueError(msg)
+
+
+def _check_se(name: str, value: float) -> None:
+  """Check that a standard error is positive, or infinite.
+
+  Parameters
+  ----------
+  name : str
+      The input the standard error is, for the message.
+  value : float
+      The standard error.
+
+  Raises
+  ------
+  TypeError
+      If the standard error is not a real number.
+  ValueError
+      If the standard error is zero, negative or NaN.
+  """
+  _check_real(name, value, "standard errors")
+  # A NaN error fails every comparison: a confidence-interval stopper would stop at once and a
+  # standard-error stopper never.
+  if not value > 0:
+    msg = f"{name} is {value!r}; standard errors must be positive, or math.inf when the responses carry no information"
+    raise ValueError(msg)
 
 
 def _exposure_rates(rates: object, n_items: int) -> FloatArray | None:
