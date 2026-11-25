@@ -172,8 +172,8 @@ def _field_defaults(cls: type[DataclassInstance]) -> tuple[tuple[str, object], .
 def _unchecked(cls: type[_T], /, **fields: object) -> _T:
   """Return an instance of a frozen dataclass built from checked fields, without checking them again.
 
-  The engine builds every session and step context from inputs it has already checked, and the
-  simulation runner from inputs it built itself (ADR-0009), so the checks of their ``__post_init__``
+  The engine builds every session and step context from inputs it has already checked, and
+  :func:`~catsim.simulate` from inputs it built itself (ADR-0009), so the checks of their ``__post_init__``
   would only repeat work. A field left out takes its default; one without a default raises
   ``KeyError``.
 

@@ -12,9 +12,7 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 
-from catsim.engine import CatEngine
 from catsim.estimation import NumericalSearchEstimator
-from catsim.initialization import FixedPointInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import (
   AStratBBlockSelector,
@@ -36,8 +34,6 @@ from catsim.selection import (
   The54321Selector,
   UrrySelector,
 )
-from catsim.simulation import SimulationRunner
-from catsim.stopping import MaxLengthStopper
 
 # Property examples build item banks and run whole sessions, whose time varies with the drawn sizes, so Hypothesis's
 # 200 ms deadline per example would fail them on a slow machine. Each module's settings(...) inherit the profile.
@@ -98,20 +94,6 @@ def max_info_selector() -> MaxInfoSelector:
 def estimator() -> NumericalSearchEstimator:
   """Provide the default numerical estimator."""
   return NumericalSearchEstimator()
-
-
-@pytest.fixture
-def simulation_runner(item_bank: ItemBank) -> SimulationRunner:
-  """Provide a simulation runner that gives every examinee 10 random items."""
-  return SimulationRunner(
-    CatEngine(item_bank, FixedPointInitializer(0.0), RandomSelector(), NumericalSearchEstimator(), MaxLengthStopper(10))
-  )
-
-
-@pytest.fixture
-def simulation_result(simulation_runner: SimulationRunner):
-  """Provide a completed simulation result for five examinees."""
-  return simulation_runner.run([-1.0, -0.5, 0.0, 0.5, 1.0], rng=42)
 
 
 @pytest.fixture(autouse=True)

@@ -7,7 +7,7 @@ from .engine import CatEngine, Selection
 from .exceptions import ExcludedItemError, NoItemsAvailableError
 from .item_bank import IrtModel, ItemBank
 from .session import Session, StopReason
-from .simulation import ResponseProvider, SimulatedResponseProvider, SimulationResult, SimulationRunner
+from .simulation import SimulationResult, simulate
 
 try:  # noqa: RUF067 - the version lookup needs a fallback, so it cannot be a plain re-export
   __version__ = importlib.metadata.version("catsim")
@@ -22,12 +22,10 @@ __all__ = [
   "IrtModel",
   "ItemBank",
   "NoItemsAvailableError",
-  "ResponseProvider",
   "Selection",
   "Session",
-  "SimulatedResponseProvider",
   "SimulationResult",
-  "SimulationRunner",
   "StepContext",
   "StopReason",
+  "simulate",
 ]

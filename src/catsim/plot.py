@@ -202,7 +202,7 @@ def item_exposure(
 
       import matplotlib.pyplot as plt
       import numpy
-      from catsim import CatEngine, ItemBank, SimulationRunner
+      from catsim import CatEngine, ItemBank, simulate
       from catsim import plot
       from catsim.estimation import NumericalSearchEstimator
       from catsim.initialization import UniformInitializer
@@ -217,7 +217,7 @@ def item_exposure(
           StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),
       )
       true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)
-      result = SimulationRunner(engine).run(true_thetas, rng=0)
+      result = simulate(engine, true_thetas=true_thetas, rng=0)
       fig, axes = plt.subplots(2, 1, figsize=(7, 12))
       plot.item_exposure(result.exposure_rates, hist=True, ax=axes[0], title="Exposure rates")
       plot.item_exposure(result.exposure_rates, item_bank=result.item_bank, par="b", ax=axes[1])
@@ -319,7 +319,7 @@ def session_progress(
 
       import matplotlib.pyplot as plt
       import numpy
-      from catsim import CatEngine, ItemBank, SimulationRunner
+      from catsim import CatEngine, ItemBank, simulate
       from catsim import plot
       from catsim.estimation import NumericalSearchEstimator
       from catsim.initialization import UniformInitializer
@@ -334,7 +334,7 @@ def session_progress(
           StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),
       )
       true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)
-      result = SimulationRunner(engine).run(true_thetas, rng=0)
+      result = simulate(engine, true_thetas=true_thetas, rng=0)
       fig, ax = plt.subplots(figsize=(8, 5))
       plot.session_progress(result.sessions[0], result.item_bank, true_theta=result.true_thetas[0], ax=ax)
       plt.show()
