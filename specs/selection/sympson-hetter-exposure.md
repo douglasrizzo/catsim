@@ -297,6 +297,22 @@ def calibrate(
   a second `select_next` before the answer draws again, so the item on screen would pass with a
   probability of about $K_i^2$.
 - Conditional SH (Stocking & Lewis, 1995) and content-balanced variants are later work.
+- A trial implementation of this sketch (1,000 examinees, 20-item tests, `MaxInfoSelector`,
+  `r_max = 0.2`) never met the 0.005 tolerance on $K_i$: after 30 iterations the largest change of a
+  value stayed between 0.05 and 0.12 while the largest expected exposure rate settled at 0.21-0.22,
+  so `calibrate` returned the last table. Compare a tolerance on the exposure rate alone, a larger
+  calibration population and the average of the last tables before choosing the defaults.
+- On a new population of the same size, the trial's table gave a largest exposure rate of 0.240
+  for `r_max = 0.2`, with about 25 declines per 20-item test and an RMSE of 0.412 (0.408 for
+  `MaxInfoSelector(r_max=0.2)`). The table controls the rates of the population it was calibrated
+  on; the technique page should say that another population can exceed $r_{\max}$.
+- A table belongs to the selector and test design it was calibrated with: the trial's
+  `MaxInfoSelector` table, used with `MEISelector`, let one item reach a rate of 0.45. A selector
+  that proposes a fixed sequence runs out of items as declines accumulate: with `LinearSelector`
+  and a 60-item list, 298 of 300 sessions ended with `StopReason.NO_ITEMS`.
+- The control must pickle, so that a study can run its simulations in a process pool: it keeps its
+  table in a plain attribute and holds no closures. An application stores a calibrated table with
+  its engine configuration.
 
 **Testing notes:**
 
