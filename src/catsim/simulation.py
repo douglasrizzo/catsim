@@ -364,8 +364,9 @@ class SimulationRunner:
   ) -> SimulationResult:
     """Run one simulated session per true ability, one after another.
 
-    One random generator serves the whole run: the initializer, the selectors' tie-breaking and
-    randomization and the simulated responses of every session draw from it, in session order. It
+    One random generator serves the whole run: every step of every session is given it, and the
+    initializer, the selectors' tie-breaking and randomization and the simulated responses draw
+    from it, in session order. It
     is built from ``rng`` at the start of every call, so the same seed gives the same result however
     many times the runner has run; see :doc:`/reproducibility`. Each session's selections are capped
     against catR's exposure rates: each item's administrations over the sessions before it
@@ -467,4 +468,4 @@ class SimulationRunner:
       if selection.item is None:
         return session
       response = examinee.answer(engine.item_bank, selection.item, session, rng)
-      session = engine._answer(session, selection.item, response)  # noqa: SLF001
+      session = engine._answer(session, selection.item, response, rng)  # noqa: SLF001

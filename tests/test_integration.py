@@ -174,46 +174,46 @@ def test_a_session_whose_stopper_never_holds_ends_when_the_bank_runs_out() -> No
 
 
 class DrawingEstimator(BaseEstimator):
-  """Estimator stub whose estimate is a draw from its context's generator."""
+  """Estimator stub whose estimate is a draw from its context's generator, and which records every generator."""
+
+  def __init__(self) -> None:
+    self.seen: list[np.random.Generator] = []
 
   @override
   def estimate(self, context: StepContext) -> Estimate:
-    """Return a normal draw as the estimate."""
+    """Record the context's generator and return a normal draw from it as the estimate."""
+    self.seen.append(context.rng)
     return Estimate(theta=float(context.rng.normal()), se=1.0)
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize(
-  "make_estimator",
-  [pytest.param(NumericalSearchEstimator, id="numerical"), pytest.param(DrawingEstimator, id="drawing")],
-)
-def test_stepping_the_engine_by_hand_reproduces_a_simulation_runner_session(
-  make_estimator: Callable[[], BaseEstimator],
-) -> None:
+def test_stepping_the_engine_by_hand_reproduces_a_simulation_runner_session() -> None:
   """A session stepped through start, select and answer matches the one SimulationRunner produces from the same seed.
 
-  The randomesque selector and the simulated responses draw from the same generator in turn, so the two paths agree
-  only if they make the same draws in the same order: the runner's unchecked steps must be the public ones. Fails for
-  an estimator that draws if the runner gives it the run's generator, which answer does not.
+  The randomesque selector, the simulated responses and an estimator that draws all draw from one generator in turn,
+  so the two paths agree only if they make the same draws in the same order: the runner's unchecked steps must be
+  the public ones. Fails if answer ignores the generator it is given, so that the estimator draws from another one,
+  or if the runner gives the estimator another generator than the run's.
   """
   item_bank = ItemBank.generate(40, rng=42)
 
-  def engine() -> CatEngine:
-    return CatEngine(
-      item_bank, FixedPointInitializer(0.0), RandomesqueSelector(3), make_estimator(), MaxLengthStopper(6)
-    )
+  def engine(estimator: BaseEstimator) -> CatEngine:
+    return CatEngine(item_bank, FixedPointInitializer(0.0), RandomesqueSelector(3), estimator, MaxLengthStopper(6))
 
-  batched = SimulationRunner(engine()).run([0.3], rng=7).sessions[0]
+  batched = SimulationRunner(engine(DrawingEstimator())).run([0.3], rng=7).sessions[0]
 
-  manual_engine = engine()
+  estimator = DrawingEstimator()
+  manual_engine = engine(estimator)
   rng = np.random.default_rng(7)
   examinee = SimulatedResponseProvider(0.3)
   manual = manual_engine.start(rng=rng)
   # one item at a time, as an interactive caller would, until select proposes none
   while (selection := manual_engine.select(manual, rng=rng)).item is not None:
     response = examinee.answer(item_bank, selection.item, selection.session, rng)
-    manual = manual_engine.answer(selection.session, selection.item, response)
+    manual = manual_engine.answer(selection.session, selection.item, response, rng=rng)
   manual = selection.session
 
   assert manual == batched
   assert manual.stop_reason is StopReason.STOPPER
+  assert len(estimator.seen) == 6
+  assert all(seen is rng for seen in estimator.seen)

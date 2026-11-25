@@ -31,7 +31,7 @@ class BaseEstimator(ABC):
     context : StepContext
         The session to estimate for, with the newest item and response, and with ``theta`` the
         estimate before them. When :meth:`CatEngine.answer <catsim.CatEngine.answer>` calls the
-        estimator, the context's generator is created for the call with a fixed seed.
+        estimator, the context's generator is the one given to ``answer``.
 
     Returns
     -------

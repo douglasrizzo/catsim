@@ -25,11 +25,6 @@ if TYPE_CHECKING:
   from .typing import FloatArray
 
 
-# The seed of the generator that answer gives the estimator and the stopper: default_rng(0)'s, built
-# from a SeedSequence made once, which generating a state does not change.
-_ANSWER_SEED = numpy.random.SeedSequence(0)
-
-
 @dataclass(frozen=True, slots=True)
 class Selection:
   """What :meth:`CatEngine.select` returns: the item to administer, the session and the items declined.
@@ -113,7 +108,7 @@ class CatEngine:
   ...   session = selection.session
   ...   if selection.item is None:
   ...     break
-  ...   session = engine.answer(session, selection.item, bool(bank.difficulty[selection.item] < 0))
+  ...   session = engine.answer(session, selection.item, bool(bank.difficulty[selection.item] < 0), rng=rng)
   >>> len(session.administered_items), session.stop_reason
   (5, <StopReason.STOPPER: 'stopper'>)
   """
@@ -212,13 +207,15 @@ class CatEngine:
     rates = _exposure_rates(exposure_rates, self.item_bank.n_items)
     return self._select(session, numpy.random.default_rng(rng), rates)
 
-  def answer(self, session: Session, item: int, response: bool) -> Session:  # noqa: FBT001 - the response is data, not a flag
+  def answer(
+    self,
+    session: Session,
+    item: int,
+    response: bool,  # noqa: FBT001 - the response is data, not a flag
+    *,
+    rng: int | numpy.random.Generator | None,
+  ) -> Session:
     """Record the response to an item, update the estimate and ask the stopper about the new state.
-
-    ``answer`` takes no random source: the session's draws are the initializer's, the selector's
-    and the exposure control's (ADR-0013). The contexts of the estimator and the stopper carry a
-    generator created for the call with a fixed seed, so ``answer`` gives the same session for the
-    same arguments, in a simulation as in a live test.
 
     Parameters
     ----------
@@ -229,6 +226,9 @@ class CatEngine:
     response : bool
         Whether the examinee answered the item correctly: a ``bool``, a ``numpy.bool_`` or the
         integer 0 or 1.
+    rng : int, numpy.random.Generator or None
+        The random source of the estimator's and the stopper's contexts: a generator, used as is,
+        a seed, or None for fresh entropy (ADR-0013). No built-in estimator or stopper draws from it.
 
     Returns
     -------
@@ -253,7 +253,7 @@ class CatEngine:
       msg = f"the session has stopped (stop_reason {session.stop_reason.value!r}) and accepts no more responses"
       raise ValueError(msg)
     checked = self._checked_item("item", item, session)
-    return self._answer(session, checked, _response("response", response))
+    return self._answer(session, checked, _response("response", response), numpy.random.default_rng(rng))
 
   def context(
     self,
@@ -408,11 +408,9 @@ class CatEngine:
       declined.append(item)
       context = _replaced(context, excluded_items=(*context.excluded_items, item))
 
-  def _answer(self, session: Session, item: int, response: bool) -> Session:  # noqa: FBT001
+  def _answer(self, session: Session, item: int, response: bool, rng: numpy.random.Generator) -> Session:  # noqa: FBT001
     """Return ``session`` with the response to ``item`` and the new estimate, stopped if the stopper holds."""
-    # The estimator starts from the previous estimate; the stopper judges the new one. Their generator
-    # depends on nothing, so the same arguments give the same session.
-    rng = numpy.random.Generator(numpy.random.PCG64(_ANSWER_SEED))
+    # The estimator starts from the previous estimate; the stopper judges the new one.
     answered = _replaced(
       self._context(session, rng, None),
       administered_items=(*session.administered_items, item),

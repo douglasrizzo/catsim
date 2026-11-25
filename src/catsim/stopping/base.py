@@ -24,9 +24,9 @@ class BaseStopper(ABC):
     Parameters
     ----------
     context : StepContext
-        The session to check, with ``theta`` its current estimate. When
-        :meth:`CatEngine.answer <catsim.CatEngine.answer>` calls the stopper, the context's
-        generator is created for the call with a fixed seed.
+        The session to check, with ``theta`` its current estimate. Its generator is the one given
+        to :meth:`CatEngine.start <catsim.CatEngine.start>` or
+        :meth:`CatEngine.answer <catsim.CatEngine.answer>`, whichever asks.
 
     Returns
     -------

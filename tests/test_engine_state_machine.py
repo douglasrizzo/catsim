@@ -106,7 +106,7 @@ class SteppedSessionMachine(RuleBasedStateMachine):
       assert selection.session is before
       return
     assert selection.item is not None
-    self.session = self.engine.answer(selection.session, selection.item, self.respond())
+    self.session = self.engine.answer(selection.session, selection.item, self.respond(), rng=self.rng)
     assert self.session.administered_items == (*before.administered_items, selection.item)
     assert self.session.estimates[:-1] == before.estimates
     assert np.isfinite(self.session.current_theta)
@@ -206,7 +206,7 @@ class ExposureControlMachine(RuleBasedStateMachine):
     item, session = self._select()
     if item is not None:
       self.proposals[-1][item] += 1
-      self.sessions[-1] = self.engine.answer(session, item, True)
+      self.sessions[-1] = self.engine.answer(session, item, True, rng=self.rng)
 
   @rule()
   def select_without_answering(self) -> None:

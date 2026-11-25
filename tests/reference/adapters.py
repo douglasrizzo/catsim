@@ -184,7 +184,7 @@ def _run_session(
     declined.extend(selection.declined)
     if selection.item is None:
       return session, declined
-    session = engine.answer(session, selection.item, _recorded_response(row, selection.item))
+    session = engine.answer(session, selection.item, _recorded_response(row, selection.item), rng=rng)
 
 
 def run_recorded(

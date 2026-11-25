@@ -228,7 +228,7 @@ def run(engine: CatEngine, respond: Callable[[int, Session], bool], *, rng: int 
     session = selection.session
     if selection.item is None:
       return session
-    session = engine.answer(session, selection.item, respond(selection.item, session))
+    session = engine.answer(session, selection.item, respond(selection.item, session), rng=generator)
 
 
 def session_after(items: tuple[int, ...], responses: tuple[bool, ...], *, excluded: tuple[int, ...] = ()) -> Session:
@@ -422,7 +422,7 @@ def test_the_steps_reject_a_session_with_items_outside_the_bank(item_bank: ItemB
   session = session_after((3, 50), (True, False))
   calls = {
     "select": lambda: engine.select(session, rng=0),
-    "answer": lambda: engine.answer(session, 4, True),
+    "answer": lambda: engine.answer(session, 4, True, rng=0),
     "context": lambda: engine.context(session),
   }
 
@@ -437,7 +437,7 @@ def test_the_steps_reject_what_is_not_a_session(item_bank: ItemBank, step: str) 
   stored = {"administered_items": (), "responses": (), "estimates": (INITIAL,)}
   calls = {
     "select": lambda: engine.select(stored, rng=0),  # ty: ignore[invalid-argument-type]
-    "answer": lambda: engine.answer(stored, 4, True),  # ty: ignore[invalid-argument-type]
+    "answer": lambda: engine.answer(stored, 4, True, rng=0),  # ty: ignore[invalid-argument-type]
     "context": lambda: engine.context(stored),  # ty: ignore[invalid-argument-type]
   }
 
@@ -485,20 +485,23 @@ def test_a_stop_rule_names_the_criterion_that_ended_a_finished_session(
 
 def test_answer_estimates_from_the_current_estimate_and_returns_the_next_session(item_bank: ItemBank) -> None:
   """answer gives the estimator the session with the new item and response, starting from the current estimate and
-  SE, and returns a new session with the item, the response and the estimator's estimate added.
+  SE, with the generator it is given, and returns a new session with the item, the response and the estimator's
+  estimate added.
 
   The current estimate is -0.25 with an SE of 0.6, unlike StepContext's defaults of 0 and infinity. Fails if the
-  estimator starts from the defaults or the initial estimate, gets another bank, items or responses, if the new
-  session records another item, response or estimate, or if the given session changes.
+  estimator starts from the defaults or the initial estimate, gets another bank, items, responses or generator, if the
+  new session records another item, response or estimate, or if the given session changes.
   """
   estimator = RecordingEstimator(theta=1.1, se=0.42, evaluations=7)
   engine = stub_engine(item_bank, estimator=estimator)
   session = session_after((1,), (True,), excluded=(8,))
+  rng = np.random.default_rng(3)
 
-  answered = engine.answer(session, 3, False)
+  answered = engine.answer(session, 3, False, rng=rng)
 
   assert estimator.seen is not None
   assert estimator.seen.item_bank is item_bank
+  assert estimator.seen.rng is rng
   assert (estimator.seen.administered_items, estimator.seen.responses) == ((1, 3), (True, False))
   assert (estimator.seen.theta, estimator.seen.se) == (-0.25, 0.6)
   assert answered == Session(
@@ -514,31 +517,34 @@ def test_answer_asks_the_stopper_about_the_new_state(item_bank: ItemBank) -> Non
   """A stopper satisfied by the state after the response ends the session that answer returns.
 
   Fails if the stopper judges a stale state (without the new item and response, or with the previous estimate or its
-  SE), or if its decision is dropped, so the session runs past its criterion.
+  SE) or gets another generator than answer's, or if its decision is dropped, so the session runs past its criterion.
   """
   stopper = RecordingStopper(decision=True)
   engine = stub_engine(item_bank, estimator=RecordingEstimator(theta=0.3, se=0.42), stopper=stopper)
+  rng = np.random.default_rng(3)
 
-  answered = engine.answer(Session(estimates=(INITIAL,)), 0, False)
+  answered = engine.answer(Session(estimates=(INITIAL,)), 0, False, rng=rng)
 
   assert stopper.seen is not None
+  assert stopper.seen.rng is rng
   assert (stopper.seen.administered_items, stopper.seen.responses) == ((0,), (False,))
   assert (stopper.seen.theta, stopper.seen.se) == (0.3, 0.42)
   assert answered.stop_reason is StopReason.STOPPER
 
 
-def test_answer_gives_the_same_session_for_the_same_arguments(item_bank: ItemBank) -> None:
-  """answer is a function of its arguments, even for an estimator that draws from its context's generator.
+def test_answer_with_the_same_seed_gives_the_same_session(item_bank: ItemBank) -> None:
+  """An int rng seeds a new generator for the call, so an estimator that draws records the same estimate for a seed.
 
-  Fails if the generator of answer's contexts draws fresh entropy, or is kept between calls, so that two calls with
-  the same arguments record different estimates.
+  Fails if answer ignores its rng: with fresh entropy the same seed gives other estimates, and with a fixed generator
+  of its own two seeds give the same one.
   """
   engine = stub_engine(item_bank, estimator=DrawingEstimator())
   session = Session(estimates=(INITIAL,))
 
-  first, second = engine.answer(session, 2, True), engine.answer(session, 2, True)
+  estimates = {seed: [engine.answer(session, 2, True, rng=seed).current_theta for _ in range(2)] for seed in (5, 6)}
 
-  assert first == second
+  assert all(len(set(thetas)) == 1 for thetas in estimates.values())
+  assert estimates[5] != estimates[6]
 
 
 def test_answer_rejects_an_estimator_that_returns_a_bare_float(item_bank: ItemBank) -> None:
@@ -549,7 +555,7 @@ def test_answer_rejects_an_estimator_that_returns_a_bare_float(item_bank: ItemBa
   engine = stub_engine(item_bank, estimator=FloatEstimator())
 
   with pytest.raises(TypeError, match=re.escape("FloatEstimator.estimate must return an Estimate, got float")):
-    engine.answer(Session(estimates=(INITIAL,)), 3, True)
+    engine.answer(Session(estimates=(INITIAL,)), 3, True, rng=0)
 
 
 @pytest.mark.parametrize(("response", "stored"), [(1, True), (0, False), (np.True_, True), (np.int64(0), False)])
@@ -558,7 +564,7 @@ def test_answer_stores_a_response_of_1_or_0_as_a_bool(item_bank: ItemBank, respo
 
   Fails if 1 and 0 are rejected, or stored as given: the session's responses would mix ints and bools.
   """
-  answered = stub_engine(item_bank).answer(Session(estimates=(INITIAL,)), 3, response)  # ty: ignore[invalid-argument-type]
+  answered = stub_engine(item_bank).answer(Session(estimates=(INITIAL,)), 3, response, rng=0)  # ty: ignore[invalid-argument-type]
 
   assert answered.responses == (stored,)
   assert type(answered.responses[0]) is bool
@@ -583,7 +589,7 @@ def test_answer_rejects_a_response_that_is_not_a_boolean_or_0_or_1(
   estimator = RecordingEstimator(0.5)
 
   with pytest.raises(error, match=re.escape(message)):
-    stub_engine(item_bank, estimator=estimator).answer(Session(estimates=(INITIAL,)), 3, response)  # ty: ignore[invalid-argument-type]
+    stub_engine(item_bank, estimator=estimator).answer(Session(estimates=(INITIAL,)), 3, response, rng=0)  # ty: ignore[invalid-argument-type]
   assert estimator.seen is None
 
 
@@ -597,7 +603,7 @@ def test_answer_rejects_a_stopped_session(item_bank: ItemBank) -> None:
   with pytest.raises(
     ValueError, match=re.escape("the session has stopped (stop_reason 'no_items') and accepts no more responses")
   ):
-    stub_engine(item_bank).answer(stopped, 1, True)
+    stub_engine(item_bank).answer(stopped, 1, True, rng=0)
 
 
 @pytest.mark.parametrize(
@@ -626,7 +632,7 @@ def test_answer_rejects_an_item_select_could_not_have_proposed(
   estimator = RecordingEstimator(0.5)
 
   with pytest.raises(error, match=re.escape(message)):
-    stub_engine(item_bank, estimator=estimator).answer(session_after((1,), (True,), excluded=(8,)), item, True)  # ty: ignore[invalid-argument-type]
+    stub_engine(item_bank, estimator=estimator).answer(session_after((1,), (True,), excluded=(8,)), item, True, rng=0)  # ty: ignore[invalid-argument-type]
   assert estimator.seen is None
 
 
@@ -648,8 +654,8 @@ def test_a_session_holds_builtin_python_values(item_bank: ItemBank) -> None:
   selection = engine.select(session, rng=0)
   assert selection.item is not None
 
-  session = engine.answer(selection.session, selection.item, np.True_)  # ty: ignore[invalid-argument-type]
-  session = engine.answer(session, np.int64(5), np.False_)  # ty: ignore[invalid-argument-type]
+  session = engine.answer(selection.session, selection.item, np.True_, rng=0)  # ty: ignore[invalid-argument-type]
+  session = engine.answer(session, np.int64(5), np.False_, rng=0)  # ty: ignore[invalid-argument-type]
 
   assert type(selection.item) is int
   assert session.theta_history == (0.0, 0.25, 0.25)
@@ -828,7 +834,7 @@ def test_a_session_rebuilt_from_its_stored_fields_continues_like_the_original(it
   items 0 and 2.
   """
   engine = counting_engine(item_bank)
-  original = engine.answer(engine.start(rng=0, excluded_items=(0, 2)), 1, True)
+  original = engine.answer(engine.start(rng=0, excluded_items=(0, 2)), 1, True, rng=0)
   stored = {field.name: list(getattr(original, field.name)) for field in dataclasses.fields(Session)[:4]}
 
   rebuilt = Session(**stored)  # ty: ignore[invalid-argument-type]
