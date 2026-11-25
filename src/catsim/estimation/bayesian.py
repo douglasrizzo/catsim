@@ -57,8 +57,9 @@ def normal_log_prior(mean: float = 0.0, sd: float = 1.0) -> LogPrior:
   Returns
   -------
   LogPrior
-      A vectorized function mapping ability values to their log-density under
-      :math:`\mathcal{N}(\text{mean}, \text{sd}^2)`.
+      A vectorized callable mapping ability values to their log-density under
+      :math:`\mathcal{N}(\text{mean}, \text{sd}^2)`. It pickles, equals any prior this function
+      returns for the same arguments, and its repr is the call that builds it.
 
   Raises
   ------
@@ -71,14 +72,27 @@ def normal_log_prior(mean: float = 0.0, sd: float = 1.0) -> LogPrior:
   if not (math.isfinite(sd) and sd > 0):
     msg = f"sd must be positive and finite, got {sd}"
     raise ValueError(msg)
+  return _NormalLogPrior(float(mean), float(sd))
 
-  var = sd * sd
-  norm = -0.5 * numpy.log(2.0 * numpy.pi * var)
 
-  def _log_prior(theta: FloatArray) -> FloatArray:
-    return norm - 0.5 * (theta - mean) ** 2 / var
+# The priors are module-level classes rather than closures so that an estimator holding one pickles, as an engine sent
+# to a worker process must (ADR-0015).
+@dataclass(frozen=True, slots=True)
+class _NormalLogPrior:
+  """The normal log-density that :func:`normal_log_prior` returns."""
 
-  return _log_prior
+  mean: float
+  sd: float
+
+  def __call__(self, theta: FloatArray) -> FloatArray:
+    """Return the log-density at each ability."""
+    var = self.sd * self.sd
+    return -0.5 * numpy.log(2.0 * numpy.pi * var) - 0.5 * (theta - self.mean) ** 2 / var
+
+  @override
+  def __repr__(self) -> str:
+    """Return the call to :func:`normal_log_prior` that builds this prior."""
+    return f"normal_log_prior(mean={self.mean!r}, sd={self.sd!r})"
 
 
 def uniform_log_prior(low: float = THETA_MIN_EXTENDED, high: float = THETA_MAX_EXTENDED) -> LogPrior:
@@ -94,8 +108,9 @@ def uniform_log_prior(low: float = THETA_MIN_EXTENDED, high: float = THETA_MAX_E
   Returns
   -------
   LogPrior
-      A vectorized function returning :math:`-\log(\text{high} - \text{low})` inside the
-      bounds and :math:`-\infty` outside them.
+      A vectorized callable returning :math:`-\log(\text{high} - \text{low})` inside the
+      bounds and :math:`-\infty` outside them. It pickles, equals any prior this function returns
+      for the same arguments, and its repr is the call that builds it.
 
   Raises
   ------
@@ -108,15 +123,25 @@ def uniform_log_prior(low: float = THETA_MIN_EXTENDED, high: float = THETA_MAX_E
   if high <= low:
     msg = f"high must be greater than low, got low={low}, high={high}"
     raise ValueError(msg)
+  return _UniformLogPrior(float(low), float(high))
 
-  inv_width = 1.0 / (high - low)
-  log_density = float(numpy.log(inv_width))
 
-  def _log_prior(theta: FloatArray) -> FloatArray:
-    inside = (theta >= low) & (theta <= high)
-    return numpy.where(inside, log_density, -numpy.inf)
+@dataclass(frozen=True, slots=True)
+class _UniformLogPrior:
+  """The uniform log-density that :func:`uniform_log_prior` returns."""
 
-  return _log_prior
+  low: float
+  high: float
+
+  def __call__(self, theta: FloatArray) -> FloatArray:
+    """Return the log-density at each ability: minus the log of the width inside the bounds, -inf outside."""
+    inside = (theta >= self.low) & (theta <= self.high)
+    return numpy.where(inside, float(numpy.log(1.0 / (self.high - self.low))), -numpy.inf)
+
+  @override
+  def __repr__(self) -> str:
+    """Return the call to :func:`uniform_log_prior` that builds this prior."""
+    return f"uniform_log_prior(low={self.low!r}, high={self.high!r})"
 
 
 # eq=False: generated equality and hashing would compare the arrays, which raises; a grid is compared by identity
@@ -314,8 +339,7 @@ class EAPEstimator(BaseEstimator):
     grid: QuadratureGrid | None = None,
     log_prior: LogPrior | None = None,
   ) -> None:
-    # Kept as given for the repr, where a default shows as None: the default grid's repr would list every
-    # node, and a prior function has no source form.
+    # Kept as given for the repr, where a default shows as None: the default grid's repr would list every node.
     self._grid_argument = grid
     self._log_prior_argument = log_prior
     self._grid = grid if grid is not None else QuadratureGrid.uniform()
@@ -393,7 +417,7 @@ class MAPEstimator(BaseEstimator):
     tol: float = 1e-6,
     bounds: tuple[float, float] = (THETA_MIN_EXTENDED, THETA_MAX_EXTENDED),
   ) -> None:
-    # Kept as given for the repr, where the default shows as None: a prior function has no source form.
+    # Kept as given for the repr, which shows the default as None, as EAPEstimator's does.
     self._log_prior_argument = log_prior
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
     self._tol = self._check_tol(tol)
