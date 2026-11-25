@@ -33,7 +33,7 @@ def test_mse_is_squared_bias_plus_error_variance(pairs: list[tuple[float, float]
   actual, predicted = zip(*pairs, strict=True)
   errors = np.subtract(predicted, actual)
 
-  assert metrics.mse(actual, predicted) == pytest.approx(
-    metrics.bias(actual, predicted) ** 2 + np.var(errors), abs=1e-9
-  )
-  assert metrics.rmse(actual, predicted) == pytest.approx(np.sqrt(metrics.mse(actual, predicted)), abs=1e-9)
+  mse = metrics.mse(actual, predicted).value
+
+  assert mse == pytest.approx(metrics.bias(actual, predicted).value ** 2 + np.var(errors), abs=1e-9)
+  assert metrics.rmse(actual, predicted).value == pytest.approx(np.sqrt(mse), abs=1e-9)

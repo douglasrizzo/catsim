@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import dataclasses
 import math
 import re
+from collections.abc import Callable
 
 import numpy as np
 import pytest
@@ -94,6 +96,16 @@ def stream(seed: int, examinee: int, kind: int) -> np.random.Generator:
   return np.random.default_rng(np.random.SeedSequence(seed, spawn_key=(examinee, kind)))
 
 
+def administered(result: SimulationResult) -> list[tuple[int, ...]]:
+  """Return each session's administered items, in session order."""
+  return [session.administered_items for session in result.sessions]
+
+
+def answers(result: SimulationResult) -> list[tuple[bool, ...]]:
+  """Return each session's responses, in session order."""
+  return [session.responses for session in result.sessions]
+
+
 def shared_answers(first: SimulationResult, second: SimulationResult) -> list[tuple[bool, bool]]:
   """Return, for every examinee and every item both runs gave them, the two runs' answers to it."""
   pairs = []
@@ -146,7 +158,7 @@ class TestGeneratedExaminees:
     for i, (theta, session) in enumerate(zip(thetas, result.sessions, strict=True)):
       correct = stream(11, i, 0).random(item_bank.n_items) < probabilities(item_bank, theta)
       expected.append(tuple(bool(correct[item]) for item in session.administered_items))
-    assert result.responses == expected
+    assert answers(result) == expected
 
   def test_two_engines_give_an_examinee_the_same_answer_to_every_item_both_give(self, item_bank: ItemBank) -> None:
     """Common random numbers: on the same seed and examinees, the answer to an item does not depend on the engine.
@@ -184,7 +196,7 @@ class TestGeneratedExaminees:
     first = simulate(engine, true_thetas=[-2.5, 2.8, 0.3], rng=4)
     second = simulate(engine, true_thetas=[0.1, -0.2, 0.3], rng=4)
 
-    assert first.test_lengths[:2].sum() != second.test_lengths[:2].sum()
+    assert first.examinees()["test_length"][:2].sum() != second.examinees()["test_length"][:2].sum()
     assert first.sessions[2] == second.sessions[2]
 
   def test_the_examinees_before_a_session_are_all_that_its_exposure_feedback_depends_on(
@@ -225,7 +237,7 @@ class TestRecordedExaminees:
     result = simulate(make_engine(item_bank, MaxInfoSelector(), 12), responses=responses, rng=0)
 
     assert result.true_thetas is None
-    assert result.responses == [
+    assert answers(result) == [
       tuple(bool(self.ROWS[i, item]) for item in session.administered_items)
       for i, session in enumerate(result.sessions)
     ]
@@ -243,7 +255,7 @@ class TestRecordedExaminees:
     result = simulate(make_engine(item_bank, MaxInfoSelector(), 12), responses=responses, rng=0)
 
     assert [session.excluded_items for session in result.sessions] == [tuple(range(0, 50, 2)), tuple(range(1, 50, 2))]
-    assert [sorted({item % 2 for item in items}) for items in result.administered_items] == [[1], [0]]
+    assert [sorted({item % 2 for item in items}) for items in administered(result)] == [[1], [0]]
 
   def test_an_examinee_who_runs_out_of_answered_items_ends_with_no_items(self, item_bank: ItemBank) -> None:
     """An examinee who answered three items gets those three, in a test planned for ten, and ends with NO_ITEMS.
@@ -273,22 +285,9 @@ class TestRecordedExaminees:
 
     result = simulate(make_engine(item_bank, MaxInfoSelector(), 6), true_thetas=[3.0, -3.0], responses=responses, rng=0)
 
-    assert result.responses == [(False,) * 6, (True,) * 6]
-    low, high = result.final_thetas.tolist()
-    assert result.bias == pytest.approx(((low - 3.0) + (high + 3.0)) / 2)
-
-  @pytest.mark.parametrize("metric", ["bias", "mse", "rmse"])
-  def test_the_metrics_of_examinees_with_unknown_abilities_raise(self, item_bank: ItemBank, metric: str) -> None:
-    """Recorded examinees alone have no true abilities, so the metrics that need them raise and say how to give them.
-
-    Fails if a metric compares the estimates with zeros or NaN instead.
-    """
-    result = simulate(make_engine(item_bank, MaxInfoSelector(), 5), responses=self.ROWS, rng=0)
-
-    with pytest.raises(
-      ValueError, match="need the examinees' true abilities, and this result has none; pass true_thetas"
-    ):
-      getattr(result, metric)
+    assert answers(result) == [(False,) * 6, (True,) * 6]
+    low, high = result.examinees()["theta"].tolist()
+    assert result.bias().value == pytest.approx(((low - 3.0) + (high + 3.0)) / 2)
 
 
 class TestRandomNumbers:
@@ -307,7 +306,7 @@ class TestRandomNumbers:
 
     assert second.sessions == first.sessions
     assert np.array_equal(second.exposure_counts, first.exposure_counts)
-    assert other_seed.administered_items != first.administered_items
+    assert administered(other_seed) != administered(first)
 
   def test_without_a_control_the_selectors_draws_are_the_only_ones_of_a_session(self, item_bank: ItemBank) -> None:
     """Session i's items are random selection's choices from stream (i, 1), drawn here one after another.
@@ -325,7 +324,7 @@ class TestRandomNumbers:
       for _ in range(5):
         items.append(int(session_rng.choice([item for item in range(item_bank.n_items) if item not in items])))
       expected.append(tuple(items))
-    assert result.administered_items == expected
+    assert administered(result) == expected
 
   def test_two_runs_without_rng_give_other_tests(self, random_engine: CatEngine) -> None:
     """A run without rng takes fresh entropy, so two such runs give other final estimates.
@@ -336,7 +335,8 @@ class TestRandomNumbers:
     thetas = [-1.0, 0.0, 1.0]
 
     assert not np.array_equal(
-      simulate(random_engine, true_thetas=thetas).final_thetas, simulate(random_engine, true_thetas=thetas).final_thetas
+      simulate(random_engine, true_thetas=thetas).examinees()["theta"],
+      simulate(random_engine, true_thetas=thetas).examinees()["theta"],
     )
 
   def test_a_generator_passed_as_rng_is_drawn_from_once_per_run(self, random_engine: CatEngine) -> None:
@@ -354,7 +354,7 @@ class TestRandomNumbers:
 
     assert five.bit_generator.state == one.bit_generator.state != np.random.default_rng(5).bit_generator.state
     assert simulate(random_engine, true_thetas=thetas, rng=np.random.default_rng(5)).sessions == first.sessions
-    assert simulate(random_engine, true_thetas=thetas, rng=five).administered_items != first.administered_items
+    assert administered(simulate(random_engine, true_thetas=thetas, rng=five)) != administered(first)
 
   def test_a_call_that_fails_its_checks_leaves_the_generator_as_it_was(self, random_engine: CatEngine) -> None:
     """A call rejected for its inputs draws nothing; fails if the entropy is drawn before the inputs are checked."""
@@ -386,7 +386,7 @@ class TestExposure:
     expected = np.zeros(item_bank.n_items)
     expected[:2] = 1.0
     assert [None if rates is None else rates.tolist() for rates in later_sessions] == [expected.tolist()] * 6
-    assert result.exposure_rates[:2].tolist() == [1.0, 1.0]
+    assert result.exposure_rates().value[:2].tolist() == [1.0, 1.0]
 
   def test_a_control_that_accepts_without_drawing_reproduces_the_run_without_one(self, item_bank: ItemBank) -> None:
     """With a control that accepts every proposal and draws nothing, a seeded run gives the run without a control.
@@ -402,7 +402,6 @@ class TestExposure:
 
     assert accepting.sessions == without.sessions
     assert [session.excluded_items for session in accepting.sessions] == [(), (), ()]
-    assert accepting.proposal_counts is not None
     assert np.array_equal(accepting.proposal_counts, accepting.exposure_counts)
 
   @pytest.mark.parametrize("recorded", [False, True], ids=["generated", "recorded-with-missing-answers"])
@@ -429,11 +428,9 @@ class TestExposure:
     )
     assert [session.excluded_items[:missing] for session in result.sessions] == [tuple(range(missing))] * 20
     assert int(declines.sum()) > 0
-    assert result.test_lengths.tolist() == [5] * 20
-    assert result.proposal_counts is not None
-    assert result.proposal_rates is not None
+    assert result.examinees()["test_length"].tolist() == [5] * 20
     assert np.array_equal(result.proposal_counts, result.exposure_counts + declines)
-    assert np.allclose(result.proposal_rates, (result.exposure_counts + declines) / 20)
+    assert np.allclose(result.proposal_rates().value, (result.exposure_counts + declines) / 20)
 
 
 def test_progress_is_told_after_each_session_how_many_have_finished(random_engine: CatEngine) -> None:
@@ -577,196 +574,484 @@ def test_simulate_rejects_what_is_not_an_engine(item_bank: ItemBank) -> None:
     simulate(item_bank, true_thetas=[0.0])  # ty: ignore[invalid-argument-type]
 
 
-def finished_session(items: tuple[int, ...]) -> Session:
-  """Return a session that administered ``items``, all answered correctly, with a constant estimate."""
-  return Session(
-    administered_items=items,
-    responses=(True,) * len(items),
-    estimates=(Estimate(0.0, math.inf),) * (len(items) + 1),
-  )
+def finished(
+  items: tuple[int, ...] = (),
+  theta: float = 0.0,
+  se: float = 1.0,
+  stop_reason: StopReason = StopReason.STOPPER,
+) -> Session:
+  """Return an ended session that administered ``items``, all answered correctly, whose final estimate is (theta, se).
+
+  A session of no items keeps its initial estimate, whose standard error is infinite.
+  """
+  if not items:
+    return Session(estimates=(Estimate(theta, math.inf, 0),), stop_reason=stop_reason)
+  estimates = (Estimate(0.0, math.inf, 0), *[Estimate(0.0, 1.0, 1)] * (len(items) - 1), Estimate(theta, se, 1))
+  return Session(administered_items=items, responses=(True,) * len(items), estimates=estimates, stop_reason=stop_reason)
 
 
-def result_of(sessions: list[Session], n_items: int = 5, true_thetas: list[float] | None = None) -> SimulationResult:
-  """Return a result holding the given sessions, on a bank of n_items items no session's exposure is counted in."""
+def result_of(
+  sessions: tuple[Session, ...] | list[Session],
+  n_items: int = 5,
+  true_thetas: tuple[float, ...] | list[float] | FloatArray | None = None,
+  *,
+  names: tuple[str, ...] | None = None,
+) -> SimulationResult:
+  """Return a result of the sessions on a bank of n_items items, whose proposals are its administrations."""
+  generated = ItemBank.generate(n_items, rng=0)
+  counts = np.bincount(np.array([item for session in sessions for item in session.administered_items], dtype=int))
   return SimulationResult(
-    item_bank=ItemBank.generate(n_items, rng=0),
-    sessions=sessions,
-    exposure_counts=np.zeros(n_items, dtype=int),
+    item_bank=generated if names is None else ItemBank(generated.items, names=names),
+    sessions=tuple(sessions),
+    proposal_counts=np.pad(counts, (0, n_items - len(counts))),
     duration=0.0,
     true_thetas=None if true_thetas is None else np.array(true_thetas),
   )
 
 
 # Two hand-built sessions with known estimates and evaluation counts, and their examinees' true abilities. The first
-# ends at 0.6 (SE 0.9) for a true 0.5 after two items, its estimates costing 7 and 5 evaluations; the second at -0.8
-# (SE 1.1) for a true -1.0 after one item costing 4. The second's initial estimate has no count, as a hand-built one
-# need not.
-TWO_SESSIONS = [
+# gives items 3 and 1 and ends at 0.6 (SE 0.9) for a true 0.5, its estimates costing 7 and 5 evaluations; the second
+# gives item 2, runs out of items and ends at -0.8 (SE 1.1) for a true -1.0, its estimate costing 4. The errors of the
+# final estimates are 0.1 and 0.2.
+TWO_SESSIONS = (
   Session(
     administered_items=(3, 1),
     responses=(True, False),
     estimates=(Estimate(0.0, math.inf, 0), Estimate(0.4, 1.2, 7), Estimate(0.6, 0.9, 5)),
+    stop_reason=StopReason.STOPPER,
   ),
-  Session(administered_items=(2,), responses=(False,), estimates=(Estimate(0.0, math.inf), Estimate(-0.8, 1.1, 4))),
-]
-TWO_TRUE_THETAS = [0.5, -1.0]
+  Session(
+    administered_items=(2,),
+    responses=(False,),
+    estimates=(Estimate(0.0, math.inf, 0), Estimate(-0.8, 1.1, 4)),
+    stop_reason=StopReason.NO_ITEMS,
+  ),
+)
+TWO_TRUE_THETAS = (0.5, -1.0)
+NAMES = ("q0", "q1", "q2", "q3", "q4")
 
 
-class TestSimulationResult:
-  """Tests for SimulationResult derived properties."""
+class TestTables:
+  """Tests for the per-step and per-session tables of a result (ADR-0016)."""
 
-  def test_per_session_properties_read_each_session_in_order(self) -> None:
-    """Each per-session property has one entry per session, in session order.
+  def test_steps_has_one_row_per_session_and_administered_item(self) -> None:
+    """The steps of the two sessions, worked out by hand, with each item's index and name and the examinee's ability.
 
-    Fails if final_thetas or final_ses read an earlier estimate (such as the initial one), if
-    theta_histories drops the initial estimate, or if test_lengths counts the estimates (one more
-    than the items). Fails too if final_thetas, final_ses or test_lengths is a list rather than an
-    array (no ``.mean()``, no elementwise ``result.final_ses < 0.4``), or if test_lengths holds
-    floats, which ``numpy.bincount`` rejects.
+    Fails if the rows include the initial estimate, if positions count from 1 or run across sessions, if an item is
+    named by its position in the test rather than its index, if a session gets another's true ability, or if a column
+    holds Python objects rather than the integers, Booleans, floats and strings pandas reads.
+    """
+    steps = result_of(TWO_SESSIONS, true_thetas=TWO_TRUE_THETAS, names=NAMES).steps()
+
+    assert {name: column.tolist() for name, column in steps.items()} == {
+      "session": [0, 0, 1],
+      "position": [0, 1, 0],
+      "item": [3, 1, 2],
+      "name": ["q3", "q1", "q2"],
+      "response": [True, False, False],
+      "theta": [0.4, 0.6, -0.8],
+      "se": [1.2, 0.9, 1.1],
+      "evaluations": [7.0, 5.0, 4.0],
+      "true_theta": [0.5, 0.5, -1.0],
+    }
+    assert [column.dtype.kind for column in steps.values()] == ["i", "i", "i", "U", "b", "f", "f", "f", "f"]
+
+  def test_examinees_has_one_row_per_session(self) -> None:
+    """Each session's length, final estimate, standard error, stop reason, true ability and decile, by hand.
+
+    Of two true abilities, -1.0 is the lowest cut and falls in decile 0, and 0.5 is the highest and in decile 9. Fails
+    if the estimate is an earlier one than the final, if the length counts the estimates (one more than the items),
+    if the stop reason is the enum's repr rather than its value, or if the decile is not that of the session's own
+    true ability.
+    """
+    examinees = result_of(TWO_SESSIONS, true_thetas=TWO_TRUE_THETAS).examinees()
+
+    assert {name: column.tolist() for name, column in examinees.items()} == {
+      "session": [0, 1],
+      "test_length": [2, 1],
+      "theta": [0.6, -0.8],
+      "se": [0.9, 1.1],
+      "stop_reason": ["stopper", "no_items"],
+      "true_theta": [0.5, -1.0],
+      "decile": [9, 0],
+    }
+    assert [column.dtype.kind for column in examinees.values()] == ["i", "i", "f", "f", "U", "f", "i"]
+
+  def test_without_true_abilities_the_tables_have_no_true_ability_columns(self) -> None:
+    """Recorded examinees' abilities are unknown, so neither table has a true ability or decile column.
+
+    Fails if an unknown ability is written as NaN, which ADR-0016 rules out as a marker, or as 0.
     """
     result = result_of(TWO_SESSIONS)
 
-    assert result.final_thetas.tolist() == [0.6, -0.8]
-    assert result.final_ses.tolist() == [0.9, 1.1]
-    assert result.test_lengths.tolist() == [2, 1]
-    assert np.bincount(result.test_lengths).tolist() == [0, 1, 1]
-    assert result.theta_histories == [[0.0, 0.4, 0.6], [0.0, -0.8]]
+    assert list(result.steps()) == ["session", "position", "item", "name", "response", "theta", "se", "evaluations"]
+    assert list(result.examinees()) == ["session", "test_length", "theta", "se", "stop_reason"]
 
-  def test_evaluations_sum_each_sessions_counts_over_its_responses(self) -> None:
-    """Session totals are 7 + 5 = 12 and 4; the mean per estimate is 16 / 3.
+  def test_an_estimate_without_an_evaluation_count_has_nan_in_the_steps(self) -> None:
+    """A custom estimator may give no count: its step has NaN, so the mean count of the run's estimates is 3.5.
 
-    Fails if the initial estimate takes part (the second session would be None for its missing
-    count), or if mean_evaluations averages the session totals (8) instead of the estimates.
+    The first session's estimates cost 3 and an unknown number, the second's 4. Fails if an unknown count is read as
+    0, which makes the mean 7 / 3.
     """
-    result = result_of(TWO_SESSIONS)
+    uncounted = Session(
+      administered_items=(3, 1),
+      responses=(True, False),
+      estimates=(Estimate(0.0, math.inf, 0), Estimate(0.4, 1.2, 3), Estimate(0.6, 0.9)),
+      stop_reason=StopReason.STOPPER,
+    )
 
-    assert result.evaluations == [12, 4]
-    assert result.mean_evaluations == pytest.approx(16 / 3)
+    evaluations = result_of([uncounted, TWO_SESSIONS[1]]).steps()["evaluations"]
 
-  def test_a_session_with_an_estimate_without_a_count_has_no_evaluation_total(self) -> None:
-    """A session with an uncounted estimate has no total; the mean is over the estimates that have a count.
+    assert evaluations[[0, 2]].tolist() == [3.0, 4.0]
+    assert math.isnan(evaluations[1])
+    assert np.nanmean(evaluations) == pytest.approx(3.5)
 
-    The first session's estimates cost 3 and an unknown number, the second's 4, so the totals are
-    [None, 4] and the mean is (3 + 4) / 2. Fails if an unknown count is read as 0 (a total of 3 and a
-    mean of 7 / 3).
+  def test_a_run_without_items_has_an_empty_steps_table_of_the_same_types(self) -> None:
+    """Sessions that stopped before their first item give a steps table of no rows, with the usual dtypes.
+
+    Fails if the empty columns fall back to NumPy's default float dtype, whose item indices cannot index the bank.
     """
-    sessions = [
-      Session(
-        administered_items=(3, 1),
-        responses=(True, False),
-        estimates=(Estimate(0.0, math.inf, 0), Estimate(0.4, 1.2, 3), Estimate(0.6, 0.9)),
+    steps = result_of([finished(), finished()]).steps()
+
+    assert [len(column) for column in steps.values()] == [0] * 8
+    assert [column.dtype.kind for column in steps.values()] == ["i", "i", "i", "U", "b", "f", "f", "f"]
+
+
+class TestResultValue:
+  """Tests for what a result holds and checks when it is built (ADR-0016)."""
+
+  def test_a_result_and_its_arrays_cannot_change(self) -> None:
+    """A result keeps copies of the arrays it is given, read-only, and its sessions as a tuple.
+
+    Fails if the result keeps the caller's arrays, so that changing them afterwards changes the result, if it keeps
+    the list it was given, or if a field or an array can be assigned.
+    """
+    true_thetas = np.array(TWO_TRUE_THETAS)
+    proposal_counts = np.array([0, 1, 1, 1, 0])
+    result = SimulationResult(
+      item_bank=ItemBank.generate(5, rng=0),
+      sessions=list(TWO_SESSIONS),  # ty: ignore[invalid-argument-type]
+      proposal_counts=proposal_counts,
+      duration=0.0,
+      true_thetas=true_thetas,
+    )
+    true_thetas[0], proposal_counts[1] = 9.0, 2
+
+    assert result.sessions == TWO_SESSIONS
+    assert result.true_thetas is not None
+    assert (result.true_thetas.tolist(), result.proposal_counts.tolist()) == ([0.5, -1.0], [0, 1, 1, 1, 0])
+    with pytest.raises(dataclasses.FrozenInstanceError):
+      result.duration = 1.0  # ty: ignore[invalid-assignment]
+    for array in (result.true_thetas, result.exposure_counts, result.proposal_counts):
+      with pytest.raises(ValueError, match="read-only"):
+        array[0] = 1
+
+  @pytest.mark.parametrize(
+    ("changes", "error", "message"),
+    [
+      pytest.param({"sessions": ()}, ValueError, "sessions is empty; a result holds at least one session", id="none"),
+      pytest.param(
+        {"sessions": (TWO_SESSIONS[0], "session")},
+        TypeError,
+        r"sessions\[1\] is a str; a result's sessions must be Session objects",
+        id="not-a-session",
       ),
-      Session(
-        administered_items=(2,), responses=(False,), estimates=(Estimate(0.0, math.inf, 0), Estimate(-0.8, 1.1, 4))
+      pytest.param(
+        {"sessions": (Session(estimates=(Estimate(0.0, math.inf),)),)},
+        ValueError,
+        r"sessions\[0\] has not ended, its stop_reason is None; a result holds finished sessions",
+        id="unfinished",
       ),
-    ]
-    result = result_of(sessions)
+      pytest.param(
+        {"item_bank": ItemBank.generate(3, rng=0), "proposal_counts": [0, 1, 1]},
+        ValueError,
+        r"sessions\[0\].administered_items\[0\] is 3; the item bank has 3 items, 0 to 2",
+        id="item-outside-the-bank",
+      ),
+      pytest.param(
+        {"true_thetas": [0.5, -1.0, 0.2]},
+        ValueError,
+        re.escape("true_thetas has shape (3,); there must be one true ability per session (2)"),
+        id="true-abilities-of-another-run",
+      ),
+      pytest.param(
+        {"true_thetas": [0.5, math.nan]},
+        ValueError,
+        r"true_thetas\[1\] is nan; true abilities must be finite, and true_thetas None when they are unknown",
+        id="nan-for-unknown",
+      ),
+      pytest.param(
+        {"proposal_counts": [0, 0, 1, 1, 0]},
+        ValueError,
+        r"proposal_counts\[1\] is 0; an item's proposals are at least its 1 administrations and at most the 2 sessions",
+        id="fewer-proposals-than-administrations",
+      ),
+      pytest.param(
+        {"proposal_counts": [0, 3, 1, 1, 0]},
+        ValueError,
+        r"proposal_counts\[1\] is 3; an item's proposals are at least",
+        id="more-proposals-than-sessions",
+      ),
+      pytest.param(
+        {"proposal_counts": [0, 1, 1, 1]},
+        ValueError,
+        re.escape("proposal_counts has shape (4,); there must be one count per item of the bank (5)"),
+        id="a-count-missing",
+      ),
+      pytest.param(
+        {"proposal_counts": [0.0, 0.5, 0.5, 0.5, 0.0]},
+        TypeError,
+        "proposal_counts holds float64 values; counts must be integers",
+        id="rates-for-counts",
+      ),
+      pytest.param({"parts": 0}, ValueError, "parts is 0; a run has at least one part", id="no-parts"),
+      pytest.param({"parts": True}, TypeError, "parts is True; it must be an integer", id="boolean-parts"),
+    ],
+  )
+  def test_a_result_that_does_not_hold_together_raises(
+    self, changes: dict[str, object], error: type[Exception], message: str
+  ) -> None:
+    """Each inconsistent input raises, naming it, the position and value where there is one, and the rule.
 
-    assert result.evaluations == [None, 4]
-    assert result.mean_evaluations == pytest.approx(3.5)
+    Fails if a result is built from no session (every metric would average nothing), from a session still running,
+    with an item the bank cannot name, with true abilities of another run or NaN for unknown ones, with proposal counts
+    that cannot be its own, or with no part.
+    """
+    arguments: dict[str, object] = {
+      "item_bank": ItemBank.generate(5, rng=0),
+      "sessions": TWO_SESSIONS,
+      "proposal_counts": [0, 1, 1, 1, 0],
+      "duration": 0.0,
+    }
 
-  def test_mean_evaluations_is_none_without_a_counted_estimate(self) -> None:
-    """A run whose sessions have no response has no mean count; fails if it reports 0 or NaN instead."""
-    result = result_of([finished_session(()), finished_session(())])
+    with pytest.raises(error, match=message):
+      SimulationResult(**(arguments | changes))  # ty: ignore[invalid-argument-type]
 
-    assert result.evaluations == [0, 0]
-    assert result.mean_evaluations is None
 
-  def test_exposure_rates_sum_to_the_test_length(self, simulation_result: SimulationResult) -> None:
-    """With one rate per item, and every examinee given 10 items, the rates sum to 10."""
-    assert simulation_result.exposure_rates.shape == (simulation_result.item_bank.n_items,)
-    assert simulation_result.exposure_rates.sum() == pytest.approx(10.0)
+class TestResultMetrics:
+  """Tests for the metrics a result computes from its sessions, overall (ADR-0016)."""
 
-  def test_metrics_compare_final_estimates_with_true_abilities(self) -> None:
-    """Errors 0.6 - 0.5 and -0.8 + 1.0 give bias 0.15, MSE (0.01 + 0.04) / 2 = 0.025 and RMSE its root.
+  def test_accuracy_metrics_compare_final_estimates_with_true_abilities(self) -> None:
+    """Errors 0.1 and 0.2 give the bias 0.15 and the MSE 0.025, each with its error worked out by hand.
 
-    Fails if a metric compares another estimate than the final one, or swaps the sign of the bias.
+    Bias: deviations -0.05 and 0.05, error sqrt(0.005 / 2) = 0.05. MSE: squared errors 0.01 and 0.04, deviations
+    -0.015 and 0.015, error sqrt(0.00045 / 2) = 0.015. RMSE: sqrt(0.025), error 0.015 / (2 sqrt(0.025)). Fails if a
+    metric reads an earlier estimate than the final one, swaps the sign of the bias, or pairs an estimate with another
+    session's true ability.
     """
     result = result_of(TWO_SESSIONS, true_thetas=TWO_TRUE_THETAS)
 
-    assert result.bias == pytest.approx(0.15)
-    assert result.mse == pytest.approx(0.025)
-    assert result.rmse == pytest.approx(math.sqrt(0.025))
+    assert result.bias() == pytest.approx((0.15, 0.05))
+    assert result.mse() == pytest.approx((0.025, 0.015))
+    assert result.rmse() == pytest.approx((math.sqrt(0.025), 0.015 / (2 * math.sqrt(0.025))))
 
-  @pytest.mark.parametrize("metric", ["bias", "mse", "rmse"])
-  def test_metrics_of_a_result_without_true_thetas_raise(self, metric: str) -> None:
-    """A result built without true abilities cannot give its accuracy metrics.
+  def test_test_length_and_standard_error_are_means_over_the_sessions(self) -> None:
+    """Lengths 2 and 1 give 1.5 with an error of 0.5, and standard errors 0.9 and 1.1 give 1.0 with an error of 0.1.
 
-    Fails if a metric compares the estimates with zeros or NaN instead of saying that the true abilities are missing.
+    Neither needs the true abilities, which this result lacks. Fails if the standard error is that of the initial,
+    infinite, estimate, if the length counts the estimates (2.5), or if these metrics ask for true abilities.
     """
-    with pytest.raises(ValueError, match="need the examinees' true abilities, and this result has none"):
-      getattr(result_of(TWO_SESSIONS), metric)
+    result = result_of(TWO_SESSIONS)
 
-  def test_a_result_rejects_true_thetas_that_do_not_match_its_sessions(self) -> None:
-    """One true ability per session: a list for another run would pair estimates with the wrong examinees."""
-    message = "true_thetas has shape (3,); there must be one true ability per session (2)"
-    with pytest.raises(ValueError, match=re.escape(message)):
-      result_of(TWO_SESSIONS, true_thetas=[0.5, -1.0, 0.2])
+    assert result.test_length() == pytest.approx((1.5, 0.5))
+    assert result.se() == pytest.approx((1.0, 0.1))
 
-  def test_a_result_rejects_a_true_ability_that_is_not_finite(self) -> None:
-    """The true abilities are known for every session or for none (ADR-0016), so NaN does not mark an unknown one.
+  def test_exposure_and_proposal_rates_are_shares_of_the_sessions(self) -> None:
+    """Items 3 and 1 go to the first session and item 2 to the second, and the selector proposed item 0 once too.
 
-    Fails if a result accepts a NaN true ability, whose bias, MSE and RMSE would then be NaN.
+    The exposure counts are [0, 1, 1, 1, 0], counted from the sessions, so the rates are halves with a binomial error
+    of sqrt(0.25 / 2); proposals [1, 1, 2, 1, 0] give rates [0.5, 0.5, 1, 0.5, 0]. Fails if the rates divide by the
+    number of items or of steps rather than sessions, or if the proposal rates read the exposure counts.
+    """
+    result = SimulationResult(
+      item_bank=ItemBank.generate(5, rng=0),
+      sessions=TWO_SESSIONS,
+      proposal_counts=np.array([1, 1, 2, 1, 0]),
+      duration=0.0,
+    )
+    half = math.sqrt(0.25 / 2)
+
+    exposure, proposal = result.exposure_rates(), result.proposal_rates()
+
+    assert result.exposure_counts.tolist() == [0, 1, 1, 1, 0]
+    assert exposure.value.tolist() == [0.0, 0.5, 0.5, 0.5, 0.0]
+    assert exposure.mc_se == pytest.approx([0.0, half, half, half, 0.0])
+    assert proposal.value.tolist() == [0.5, 0.5, 1.0, 0.5, 0.0]
+    assert proposal.mc_se == pytest.approx([half, half, 0.0, half, 0.0])
+
+  def test_the_overlap_rate_needs_tests_of_one_length_of_at_least_one_item(self) -> None:
+    """Tests [0, 1] and [0, 2] of a 5-item bank have rates 1, 0.5, 0.5, 0, 0: overlap (1 + 0.25 + 0.25) / 2 = 0.75.
+
+    Both tests' rates sum to 1.5, so the error is 0. Tests of 1 and 2 items, or of none, have no overlap rate, whose
+    formula assumes one fixed length. Fails if a number is computed from a length the sessions do not share, or from a
+    length of 0.
+    """
+    assert result_of([finished((0, 1)), finished((0, 2))]).overlap_rate() == pytest.approx((0.75, 0.0))
+    assert result_of([finished((0,)), finished((0, 1))]).overlap_rate() is None
+    assert result_of([finished(), finished()]).overlap_rate() is None
+
+  @pytest.mark.parametrize(
+    ("metric", "needed_by"),
+    [
+      pytest.param(lambda result: result.bias(), "bias", id="bias"),
+      pytest.param(lambda result: result.mse(), "mse", id="mse"),
+      pytest.param(lambda result: result.rmse(), "rmse", id="rmse"),
+      pytest.param(lambda result: result.deciles(), "deciles", id="deciles"),
+      pytest.param(lambda result: result.test_length(decile=0), "a metric by decile", id="length-by-decile"),
+      pytest.param(lambda result: result.se(decile=0), "a metric by decile", id="se-by-decile"),
+      pytest.param(lambda result: result.exposure_rates(decile=0), "a metric by decile", id="exposure-by-decile"),
+      pytest.param(lambda result: result.overlap_rate(decile=0), "a metric by decile", id="overlap-by-decile"),
+    ],
+  )
+  def test_metrics_that_need_true_abilities_raise_without_them(
+    self, metric: Callable[[SimulationResult], object], needed_by: str
+  ) -> None:
+    """Recorded examinees' abilities are unknown, so the accuracy metrics and every metric by decile raise (ADR-0014).
+
+    Fails if a metric compares the estimates with zeros or NaN, or groups the sessions by their estimates instead.
     """
     with pytest.raises(
-      ValueError, match=r"true_thetas\[1\] is nan; true abilities must be finite, and true_thetas None"
+      ValueError,
+      match=f"{needed_by} needs the examinees' true abilities, and this result has none; pass true_thetas to simulate",
     ):
-      result_of(TWO_SESSIONS, true_thetas=[0.5, math.nan])
+      metric(result_of(TWO_SESSIONS))
 
 
-def test_simulation_result_empty_sessions_exposure_and_overlap(item_bank) -> None:
-  """A result with no sessions has zero exposure and proposal rates and no overlap rate.
+def ranks(values: FloatArray) -> np.ndarray:
+  """Return each value's rank among distinct values, 0 for the lowest."""
+  return np.argsort(np.argsort(values))
 
-  Fails if exposure_rates or proposal_rates divides the counts by zero sessions (NaN, with a warning that the test
-  settings turn into an error), or if overlap_rate computes a number for a run without tests.
-  """
-  result = SimulationResult(
-    item_bank=item_bank,
-    sessions=[],
-    exposure_counts=np.zeros(item_bank.n_items, dtype=int),
-    duration=0.0,
-    proposal_counts=np.zeros(item_bank.n_items, dtype=int),
+
+class TestDeciles:
+  """Tests for the deciles of the true ability and the metrics by decile (ADR-0016)."""
+
+  @pytest.mark.parametrize(
+    ("n_examinees", "decile_of_rank"),
+    [
+      pytest.param(20, lambda rank: rank // 2, id="20"),
+      pytest.param(100, lambda rank: rank // 10, id="100"),
+      pytest.param(11, lambda rank: min(rank, 9), id="11"),
+    ],
   )
+  def test_distinct_abilities_fill_the_deciles_by_rank(
+    self, n_examinees: int, decile_of_rank: Callable[[int], int]
+  ) -> None:
+    """Of 20 distinct abilities, the ranks 2k and 2k + 1 form decile k; of 11, ranks 0 to 8 are deciles 0 to 8.
 
-  assert result.proposal_rates is not None
-  assert np.array_equal(result.exposure_rates, np.zeros(item_bank.n_items))
-  assert np.array_equal(result.proposal_rates, np.zeros(item_bank.n_items))
-  assert result.overlap_rate is None
+    With 11 abilities, each cut but the last equals an ability, which belongs to the decile above it, and the highest
+    two share decile 9. Fails if the cuts are numpy.linspace's tenths, which at 11 examinees leave deciles 3 and 7
+    empty, as catR's seq(0, 1, 0.1) does; if a decile's interval is closed on the right instead of the left, so an
+    ability equal to a cut falls a decile lower; or if the highest ability falls outside decile 9.
+    """
+    true_thetas = np.random.default_rng(n_examinees).permutation(n_examinees) * 0.37 - 2.0
 
+    deciles = result_of([finished()] * n_examinees, true_thetas=true_thetas).examinees()["decile"]
 
-@pytest.mark.parametrize("metric", ["bias", "mse", "rmse"])
-def test_metrics_of_a_result_without_sessions_raise(metric: str) -> None:
-  """With no session, the metrics averaged an empty array: NaN and a RuntimeWarning instead of a clear error."""
-  with pytest.raises(ValueError, match="need at least one session, and the result has none"):
-    getattr(result_of([]), metric)
+    assert deciles.tolist() == [decile_of_rank(rank) for rank in ranks(true_thetas)]
 
+  def test_tied_abilities_share_a_decile_and_can_leave_deciles_empty(self) -> None:
+    """Abilities 0, 0, 0, 0, 0, 1, 2, 3, 4 and 5: the five zeros all fall in decile 4, and deciles 0 to 3 are empty.
 
-def test_simulation_result_overlap_rate_for_a_hand_worked_run() -> None:
-  """Two 2-item tests, [0, 1] and [0, 2], on a 5-item bank give exposure rates [1, 0.5, 0.5, 0, 0].
+    The cuts at 0.1 to 0.4 are interpolated between zeros, so they are 0, and the cut at 0.5 lies between 0 and 1, at
+    0.5; the cuts at 0.6 to 0.9 are 1.4, 2.3, 3.2 and 4.1. Fails if tied abilities are split between deciles by their
+    order, as grouping by rank would split them, or if the zeros fall in the lowest decile whose cut is 0.
+    """
+    result = result_of([finished()] * 10, true_thetas=[0, 0, 0, 0, 0, 1, 2, 3, 4, 5])
 
-  The rates average Q / N, so (N / Q) var(r) + Q / N reduces to sum(r^2) / Q = 1.5 / 2 = 0.75. A wrong test
-  length of 1 would give 0.9.
-  """
-  sessions = [finished_session((0, 1)), finished_session((0, 2))]
-  result = SimulationResult(
-    item_bank=ItemBank.generate(5, rng=0),
-    sessions=sessions,
-    exposure_counts=np.array([2, 1, 1, 0, 0]),
-    duration=0.0,
+    assert result.examinees()["decile"].tolist() == [4, 4, 4, 4, 4, 5, 6, 7, 8, 9]
+    assert result.deciles()["n_sessions"].tolist() == [0, 0, 0, 0, 5, 1, 1, 1, 1, 1]
+
+  def test_an_empty_decile_gives_nan_for_every_metric(self) -> None:
+    """Three examinees of one ability are all in decile 9, so decile 0 holds no session and every metric of it is NaN.
+
+    Fails if an empty decile averages an empty array (NaN with a warning, which the test settings turn into an error),
+    or reports 0 as if it had been measured.
+    """
+    result = result_of([finished((0, 1), theta=0.2)] * 3, true_thetas=[1.0, 1.0, 1.0])
+
+    scalars = [
+      result.bias(decile=0),
+      result.mse(decile=0),
+      result.rmse(decile=0),
+      result.test_length(decile=0),
+      result.se(decile=0),
+      result.overlap_rate(decile=0),
+    ]
+    table = result.deciles()
+
+    assert all(metric is not None and np.isnan(metric).all() for metric in scalars)
+    assert np.isnan(result.exposure_rates(decile=0)).all()
+    assert table["n_sessions"].tolist() == [0] * 9 + [3]
+    assert all(np.isnan(column[:9]).all() for name, column in table.items() if name not in {"decile", "n_sessions"})
+    assert table["bias"][9] == pytest.approx(-0.8)
+
+  def test_the_deciles_table_of_a_hand_worked_run(self) -> None:
+    """Twenty examinees of abilities 0 to 19, two per decile, with each decile's metrics worked out by hand.
+
+    In decile k, the examinee of ability 2k takes one item and ends at an error of 0.1k + 0.05 with a standard error of
+    0.5, and the one of 2k + 1 takes three and ends at 0.1k - 0.05 with 0.7. So the bias is 0.1k with an error of 0.05;
+    the MSE 0.01k^2 + 0.0025, whose squared errors differ by 0.02k, with an error of 0.01k; the length 2 with an error
+    of 1; and the standard error 0.6 with an error of 0.1. The tests differ in length, so there is no overlap rate.
+    Fails if a row covers another decile's sessions, or a metric or its error is put in another column or row.
+    """
+    sessions = [
+      finished((k,), theta=2 * k + 0.1 * k + 0.05, se=0.5)
+      if examinee % 2 == 0
+      else finished((k, 10, 11), theta=2 * k + 1 + 0.1 * k - 0.05, se=0.7, stop_reason=StopReason.NO_ITEMS)
+      for examinee in range(20)
+      for k in [examinee // 2]
+    ]
+    k = np.arange(10)
+    mse = 0.01 * k**2 + 0.0025
+
+    table = result_of(sessions, n_items=12, true_thetas=np.arange(20.0)).deciles()
+
+    assert table["decile"].tolist() == k.tolist()
+    assert table["n_sessions"].tolist() == [2] * 10
+    assert table["true_theta"] == pytest.approx(2 * k + 0.5)
+    assert table["bias"] == pytest.approx(0.1 * k)
+    assert table["bias_mc_se"] == pytest.approx([0.05] * 10)
+    assert table["mse"] == pytest.approx(mse)
+    assert table["mse_mc_se"] == pytest.approx(0.01 * k)
+    assert table["rmse"] == pytest.approx(np.sqrt(mse))
+    assert table["rmse_mc_se"] == pytest.approx(0.01 * k / (2 * np.sqrt(mse)))
+    assert table["test_length"] == pytest.approx([2.0] * 10)
+    assert table["test_length_mc_se"] == pytest.approx([1.0] * 10)
+    assert table["se"] == pytest.approx([0.6] * 10)
+    assert table["se_mc_se"] == pytest.approx([0.1] * 10)
+    assert np.isnan(table["overlap_rate"]).all()
+    assert np.isnan(table["overlap_rate_mc_se"]).all()
+
+  def test_a_deciles_exposure_and_overlap_are_those_of_its_own_tests(self) -> None:
+    """In decile k, the two examinees take items (k, 10) and (k, 11), so similar examinees share item k.
+
+    Within decile 3, item 3 has rate 1 and items 10 and 11 rate 0.5, so the overlap is (1 + 0.25 + 0.25) / 2 = 0.75.
+    Over the run, items 0 to 9 have rate 0.1 and items 10 and 11 rate 0.5, so it is (10 * 0.01 + 2 * 0.25) / 2 = 0.3.
+    Every test's rates sum to the same value, so the errors are 0. Fails if a decile's metric is computed from the
+    whole run's rates.
+    """
+    sessions = [finished((examinee // 2, 10 + examinee % 2)) for examinee in range(20)]
+    result = result_of(sessions, n_items=12, true_thetas=np.arange(20.0))
+
+    rates, errors = result.exposure_rates(decile=3)
+
+    assert rates.tolist() == [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.5]
+    assert errors[[3, 10]] == pytest.approx([0.0, math.sqrt(0.25 / 2)])
+    assert result.overlap_rate(decile=3) == pytest.approx((0.75, 0.0))
+    assert result.overlap_rate() == pytest.approx((0.3, 0.0))
+
+  @pytest.mark.parametrize(
+    ("decile", "error", "message"),
+    [
+      pytest.param(10, ValueError, "decile is 10; the deciles are 0, of the lowest true abilities, to 9", id="ten"),
+      pytest.param(-1, ValueError, "decile is -1; the deciles are 0", id="negative"),
+      pytest.param(2.0, TypeError, r"decile is 2.0; it must be None or an integer from 0 to 9", id="float"),
+      pytest.param(True, TypeError, "decile is True; it must be None or an integer", id="boolean"),
+    ],
   )
+  def test_a_decile_is_one_of_0_to_9(self, decile: object, error: type[Exception], message: str) -> None:
+    """Fails if decile 10 gives an empty decile's NaN, as if it existed, or True reads as decile 1."""
+    result = result_of(TWO_SESSIONS, true_thetas=TWO_TRUE_THETAS)
 
-  assert result.exposure_rates.tolist() == [1.0, 0.5, 0.5, 0.0, 0.0]
-  assert result.overlap_rate == pytest.approx(0.75)
-
-
-def test_simulation_result_overlap_requires_uniform_non_zero_test_lengths() -> None:
-  """Overlap is None for sessions of different lengths or of no items.
-
-  Fails if overlap_rate computes a number from a test length the sessions do not share, or divides
-  by a test length of zero.
-  """
-  heterogeneous = result_of([finished_session((0,)), finished_session((0, 1))])
-  zero_length = result_of([finished_session(()), finished_session(())])
-
-  assert heterogeneous.overlap_rate is None
-  assert zero_length.overlap_rate is None
+    with pytest.raises(error, match=message):
+      result.bias(decile=decile)  # ty: ignore[invalid-argument-type]

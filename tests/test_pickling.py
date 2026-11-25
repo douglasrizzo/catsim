@@ -209,7 +209,11 @@ def test_every_built_in_strategy_has_a_pickle_case() -> None:
 def _run(engine: CatEngine) -> tuple[list[tuple[int, ...]], list[list[float]], list[float]]:
   """Return the items, the estimates and the final standard errors of a seeded run of three examinees."""
   result = simulate(engine, true_thetas=[-1.0, 0.0, 1.5], rng=5)
-  return result.administered_items, result.theta_histories, result.final_ses.tolist()
+  return (
+    [session.administered_items for session in result.sessions],
+    [list(session.theta_history) for session in result.sessions],
+    result.examinees()["se"].tolist(),
+  )
 
 
 def test_engine_copy_runs_like_the_original() -> None:

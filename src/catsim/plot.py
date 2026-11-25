@@ -219,15 +219,17 @@ def item_exposure(
       true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)
       result = simulate(engine, true_thetas=true_thetas, rng=0)
       fig, axes = plt.subplots(2, 1, figsize=(7, 12))
-      plot.item_exposure(result.exposure_rates, hist=True, ax=axes[0], title="Exposure rates")
-      plot.item_exposure(result.exposure_rates, item_bank=result.item_bank, par="b", ax=axes[1])
+      rates = result.exposure_rates().value
+      plot.item_exposure(rates, hist=True, ax=axes[0], title="Exposure rates")
+      plot.item_exposure(rates, item_bank=result.item_bank, par="b", ax=axes[1])
       plt.tight_layout()
       plt.show()
 
   Parameters
   ----------
   exposure_rates : numpy.ndarray
-      The exposure rate of each item, in item bank order, such as ``SimulationResult.exposure_rates``.
+      The exposure rate of each item, in item bank order, such as the value of a
+      :class:`~catsim.SimulationResult`'s :meth:`~catsim.SimulationResult.exposure_rates`.
   item_bank : ItemBank or None, optional
       The item bank the rates belong to, needed with ``par``. Default is None.
   par : str or None, optional

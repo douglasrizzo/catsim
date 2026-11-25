@@ -717,6 +717,14 @@ OVERLAP_INPUTS: dict[str, tuple[FloatArray, int]] = {
 }
 
 
+# Public functions of catsim.metrics that no case is named after, with the reason. Added after adda72dc by ADR-0016,
+# with the Monte Carlo errors, and tested by tests/test_metrics.py.
+METRICS_EXEMPT = {
+  "mean": "the mean of a per-session statistic, added after adda72dc",
+  "exposure_rates": "exposure rates from counts, added after adda72dc; the whole tests record the rates of their runs",
+}
+
+
 def _metrics_cases() -> dict[str, Case]:
   cases: dict[str, Case] = {}
   for name, (actual, predicted) in METRIC_ARRAYS.items():
@@ -1080,7 +1088,7 @@ def uncovered() -> list[str]:
     names = {cls.__name__ for cls in strategies} | exempt.keys()
     exports = importlib.import_module(package).__all__
     missing |= {f"{package}.{name}" for name in exports if name not in names and not _named(family, name)}
-  for module, family, exempt in (("catsim.irt", "irt", IRT_EXEMPT), ("catsim.metrics", "metrics", {})):
+  for module, family, exempt in (("catsim.irt", "irt", IRT_EXEMPT), ("catsim.metrics", "metrics", METRICS_EXEMPT)):
     missing |= {f"{module}.{name}" for name in _module_functions(module) - exempt.keys() if not _named(family, name)}
   derived = set(_bank_values(BANKS["4pl"])) | ITEM_BANK_EXEMPT.keys()
   members = {name for name in vars(ItemBank) if not name.startswith("_")}

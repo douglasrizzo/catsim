@@ -91,7 +91,7 @@ def test_selectors_complete_fixed_length_runs(factory: Callable[[], BaseSelector
   result = run_simulation(item_bank, factory(), MaxLengthStopper(8))
 
   assert all(len(session.administered_items) == 8 for session in result.sessions)
-  assert result.overlap_rate is not None
+  assert result.overlap_rate() is not None
 
 
 @pytest.mark.integration
