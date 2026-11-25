@@ -4,9 +4,6 @@
 .. autoclass:: catsim.CatEngine
    :members:
 
-.. autoclass:: catsim.RunContext
-   :members:
-
-.. autoclass:: catsim.ResponseProvider
+.. autoclass:: catsim.Selection
    :members:
 ```

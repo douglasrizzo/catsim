@@ -206,7 +206,7 @@ def test_every_built_in_strategy_has_a_pickle_case() -> None:
   assert covered == _built_in_strategies()
 
 
-def _run(engine: CatEngine) -> tuple[list[list[int]], list[list[float]], list[float]]:
+def _run(engine: CatEngine) -> tuple[list[tuple[int, ...]], list[list[float]], list[float]]:
   """Return the items, the estimates and the final standard errors of a seeded run of three examinees."""
   result = SimulationRunner(engine).run([-1.0, 0.0, 1.5], rng=5)
   return result.administered_items, result.theta_histories, result.final_ses.tolist()

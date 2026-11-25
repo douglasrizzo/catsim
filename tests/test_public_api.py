@@ -11,6 +11,8 @@ from types import ModuleType
 
 import pytest
 
+import catsim
+
 PACKAGES = [
   "catsim",
   "catsim.selection",
@@ -21,10 +23,11 @@ PACKAGES = [
 ]
 # Top-level modules that are import paths of their own; catsim's other modules are internal.
 PUBLIC_MODULES = ["catsim.irt", "catsim.metrics", "catsim.plot", "catsim.typing"]
-# Names that ADR-0023's list retired, each for the one its concept keeps.
+# Names that ADR-0023's list retired, each for the one its concept keeps; item_id is one of its rejected alternatives.
 RETIRED_NAMES = {
   "administered_item_ids",
   "est_theta",
+  "item_id",
   "item_indices",
   "item_type",
   "itemtype",
@@ -33,6 +36,11 @@ RETIRED_NAMES = {
   "seed",
   "updated_theta",
 }
+
+
+# The mutable runtime that ADR-0006 replaced with immutable sessions and an engine of three steps.
+RETIRED_EXPORTS = {"CatSessionSnapshot", "CatSessionState", "CatStepResult", "ExposureTracker", "RunContext"}
+RETIRED_ENGINE_METHODS = {"apply_response", "run_session", "select_next", "should_stop", "start_session", "step"}
 
 
 def _internal_modules(package: ModuleType) -> Iterator[ModuleType]:
@@ -171,3 +179,13 @@ def test_no_public_attribute_uses_a_retired_name() -> None:
   }
 
   assert offenders == set()
+
+
+def test_the_mutable_runtime_is_gone() -> None:
+  """A retired session type, run context or exposure tracker, or an engine method that changed a session in place,
+  left reachable gives a second way to run a test, with the state that outlived a run (ADR-0006).
+  """
+  exported = RETIRED_EXPORTS & {name for name in dir(catsim) if not name.startswith("_")}
+  methods = {name for name in RETIRED_ENGINE_METHODS if hasattr(catsim.CatEngine, name)}
+
+  assert (exported, methods) == (set(), set())

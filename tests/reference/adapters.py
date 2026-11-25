@@ -7,8 +7,9 @@ contexts, building an engine and running whole tests, the exposure control the w
 the metric functions. A later item that changes one of those rewrites the functions here, keeping
 their signatures and what they return, and leaves the cases and the recorded data as they are.
 
-This version is written for catsim at adda72dc: ``CatEngine.start_session`` and ``run_session``
-with a ``RunContext``, an ``ExposureTracker`` and a ``ResponseProvider``.
+This version is written for the immutable sessions of ADR-0006: ``CatEngine.start``, ``select``
+and ``answer``, with the run's exposure counted here and given to each session as catR's rates
+(ADR-0012).
 """
 
 from __future__ import annotations
@@ -19,9 +20,9 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy
-from typing_extensions import override
 
-from catsim import CatEngine, ExposureTracker, ResponseProvider, RunContext, SimulationResult, StepContext, metrics
+from catsim import CatEngine, SimulationResult, StepContext, metrics
+from catsim.compat import override
 from catsim.exposure import BaseExposureControl
 
 if TYPE_CHECKING:
@@ -29,7 +30,7 @@ if TYPE_CHECKING:
 
   import numpy.typing as npt
 
-  from catsim import CatSessionSnapshot, ItemBank
+  from catsim import ItemBank, Session
   from catsim.estimation import BaseEstimator
   from catsim.initialization import BaseInitializer
   from catsim.selection import BaseSelector
@@ -79,9 +80,9 @@ class DeclineListed(BaseExposureControl):
     self._items = frozenset(items)
 
   @override
-  def accept(self, context: StepContext, item_id: int) -> bool:
+  def accept(self, context: StepContext, item: int) -> bool:
     """Return whether the item is not one of the listed ones."""
-    return item_id not in self._items
+    return item not in self._items
 
 
 def build_engine(
@@ -162,20 +163,28 @@ class RecordedRun:
   rmse: float | None
 
 
-class _RecordedExaminee(ResponseProvider):
-  """Answer every item from one row of a response matrix, 1.0 for correct and 0.0 for incorrect."""
+def _recorded_response(row: FloatArray, item: int) -> bool:
+  """Return the recorded response to an item, 1.0 for correct and 0.0 for incorrect."""
+  response = float(row[item])
+  if math.isnan(response):
+    msg = f"item {item} has no recorded response, so the session should have excluded it"
+    raise ValueError(msg)
+  return response == 1.0
 
-  def __init__(self, row: FloatArray) -> None:
-    self._row = row
 
-  @override
-  def answer(self, item_bank: ItemBank, item_id: int, session: CatSessionSnapshot, rng: numpy.random.Generator) -> bool:
-    """Return the recorded response to the item."""
-    response = float(self._row[item_id])
-    if math.isnan(response):
-      msg = f"item {item_id} has no recorded response, so the session should have excluded it"
-      raise ValueError(msg)
-    return response == 1.0
+def _run_session(
+  engine: CatEngine, row: FloatArray, rng: numpy.random.Generator, exposure_rates: FloatArray | None
+) -> tuple[Session, list[int]]:
+  """Return a session answered from ``row``, which excludes the items it has no response to, and its declines."""
+  session = engine.start(rng=rng, excluded_items=numpy.flatnonzero(numpy.isnan(row)).tolist())
+  declined: list[int] = []
+  while True:
+    selection = engine.select(session, rng=rng, exposure_rates=exposure_rates)
+    session = selection.session
+    declined.extend(selection.declined)
+    if selection.item is None:
+      return session, declined
+    session = engine.answer(session, selection.item, _recorded_response(row, selection.item), rng=rng)
 
 
 def run_recorded(
@@ -208,20 +217,25 @@ def run_recorded(
       The sessions and the run's exposure and metrics.
   """
   matrix = numpy.asarray(responses, dtype=float)
-  tracker = ExposureTracker(engine.item_bank.n_items)
-  context = RunContext(rng=numpy.random.default_rng(rng), exposure_tracker=tracker)
-  sessions = []
-  for index, row in enumerate(matrix):
-    true_theta = None if true_thetas is None else float(true_thetas[index])
-    state = engine.start_session(index, context, true_theta=true_theta)
-    state.excluded_items.extend(numpy.flatnonzero(numpy.isnan(row)).tolist())
-    sessions.append(engine.run_session(state, _RecordedExaminee(row), context))
+  generator = numpy.random.default_rng(rng)
+  exposure_counts = numpy.zeros(engine.item_bank.n_items, dtype=int)
+  proposal_counts = numpy.zeros(engine.item_bank.n_items, dtype=int)
+  sessions: list[Session] = []
+  for row in matrix:
+    rates = exposure_counts / len(sessions) if sessions else None
+    session, declined = _run_session(engine, row, generator, rates)
+    for item in session.administered_items:
+      exposure_counts[item] += 1
+    for item in (*session.administered_items, *declined):
+      proposal_counts[item] += 1
+    sessions.append(session)
   result = SimulationResult(
     item_bank=engine.item_bank,
     sessions=sessions,
-    exposure_counts=tracker.counts.copy(),
+    exposure_counts=exposure_counts,
     duration=0.0,
-    proposal_counts=tracker.proposals.copy(),
+    proposal_counts=proposal_counts,
+    true_thetas=None if true_thetas is None else numpy.asarray(true_thetas, dtype=float),
   )
   proposal_rates = result.proposal_rates
   assert proposal_rates is not None
@@ -240,7 +254,7 @@ def run_recorded(
       for session in sessions
     ],
     exposure_counts=result.exposure_counts.tolist(),
-    proposal_counts=tracker.proposals.tolist(),
+    proposal_counts=proposal_counts.tolist(),
     exposure_rates=result.exposure_rates.tolist(),
     proposal_rates=proposal_rates.tolist(),
     overlap_rate=result.overlap_rate,

@@ -11,7 +11,7 @@ import numpy as np
 import pytest
 from matplotlib.patches import Rectangle
 
-from catsim import CatSessionSnapshot, CatSessionState, Estimate, ItemBank, plot
+from catsim import Estimate, ItemBank, Session, plot
 from catsim.plot import PlotType
 from catsim.typing import FloatArray
 
@@ -274,13 +274,11 @@ class TestSessionProgress:
 
   # Three items whose difficulties differ from every estimate and standard error below.
   ITEM_BANK = ItemBank(np.array([[1.0, -0.5, 0.0, 1.0], [1.0, 0.3, 0.0, 1.0], [1.0, 1.2, 0.0, 1.0]]))
-  # The initial estimate has an infinite standard error, as CatEngine.start_session records it.
-  SESSION = CatSessionState(
-    session_id="examinee",
-    estimates=[Estimate(0.0, np.inf, 0), Estimate(0.8, 1.1, 3), Estimate(0.5, 0.9, 4), Estimate(0.6, 0.7, 5)],
-    true_theta=0.4,
-    administered_items=[2, 0, 1],
-    responses=[True, False, True],
+  # The initial estimate has an infinite standard error, as CatEngine.start records it.
+  SESSION = Session(
+    estimates=(Estimate(0.0, np.inf, 0), Estimate(0.8, 1.1, 3), Estimate(0.5, 0.9, 4), Estimate(0.6, 0.7, 5)),
+    administered_items=(2, 0, 1),
+    responses=(True, False, True),
   )
 
   @staticmethod
@@ -288,17 +286,14 @@ class TestSessionProgress:
     """Return the lines of the plot and of its twin axes, by label."""
     return {line.get_label(): line for axes in ax.figure.axes for line in axes.get_lines()}
 
-  @pytest.mark.parametrize("session", [SESSION, SESSION.snapshot()], ids=["state", "snapshot"])
-  def test_session_progress_plots_the_recorded_estimates_at_each_test_length(
-    self, session: CatSessionState | CatSessionSnapshot
-  ) -> None:
+  def test_session_progress_plots_the_recorded_estimates_at_each_test_length(self) -> None:
     """After k items the plot shows the k-th estimate and standard error the session recorded, and the k-th item.
 
     Fails if an estimate is paired with another number of items, if the standard error is recomputed rather than read
     from the session (what the stopper judged), if the initial estimate's infinite error is drawn, if difficulties are
-    taken in bank order rather than administration order, or if a session snapshot cannot be plotted.
+    taken in bank order rather than administration order, or if the true ability given is not drawn.
     """
-    ax = plot.session_progress(session, self.ITEM_BANK)
+    ax = plot.session_progress(self.SESSION, self.ITEM_BANK, true_theta=0.4)
     lines = self._lines(ax)
 
     estimate = lines[r"Ability estimate $\hat{\theta}$"]
@@ -325,13 +320,11 @@ class TestSessionProgress:
     assert vertices == {(1.0, -0.3), (1.0, 1.9), (2.0, -0.4), (2.0, 1.4), (3.0, -0.1), (3.0, 1.3)}
 
   def test_session_progress_without_true_ability_draws_no_true_ability_line(self) -> None:
-    """A live session has no true ability, so the plot draws no line for one.
+    """A recorded or live examinee has no known true ability, so the plot draws no line for one.
 
-    Fails if a session without ``true_theta`` raises, or draws a line at some made-up ability.
+    Fails if a plot without ``true_theta`` raises, or draws a line at some made-up ability.
     """
-    live = CatSessionState(
-      session_id="live", estimates=list(self.SESSION.estimates[:2]), administered_items=[2], responses=[True]
-    )
+    live = Session(estimates=self.SESSION.estimates[:2], administered_items=(2,), responses=(True,))
     ax = plot.session_progress(live, self.ITEM_BANK)
 
     assert set(self._lines(ax)) == {r"Ability estimate $\hat{\theta}$", "Item difficulty", "Standard error"}
@@ -348,27 +341,14 @@ class TestSessionProgress:
     assert len(ticks) > 1
     np.testing.assert_array_equal(ticks, np.round(ticks))
 
-  @pytest.mark.parametrize(
-    ("items", "bank_size"),
-    [pytest.param([2, 0, 1], 2, id="past the bank"), pytest.param([2, 0, -1], 3, id="negative")],
-  )
-  def test_session_progress_rejects_items_outside_the_bank_before_drawing(
-    self, items: list[int], bank_size: int
-  ) -> None:
+  def test_session_progress_rejects_items_outside_the_bank_before_drawing(self) -> None:
     """A session whose items are not in the item bank raises before any figure exists.
 
-    Fails if a bad call leaves an empty figure open behind the error, or if a negative item index wraps around to the
-    bank's last item, as numpy indexing does, instead of raising.
+    A session cannot hold a negative index, but it is built without the bank, so it can hold one past it. Fails if a
+    bad call leaves an empty figure open behind the error, or reads past the bank's parameters.
     """
-    session = CatSessionState(
-      session_id="examinee",
-      estimates=list(self.SESSION.estimates),
-      administered_items=items,
-      responses=[True, False, True],
-    )
-
     with pytest.raises(IndexError, match="not items of the bank"):
-      plot.session_progress(session, ItemBank(self.ITEM_BANK.items[:bank_size]))
+      plot.session_progress(self.SESSION, ItemBank(self.ITEM_BANK.items[:2]))
     assert plt.get_fignums() == []
 
 

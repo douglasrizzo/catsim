@@ -89,18 +89,6 @@ def item_bank() -> ItemBank:
 
 
 @pytest.fixture
-def fixed_initializer() -> FixedPointInitializer:
-  """Provide a deterministic initializer."""
-  return FixedPointInitializer(0.0)
-
-
-@pytest.fixture
-def random_selector() -> RandomSelector:
-  """Provide a random selector."""
-  return RandomSelector()
-
-
-@pytest.fixture
 def max_info_selector() -> MaxInfoSelector:
   """Provide a max-information selector."""
   return MaxInfoSelector()
@@ -110,12 +98,6 @@ def max_info_selector() -> MaxInfoSelector:
 def estimator() -> NumericalSearchEstimator:
   """Provide the default numerical estimator."""
   return NumericalSearchEstimator()
-
-
-@pytest.fixture
-def fixed_length_stopper() -> MaxLengthStopper:
-  """Provide a fixed-length stopper."""
-  return MaxLengthStopper(10)
 
 
 @pytest.fixture

@@ -23,14 +23,16 @@ comparison.
 - Every draw comes from a generator or seed the caller passes as `rng`: `None` for fresh entropy
   (NumPy's convention), an `int` for a fixed state, or a `numpy.random.Generator`, used as is.
   catsim never uses global random state.
-- Each step method takes the generator of its call (ADR-0006). The application chooses how its
+- Each step method, `start`, `select` and `answer`, takes the generator of its call (ADR-0006), and
+  the strategies it calls get that generator in their contexts. The application chooses how its
   sessions draw.
 - `simulate` derives one root entropy from `rng`: the seed itself, or a number drawn once from a
   passed generator. Examinee `i`, at position `i` of the run's examinees, draws from two streams of
   its own:
   - `SeedSequence(entropy, spawn_key=(i, 0))` for its response pattern (ADR-0014);
-  - `SeedSequence(entropy, spawn_key=(i, 1))` for its session: the initializer, the selector and
-    the exposure control.
+  - `SeedSequence(entropy, spawn_key=(i, 1))` for its session: the generator of its steps, from
+    which the initializer, the selector and the exposure control draw; no built-in estimator or
+    stopper draws.
 - `ItemBank.generate` takes its own `rng`, so a generated bank depends on no run.
 
 ## Consequences

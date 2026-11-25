@@ -3,11 +3,11 @@
 import importlib.metadata
 
 from .context import Estimate, StepContext
-from .engine import CatEngine, ResponseProvider, RunContext
+from .engine import CatEngine, Selection
 from .exceptions import ExcludedItemError, NoItemsAvailableError
 from .item_bank import IrtModel, ItemBank
-from .simulation import SimulatedResponseProvider, SimulationResult, SimulationRunner
-from .state import CatSessionSnapshot, CatSessionState, CatStepResult, ExposureTracker, StopReason
+from .session import Session, StopReason
+from .simulation import ResponseProvider, SimulatedResponseProvider, SimulationResult, SimulationRunner
 
 try:  # noqa: RUF067 - the version lookup needs a fallback, so it cannot be a plain re-export
   __version__ = importlib.metadata.version("catsim")
@@ -17,17 +17,14 @@ except importlib.metadata.PackageNotFoundError:
 
 __all__ = [
   "CatEngine",
-  "CatSessionSnapshot",
-  "CatSessionState",
-  "CatStepResult",
   "Estimate",
   "ExcludedItemError",
-  "ExposureTracker",
   "IrtModel",
   "ItemBank",
   "NoItemsAvailableError",
   "ResponseProvider",
-  "RunContext",
+  "Selection",
+  "Session",
   "SimulatedResponseProvider",
   "SimulationResult",
   "SimulationRunner",

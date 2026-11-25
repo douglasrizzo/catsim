@@ -30,7 +30,7 @@ arguments (the bank, the items given, the responses, the estimate), and Concerto
   ```python
   engine.start(*, rng, excluded_items=()) -> Session
   engine.select(session, *, rng, exposure_rates=None) -> Selection  # item | None, session, declined
-  engine.answer(session, item, response) -> Session
+  engine.answer(session, item, response, *, rng) -> Session
   ```
 
 - A step's result depends only on its arguments and the engine's configuration. catsim keeps nothing

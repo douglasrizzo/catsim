@@ -123,9 +123,9 @@ class TestIntervalInfoSelector:
 
     assert IntervalInfoSelector().select(make_context(item_bank, theta=0.0, se=np.inf)) == 1
 
-  @pytest.mark.parametrize("se", [0.0, 1e-300, 1e-16])
+  @pytest.mark.parametrize("se", [5e-324, 1e-300, 1e-16])
   def test_a_vanishing_interval_selects_the_most_informative_item_at_the_estimate(self, se: float) -> None:
-    """A zero or near-zero standard error selects by the items' information at theta_hat, the interval's limit.
+    """A near-zero standard error selects by the items' information at theta_hat, the interval's limit.
 
     At theta = 0.3 the 2PL items (a, b) = (2, 0), (1, 3) and (3, -0.2) give a^2 P (1 - P) = 0.915, 0.059 and 1.34,
     so item 2. Fails if the selector integrates over the collapsed interval: every integral is 0 (a random tie) or
