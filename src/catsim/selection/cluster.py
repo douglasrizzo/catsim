@@ -54,7 +54,7 @@ class CapFallback(StrEnum):
 class ClusterSelector(BaseSelector):
   """Choose the best-scoring cluster of items, then the most informative remaining item in it.
 
-  This is the cluster-based selection method of Meneghetti (2015). The caller labels each item with
+  This is the cluster-based selection method of :cite:t:`Meneghetti2015`. The caller labels each item with
   a cluster, for example by clustering the item parameters. At each step the selector scores every
   cluster that still has an item left, takes the best one, and administers that cluster's most
   informative remaining item whose exposure rate is below ``r_max``. Exact ties between clusters and

@@ -29,7 +29,7 @@ _SCAN_POINTS = 121
 
 
 class WarmLikelihoodEstimator(BaseEstimator):
-  r"""Warm's (1989) weighted likelihood estimator (WLE).
+  r"""Weighted likelihood estimator (WLE) of :cite:t:`Warm1989`.
 
   The root of Warm's modified score equation, which removes the MLE's first-order bias and stays
   finite for all-correct and all-incorrect response patterns; see
