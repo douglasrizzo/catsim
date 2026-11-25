@@ -481,7 +481,7 @@
 <dd class="field-odd"><p><a class="reference internal" href="#catsim.selection.MLWISelector" title="catsim.selection.MLWISelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.MLWISelector</span></code></a></p>
 </dd>
 <dt class="field-even">Sources<span class="colon">:</span></dt>
-<dd class="field-even"><p>Veerkamp &amp; Berger (1997)</p>
+<dd class="field-even"><p><span class="bibtex-citation" id="id1">Veerkamp and Berger [<a class="reference internal" href="#id10" title="Wim J. J. Veerkamp and Martijn P. F. Berger. Some new item selection criteria for adaptive testing. Journal of Educational and Behavioral Statistics, 22(2):203–226, 1997. Not openly available; the 1994 research report of the same title is the open version. doi:10.3102/10769986022002203.">1997</a>]</span></p>
 </dd>
 </dl>
 <section id="motivation">
@@ -493,8 +493,8 @@ it spreads attention across plausible ability values without introducing a prior
 </section>
 <section id="definition">
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
-<p>For candidate item <span class="math notranslate nohighlight">\(i\)</span>, MLWI is defined as (Veerkamp &amp; Berger, 1994,
-pp. 11–12, Equations 17 and 18)</p>
+<p>For candidate item <span class="math notranslate nohighlight">\(i\)</span>, MLWI is defined as
+<span class="bibtex-citation" id="id2">[<a class="reference internal" href="#id41" title="Wim J. J. Veerkamp and Martijn P. F. Berger. Some new item selection criteria for adaptive testing. Research Report 94-6, University of Twente, Enschede, 1994. Open copy: https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf.">Veerkamp and Berger, 1994</a>, pp. 11–12, Equations 17 and 18]</span></p>
 <div class="math notranslate nohighlight">
 \[\mathrm{MLWI}_i
 =
@@ -502,8 +502,8 @@ pp. 11–12, Equations 17 and 18)</p>
 <p>It is the general weighted information criterion of the same report (p. 7,
 Equations 7 and 8) with the likelihood as the weight, and it needs no
 provisional ability estimate (p. 12). Before any response the likelihood is 1,
-so the first item is the one with the most total information (p. 12). Magis and
-Raîche (2012, p. 9, Table 1) give the same criterion.</p>
+so the first item is the one with the most total information (p. 12).
+<span class="bibtex-citation" id="id3">Magis and Raîche [<a class="reference internal" href="#id16" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">2012</a>, p. 9, Table 1]</span> give the same criterion.</p>
 <section id="computation">
 <h3>Computation<a class="headerlink" href="#computation" title="Link to this heading">#</a></h3>
 <p>As in Veerkamp and Berger’s simulations (p. 15, Equation 20), catsim approximates
@@ -572,9 +572,22 @@ remaining item with the largest weighted information.</p></li>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Veerkamp, W. J. J., &amp; Berger, M. P. F. (1997). Some new item selection criteria for adaptive testing. <em>Journal of Educational and Behavioral Statistics</em>, 22(2), 203-226. <a class="reference external" href="https://doi.org/10.3102/10769986022002203">https://doi.org/10.3102/10769986022002203</a>. Not openly available; the 1994 report below is the open version.</p>
-<p>Veerkamp, W. J. J., &amp; Berger, M. P. F. (1994). <em>Some new item selection criteria for adaptive testing</em> (Research Report 94-6). Enschede: University of Twente. Open copy: <a class="reference external" href="https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf">University of Twente</a>.</p>
-<p>Magis, D., &amp; Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8), 1-31. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">https://doi.org/10.18637/jss.v048.i08</a> (open access).</p>
+<div class="docutils container" id="id4">
+<div role="list" class="citation-list">
+<div class="citation" id="id16" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">MR12</a><span class="fn-bracket">]</span></span>
+<p>D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8):1–31, 2012. Open access. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">doi:10.18637/jss.v048.i08</a>.</p>
+</div>
+<div class="citation" id="id41" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">VB94</a><span class="fn-bracket">]</span></span>
+<p>Wim J. J. Veerkamp and Martijn P. F. Berger. Some new item selection criteria for adaptive testing. Research Report 94-6, University of Twente, Enschede, 1994. Open copy: <a class="reference external" href="https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf">https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf</a>.</p>
+</div>
+<div class="citation" id="id10" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">VB97</a><span class="fn-bracket">]</span></span>
+<p>Wim J. J. Veerkamp and Martijn P. F. Berger. Some new item selection criteria for adaptive testing. <em>Journal of Educational and Behavioral Statistics</em>, 22(2):203–226, 1997. Not openly available; the 1994 research report of the same title is the open version. <a class="reference external" href="https://doi.org/10.3102/10769986022002203">doi:10.3102/10769986022002203</a>.</p>
+</div>
+</div>
+</div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>Sister spec: <a class="reference internal" href="mei-selector.html"><span class="doc">Maximum Expected Information Selector</span></a></p>

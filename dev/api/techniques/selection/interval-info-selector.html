@@ -481,18 +481,18 @@
 <dd class="field-odd"><p><a class="reference internal" href="#catsim.selection.IntervalInfoSelector" title="catsim.selection.IntervalInfoSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.IntervalInfoSelector</span></code></a></p>
 </dd>
 <dt class="field-even">Sources<span class="colon">:</span></dt>
-<dd class="field-even"><p>Veerkamp &amp; Berger (1997)</p>
+<dd class="field-even"><p><span class="bibtex-citation" id="id1">Veerkamp and Berger [<a class="reference internal" href="#id11" title="Wim J. J. Veerkamp and Martijn P. F. Berger. Some new item selection criteria for adaptive testing. Journal of Educational and Behavioral Statistics, 22(2):203–226, 1997. Not openly available; the 1994 research report of the same title is the open version. doi:10.3102/10769986022002203.">1997</a>]</span></p>
 </dd>
 </dl>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">#</a></h2>
 <p>Point-information rules assume the current estimate is accurate enough to be
 trusted as a single design point, which is least true early in the test.
-The interval information criterion of Veerkamp and Berger (1997) integrates
+The interval information criterion of <span class="bibtex-citation" id="id2">Veerkamp and Berger [<a class="reference internal" href="#id11" title="Wim J. J. Veerkamp and Martijn P. F. Berger. Some new item selection criteria for adaptive testing. Journal of Educational and Behavioral Statistics, 22(2):203–226, 1997. Not openly available; the 1994 research report of the same title is the open version. doi:10.3102/10769986022002203.">1997</a>]</span> integrates
 each item’s information over a confidence interval for <span class="math notranslate nohighlight">\(\theta\)</span> rather than
 evaluate it at a single point.
-Page and equation numbers below are those of the openly available 1994 research
-report that preceded the article; there the criterion is one case of a general
+Page and equation numbers below are those of the openly available <span class="bibtex-citation" id="id3"><a class="reference internal" href="#id42" title="Wim J. J. Veerkamp and Martijn P. F. Berger. Some new item selection criteria for adaptive testing. Research Report 94-6, University of Twente, Enschede, 1994. Open copy: https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf.">1994</a></span>
+research report that preceded the article; there the criterion is one case of a general
 weighted information criterion, <span class="math notranslate nohighlight">\(\max_i \int W_n(\theta)\, I_i(\theta)\, d\theta\)</span>
 (p. 7, Equations 7 and 8).
 The interval is wide while the estimate is uncertain and narrows as items are
@@ -544,8 +544,9 @@ fixed <code class="docutils literal notranslate"><span class="pre">interval</spa
 throughout the test.</p>
 <p>The integral has a closed form, which <a class="reference internal" href="../../irt.html#catsim.irt.info_integral" title="catsim.irt.info_integral"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.info_integral()</span></code></a>
 computes, so the scores of all items are computed exactly, without numerical
-quadrature. It extends the 3PL closed form of Veerkamp and Berger (pp. 21–22,
-Appendix, Equation 25), to which it reduces when <span class="math notranslate nohighlight">\(d_i = 1\)</span>. Under the 2PL model,
+quadrature. It extends the 3PL closed form of
+<span class="bibtex-citation" id="id4">Veerkamp and Berger [<a class="reference internal" href="#id42" title="Wim J. J. Veerkamp and Martijn P. F. Berger. Some new item selection criteria for adaptive testing. Research Report 94-6, University of Twente, Enschede, 1994. Open copy: https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf.">1994</a>, pp. 21–22, Appendix, Equation 25]</span>, to which it reduces
+when <span class="math notranslate nohighlight">\(d_i = 1\)</span>. Under the 2PL model,
 the integral over the whole scale is <span class="math notranslate nohighlight">\(a_i\)</span> (Equation 28).</p>
 </section>
 </section>
@@ -589,8 +590,20 @@ is largest.</p></li>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Veerkamp, W. J. J., &amp; Berger, M. P. F. (1997). Some new item selection criteria for adaptive testing. <em>Journal of Educational and Behavioral Statistics</em>, 22(2), 203-226. <a class="reference external" href="https://doi.org/10.3102/10769986022002203">https://doi.org/10.3102/10769986022002203</a>. Not openly available; the 1994 report below is the open version.</p>
-<p>Veerkamp, W. J. J., &amp; Berger, M. P. F. (1994). <em>Some new item selection criteria for adaptive testing</em> (Research Report 94-6). Enschede: University of Twente. Open copy: <a class="reference external" href="https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf">University of Twente</a>.</p>
+<div class="docutils container" id="id5">
+<div role="list" class="citation-list">
+<div class="citation" id="id42" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>VB94<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id3">1</a>,<a role="doc-backlink" href="#id4">2</a>)</span>
+<p>Wim J. J. Veerkamp and Martijn P. F. Berger. Some new item selection criteria for adaptive testing. Research Report 94-6, University of Twente, Enschede, 1994. Open copy: <a class="reference external" href="https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf">https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf</a>.</p>
+</div>
+<div class="citation" id="id11" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>VB97<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>,<a role="doc-backlink" href="#id1">3</a>)</span>
+<p>Wim J. J. Veerkamp and Martijn P. F. Berger. Some new item selection criteria for adaptive testing. <em>Journal of Educational and Behavioral Statistics</em>, 22(2):203–226, 1997. Not openly available; the 1994 research report of the same title is the open version. <a class="reference external" href="https://doi.org/10.3102/10769986022002203">doi:10.3102/10769986022002203</a>.</p>
+</div>
+</div>
+</div>
 </section>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
@@ -600,7 +613,7 @@ is largest.</p></li>
 <dd><p>Bases: <a class="reference internal" href="index.html#catsim.selection.BaseSelector" title="catsim.selection.base.BaseSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></a></p>
 <p>Select the item whose information, integrated over an interval around the estimate, is largest.</p>
 <p>By default the interval is a confidence interval for the estimate, built from the estimator’s
-standard error (<code class="docutils literal notranslate"><span class="pre">context.se</span></code>) <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../../../references.html#id7" title="Wim J. J. Veerkamp and Martijn P. F. Berger. Some new item selection criteria for adaptive testing. Journal of Educational and Behavioral Statistics, 22(2):203–226, 1997. doi:10.3102/10769986022002203.">Veerkamp and Berger, 1997</a>]</span>. It spans the whole ability scale before the
+standard error (<code class="docutils literal notranslate"><span class="pre">context.se</span></code>) <span class="bibtex-citation" id="id1">[<a class="reference internal" href="#id11" title="Wim J. J. Veerkamp and Martijn P. F. Berger. Some new item selection criteria for adaptive testing. Journal of Educational and Behavioral Statistics, 22(2):203–226, 1997. Not openly available; the 1994 research report of the same title is the open version. doi:10.3102/10769986022002203.">Veerkamp and Berger, 1997</a>]</span>. It spans the whole ability scale before the
 first response and narrows as the standard error falls; a standard error of zero, or nearly zero,
 selects by the items’ information at the estimate. Setting <code class="docutils literal notranslate"><span class="pre">interval</span></code> fixes the half-width. The
 selector applies no exposure cap: <code class="docutils literal notranslate"><span class="pre">context.exposure_rates</span></code> is ignored.</p>

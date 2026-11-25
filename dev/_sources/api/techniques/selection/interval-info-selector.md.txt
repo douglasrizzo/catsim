@@ -1,17 +1,17 @@
 # Interval Information Selector
 
 :Class: {py:class}`catsim.selection.IntervalInfoSelector`
-:Sources: Veerkamp & Berger (1997)
+:Sources: {cite:t}`Veerkamp1997`
 
 ## Motivation
 
 Point-information rules assume the current estimate is accurate enough to be
 trusted as a single design point, which is least true early in the test.
-The interval information criterion of Veerkamp and Berger (1997) integrates
+The interval information criterion of {cite:t}`Veerkamp1997` integrates
 each item's information over a confidence interval for $\theta$ rather than
 evaluate it at a single point.
-Page and equation numbers below are those of the openly available 1994 research
-report that preceded the article; there the criterion is one case of a general
+Page and equation numbers below are those of the openly available {cite:year}`Veerkamp1994`
+research report that preceded the article; there the criterion is one case of a general
 weighted information criterion, $\max_i \int W_n(\theta)\, I_i(\theta)\, d\theta$
 (p. 7, Equations 7 and 8).
 The interval is wide while the estimate is uncertain and narrows as items are
@@ -76,8 +76,9 @@ throughout the test.
 
 The integral has a closed form, which {py:func}`catsim.irt.info_integral`
 computes, so the scores of all items are computed exactly, without numerical
-quadrature. It extends the 3PL closed form of Veerkamp and Berger (pp. 21–22,
-Appendix, Equation 25), to which it reduces when $d_i = 1$. Under the 2PL model,
+quadrature. It extends the 3PL closed form of
+{cite:t}`Veerkamp1994{pp. 21–22, Appendix, Equation 25}`, to which it reduces
+when $d_i = 1$. Under the 2PL model,
 the integral over the whole scale is $a_i$ (Equation 28).
 
 ## Parameters
@@ -109,9 +110,9 @@ the integral over the whole scale is $a_i$ (Equation 28).
 
 ## References
 
-Veerkamp, W. J. J., & Berger, M. P. F. (1997). Some new item selection criteria for adaptive testing. *Journal of Educational and Behavioral Statistics*, 22(2), 203-226. <https://doi.org/10.3102/10769986022002203>. Not openly available; the 1994 report below is the open version.
-
-Veerkamp, W. J. J., & Berger, M. P. F. (1994). *Some new item selection criteria for adaptive testing* (Research Report 94-6). Enschede: University of Twente. Open copy: [University of Twente](https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf).
+```{bibliography}
+:filter: docname in docnames
+```
 
 ## API Reference
 

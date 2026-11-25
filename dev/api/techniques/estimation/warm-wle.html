@@ -472,7 +472,7 @@
 <dd class="field-odd"><p><a class="reference internal" href="#catsim.estimation.WarmLikelihoodEstimator" title="catsim.estimation.WarmLikelihoodEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.WarmLikelihoodEstimator</span></code></a></p>
 </dd>
 <dt class="field-even">Sources<span class="colon">:</span></dt>
-<dd class="field-even"><p>Warm (1989)</p>
+<dd class="field-even"><p><span class="bibtex-citation" id="id1">Warm [<a class="reference internal" href="#id51" title="T. A. Warm. Weighted likelihood estimation of ability in item response theory. Psychometrika, 54(3):427–450, 1989. Not openly available; Warm (1985) derives the same estimator. doi:10.1007/BF02294627.">1989</a>]</span></p>
 </dd>
 </dl>
 <section id="motivation">
@@ -490,15 +490,15 @@ short-test behavior that matters most in adaptive testing.</p>
 <p>Warm’s estimator maximizes the likelihood multiplied by a weight function
 <span class="math notranslate nohighlight">\(w(\theta)\)</span> chosen so that the first-order (<span class="math notranslate nohighlight">\(O(n^{-1})\)</span>) bias of the MLE cancels.
 The weight is defined through its log-derivative,
-<span class="math notranslate nohighlight">\(\frac{d}{d\theta}\ln w(\theta) = J(\theta) / [2 I(\theta)]\)</span> (Warm, 1985, p. 8,
-Equations 9 and 10), so the estimate is the root of the modified score equation</p>
+<span class="math notranslate nohighlight">\(\frac{d}{d\theta}\ln w(\theta) = J(\theta) / [2 I(\theta)]\)</span>
+<span class="bibtex-citation" id="id2">[<a class="reference internal" href="#id52" title="T. A. Warm. Weighted likelihood estimation of ability in item response theory with tests of finite length. PhD thesis, University of Oklahoma, 1985. Open access. URL: https://shareok.org/handle/11244/5356.">Warm, 1985</a>, p. 8, Equations 9 and 10]</span>, so the estimate is the root of the modified score equation</p>
 <div class="math notranslate nohighlight">
 \[\sum_i \frac{\bigl[u_i - P_i(\theta)\bigr] P_i'(\theta)}{P_i(\theta)\,[1-P_i(\theta)]}
 +
 \frac{J(\theta)}{2\,I(\theta)}
 = 0,\]</div>
-<p>(Warm, 1985, p. 8, Equation 11; Magis &amp; Raîche, 2012, p. 6, Equations 12 and
-13), where <span class="math notranslate nohighlight">\(I(\theta)\)</span> is test information and</p>
+<p><span class="bibtex-citation" id="id3">[<a class="reference internal" href="#id52" title="T. A. Warm. Weighted likelihood estimation of ability in item response theory with tests of finite length. PhD thesis, University of Oklahoma, 1985. Open access. URL: https://shareok.org/handle/11244/5356.">Warm, 1985</a>, p. 8, Equation 11]</span>; <span class="bibtex-citation" id="id4">[<a class="reference internal" href="#id24" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, p. 6, Equations 12 and 13]</span>,
+where <span class="math notranslate nohighlight">\(I(\theta)\)</span> is test information and</p>
 <div class="math notranslate nohighlight">
 \[J(\theta)
 =
@@ -507,21 +507,21 @@ Equations 9 and 10), so the estimate is the root of the modified score equation<
      {P_i(\theta)\,[1-P_i(\theta)]}.\]</div>
 <p>For models without guessing or slipping (<span class="math notranslate nohighlight">\(c = 0\)</span>, <span class="math notranslate nohighlight">\(d = 1\)</span>), <span class="math notranslate nohighlight">\(J = I'\)</span> and the
 weight is <span class="math notranslate nohighlight">\(w(\theta) = \sqrt{I(\theta)}\)</span>: the WLE then maximizes
-<span class="math notranslate nohighlight">\(L(\theta)\sqrt{I(\theta)}\)</span>, the likelihood under a Jeffreys prior (Warm, 1985,
-p. 9; Magis &amp; Raîche, 2012, p. 6). With guessing
+<span class="math notranslate nohighlight">\(L(\theta)\sqrt{I(\theta)}\)</span>, the likelihood under a Jeffreys prior
+<span class="bibtex-citation" id="id5">[<a class="reference internal" href="#id52" title="T. A. Warm. Weighted likelihood estimation of ability in item response theory with tests of finite length. PhD thesis, University of Oklahoma, 1985. Open access. URL: https://shareok.org/handle/11244/5356.">Warm, 1985</a>, p. 9]</span>; <span class="bibtex-citation" id="id6">[<a class="reference internal" href="#id24" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, p. 6]</span>. With guessing
 or slipping, <span class="math notranslate nohighlight">\(J \neq I'\)</span>, so the WLE is defined by the equation above and not by
 the <span class="math notranslate nohighlight">\(\sqrt{I}\)</span>-weighted likelihood.</p>
 <p>Expanding the equation around the MLE gives the familiar approximation
 <span class="math notranslate nohighlight">\(\hat{\theta}_{\mathrm{WLE}} \approx \hat{\theta}_{\mathrm{MLE}} + J/(2I^2)\)</span>, which
-is why <span class="math notranslate nohighlight">\(-J/(2I^2)\)</span> is the MLE’s first-order bias (Lord, 1983, as given by Warm,
-1985, p. 7, Equation 6). The implementation
+is why <span class="math notranslate nohighlight">\(-J/(2I^2)\)</span> is the MLE’s first-order bias <span class="bibtex-citation" id="id7">[<a class="reference internal" href="#id53" title="F. M. Lord. Unbiased estimators of ability parameters, of their variance, and of their parallel-forms reliability. Psychometrika, 48(2):233–245, 1983. Not openly available; Warm (1985, p. 7) gives its bias formula. doi:10.1007/BF02294018.">Lord, 1983</a>]</span>, as given by
+<span class="bibtex-citation" id="id8">Warm [<a class="reference internal" href="#id52" title="T. A. Warm. Weighted likelihood estimation of ability in item response theory with tests of finite length. PhD thesis, University of Oklahoma, 1985. Open access. URL: https://shareok.org/handle/11244/5356.">1985</a>, p. 7, Equation 6]</span>. The implementation
 does not use this approximation: it fails exactly where WLE matters most, because
 the MLE is infinite for all-correct and all-incorrect patterns, and with guessing it
 can sit on the search bound, where <span class="math notranslate nohighlight">\(I \approx 0\)</span> makes the correction explode.</p>
 <p>The estimator returns a <a class="reference internal" href="../../context.html#catsim.Estimate" title="catsim.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a>. Its standard error
 is the Fisher one at the estimate, <span class="math notranslate nohighlight">\(1/\sqrt{I(\hat{\theta})}\)</span>, infinite where
-the information is 0. This departs from Magis and Raîche (2012, p. 6, Equation
-14), who add <span class="math notranslate nohighlight">\((I'J - IJ')/(2I^2)\)</span> to the information, and follows catR: since
+the information is 0. This departs from <span class="bibtex-citation" id="id9">Magis and Raîche [<a class="reference internal" href="#id24" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">2012</a>, p. 6, Equation 14]</span>,
+who add <span class="math notranslate nohighlight">\((I'J - IJ')/(2I^2)\)</span> to the information, and follows catR: since
 version 3.0 its <code class="docutils literal notranslate"><span class="pre">semTheta</span></code> gives the WLE the maximum likelihood formula, because
 the corrected one sometimes led to mathematical problems (<a class="reference external" href="https://github.com/cran/catR/blob/master/NEWS">catR’s
 NEWS</a>, version 3.0), and its
@@ -541,8 +541,8 @@ of the weighted likelihood and is refined with Brent’s method. If several maxi
 exist, which can happen with guessing, the one with the largest weighted
 likelihood is returned; candidates are ranked by integrating the modified score,
 the derivative of the weighted log-likelihood. If the modified score never changes
-sign, the estimate is the bound it points to. This mirrors <code class="docutils literal notranslate"><span class="pre">catR</span></code> (Magis and
-Raîche, 2012), whose
+sign, the estimate is the bound it points to. This mirrors <code class="docutils literal notranslate"><span class="pre">catR</span></code>
+<span class="bibtex-citation" id="id10">[<a class="reference internal" href="#id24" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>]</span>, whose
 <a class="reference external" href="https://github.com/cran/catR/blob/master/R/thetaEst.R"><code class="docutils literal notranslate"><span class="pre">thetaEst.R</span></code></a> solves the
 same equation with <code class="docutils literal notranslate"><span class="pre">uniroot</span></code>; catsim adds the explicit handling of multiple
 roots.</p>
@@ -581,8 +581,8 @@ roots.</p>
 and 10 items, 3,000 simulated ones for 20 and 40), the classic formula
 overestimates the error in short tests, by 10% under the 2PL and 28% under the 3PL
 at 5 items. That is conservative: a standard-error stopper runs a few items longer
-than needed. Equation 14 roughly halves that gap. The sandwich formula of Magis
-(2016), catR’s <code class="docutils literal notranslate"><span class="pre">sem.type</span> <span class="pre">=</span> <span class="pre">&quot;new&quot;</span></code>, is closest under the 3PL but underestimates the
+than needed. Equation 14 roughly halves that gap. The sandwich formula of
+<span class="bibtex-citation" id="id11">Magis [<a class="reference internal" href="#id54" title="D. Magis. Efficient standard error formulas of ability estimators with dichotomous item response models. Psychometrika, 81(1):184–200, 2016. doi:10.1007/s11336-015-9443-3.">2016</a>]</span>, catR’s <code class="docutils literal notranslate"><span class="pre">sem.type</span> <span class="pre">=</span> <span class="pre">&quot;new&quot;</span></code>, is closest under the 3PL but underestimates the
 error under the 2PL (by 8% at 5 items), which would stop tests too early. From 20
 items on, the three agree within about 3%.</p>
 </section>
@@ -603,11 +603,33 @@ the items, so no unconditional bias guarantee is made for that case.</p></li>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Warm, T. A. (1989). Weighted likelihood estimation of ability in item response theory. <em>Psychometrika</em>, 54(3), 427-450. <a class="reference external" href="https://doi.org/10.1007/BF02294627">https://doi.org/10.1007/BF02294627</a>. Not openly available; Warm (1985) derives the same estimator.</p>
-<p>Warm, T. A. (1985). <em>Weighted likelihood estimation of ability in item response theory with tests of finite length</em> (Doctoral dissertation). University of Oklahoma. <a class="reference external" href="https://shareok.org/handle/11244/5356">https://shareok.org/handle/11244/5356</a> (open access).</p>
-<p>Lord, F. M. (1983). Unbiased estimators of ability parameters, of their variance, and of their parallel-forms reliability. <em>Psychometrika</em>, 48(2), 233-245. <a class="reference external" href="https://doi.org/10.1007/BF02294018">https://doi.org/10.1007/BF02294018</a>. Not openly available; Warm (1985, p. 7) gives its bias formula.</p>
-<p>Magis, D. (2016). Efficient standard error formulas of ability estimators with dichotomous item response models. <em>Psychometrika</em>, 81(1), 184-200. <a class="reference external" href="https://doi.org/10.1007/s11336-015-9443-3">https://doi.org/10.1007/s11336-015-9443-3</a>.</p>
-<p>Magis, D., &amp; Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8), 1-31. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">https://doi.org/10.18637/jss.v048.i08</a> (open access).</p>
+<div class="docutils container" id="id12">
+<div role="list" class="citation-list">
+<div class="citation" id="id53" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">Lor83</a><span class="fn-bracket">]</span></span>
+<p>F. M. Lord. Unbiased estimators of ability parameters, of their variance, and of their parallel-forms reliability. <em>Psychometrika</em>, 48(2):233–245, 1983. Not openly available; Warm (1985, p. 7) gives its bias formula. <a class="reference external" href="https://doi.org/10.1007/BF02294018">doi:10.1007/BF02294018</a>.</p>
+</div>
+<div class="citation" id="id54" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id11">Mag16</a><span class="fn-bracket">]</span></span>
+<p>D. Magis. Efficient standard error formulas of ability estimators with dichotomous item response models. <em>Psychometrika</em>, 81(1):184–200, 2016. <a class="reference external" href="https://doi.org/10.1007/s11336-015-9443-3">doi:10.1007/s11336-015-9443-3</a>.</p>
+</div>
+<div class="citation" id="id24" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>MR12<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id4">1</a>,<a role="doc-backlink" href="#id6">2</a>,<a role="doc-backlink" href="#id9">3</a>,<a role="doc-backlink" href="#id10">4</a>)</span>
+<p>D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8):1–31, 2012. Open access. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">doi:10.18637/jss.v048.i08</a>.</p>
+</div>
+<div class="citation" id="id52" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>War85<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id2">1</a>,<a role="doc-backlink" href="#id3">2</a>,<a role="doc-backlink" href="#id5">3</a>,<a role="doc-backlink" href="#id8">4</a>)</span>
+<p>T. A. Warm. <em>Weighted likelihood estimation of ability in item response theory with tests of finite length</em>. PhD thesis, University of Oklahoma, 1985. Open access. URL: <a class="reference external" href="https://shareok.org/handle/11244/5356">https://shareok.org/handle/11244/5356</a>.</p>
+</div>
+<div class="citation" id="id51" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>War89<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id1">2</a>)</span>
+<p>T. A. Warm. Weighted likelihood estimation of ability in item response theory. <em>Psychometrika</em>, 54(3):427–450, 1989. Not openly available; Warm (1985) derives the same estimator. <a class="reference external" href="https://doi.org/10.1007/BF02294627">doi:10.1007/BF02294627</a>.</p>
+</div>
+</div>
+</div>
 </section>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
@@ -615,7 +637,7 @@ the items, so no unconditional bias guarantee is made for that case.</p></li>
 <dt class="sig sig-object py" id="catsim.estimation.WarmLikelihoodEstimator">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.estimation.</span></span><span class="sig-name descname"><span class="pre">WarmLikelihoodEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(-6.0,</span> <span class="pre">6.0)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/estimation/wle.html#WarmLikelihoodEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.WarmLikelihoodEstimator" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="index.html#catsim.estimation.BaseEstimator" title="catsim.estimation.base.BaseEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code></a></p>
-<p>Warm’s (1989) weighted likelihood estimator (WLE).</p>
+<p>Weighted likelihood estimator (WLE) of <span class="bibtex-citation" id="id1">Warm [<a class="reference internal" href="#id51" title="T. A. Warm. Weighted likelihood estimation of ability in item response theory. Psychometrika, 54(3):427–450, 1989. Not openly available; Warm (1985) derives the same estimator. doi:10.1007/BF02294627.">1989</a>]</span>.</p>
 <p>The root of Warm’s modified score equation, which removes the MLE’s first-order bias and stays
 finite for all-correct and all-incorrect response patterns; see
 <a class="reference internal" href="#"><span class="doc">Warm Weighted Likelihood Estimator</span></a>. If the equation has several roots within <code class="docutils literal notranslate"><span class="pre">bounds</span></code>,

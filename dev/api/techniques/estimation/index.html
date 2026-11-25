@@ -837,7 +837,7 @@ per step.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><a class="reference internal" href="numerical-search-estimator.html#catsim.estimation.NumericalSearchEstimator" title="catsim.estimation.NumericalSearchEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericalSearchEstimator</span></code></a></p></td>
-<td><p><span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta)}\)</span>, the Fisher standard error (Magis and Raîche 2012, Eq. 3, p. 4)</p></td>
+<td><p><span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta)}\)</span>, the Fisher standard error <span class="bibtex-citation" id="id1">[<a class="reference internal" href="#id14" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, Eq. 3, p. 4]</span></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="eap-estimator.html#catsim.estimation.EAPEstimator" title="catsim.estimation.EAPEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EAPEstimator</span></code></a></p></td>
 <td><p>the posterior standard deviation (Eq. 11, p. 6)</p></td>
@@ -878,6 +878,17 @@ threshold the stopping decision after 20 items differed in 47 sessions.</p>
   BaseEstimator &lt;|-- NumericalSearchEstimator
   BaseEstimator &lt;|-- WarmLikelihoodEstimator
     </pre></section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
+<div class="docutils container" id="id2">
+<div role="list" class="citation-list">
+<div class="citation" id="id14" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">MR12</a><span class="fn-bracket">]</span></span>
+<p>D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8):1–31, 2012. Open access. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">doi:10.18637/jss.v048.i08</a>.</p>
+</div>
+</div>
+</div>
+</section>
 <section id="base-class">
 <h2>Base Class<a class="headerlink" href="#base-class" title="Link to this heading">#</a></h2>
 <dl class="py class">
@@ -969,6 +980,7 @@ estimate before them.</p>
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implemented">Implemented</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#class-hierarchy">Class Hierarchy</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#base-class">Base Class</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.estimation.BaseEstimator"><code class="docutils literal notranslate"><span class="pre">BaseEstimator</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.estimation.BaseEstimator.estimate"><code class="docutils literal notranslate"><span class="pre">BaseEstimator.estimate()</span></code></a></li>

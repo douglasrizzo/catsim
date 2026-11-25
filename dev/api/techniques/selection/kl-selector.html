@@ -481,7 +481,7 @@
 <dd class="field-odd"><p><a class="reference internal" href="#catsim.selection.KLSelector" title="catsim.selection.KLSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.KLSelector</span></code></a></p>
 </dd>
 <dt class="field-even">Sources<span class="colon">:</span></dt>
-<dd class="field-even"><p>Chang &amp; Ying (1996)</p>
+<dd class="field-even"><p><span class="bibtex-citation" id="id1">Chang and Ying [<a class="reference internal" href="#id20" title="H.-H. Chang and Z. Ying. A global information approach to computerized adaptive testing. Applied Psychological Measurement, 20(3):213–229, 1996. Open copy: https://hdl.handle.net/11299/119092. doi:10.1177/014662169602000303.">1996</a>]</span></p>
 </dd>
 </dl>
 <section id="motivation">
@@ -496,8 +496,8 @@ so the method behaves more globally early in the test and more locally later on.
 <section id="definition">
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
 <p>For candidate item <span class="math notranslate nohighlight">\(i\)</span>, current estimate <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>, and a
-comparison point <span class="math notranslate nohighlight">\(\theta\)</span>, the item-level divergence (Chang &amp; Ying, 1996,
-p. 217, Definition 2.1) is</p>
+comparison point <span class="math notranslate nohighlight">\(\theta\)</span>, the item-level divergence
+<span class="bibtex-citation" id="id2">[<a class="reference internal" href="#id20" title="H.-H. Chang and Z. Ying. A global information approach to computerized adaptive testing. Applied Psychological Measurement, 20(3):213–229, 1996. Open copy: https://hdl.handle.net/11299/119092. doi:10.1177/014662169602000303.">Chang and Ying, 1996</a>, p. 217, Definition 2.1]</span> is</p>
 <div class="math notranslate nohighlight">
 \[K_i(\theta \,\|\, \hat{\theta})
 =
@@ -555,7 +555,7 @@ nodes and the error grows, to about <span class="math notranslate nohighlight">\
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">window</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">3.0</span></code></p></td>
 <td><p>Positive constant <span class="math notranslate nohighlight">\(c\)</span> controlling the half-width <span class="math notranslate nohighlight">\(\delta_n = c/\sqrt{n}\)</span>.
-Chang and Ying (1996) chose <span class="math notranslate nohighlight">\(c\)</span> from the coverage probability of a
+<span class="bibtex-citation" id="id1">Chang and Ying [<a class="reference internal" href="#id20" title="H.-H. Chang and Z. Ying. A global information approach to computerized adaptive testing. Applied Psychological Measurement, 20(3):213–229, 1996. Open copy: https://hdl.handle.net/11299/119092. doi:10.1177/014662169602000303.">1996</a>]</span> chose <span class="math notranslate nohighlight">\(c\)</span> from the coverage probability of a
 confidence interval for <span class="math notranslate nohighlight">\(\theta\)</span> (p. 221) and used <span class="math notranslate nohighlight">\(c = 3\)</span> in
 their simulation (p. 223).</p></td>
 </tr>
@@ -579,7 +579,15 @@ remaining item with the largest KL integral.</p></li>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Chang, H.-H., &amp; Ying, Z. (1996). A global information approach to computerized adaptive testing. <em>Applied Psychological Measurement</em>, 20(3), 213-229. <a class="reference external" href="https://doi.org/10.1177/014662169602000303">https://doi.org/10.1177/014662169602000303</a>. Open copy: <a class="reference external" href="https://hdl.handle.net/11299/119092">University of Minnesota Digital Conservancy</a>.</p>
+<div class="docutils container" id="id3">
+<div role="list" class="citation-list">
+<div class="citation" id="id20" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>CY96<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>,<a role="doc-backlink" href="#id1">3</a>)</span>
+<p>H.-H. Chang and Z. Ying. A global information approach to computerized adaptive testing. <em>Applied Psychological Measurement</em>, 20(3):213–229, 1996. Open copy: <a class="reference external" href="https://hdl.handle.net/11299/119092">https://hdl.handle.net/11299/119092</a>. <a class="reference external" href="https://doi.org/10.1177/014662169602000303">doi:10.1177/014662169602000303</a>.</p>
+</div>
+</div>
+</div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>Posterior-weighted variant: a planned extension, KLP.</p>

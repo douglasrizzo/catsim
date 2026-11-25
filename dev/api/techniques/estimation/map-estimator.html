@@ -472,21 +472,21 @@
 <dd class="field-odd"><p><a class="reference internal" href="#catsim.estimation.MAPEstimator" title="catsim.estimation.MAPEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.MAPEstimator</span></code></a></p>
 </dd>
 <dt class="field-even">Sources<span class="colon">:</span></dt>
-<dd class="field-even"><p>Samejima (1969); Bock &amp; Aitkin (1981)</p>
+<dd class="field-even"><p><span class="bibtex-citation" id="id1">Samejima [<a class="reference internal" href="#id43" title="F. Samejima. Estimation of latent ability using a response pattern of graded scores. Psychometrika, 34(S1):1–97, 1969. Psychometrika Monograph Supplement No. 17. Open copy: https://psychometricsociety.org/sites/main/files/file-attachments/mn17.pdf. doi:10.1007/BF03372160.">1969</a>]</span>; <span class="bibtex-citation" id="id2">Bock and Aitkin [<a class="reference internal" href="#id40" title="R. D. Bock and M. Aitkin. Marginal maximum likelihood estimation of item parameters: application of an EM algorithm. Psychometrika, 46(4):443–459, 1981. Not openly available; Bock and Mislevy (1982, p. 432) describe its quadrature formulas. doi:10.1007/BF02293801.">1981</a>]</span></p>
 </dd>
 </dl>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">#</a></h2>
 <p>MAP, also called the Bayes modal estimator, is the posterior mode: the
-maximum-likelihood estimate with a prior added to the objective. Samejima
-(1969, p. 7, Equations 2-5 and 2-6) defines the Bayes modal estimator as the
-value that maximizes the prior density times the likelihood; Bock and Mislevy
-(1982, p. 432) credit Bock and Aitkin (1981) with the name MAP, and Magis and
-Raîche (2012, p. 4) attribute the estimator to Birnbaum (1969). The prior keeps
+maximum-likelihood estimate with a prior added to the objective.
+<span class="bibtex-citation" id="id3">Samejima [<a class="reference internal" href="#id43" title="F. Samejima. Estimation of latent ability using a response pattern of graded scores. Psychometrika, 34(S1):1–97, 1969. Psychometrika Monograph Supplement No. 17. Open copy: https://psychometricsociety.org/sites/main/files/file-attachments/mn17.pdf. doi:10.1007/BF03372160.">1969</a>, p. 7, Equations 2-5 and 2-6]</span> defines the Bayes modal
+estimator as the value that maximizes the prior density times the likelihood;
+<span class="bibtex-citation" id="id4">Bock and Mislevy [<a class="reference internal" href="#id41" title="R. D. Bock and R. J. Mislevy. Adaptive EAP estimation of ability in a microcomputer environment. Applied Psychological Measurement, 6(4):431–444, 1982. Open copy: https://hdl.handle.net/11299/101546. doi:10.1177/014662168200600405.">1982</a>, p. 432]</span> credit <span class="bibtex-citation" id="id5">Bock and Aitkin [<a class="reference internal" href="#id40" title="R. D. Bock and M. Aitkin. Marginal maximum likelihood estimation of item parameters: application of an EM algorithm. Psychometrika, 46(4):443–459, 1981. Not openly available; Bock and Mislevy (1982, p. 432) describe its quadrature formulas. doi:10.1007/BF02293801.">1981</a>]</span> with the name MAP, and
+<span class="bibtex-citation" id="id6">Magis and Raîche [<a class="reference internal" href="#id23" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">2012</a>, p. 4]</span> attribute the estimator to <span class="bibtex-citation" id="id7">Birnbaum [<a class="reference internal" href="#id44" title="A. Birnbaum. Statistical theory for logistic mental test models with a prior distribution of ability. Journal of Mathematical Psychology, 6(2):258–276, 1969. Not openly available. doi:10.1016/0022-2496(69)90005-4.">1969</a>]</span>. The prior keeps
 the estimate finite for all-correct and all-incorrect patterns, where the MLE
 does not exist, while the computation stays a one-dimensional optimization like
 the MLE’s, with no quadrature grid.</p>
-<p>It is not necessarily cheaper than EAP: Bock and Mislevy (1982, p. 432) argue
+<p>It is not necessarily cheaper than EAP: <span class="bibtex-citation" id="id8">Bock and Mislevy [<a class="reference internal" href="#id41" title="R. D. Bock and R. J. Mislevy. Adaptive EAP estimation of ability in a microcomputer environment. Applied Psychological Measurement, 6(4):431–444, 1982. Open copy: https://hdl.handle.net/11299/101546. doi:10.1177/014662168200600405.">1982</a>, p. 432]</span> argue
 the opposite for adaptive testing, since EAP’s quadrature sums accumulate item by
 item while MAP needs a new optimization after every response.</p>
 </section>
@@ -511,8 +511,8 @@ standard error is</p>
 curvature is a central difference, so any prior works. For a normal prior with
 variance <span class="math notranslate nohighlight">\(\sigma^2\)</span> the curvature is <span class="math notranslate nohighlight">\(-1/\sigma^2\)</span>, and this is the standard
 error catR gives the Bayes modal estimator,
-<span class="math notranslate nohighlight">\(1/\sqrt{I(\hat{\theta}) + 1/\sigma^2}\)</span> (Magis &amp; Raîche, 2012, p. 5, Equation
-6). Inside a uniform prior’s support the curvature is 0; at the support’s edge
+<span class="math notranslate nohighlight">\(1/\sqrt{I(\hat{\theta}) + 1/\sigma^2}\)</span> <span class="bibtex-citation" id="id9">[<a class="reference internal" href="#id23" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, p. 5, Equation 6]</span>.
+Inside a uniform prior’s support the curvature is 0; at the support’s edge
 the difference is not finite and the prior adds nothing. Both give the Fisher
 standard error, <span class="math notranslate nohighlight">\(1/\sqrt{I(\hat{\theta})}\)</span>. Where the sum is not positive, as
 with a uniform prior and no responses, the standard error is infinite.</p>
@@ -576,7 +576,7 @@ spacing does.</p>
 prior the derivative of the log-posterior points toward the prior mean at the
 MLE and toward the MLE at the prior mean, and its single root lies between them
 (the second guarantee below). With a uniform prior over a wide enough interval,
-MAP coincides with the MLE (Magis &amp; Raîche, 2012, p. 5).</p>
+MAP coincides with the MLE <span class="bibtex-citation" id="id10">[<a class="reference internal" href="#id23" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, p. 5]</span>.</p>
 <p>On long, information-rich tests, MAP and EAP converge toward similar values
 because the posterior becomes sharply concentrated.</p>
 </section>
@@ -593,11 +593,34 @@ because the posterior becomes sharply concentrated.</p>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Samejima, F. (1969). Estimation of latent ability using a response pattern of graded scores. <em>Psychometrika Monograph Supplement</em>, No. 17. <a class="reference external" href="https://doi.org/10.1007/BF03372160">https://doi.org/10.1007/BF03372160</a>. Open copy: <a class="reference external" href="https://psychometricsociety.org/sites/main/files/file-attachments/mn17.pdf">Psychometric Society</a>.</p>
-<p>Bock, R. D., &amp; Aitkin, M. (1981). Marginal maximum likelihood estimation of item parameters: Application of an EM algorithm. <em>Psychometrika</em>, 46(4), 443-459. <a class="reference external" href="https://doi.org/10.1007/BF02293801">https://doi.org/10.1007/BF02293801</a>. Not openly available.</p>
-<p>Bock, R. D., &amp; Mislevy, R. J. (1982). Adaptive EAP estimation of ability in a microcomputer environment. <em>Applied Psychological Measurement</em>, 6(4), 431-444. <a class="reference external" href="https://doi.org/10.1177/014662168200600405">https://doi.org/10.1177/014662168200600405</a>. Open copy: <a class="reference external" href="https://hdl.handle.net/11299/101546">University of Minnesota Digital Conservancy</a>.</p>
-<p>Birnbaum, A. (1969). Statistical theory for logistic mental test models with a prior distribution of ability. <em>Journal of Mathematical Psychology</em>, 6(2), 258-276. <a class="reference external" href="https://doi.org/10.1016/0022-2496(69)90005-4">https://doi.org/10.1016/0022-2496(69)90005-4</a>. Not openly available.</p>
-<p>Magis, D., &amp; Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8), 1-31. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">https://doi.org/10.18637/jss.v048.i08</a> (open access).</p>
+<div class="docutils container" id="id11">
+<div role="list" class="citation-list">
+<div class="citation" id="id44" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">Bir69</a><span class="fn-bracket">]</span></span>
+<p>A. Birnbaum. Statistical theory for logistic mental test models with a prior distribution of ability. <em>Journal of Mathematical Psychology</em>, 6(2):258–276, 1969. Not openly available. <a class="reference external" href="https://doi.org/10.1016/0022-2496(69)90005-4">doi:10.1016/0022-2496(69)90005-4</a>.</p>
+</div>
+<div class="citation" id="id40" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>BA81<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id2">1</a>,<a role="doc-backlink" href="#id5">2</a>)</span>
+<p>R. D. Bock and M. Aitkin. Marginal maximum likelihood estimation of item parameters: application of an EM algorithm. <em>Psychometrika</em>, 46(4):443–459, 1981. Not openly available; Bock and Mislevy (1982, p. 432) describe its quadrature formulas. <a class="reference external" href="https://doi.org/10.1007/BF02293801">doi:10.1007/BF02293801</a>.</p>
+</div>
+<div class="citation" id="id41" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>BM82<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id4">1</a>,<a role="doc-backlink" href="#id8">2</a>)</span>
+<p>R. D. Bock and R. J. Mislevy. Adaptive EAP estimation of ability in a microcomputer environment. <em>Applied Psychological Measurement</em>, 6(4):431–444, 1982. Open copy: <a class="reference external" href="https://hdl.handle.net/11299/101546">https://hdl.handle.net/11299/101546</a>. <a class="reference external" href="https://doi.org/10.1177/014662168200600405">doi:10.1177/014662168200600405</a>.</p>
+</div>
+<div class="citation" id="id23" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>MR12<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id6">1</a>,<a role="doc-backlink" href="#id9">2</a>,<a role="doc-backlink" href="#id10">3</a>)</span>
+<p>D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8):1–31, 2012. Open access. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">doi:10.18637/jss.v048.i08</a>.</p>
+</div>
+<div class="citation" id="id43" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Sam69<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id3">2</a>)</span>
+<p>F. Samejima. Estimation of latent ability using a response pattern of graded scores. <em>Psychometrika</em>, 34(S1):1–97, 1969. Psychometrika Monograph Supplement No. 17. Open copy: <a class="reference external" href="https://psychometricsociety.org/sites/main/files/file-attachments/mn17.pdf">https://psychometricsociety.org/sites/main/files/file-attachments/mn17.pdf</a>. <a class="reference external" href="https://doi.org/10.1007/BF03372160">doi:10.1007/BF03372160</a>.</p>
+</div>
+</div>
+</div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="bayesian-infrastructure.html"><span class="doc">Bayesian Estimation Infrastructure</span></a>,

@@ -755,6 +755,7 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l1"><a class="reference internal" href="live-sessions.html">Live CAT Sessions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reproducibility.html">Reproducibility</a></li>
 <li class="toctree-l1"><a class="reference internal" href="extending.html">Extending catsim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 </ul>
 </div>
 </nav></div>
@@ -842,7 +843,7 @@ on item response theory, the subject of the next section.</p>
 </section>
 <section id="item-response-theory-models">
 <h2>Item Response Theory Models<a class="headerlink" href="#item-response-theory-models" title="Link to this heading">#</a></h2>
-<p><a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> uses item response theory <span class="bibtex-citation" id="id1">[<a class="reference internal" href="references.html#id10" title="F. M. Lord, M. R. Novick, and A. Birnbaum. Statistical theories of mental test scores. Addison-Wesley, Reading, MA, 1968.">Lord <em>et al.</em>, 1968</a>, <a class="reference internal" href="references.html#id12" title="G. Rasch. An item analysis which takes individual differences into account. The British Journal of Mathematical and Statistical Psychology, 19(1):49–57, 1966. doi:10.1111/j.2044-8317.1966.tb00354.x.">Rasch, 1966</a>]</span>, a family of models developed
+<p><a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> uses item response theory <span class="bibtex-citation" id="id1">[<a class="reference internal" href="references.html#id10" title="F. M. Lord and M. R. Novick. Statistical theories of mental test scores. Addison-Wesley, Reading, MA, 1968. With contributions by A. Birnbaum.">Lord and Novick, 1968</a>, <a class="reference internal" href="references.html#id12" title="G. Rasch. An item analysis which takes individual differences into account. The British Journal of Mathematical and Statistical Psychology, 19(1):49–57, 1966. doi:10.1111/j.2044-8317.1966.tb00354.x.">Rasch, 1966</a>]</span>, a family of models developed
 in the second half of the 20th century to measure abilities and to compare examinees on a common
 ability scale, which also justifies its use in adaptive testing. <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> implements its
 one-, two-, three- and four-parameter logistic models, in which examinees and items are represented
@@ -929,12 +930,12 @@ item matrix, and <a class="reference internal" href="api/item_bank.html#catsim.I
 </div>
 <p>These examples draw five items under each logistic model. Whatever the model, the item matrix has
 four columns. In the last example, the discrimination and the difficulty have a correlation of
-<span class="math notranslate nohighlight">\(0.5\)</span>, which simulations may need <span class="bibtex-citation" id="id7">[<a class="reference internal" href="references.html#id14" title="H.-H. Chang, J. Qian, and Z. Ying. A-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. doi:10.1177/01466210122032181.">Chang <em>et al.</em>, 2001</a>]</span>.</p>
+<span class="math notranslate nohighlight">\(0.5\)</span>, which simulations may need <span class="bibtex-citation" id="id7">[<a class="reference internal" href="references.html#id14" title="H.-H. Chang, J. Qian, and Z. Ying. a-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. Not openly available; Barrada et al. (2006) describe the method. doi:10.1177/01466210122032181.">Chang <em>et al.</em>, 2001</a>]</span>.</p>
 </section>
 </section>
 <section id="computerized-adaptive-tests">
 <h2>Computerized Adaptive Tests<a class="headerlink" href="#computerized-adaptive-tests" title="Link to this heading">#</a></h2>
-<p>Computerized adaptive testing emerged in the 1970s as <em>tailored testing</em> <span class="bibtex-citation" id="id8">[<a class="reference internal" href="references.html#id11" title="F. M. Lord. A broad-range tailored test of verbal ability. Applied Psychological Measurement, 1(1):95–100, 1977. doi:10.1177/014662167700100115.">Lord, 1977</a>]</span>. A linear
+<p>Computerized adaptive testing emerged in the 1970s as <em>tailored testing</em> <span class="bibtex-citation" id="id8">[<a class="reference internal" href="references.html#id11" title="F. M. Lord. A broad-range tailored test of verbal ability. Applied Psychological Measurement, 1(1):95–100, 1977. Open copy: https://hdl.handle.net/11299/98423. doi:10.1177/014662167700100115.">Lord, 1977</a>]</span>. A linear
 test estimates an examinee’s ability once, at the end. A computerized adaptive test (CAT) updates the
 estimate after each response. Knowing more about the ability at each step lets the test
 choose more informative items <em>during</em> the test, so the standard error of the estimate falls

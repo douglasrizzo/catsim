@@ -1,7 +1,7 @@
 # Maximum Likelihood Weighted Information Selector
 
 :Class: {py:class}`catsim.selection.MLWISelector`
-:Sources: Veerkamp & Berger (1997)
+:Sources: {cite:t}`Veerkamp1997`
 
 ## Motivation
 
@@ -12,8 +12,8 @@ it spreads attention across plausible ability values without introducing a prior
 
 ## Definition
 
-For candidate item $i$, MLWI is defined as (Veerkamp & Berger, 1994,
-pp. 11–12, Equations 17 and 18)
+For candidate item $i$, MLWI is defined as
+{cite:p}`Veerkamp1994{pp. 11–12, Equations 17 and 18}`
 
 $$
 \mathrm{MLWI}_i
@@ -24,8 +24,8 @@ $$
 It is the general weighted information criterion of the same report (p. 7,
 Equations 7 and 8) with the likelihood as the weight, and it needs no
 provisional ability estimate (p. 12). Before any response the likelihood is 1,
-so the first item is the one with the most total information (p. 12). Magis and
-Raîche (2012, p. 9, Table 1) give the same criterion.
+so the first item is the one with the most total information (p. 12).
+{cite:t}`Magis12{p. 9, Table 1}` give the same criterion.
 
 ### Computation
 
@@ -85,11 +85,9 @@ peaked, its choices approach maximum-information selection near the ML estimate.
 
 ## References
 
-Veerkamp, W. J. J., & Berger, M. P. F. (1997). Some new item selection criteria for adaptive testing. *Journal of Educational and Behavioral Statistics*, 22(2), 203-226. <https://doi.org/10.3102/10769986022002203>. Not openly available; the 1994 report below is the open version.
-
-Veerkamp, W. J. J., & Berger, M. P. F. (1994). *Some new item selection criteria for adaptive testing* (Research Report 94-6). Enschede: University of Twente. Open copy: [University of Twente](https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf).
-
-Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
+```{bibliography}
+:filter: docname in docnames
+```
 
 :::{seealso}
 Sister spec: {doc}`/api/techniques/selection/mei-selector`

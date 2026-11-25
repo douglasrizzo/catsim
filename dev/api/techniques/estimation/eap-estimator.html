@@ -472,7 +472,7 @@
 <dd class="field-odd"><p><a class="reference internal" href="#catsim.estimation.EAPEstimator" title="catsim.estimation.EAPEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.EAPEstimator</span></code></a></p>
 </dd>
 <dt class="field-even">Sources<span class="colon">:</span></dt>
-<dd class="field-even"><p>Bock &amp; Mislevy (1982)</p>
+<dd class="field-even"><p><span class="bibtex-citation" id="id1">Bock and Mislevy [<a class="reference internal" href="#id36" title="R. D. Bock and R. J. Mislevy. Adaptive EAP estimation of ability in a microcomputer environment. Applied Psychological Measurement, 6(4):431–444, 1982. Open copy: https://hdl.handle.net/11299/101546. doi:10.1177/014662168200600405.">1982</a>]</span></p>
 </dd>
 </dl>
 <section id="motivation">
@@ -481,14 +481,14 @@
 than the maximizer of a likelihood. In CAT practice this is attractive because
 it always returns a finite value, even for all-correct or all-incorrect patterns
 where the MLE does not exist, so no heuristic such as Dodd’s is needed early in
-the test; Bock and Mislevy (1982, p. 443) conclude that it is stable at all
+the test; <span class="bibtex-citation" id="id2">Bock and Mislevy [<a class="reference internal" href="#id36" title="R. D. Bock and R. J. Mislevy. Adaptive EAP estimation of ability in a microcomputer environment. Applied Psychological Measurement, 6(4):431–444, 1982. Open copy: https://hdl.handle.net/11299/101546. doi:10.1177/014662168200600405.">1982</a>, p. 443]</span> conclude that it is stable at all
 adaptive test lengths, including the first few items.</p>
 <p>EAP’s posterior also yields the posterior variance at no extra cost, and that
-variance serves as the error variance of the estimate (Bock &amp; Mislevy, 1982,
-p. 432); in their simulations the posterior standard deviation behaved like the
+variance serves as the error variance of the estimate <span class="bibtex-citation" id="id3">[<a class="reference internal" href="#id36" title="R. D. Bock and R. J. Mislevy. Adaptive EAP estimation of ability in a microcomputer environment. Applied Psychological Measurement, 6(4):431–444, 1982. Open copy: https://hdl.handle.net/11299/101546. doi:10.1177/014662168200600405.">Bock and Mislevy, 1982</a>, p. 432]</span>;
+in their simulations the posterior standard deviation behaved like the
 standard error of measurement (p. 431). The estimator reports the posterior
-standard deviation as the estimate’s standard error, as catR does (Magis &amp;
-Raîche, 2012, p. 6, Equation 11), and the precision stoppers judge it.</p>
+standard deviation as the estimate’s standard error, as catR does
+<span class="bibtex-citation" id="id4">[<a class="reference internal" href="#id18" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, p. 6, Equation 11]</span>, and the precision stoppers judge it.</p>
 </section>
 <section id="definition">
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
@@ -514,7 +514,7 @@ the implementation approximates this as</p>
 \sum_{q=1}^{Q}
 (\theta_q-\hat{\theta}_{\mathrm{EAP}})^2
 \tilde{p}(\theta_q \mid \mathbf{u}).\]</div>
-<p>These are Equations 4 and 5 of Bock and Mislevy (1982, p. 433); catsim returns
+<p>These are Equations 4 and 5 of <span class="bibtex-citation" id="id5">Bock and Mislevy [<a class="reference internal" href="#id36" title="R. D. Bock and R. J. Mislevy. Adaptive EAP estimation of ability in a microcomputer environment. Applied Psychological Measurement, 6(4):431–444, 1982. Open copy: https://hdl.handle.net/11299/101546. doi:10.1177/014662168200600405.">1982</a>, p. 433]</span>; catsim returns
 the variance, the square of their Equation 5, without Sheppard’s correction (see
 <a class="reference internal" href="bayesian-infrastructure.html"><span class="doc">Bayesian Estimation Infrastructure</span></a>).</p>
 <p>The estimator returns a <a class="reference internal" href="../../context.html#catsim.Estimate" title="catsim.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a> with
@@ -567,9 +567,23 @@ about 0.065; longer tests need a finer grid (see
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Bock, R. D., &amp; Mislevy, R. J. (1982). Adaptive EAP estimation of ability in a microcomputer environment. <em>Applied Psychological Measurement</em>, 6(4), 431-444. <a class="reference external" href="https://doi.org/10.1177/014662168200600405">https://doi.org/10.1177/014662168200600405</a>. Open copy: <a class="reference external" href="https://hdl.handle.net/11299/101546">University of Minnesota Digital Conservancy</a>.</p>
-<p>Wang, T., &amp; Vispoel, W. P. (1998). Properties of ability estimation methods in computerized adaptive testing. <em>Journal of Educational Measurement</em>, 35(2), 109-135. <a class="reference external" href="https://doi.org/10.1111/j.1745-3984.1998.tb00530.x">https://doi.org/10.1111/j.1745-3984.1998.tb00530.x</a>. Not openly available.</p>
-<p>Magis, D., &amp; Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8), 1-31. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">https://doi.org/10.18637/jss.v048.i08</a> (open access).</p>
+<div class="docutils container" id="id6">
+<div role="list" class="citation-list">
+<div class="citation" id="id36" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>BM82<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>,<a role="doc-backlink" href="#id3">3</a>,<a role="doc-backlink" href="#id5">4</a>)</span>
+<p>R. D. Bock and R. J. Mislevy. Adaptive EAP estimation of ability in a microcomputer environment. <em>Applied Psychological Measurement</em>, 6(4):431–444, 1982. Open copy: <a class="reference external" href="https://hdl.handle.net/11299/101546">https://hdl.handle.net/11299/101546</a>. <a class="reference external" href="https://doi.org/10.1177/014662168200600405">doi:10.1177/014662168200600405</a>.</p>
+</div>
+<div class="citation" id="id18" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">MR12</a><span class="fn-bracket">]</span></span>
+<p>D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8):1–31, 2012. Open access. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">doi:10.18637/jss.v048.i08</a>.</p>
+</div>
+<div class="citation" id="id37" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>WV98<span class="fn-bracket">]</span></span>
+<p>T. Wang and W. P. Vispoel. Properties of ability estimation methods in computerized adaptive testing. <em>Journal of Educational Measurement</em>, 35(2):109–135, 1998. Not openly available. <a class="reference external" href="https://doi.org/10.1111/j.1745-3984.1998.tb00530.x">doi:10.1111/j.1745-3984.1998.tb00530.x</a>.</p>
+</div>
+</div>
+</div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>Depends on <a class="reference internal" href="bayesian-infrastructure.html"><span class="doc">Bayesian Estimation Infrastructure</span></a></p>

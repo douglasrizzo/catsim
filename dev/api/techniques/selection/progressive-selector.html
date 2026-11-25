@@ -481,7 +481,7 @@
 <dd class="field-odd"><p><a class="reference internal" href="#catsim.selection.ProgressiveSelector" title="catsim.selection.ProgressiveSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.ProgressiveSelector</span></code></a></p>
 </dd>
 <dt class="field-even">Sources<span class="colon">:</span></dt>
-<dd class="field-even"><p>Revuelta &amp; Ponsoda (1998); Barrada et al. (2008, 2010)</p>
+<dd class="field-even"><p><span class="bibtex-citation" id="id1">Revuelta and Ponsoda [<a class="reference internal" href="#id55" title="J. Revuelta and V. Ponsoda. A comparison of item exposure control methods in computerized adaptive testing. Journal of Educational Measurement, 35(4):311–327, 1998. Not openly available; Barrada et al. (2008) describe the method. doi:10.1111/j.1745-3984.1998.tb00541.x.">1998</a>]</span>; <span class="bibtex-citation" id="id2">Barrada <em>et al.</em> [<a class="reference internal" href="#id45" title="Juan Ramón Barrada, Julio Olea, Vicente Ponsoda, and Francisco J. Abad. Incorporating randomness in the Fisher information for improving item-exposure control in CATs. British Journal of Mathematical and Statistical Psychology, 61(2):493–513, 2008. Open copy: https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf. doi:10.1348/000711007X230937.">2008</a>], Barrada <em>et al.</em> [<a class="reference internal" href="#id10" title="Juan Ramón Barrada, Julio Olea, Vicente Ponsoda, and Francisco J. Abad. A method for the comparison of item selection rules in computerized adaptive testing. Applied Psychological Measurement, 34(6):438–452, 2010. Open copy: https://personal.unizar.es/barrada/papers/10_APM_Barrada.pdf. doi:10.1177/0146621610370152.">2010</a>]</span></p>
 </dd>
 </dl>
 <section id="motivation">
@@ -518,12 +518,12 @@ w_n = 1
 <p>with acceleration parameter <span class="math notranslate nohighlight">\(t\)</span>, any real number. The weight is 0 at the first
 position and 1 at the last. With <span class="math notranslate nohighlight">\(t = 0\)</span> it is linear, <span class="math notranslate nohighlight">\(w_n = (n-1)/(N-1)\)</span>;
 positive <span class="math notranslate nohighlight">\(t\)</span> keeps the random component longer and negative <span class="math notranslate nohighlight">\(t\)</span> drops it sooner
-(Barrada et al., 2008, p. 498; Figure 1, p. 499, plots <span class="math notranslate nohighlight">\(t = -1, 0, 1, 2\)</span>).
-Dividing by the largest available information is equivalent to Revuelta and
-Ponsoda’s (1998) random component drawn on <span class="math notranslate nohighlight">\([0, \max_{j \in \mathcal{A}} I_j]\)</span>,
-as Barrada et al. (2008, p. 496, Equation 6) describe it. The selector chooses
-the available item with the largest score.</p>
-<p>The schedule is Barrada et al.’s (2008, p. 498, Equation 12), with <span class="math notranslate nohighlight">\(m\)</span> for their
+<span class="bibtex-citation" id="id3">[<a class="reference internal" href="#id45" title="Juan Ramón Barrada, Julio Olea, Vicente Ponsoda, and Francisco J. Abad. Incorporating randomness in the Fisher information for improving item-exposure control in CATs. British Journal of Mathematical and Statistical Psychology, 61(2):493–513, 2008. Open copy: https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf. doi:10.1348/000711007X230937.">Barrada <em>et al.</em>, 2008</a>, p. 498]</span> (Figure 1, p. 499, plots <span class="math notranslate nohighlight">\(t = -1, 0, 1, 2\)</span>).
+Dividing by the largest available information is equivalent to
+<span class="bibtex-citation" id="id4"><a class="reference internal" href="#id55" title="J. Revuelta and V. Ponsoda. A comparison of item exposure control methods in computerized adaptive testing. Journal of Educational Measurement, 35(4):311–327, 1998. Not openly available; Barrada et al. (2008) describe the method. doi:10.1111/j.1745-3984.1998.tb00541.x.">Revuelta and Ponsoda</a></span>’s <span class="bibtex-citation" id="id5">[<a class="reference internal" href="#id55" title="J. Revuelta and V. Ponsoda. A comparison of item exposure control methods in computerized adaptive testing. Journal of Educational Measurement, 35(4):311–327, 1998. Not openly available; Barrada et al. (2008) describe the method. doi:10.1111/j.1745-3984.1998.tb00541.x.">1998</a>]</span> random component drawn on
+<span class="math notranslate nohighlight">\([0, \max_{j \in \mathcal{A}} I_j]\)</span>, as <span class="bibtex-citation" id="id6">Barrada <em>et al.</em> [<a class="reference internal" href="#id45" title="Juan Ramón Barrada, Julio Olea, Vicente Ponsoda, and Francisco J. Abad. Incorporating randomness in the Fisher information for improving item-exposure control in CATs. British Journal of Mathematical and Statistical Psychology, 61(2):493–513, 2008. Open copy: https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf. doi:10.1348/000711007X230937.">2008</a>, p. 496, Equation 6]</span> describe
+it. The selector chooses the available item with the largest score.</p>
+<p>The schedule is that of <span class="bibtex-citation" id="id7">Barrada <em>et al.</em> [<a class="reference internal" href="#id45" title="Juan Ramón Barrada, Julio Olea, Vicente Ponsoda, and Francisco J. Abad. Incorporating randomness in the Fisher information for improving item-exposure control in CATs. British Journal of Mathematical and Statistical Psychology, 61(2):493–513, 2008. Open copy: https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf. doi:10.1348/000711007X230937.">2008</a>, p. 498, Equation 12]</span>, with <span class="math notranslate nohighlight">\(m\)</span> for their
 <span class="math notranslate nohighlight">\(h - 1\)</span> and <span class="math notranslate nohighlight">\(n\)</span>, <span class="math notranslate nohighlight">\(N\)</span> for their <span class="math notranslate nohighlight">\(k\)</span>, <span class="math notranslate nohighlight">\(K\)</span>. As printed, both sums in Equation 12 run
 to <span class="math notranslate nohighlight">\(k\)</span>, and Equations 12 and 13 both use the exponent <span class="math notranslate nohighlight">\(s\)</span>; the text under them,
 which names <span class="math notranslate nohighlight">\(t\)</span> and <span class="math notranslate nohighlight">\(s\)</span> as the two acceleration parameters and gives a weight of
@@ -581,7 +581,7 @@ out before the scores are computed, unless every remaining item is.</p></td>
 <section id="behavior-and-comparison">
 <h2>Behavior and Comparison<a class="headerlink" href="#behavior-and-comparison" title="Link to this heading">#</a></h2>
 <p>Revuelta and Ponsoda’s original schedule, <span class="math notranslate nohighlight">\(w = (n - 1)/N\)</span>, stops just short of 1
-at the last item (Barrada et al., 2008, p. 496, Equation 7); Barrada et al. did
+at the last item <span class="bibtex-citation" id="id8">[<a class="reference internal" href="#id45" title="Juan Ramón Barrada, Julio Olea, Vicente Ponsoda, and Francisco J. Abad. Incorporating randomness in the Fisher information for improving item-exposure control in CATs. British Journal of Mathematical and Statistical Psychology, 61(2):493–513, 2008. Open copy: https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf. doi:10.1348/000711007X230937.">Barrada <em>et al.</em>, 2008</a>, p. 496, Equation 7]</span>; Barrada et al. did
 not test it separately, since it differs little from Equation 12 with <span class="math notranslate nohighlight">\(t = 0\)</span>
 (p. 500).</p>
 </section>
@@ -600,9 +600,24 @@ administers the same items.</p></li>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Revuelta, J., &amp; Ponsoda, V. (1998). A comparison of item exposure control methods in computerized adaptive testing. <em>Journal of Educational Measurement</em>, 35(4), 311-327. <a class="reference external" href="https://doi.org/10.1111/j.1745-3984.1998.tb00541.x">https://doi.org/10.1111/j.1745-3984.1998.tb00541.x</a>. Not openly available; Barrada et al. (2008) describe the method.</p>
-<p>Barrada, J. R., Olea, J., Ponsoda, V., &amp; Abad, F. J. (2008). Incorporating randomness in the Fisher information for improving item-exposure control in CATs. <em>British Journal of Mathematical and Statistical Psychology</em>, 61(2), 493-513. <a class="reference external" href="https://doi.org/10.1348/000711007X230937">https://doi.org/10.1348/000711007X230937</a>. Open copy: <a class="reference external" href="https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf">first author’s page</a>.</p>
-<p>Barrada, J. R., Olea, J., Ponsoda, V., &amp; Abad, F. J. (2010). A method for the comparison of item selection rules in computerized adaptive testing. <em>Applied Psychological Measurement</em>, 34(6), 438-452. <a class="reference external" href="https://doi.org/10.1177/0146621610370152">https://doi.org/10.1177/0146621610370152</a>. Open copy: <a class="reference external" href="https://personal.unizar.es/barrada/papers/10_APM_Barrada.pdf">first author’s page</a>.</p>
+<div class="docutils container" id="id9">
+<div role="list" class="citation-list">
+<div class="citation" id="id45" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>BOPA08<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id2">1</a>,<a role="doc-backlink" href="#id3">2</a>,<a role="doc-backlink" href="#id6">3</a>,<a role="doc-backlink" href="#id7">4</a>,<a role="doc-backlink" href="#id8">5</a>)</span>
+<p>Juan Ramón Barrada, Julio Olea, Vicente Ponsoda, and Francisco J. Abad. Incorporating randomness in the Fisher information for improving item-exposure control in CATs. <em>British Journal of Mathematical and Statistical Psychology</em>, 61(2):493–513, 2008. Open copy: <a class="reference external" href="https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf">https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf</a>. <a class="reference external" href="https://doi.org/10.1348/000711007X230937">doi:10.1348/000711007X230937</a>.</p>
+</div>
+<div class="citation" id="id10" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">BOPA10</a><span class="fn-bracket">]</span></span>
+<p>Juan Ramón Barrada, Julio Olea, Vicente Ponsoda, and Francisco J. Abad. A method for the comparison of item selection rules in computerized adaptive testing. <em>Applied Psychological Measurement</em>, 34(6):438–452, 2010. Open copy: <a class="reference external" href="https://personal.unizar.es/barrada/papers/10_APM_Barrada.pdf">https://personal.unizar.es/barrada/papers/10_APM_Barrada.pdf</a>. <a class="reference external" href="https://doi.org/10.1177/0146621610370152">doi:10.1177/0146621610370152</a>.</p>
+</div>
+<div class="citation" id="id55" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>RP98<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id4">2</a>,<a role="doc-backlink" href="#id5">3</a>)</span>
+<p>J. Revuelta and V. Ponsoda. A comparison of item exposure control methods in computerized adaptive testing. <em>Journal of Educational Measurement</em>, 35(4):311–327, 1998. Not openly available; Barrada et al. (2008) describe the method. <a class="reference external" href="https://doi.org/10.1111/j.1745-3984.1998.tb00541.x">doi:10.1111/j.1745-3984.1998.tb00541.x</a>.</p>
+</div>
+</div>
+</div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>Companion spec: <a class="reference internal" href="proportional-selector.html"><span class="doc">Proportional Selector</span></a></p>

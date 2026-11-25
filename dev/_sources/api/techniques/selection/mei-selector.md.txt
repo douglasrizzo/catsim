@@ -1,7 +1,7 @@
 # Maximum Expected Information Selector
 
 :Class: {py:class}`catsim.selection.MEISelector`
-:Sources: van der Linden (1998)
+:Sources: {cite:t}`vanderLinden1998`
 
 ## Motivation
 
@@ -33,13 +33,14 @@ where $I(\cdot)$ is the information of the administered test extended by
 the candidate item. The selector chooses the item, neither administered nor
 excluded, with the largest expected information value.
 
-van der Linden's 1996 report, which preceded the 1998 article, defines MEI
+{cite:author}`vanderLinden1996`'s {cite:year}`vanderLinden1996` report, which preceded the
+{cite:year}`vanderLinden1998` article, defines MEI
 with the observed information of the **whole response pattern**, the
 administered items plus the candidate's predicted response, each evaluated at
 its updated estimate, and weights the two branches by the response
 probabilities at the current estimate (p. 11, Equation 13). He notes that the
 criterion therefore re-evaluates the information of the items already
-administered. Choi and Swartz (2009, Equation 3, extended to polytomous items)
+administered. {cite:t}`Choi2009{Equation 3, extended to polytomous items}`
 use the same whole-pattern measure. catsim follows this definition with Fisher
 rather than observed information; the two are equal under the 2PL model the
 report assumes (p. 10) and differ with guessing or slipping.
@@ -81,8 +82,8 @@ selection.
 
 `catR` departs from van der Linden's definition: its
 [`MEI.R`](https://github.com/cran/catR/blob/master/R/MEI.R) uses only the
-**candidate item's** information at each updated estimate (Magis & Raîche,
-2012, p. 9, Table 1), observed information by default (p. 17). The two forms
+**candidate item's** information at each updated estimate
+{cite:p}`Magis12{p. 9, Table 1}`, observed information by default (p. 17). The two forms
 can rank items differently.
 
 With the default estimator (maximum likelihood with Dodd's heuristic), while the
@@ -104,13 +105,9 @@ branches from the first item.
 
 ## References
 
-van der Linden, W. J. (1998). Bayesian item selection criteria for adaptive testing. *Psychometrika*, 63(2), 201-216. <https://doi.org/10.1007/BF02294775>. Not openly available; the 1996 report below preceded it.
-
-van der Linden, W. J. (1996). *Bayesian item selection criteria for adaptive testing* (Research Report 96-01). Enschede: University of Twente. Open copy: [University of Twente](https://research.utwente.nl/files/247173933/Research_Report_96_01.pdf).
-
-Choi, S. W., & Swartz, R. J. (2009). Comparison of CAT item selection criteria for polytomous items. *Applied Psychological Measurement*, 33(6), 419-440. <https://doi.org/10.1177/0146621608327801>. Open copy: [PubMed Central](https://pmc.ncbi.nlm.nih.gov/articles/PMC2791416/).
-
-Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
+```{bibliography}
+:filter: docname in docnames
+```
 
 :::{seealso}
 Sister spec: {doc}`/api/techniques/selection/mlwi-selector`

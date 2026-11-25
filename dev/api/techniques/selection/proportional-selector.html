@@ -481,7 +481,7 @@
 <dd class="field-odd"><p><a class="reference internal" href="#catsim.selection.ProportionalSelector" title="catsim.selection.ProportionalSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.ProportionalSelector</span></code></a></p>
 </dd>
 <dt class="field-even">Sources<span class="colon">:</span></dt>
-<dd class="field-even"><p>Segall (2004); Barrada et al. (2008)</p>
+<dd class="field-even"><p><span class="bibtex-citation" id="id1">Segall [<a class="reference internal" href="#id53" title="D. O. Segall. A sharing item response theory model for computerized adaptive testing. Journal of Educational and Behavioral Statistics, 29(4):439–460, 2004. Not openly available; Barrada et al. (2008) describe the method. doi:10.3102/10769986029004439.">2004</a>]</span>; <span class="bibtex-citation" id="id2">Barrada <em>et al.</em> [<a class="reference internal" href="#id42" title="Juan Ramón Barrada, Julio Olea, Vicente Ponsoda, and Francisco J. Abad. Incorporating randomness in the Fisher information for improving item-exposure control in CATs. British Journal of Mathematical and Statistical Psychology, 61(2):493–513, 2008. Open copy: https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf. doi:10.1348/000711007X230937.">2008</a>]</span></p>
 </dd>
 </dl>
 <section id="motivation">
@@ -493,7 +493,7 @@ samples directly from a probability distribution defined by item information.</p
 start of the test and increasingly concentrated on high-information items as the
 test progresses. At the last item the information is raised to the test length,
 so the longer the test, the closer its last draws come to maximum-information
-selection; for the test lengths CATs use, Barrada et al. (2008, p. 498) expect
+selection; for the test lengths CATs use, <span class="bibtex-citation" id="id3">Barrada <em>et al.</em> [<a class="reference internal" href="#id42" title="Juan Ramón Barrada, Julio Olea, Vicente Ponsoda, and Francisco J. Abad. Incorporating randomness in the Fisher information for improving item-exposure control in CATs. British Journal of Mathematical and Statistical Psychology, 61(2):493–513, 2008. Open copy: https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf. doi:10.1348/000711007X230937.">2008</a>, p. 498]</span> expect
 items of low information to be drawn with negligible probability by then.</p>
 </section>
 <section id="definition">
@@ -522,9 +522,9 @@ w_n = 1
 <p>The exponent is 0 at the first position, where selection is uniformly random,
 and grows to the test length <span class="math notranslate nohighlight">\(N\)</span> at the last; with <span class="math notranslate nohighlight">\(s = 0\)</span> it grows linearly.
 Past position <span class="math notranslate nohighlight">\(N\)</span> it stays at <span class="math notranslate nohighlight">\(N\)</span>.</p>
-<p>Segall (2004) selects each item with probability proportional to <span class="math notranslate nohighlight">\(V_i\)</span>; in
+<p><span class="bibtex-citation" id="id4">Segall [<a class="reference internal" href="#id53" title="D. O. Segall. A sharing item response theory model for computerized adaptive testing. Journal of Educational and Behavioral Statistics, 29(4):439–460, 2004. Not openly available; Barrada et al. (2008) describe the method. doi:10.3102/10769986029004439.">2004</a>]</span> selects each item with probability proportional to <span class="math notranslate nohighlight">\(V_i\)</span>; in
 his paper <span class="math notranslate nohighlight">\(V_i\)</span> was an expected variance, and with Fisher information
-<span class="math notranslate nohighlight">\(V_i = I_i(\hat{\theta})\)</span> (Barrada et al., 2008, p. 497, Equations 8–10).
+<span class="math notranslate nohighlight">\(V_i = I_i(\hat{\theta})\)</span> <span class="bibtex-citation" id="id5">[<a class="reference internal" href="#id42" title="Juan Ramón Barrada, Julio Olea, Vicente Ponsoda, and Francisco J. Abad. Incorporating randomness in the Fisher information for improving item-exposure control in CATs. British Journal of Mathematical and Statistical Psychology, 61(2):493–513, 2008. Open copy: https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf. doi:10.1348/000711007X230937.">Barrada <em>et al.</em>, 2008</a>, p. 497, Equations 8–10]</span>.
 Barrada et al. raise the information to a power that grows during the test
 (p. 497, Equation 11): a power of 0 gives random selection, a power of 1
 Segall’s method, and a large power approaches maximum information
@@ -597,8 +597,20 @@ administers the same items.</p></li>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Segall, D. O. (2004). A sharing item response theory model for computerized adaptive testing. <em>Journal of Educational and Behavioral Statistics</em>, 29(4), 439-460. <a class="reference external" href="https://doi.org/10.3102/10769986029004439">https://doi.org/10.3102/10769986029004439</a>. Not openly available; Barrada et al. (2008) describe the method.</p>
-<p>Barrada, J. R., Olea, J., Ponsoda, V., &amp; Abad, F. J. (2008). Incorporating randomness in the Fisher information for improving item-exposure control in CATs. <em>British Journal of Mathematical and Statistical Psychology</em>, 61(2), 493-513. <a class="reference external" href="https://doi.org/10.1348/000711007X230937">https://doi.org/10.1348/000711007X230937</a>. Open copy: <a class="reference external" href="https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf">first author’s page</a>.</p>
+<div class="docutils container" id="id6">
+<div role="list" class="citation-list">
+<div class="citation" id="id42" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>BOPA08<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id2">1</a>,<a role="doc-backlink" href="#id3">2</a>,<a role="doc-backlink" href="#id5">3</a>)</span>
+<p>Juan Ramón Barrada, Julio Olea, Vicente Ponsoda, and Francisco J. Abad. Incorporating randomness in the Fisher information for improving item-exposure control in CATs. <em>British Journal of Mathematical and Statistical Psychology</em>, 61(2):493–513, 2008. Open copy: <a class="reference external" href="https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf">https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf</a>. <a class="reference external" href="https://doi.org/10.1348/000711007X230937">doi:10.1348/000711007X230937</a>.</p>
+</div>
+<div class="citation" id="id53" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Seg04<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id4">2</a>)</span>
+<p>D. O. Segall. A sharing item response theory model for computerized adaptive testing. <em>Journal of Educational and Behavioral Statistics</em>, 29(4):439–460, 2004. Not openly available; Barrada et al. (2008) describe the method. <a class="reference external" href="https://doi.org/10.3102/10769986029004439">doi:10.3102/10769986029004439</a>.</p>
+</div>
+</div>
+</div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>Companion spec: <a class="reference internal" href="progressive-selector.html"><span class="doc">Progressive Selector</span></a></p>

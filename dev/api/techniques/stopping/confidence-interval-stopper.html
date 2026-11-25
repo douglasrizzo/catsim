@@ -470,7 +470,7 @@
 <dd class="field-odd"><p><a class="reference internal" href="#catsim.stopping.ConfidenceIntervalStopper" title="catsim.stopping.ConfidenceIntervalStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.ConfidenceIntervalStopper</span></code></a></p>
 </dd>
 <dt class="field-even">Sources<span class="colon">:</span></dt>
-<dd class="field-even"><p>Thissen (2000); Wainer (2000)</p>
+<dd class="field-even"><p><span class="bibtex-citation" id="id1">Thissen [<a class="reference internal" href="#id7" title="D. Thissen. Reliability and measurement precision. In H. Wainer, editor, Computerized Adaptive Testing: A Primer, 159–184. Lawrence Erlbaum Associates, 2000. Not openly available.">2000</a>]</span>; <span class="bibtex-citation" id="id2">Wainer [<a class="reference internal" href="#id54" title="H. Wainer, editor. Computerized Adaptive Testing: A Primer. Lawrence Erlbaum Associates, Mahwah, NJ, second edition, 2000. Not openly available.">2000</a>]</span></p>
 </dd>
 </dl>
 <section id="motivation">
@@ -545,7 +545,7 @@ carries the session’s standard error.</p>
 <h2>Behavior and Comparison<a class="headerlink" href="#behavior-and-comparison" title="Link to this heading">#</a></h2>
 <p>A smaller standard error narrows the interval, so EAP and MAP sessions are
 usually classified sooner than they would be on the Fisher error.</p>
-<p>Magis and Raîche (2012, p. 11) describe the classification criterion with a
+<p><span class="bibtex-citation" id="id3">Magis and Raîche [<a class="reference internal" href="#id16" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">2012</a>, p. 11]</span> describe the classification criterion with a
 single ability threshold: a confidence interval for ability is built after every
 item, and the test stops once the threshold is no longer inside it. catsim
 generalizes this to several boundaries; with one boundary the two rules agree.</p>
@@ -560,9 +560,22 @@ generalizes this to several boundaries; with one boundary the two rules agree.</
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Thissen, D. (2000). Reliability and measurement precision. In H. Wainer (Ed.), <em>Computerized Adaptive Testing: A Primer</em> (2nd ed., pp. 159-184). Mahwah, NJ: Lawrence Erlbaum Associates.</p>
-<p>Wainer, H. (Ed.). (2000). <em>Computerized Adaptive Testing: A Primer</em> (2nd ed.). Mahwah, NJ: Lawrence Erlbaum Associates.</p>
-<p>Magis, D., &amp; Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8), 1-31. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">https://doi.org/10.18637/jss.v048.i08</a> (open access).</p>
+<div class="docutils container" id="id4">
+<div role="list" class="citation-list">
+<div class="citation" id="id16" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">MR12</a><span class="fn-bracket">]</span></span>
+<p>D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8):1–31, 2012. Open access. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">doi:10.18637/jss.v048.i08</a>.</p>
+</div>
+<div class="citation" id="id7" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">Thi00</a><span class="fn-bracket">]</span></span>
+<p>D. Thissen. Reliability and measurement precision. In H. Wainer, editor, <em>Computerized Adaptive Testing: A Primer</em>, 159–184. Lawrence Erlbaum Associates, 2000. Not openly available.</p>
+</div>
+<div class="citation" id="id54" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">Wai00</a><span class="fn-bracket">]</span></span>
+<p>H. Wainer, editor. <em>Computerized Adaptive Testing: A Primer</em>. Lawrence Erlbaum Associates, Mahwah, NJ, second edition, 2000. Not openly available.</p>
+</div>
+</div>
+</div>
 </section>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>

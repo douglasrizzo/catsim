@@ -1,7 +1,7 @@
 # Maximum Length Stopper
 
 :Class: {py:class}`catsim.stopping.MaxLengthStopper`
-:Sources: Wainer (2000); Thissen (2000)
+:Sources: {cite:t}`Wainer2000`; {cite:t}`Thissen00`
 
 ## Motivation
 
@@ -48,9 +48,9 @@ has no item left to give.
 
 ## References
 
-Wainer, H. (Ed.). (2000). *Computerized Adaptive Testing: A Primer* (2nd ed.). Mahwah, NJ: Lawrence Erlbaum Associates.
-
-Thissen, D. (2000). Reliability and measurement precision. In H. Wainer (Ed.), *Computerized Adaptive Testing: A Primer* (2nd ed., pp. 159-184). Mahwah, NJ: Lawrence Erlbaum Associates.
+```{bibliography}
+:filter: docname in docnames
+```
 
 ## API Reference
 

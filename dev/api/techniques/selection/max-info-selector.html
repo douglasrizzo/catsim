@@ -481,7 +481,7 @@
 <dd class="field-odd"><p><a class="reference internal" href="#catsim.selection.MaxInfoSelector" title="catsim.selection.MaxInfoSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.MaxInfoSelector</span></code></a></p>
 </dd>
 <dt class="field-even">Sources<span class="colon">:</span></dt>
-<dd class="field-even"><p>Lord (1977); Lord (1980)</p>
+<dd class="field-even"><p><span class="bibtex-citation" id="id1">Lord [<a class="reference internal" href="#id15" title="F. M. Lord. A broad-range tailored test of verbal ability. Applied Psychological Measurement, 1(1):95–100, 1977. Open copy: https://hdl.handle.net/11299/98423. doi:10.1177/014662167700100115.">1977</a>]</span>; <span class="bibtex-citation" id="id2">Lord [<a class="reference internal" href="#id40" title="F. M. Lord. Applications of Item Response Theory to Practical Testing Problems. Lawrence Erlbaum Associates, Hillsdale, NJ, 1980. Not openly available.">1980</a>]</span></p>
 </dd>
 </dl>
 <section id="motivation">
@@ -489,7 +489,7 @@
 <p>Maximum Fisher information is the canonical local item-selection rule in CAT. At
 each step it chooses the remaining item that is most informative at the current
 ability estimate <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>, which makes it the natural baseline for both
-efficiency and implementation simplicity. Lord (1977, p. 97) describes the
+efficiency and implementation simplicity. <span class="bibtex-citation" id="id3">Lord [<a class="reference internal" href="#id15" title="F. M. Lord. A broad-range tailored test of verbal ability. Applied Psychological Measurement, 1(1):95–100, 1977. Open copy: https://hdl.handle.net/11299/98423. doi:10.1177/014662167700100115.">1977</a>, p. 97]</span> describes the
 rule: after each response the ability is re-estimated, and the next item is “the
 item that gives the most information at his estimated ability level”.</p>
 </section>
@@ -497,7 +497,7 @@ item that gives the most information at his estimated ability level”.</p>
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
 <p>For each item <span class="math notranslate nohighlight">\(i\)</span> that is neither administered nor excluded, the selector
 evaluates the item information <span class="math notranslate nohighlight">\(I_i(\hat{\theta})\)</span> at the current estimate:
-the general item information of Magis and Raîche (2012, p. 4, Equation 4), which
+the general item information of <span class="bibtex-citation" id="id4">Magis and Raîche [<a class="reference internal" href="#id17" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">2012</a>, p. 4, Equation 4]</span>, which
 <a class="reference internal" href="../../irt.html#catsim.irt.information" title="catsim.irt.information"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.information()</span></code></a> computes under the 4PL. The selected item is</p>
 <div class="math notranslate nohighlight">
 \[i^*
@@ -557,9 +557,23 @@ highest-information remaining item.</p></li>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Lord, F. M. (1977). A broad-range tailored test of verbal ability. <em>Applied Psychological Measurement</em>, 1(1), 95-100. <a class="reference external" href="https://doi.org/10.1177/014662167700100115">https://doi.org/10.1177/014662167700100115</a>. Open copy: <a class="reference external" href="https://hdl.handle.net/11299/98423">University of Minnesota Digital Conservancy</a>.</p>
-<p>Lord, F. M. (1980). <em>Applications of Item Response Theory to Practical Testing Problems</em>. Hillsdale, NJ: Lawrence Erlbaum Associates.</p>
-<p>Magis, D., &amp; Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8), 1-31. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">https://doi.org/10.18637/jss.v048.i08</a> (open access).</p>
+<div class="docutils container" id="id5">
+<div role="list" class="citation-list">
+<div class="citation" id="id15" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Lor77<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id3">2</a>)</span>
+<p>F. M. Lord. A broad-range tailored test of verbal ability. <em>Applied Psychological Measurement</em>, 1(1):95–100, 1977. Open copy: <a class="reference external" href="https://hdl.handle.net/11299/98423">https://hdl.handle.net/11299/98423</a>. <a class="reference external" href="https://doi.org/10.1177/014662167700100115">doi:10.1177/014662167700100115</a>.</p>
+</div>
+<div class="citation" id="id40" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">Lor80</a><span class="fn-bracket">]</span></span>
+<p>F. M. Lord. <em>Applications of Item Response Theory to Practical Testing Problems</em>. Lawrence Erlbaum Associates, Hillsdale, NJ, 1980. Not openly available.</p>
+</div>
+<div class="citation" id="id17" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">MR12</a><span class="fn-bracket">]</span></span>
+<p>D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8):1–31, 2012. Open access. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">doi:10.18637/jss.v048.i08</a>.</p>
+</div>
+</div>
+</div>
 </section>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>

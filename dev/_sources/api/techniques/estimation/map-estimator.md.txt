@@ -1,21 +1,21 @@
 # Maximum A Posteriori Estimator
 
 :Class: {py:class}`catsim.estimation.MAPEstimator`
-:Sources: Samejima (1969); Bock & Aitkin (1981)
+:Sources: {cite:t}`Samejima1969`; {cite:t}`Bock1981`
 
 ## Motivation
 
 MAP, also called the Bayes modal estimator, is the posterior mode: the
-maximum-likelihood estimate with a prior added to the objective. Samejima
-(1969, p. 7, Equations 2-5 and 2-6) defines the Bayes modal estimator as the
-value that maximizes the prior density times the likelihood; Bock and Mislevy
-(1982, p. 432) credit Bock and Aitkin (1981) with the name MAP, and Magis and
-Raîche (2012, p. 4) attribute the estimator to Birnbaum (1969). The prior keeps
+maximum-likelihood estimate with a prior added to the objective.
+{cite:t}`Samejima1969{p. 7, Equations 2-5 and 2-6}` defines the Bayes modal
+estimator as the value that maximizes the prior density times the likelihood;
+{cite:t}`Bock1982{p. 432}` credit {cite:t}`Bock1981` with the name MAP, and
+{cite:t}`Magis12{p. 4}` attribute the estimator to {cite:t}`Birnbaum1969`. The prior keeps
 the estimate finite for all-correct and all-incorrect patterns, where the MLE
 does not exist, while the computation stays a one-dimensional optimization like
 the MLE's, with no quadrature grid.
 
-It is not necessarily cheaper than EAP: Bock and Mislevy (1982, p. 432) argue
+It is not necessarily cheaper than EAP: {cite:t}`Bock1982{p. 432}` argue
 the opposite for adaptive testing, since EAP's quadrature sums accumulate item by
 item while MAP needs a new optimization after every response.
 
@@ -46,8 +46,8 @@ the test information plus the prior's negative curvature at the mode. The
 curvature is a central difference, so any prior works. For a normal prior with
 variance $\sigma^2$ the curvature is $-1/\sigma^2$, and this is the standard
 error catR gives the Bayes modal estimator,
-$1/\sqrt{I(\hat{\theta}) + 1/\sigma^2}$ (Magis & Raîche, 2012, p. 5, Equation
-6). Inside a uniform prior's support the curvature is 0; at the support's edge
+$1/\sqrt{I(\hat{\theta}) + 1/\sigma^2}$ {cite:p}`Magis12{p. 5, Equation 6}`.
+Inside a uniform prior's support the curvature is 0; at the support's edge
 the difference is not finite and the prior adds nothing. Both give the Fisher
 standard error, $1/\sqrt{I(\hat{\theta})}$. Where the sum is not positive, as
 with a uniform prior and no responses, the standard error is infinite.
@@ -105,7 +105,7 @@ Under the 1PL and 2PL models the log-likelihood is concave, so with a normal
 prior the derivative of the log-posterior points toward the prior mean at the
 MLE and toward the MLE at the prior mean, and its single root lies between them
 (the second guarantee below). With a uniform prior over a wide enough interval,
-MAP coincides with the MLE (Magis & Raîche, 2012, p. 5).
+MAP coincides with the MLE {cite:p}`Magis12{p. 5}`.
 
 On long, information-rich tests, MAP and EAP converge toward similar values
 because the posterior becomes sharply concentrated.
@@ -121,15 +121,9 @@ because the posterior becomes sharply concentrated.
 
 ## References
 
-Samejima, F. (1969). Estimation of latent ability using a response pattern of graded scores. *Psychometrika Monograph Supplement*, No. 17. <https://doi.org/10.1007/BF03372160>. Open copy: [Psychometric Society](https://psychometricsociety.org/sites/main/files/file-attachments/mn17.pdf).
-
-Bock, R. D., & Aitkin, M. (1981). Marginal maximum likelihood estimation of item parameters: Application of an EM algorithm. *Psychometrika*, 46(4), 443-459. <https://doi.org/10.1007/BF02293801>. Not openly available.
-
-Bock, R. D., & Mislevy, R. J. (1982). Adaptive EAP estimation of ability in a microcomputer environment. *Applied Psychological Measurement*, 6(4), 431-444. <https://doi.org/10.1177/014662168200600405>. Open copy: [University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/101546).
-
-Birnbaum, A. (1969). Statistical theory for logistic mental test models with a prior distribution of ability. *Journal of Mathematical Psychology*, 6(2), 258-276. <https://doi.org/10.1016/0022-2496(69)90005-4>. Not openly available.
-
-Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
+```{bibliography}
+:filter: docname in docnames
+```
 
 :::{seealso}
 {doc}`/api/techniques/estimation/bayesian-infrastructure`,

@@ -493,7 +493,7 @@
 <dd class="field-odd"><p><a class="reference internal" href="#catsim.selection.StratifiedSelector" title="catsim.selection.StratifiedSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.StratifiedSelector</span></code></a></p>
 </dd>
 <dt class="field-even">Sources<span class="colon">:</span></dt>
-<dd class="field-even"><p>Chang &amp; Ying (1999); Chang et al. (2001); Barrada et al. (2006)</p>
+<dd class="field-even"><p><span class="bibtex-citation" id="id1">Chang and Ying [<a class="reference internal" href="#id33" title="H.-H. Chang and Z. Ying. a-stratified multistage computerized adaptive testing. Applied Psychological Measurement, 23(3):211–222, 1999. Not openly available; Barrada et al. (2006) describe the method. doi:10.1177/01466219922031338.">1999</a>]</span>; <span class="bibtex-citation" id="id2">Chang <em>et al.</em> [<a class="reference internal" href="#id32" title="H.-H. Chang, J. Qian, and Z. Ying. a-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. Not openly available; Barrada et al. (2006) describe the method. doi:10.1177/01466210122032181.">2001</a>]</span>; <span class="bibtex-citation" id="id3">Barrada <em>et al.</em> [<a class="reference internal" href="#id34" title="Juan Ramón Barrada, Paloma Mazuela, and Julio Olea. Maximum information stratification method for controlling item exposure in computerized adaptive testing. Psicothema, 18(1):156–159, 2006. Open access. URL: https://www.psicothema.com/pdf/3191.pdf.">2006</a>]</span></p>
 </dd>
 </dl>
 <section id="motivation">
@@ -505,17 +505,17 @@ when the ability estimate is still rough, draw from strata of weakly informative
 items, and the most informative items are kept for the last stages. Within the
 active stratum the selector still adapts, choosing the item located closest to
 the current estimate.</p>
-<p>The a-stratified method of Chang and Ying (1999) stratifies by discrimination and
+<p>The a-stratified method of <span class="bibtex-citation" id="id4">Chang and Ying [<a class="reference internal" href="#id33" title="H.-H. Chang and Z. Ying. a-stratified multistage computerized adaptive testing. Applied Psychological Measurement, 23(3):211–222, 1999. Not openly available; Barrada et al. (2006) describe the method. doi:10.1177/01466219922031338.">1999</a>]</span> stratifies by discrimination and
 matches difficulty to the estimate. Item discrimination and difficulty are often
 positively correlated, so strata formed on <span class="math notranslate nohighlight">\(a\)</span> alone inherit skewed difficulty
 distributions: early strata lack hard items and late strata lack easy ones,
 which hurts both precision and exposure balance. The b-blocking refinement of
-Chang, Qian and Ying (2001) forces every stratum to cover the whole difficulty
+<span class="bibtex-citation" id="id5">Chang, Qian, and Ying [<a class="reference internal" href="#id32" title="H.-H. Chang, J. Qian, and Z. Ying. a-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. Not openly available; Barrada et al. (2006) describe the method. doi:10.1177/01466210122032181.">2001</a>]</span> forces every stratum to cover the whole difficulty
 range before discrimination-based stratification is applied.</p>
 <p>The a-stratified method ignores the guessing parameter, both when stratifying
 and when selecting. Under the 3PL and 4PL models an item’s discrimination does
 not rank its maximum information, and its information does not peak at <span class="math notranslate nohighlight">\(b\)</span>.
-Maximum-information stratification (MIS) of Barrada et al. (2006) stratifies by
+Maximum-information stratification (MIS) of <span class="bibtex-citation" id="id6">Barrada <em>et al.</em> [<a class="reference internal" href="#id34" title="Juan Ramón Barrada, Paloma Mazuela, and Julio Olea. Maximum information stratification method for controlling item exposure in computerized adaptive testing. Psicothema, 18(1):156–159, 2006. Open access. URL: https://www.psicothema.com/pdf/3191.pdf.">2006</a>]</span> stratifies by
 the item’s maximum information and matches the ability at which that maximum is
 reached. MIS-B applies the blocking idea to MIS: it blocks on that ability, so
 that every stratum covers the whole ability range.</p>
@@ -541,25 +541,25 @@ scale:</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><a class="reference internal" href="#catsim.selection.AStratSelector" title="catsim.selection.AStratSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">AStratSelector</span></code></a></p></td>
-<td><p>a-stratified (Chang &amp; Ying, 1999)</p></td>
+<td><p>a-stratified <span class="bibtex-citation" id="id7">[<a class="reference internal" href="#id33" title="H.-H. Chang and Z. Ying. a-stratified multistage computerized adaptive testing. Applied Psychological Measurement, 23(3):211–222, 1999. Not openly available; Barrada et al. (2006) describe the method. doi:10.1177/01466219922031338.">Chang and Ying, 1999</a>]</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(a_i\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(b_i\)</span></p></td>
 <td><p>no</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#catsim.selection.AStratBBlockSelector" title="catsim.selection.AStratBBlockSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">AStratBBlockSelector</span></code></a></p></td>
-<td><p>a-stratified with b-blocking (Chang et al., 2001)</p></td>
+<td><p>a-stratified with b-blocking <span class="bibtex-citation" id="id8">[<a class="reference internal" href="#id32" title="H.-H. Chang, J. Qian, and Z. Ying. a-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. Not openly available; Barrada et al. (2006) describe the method. doi:10.1177/01466210122032181.">Chang <em>et al.</em>, 2001</a>]</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(a_i\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(b_i\)</span></p></td>
 <td><p>on <span class="math notranslate nohighlight">\(b_i\)</span></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#catsim.selection.MaxInfoStratSelector" title="catsim.selection.MaxInfoStratSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxInfoStratSelector</span></code></a></p></td>
-<td><p>MIS (Barrada et al., 2006)</p></td>
+<td><p>MIS <span class="bibtex-citation" id="id9">[<a class="reference internal" href="#id34" title="Juan Ramón Barrada, Paloma Mazuela, and Julio Olea. Maximum information stratification method for controlling item exposure in computerized adaptive testing. Psicothema, 18(1):156–159, 2006. Open access. URL: https://www.psicothema.com/pdf/3191.pdf.">Barrada <em>et al.</em>, 2006</a>]</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(I_i^{\max}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(\theta_i^{\max}\)</span></p></td>
 <td><p>no</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#catsim.selection.MaxInfoBBlockSelector" title="catsim.selection.MaxInfoBBlockSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxInfoBBlockSelector</span></code></a></p></td>
-<td><p>MIS-B (Barrada et al., 2006)</p></td>
+<td><p>MIS-B <span class="bibtex-citation" id="id10">[<a class="reference internal" href="#id34" title="Juan Ramón Barrada, Paloma Mazuela, and Julio Olea. Maximum information stratification method for controlling item exposure in computerized adaptive testing. Psicothema, 18(1):156–159, 2006. Open access. URL: https://www.psicothema.com/pdf/3191.pdf.">Barrada <em>et al.</em>, 2006</a>]</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(I_i^{\max}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(\theta_i^{\max}\)</span></p></td>
 <td><p>on <span class="math notranslate nohighlight">\(\theta_i^{\max}\)</span></p></td>
@@ -574,56 +574,57 @@ information there:</p>
 \qquad
 I_i^{\max} = I_i(\theta_i^{\max}).\]</div>
 <p><a class="reference internal" href="../../irt.html#catsim.irt.max_info_theta" title="catsim.irt.max_info_theta"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.max_info_theta()</span></code></a> computes <span class="math notranslate nohighlight">\(\theta_i^{\max}\)</span>.</p>
-<p>Barrada et al. (2006, p. 157, Equations 1 and 2) give <span class="math notranslate nohighlight">\(I_i^{\max}\)</span> and
+<p><span class="bibtex-citation" id="id11">Barrada <em>et al.</em> [<a class="reference internal" href="#id34" title="Juan Ramón Barrada, Paloma Mazuela, and Julio Olea. Maximum information stratification method for controlling item exposure in computerized adaptive testing. Psicothema, 18(1):156–159, 2006. Open access. URL: https://www.psicothema.com/pdf/3191.pdf.">2006</a>, p. 157, Equations 1 and 2]</span> give <span class="math notranslate nohighlight">\(I_i^{\max}\)</span> and
 <span class="math notranslate nohighlight">\(\theta_i^{\max}\)</span> in closed form for the 3PL model, with the scaling constant
 <span class="math notranslate nohighlight">\(D = 1.7\)</span>; catsim’s IRT functions use no scaling constant.</p>
 <p><strong>Strata without blocking.</strong> Items are sorted by increasing <span class="math notranslate nohighlight">\(k_i\)</span> and split
 into <span class="math notranslate nohighlight">\(S\)</span> contiguous strata of <span class="math notranslate nohighlight">\(\lfloor M/S \rfloor\)</span> items, the first
 <span class="math notranslate nohighlight">\(M \bmod S\)</span> of them holding one item more. This is the a-stratified procedure
-of Chang and Ying (1999), as described step by step by Barrada et al. (2006,
-p. 157).</p>
-<figure class="align-default" id="id1">
+of <span class="bibtex-citation" id="id12">Chang and Ying [<a class="reference internal" href="#id33" title="H.-H. Chang and Z. Ying. a-stratified multistage computerized adaptive testing. Applied Psychological Measurement, 23(3):211–222, 1999. Not openly available; Barrada et al. (2006) describe the method. doi:10.1177/01466219922031338.">1999</a>]</span>, as described step by step by
+<span class="bibtex-citation" id="id13">Barrada <em>et al.</em> [<a class="reference internal" href="#id34" title="Juan Ramón Barrada, Paloma Mazuela, and Julio Olea. Maximum information stratification method for controlling item exposure in computerized adaptive testing. Psicothema, 18(1):156–159, 2006. Open access. URL: https://www.psicothema.com/pdf/3191.pdf.">2006</a>, p. 157]</span>.</p>
+<figure class="align-default" id="id71">
 <a class="reference internal image-reference" href="../../../_images/alpha-strat.svg"><img alt="A row of strata numbered 1 to k under an arrow labelled a, shading darker from stratum 1 to stratum k." src="../../../_images/alpha-strat.svg" style="width: 400px;" />
 </a>
 <figcaption>
 <p><span class="caption-number">Fig. 3 </span><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">AStratSelector</span></code>: the item bank sorted by increasing <span class="math notranslate nohighlight">\(a\)</span> and split into strata
-<span class="math notranslate nohighlight">\(1, \dots, k\)</span>.</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
+<span class="math notranslate nohighlight">\(1, \dots, k\)</span>.</span><a class="headerlink" href="#id71" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<figure class="align-default" id="id2">
+<figure class="align-default" id="id72">
 <a class="reference internal image-reference" href="../../../_images/mis.svg"><img alt="A row of strata numbered 1 to k under an arrow labelled maximum information, shading darker from stratum 1 to stratum k." src="../../../_images/mis.svg" style="width: 400px;" />
 </a>
 <figcaption>
 <p><span class="caption-number">Fig. 4 </span><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">MaxInfoStratSelector</span></code>: the item bank sorted by increasing <span class="math notranslate nohighlight">\(I_i^{\max}\)</span> and split
-into strata <span class="math notranslate nohighlight">\(1, \dots, k\)</span>.</span><a class="headerlink" href="#id2" title="Link to this image">#</a></p>
+into strata <span class="math notranslate nohighlight">\(1, \dots, k\)</span>.</span><a class="headerlink" href="#id72" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<p><strong>Strata with blocking</strong> (Chang et al., 2001; described by Barrada et al., 2006,
-p. 157). Items are sorted by increasing <span class="math notranslate nohighlight">\(\ell_i\)</span> and grouped into consecutive
-blocks of <span class="math notranslate nohighlight">\(S\)</span> items. Each block is sorted by increasing <span class="math notranslate nohighlight">\(k_i\)</span>; its first item
-joins the first stratum, its second item the second stratum, and so on. Every
+<p><strong>Strata with blocking</strong> <span class="bibtex-citation" id="id14">[<a class="reference internal" href="#id32" title="H.-H. Chang, J. Qian, and Z. Ying. a-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. Not openly available; Barrada et al. (2006) describe the method. doi:10.1177/01466210122032181.">Chang <em>et al.</em>, 2001</a>]</span>;
+<span class="bibtex-citation" id="id15">[described by <a class="reference internal" href="#id34" title="Juan Ramón Barrada, Paloma Mazuela, and Julio Olea. Maximum information stratification method for controlling item exposure in computerized adaptive testing. Psicothema, 18(1):156–159, 2006. Open access. URL: https://www.psicothema.com/pdf/3191.pdf.">Barrada <em>et al.</em>, 2006</a>, p. 157]</span>. Items are sorted by increasing
+<span class="math notranslate nohighlight">\(\ell_i\)</span> and grouped into consecutive blocks of <span class="math notranslate nohighlight">\(S\)</span> items. Each block is sorted
+by increasing <span class="math notranslate nohighlight">\(k_i\)</span>; its first item joins the first stratum, its second item
+the second stratum, and so on. Every
 full block therefore gives one item to every
 stratum, so each stratum spans the locations those blocks cover, while the
 strata still ascend in <span class="math notranslate nohighlight">\(k_i\)</span>. A trailing block of <span class="math notranslate nohighlight">\(r &lt; S\)</span> items, those of
 highest location, gives its items, in the same order, to the first <span class="math notranslate nohighlight">\(r\)</span> strata, so
 the strata have the sizes they would have without blocking.</p>
-<figure class="align-default" id="id3">
+<figure class="align-default" id="id73">
 <a class="reference internal image-reference" href="../../../_images/b-blocking.svg"><img alt="Blocks 1 to k under an arrow labelled b, each block sorted along its own arrow labelled a. The first items of blocks 1 to k are gathered into the first cell of a new row of strata." src="../../../_images/b-blocking.svg" style="width: 400px;" />
 </a>
 <figcaption>
 <p><span class="caption-number">Fig. 5 </span><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">AStratBBlockSelector</span></code>: items sorted by <span class="math notranslate nohighlight">\(b\)</span> into <span class="math notranslate nohighlight">\(k\)</span> blocks of <span class="math notranslate nohighlight">\(S\)</span> items, each
 block sorted by <span class="math notranslate nohighlight">\(a\)</span>. The first item of every block, <span class="math notranslate nohighlight">\(\{1_1, 2_1, \dots, k_1\}\)</span>,
-forms the first stratum, the second items the second stratum, and so on.</span><a class="headerlink" href="#id3" title="Link to this image">#</a></p>
+forms the first stratum, the second items the second stratum, and so on.</span><a class="headerlink" href="#id73" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<figure class="align-default" id="id4">
+<figure class="align-default" id="id74">
 <a class="reference internal image-reference" href="../../../_images/mis-b.svg"><img alt="Blocks 1 to k under an arrow labelled theta max, each block sorted along its own arrow labelled maximum information. The first items of blocks 1 to k are gathered into the first cell of a new row of strata." src="../../../_images/mis-b.svg" style="width: 400px;" />
 </a>
 <figcaption>
 <p><span class="caption-number">Fig. 6 </span><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">MaxInfoBBlockSelector</span></code>: items sorted by <span class="math notranslate nohighlight">\(\theta_i^{\max}\)</span> into <span class="math notranslate nohighlight">\(k\)</span> blocks of <span class="math notranslate nohighlight">\(S\)</span>
 items, each block sorted by <span class="math notranslate nohighlight">\(I_i^{\max}\)</span>. The first item of every block,
 <span class="math notranslate nohighlight">\(\{1_1, 2_1, \dots, k_1\}\)</span>, forms the first stratum, the second items the second
-stratum, and so on.</span><a class="headerlink" href="#id4" title="Link to this image">#</a></p>
+stratum, and so on.</span><a class="headerlink" href="#id74" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <p><strong>Stages.</strong> The test’s positions are split, in order, into <span class="math notranslate nohighlight">\(S\)</span> stages of
@@ -637,7 +638,7 @@ stratum</p>
 \left\lfloor \dfrac{t}{q + 1} \right\rfloor &amp; \text{if } t &lt; h(q + 1), \\[1ex]
 h + \left\lfloor \dfrac{t - h(q + 1)}{q} \right\rfloor &amp; \text{otherwise.}
 \end{cases}\end{split}\]</div>
-<p>Barrada et al. (2006, pp. 157–158) use a bank and a test that divide evenly
+<p><span class="bibtex-citation" id="id16">Barrada <em>et al.</em> [<a class="reference internal" href="#id34" title="Juan Ramón Barrada, Paloma Mazuela, and Julio Olea. Maximum information stratification method for controlling item exposure in computerized adaptive testing. Psicothema, 18(1):156–159, 2006. Open access. URL: https://www.psicothema.com/pdf/3191.pdf.">2006</a>, pp. 157–158]</span> use a bank and a test that divide evenly
 into strata; when they do not, catsim gives the extra items and positions to
 the first strata and stages. A test of at most <span class="math notranslate nohighlight">\(M\)</span> items (<span class="math notranslate nohighlight">\(n \le M\)</span>) then
 never needs more items from a stratum than the stratum holds, so a session
@@ -645,7 +646,7 @@ without excluded items administers all <span class="math notranslate nohighlight
 position <span class="math notranslate nohighlight">\(n\)</span> or later: asked for an item there, the selector raises
 <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p>
 <p><strong>Selection.</strong> Within the active stratum, the selector takes the item whose
-location is closest to the estimate (Barrada et al., 2006, p. 157). With <span class="math notranslate nohighlight">\(R_t\)</span>
+location is closest to the estimate <span class="bibtex-citation" id="id17">[<a class="reference internal" href="#id34" title="Juan Ramón Barrada, Paloma Mazuela, and Julio Olea. Maximum information stratification method for controlling item exposure in computerized adaptive testing. Psicothema, 18(1):156–159, 2006. Open access. URL: https://www.psicothema.com/pdf/3191.pdf.">Barrada <em>et al.</em>, 2006</a>, p. 157]</span>. With <span class="math notranslate nohighlight">\(R_t\)</span>
 the items neither administered nor excluded,</p>
 <div class="math notranslate nohighlight">
 \[i^* = \arg\min_{i \in \mathcal{S}_{s(t)} \cap R_t} \left| \ell_i - \hat{\theta} \right|.\]</div>
@@ -677,7 +678,7 @@ past it.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
 <td><p>Number of strata <span class="math notranslate nohighlight">\(S\)</span>, between 1 and <code class="docutils literal notranslate"><span class="pre">test_size</span></code>. <code class="docutils literal notranslate"><span class="pre">None</span></code> uses
 one stratum per test item (<span class="math notranslate nohighlight">\(S = n\)</span>). The original studies used a
-few strata with several items each: Barrada et al. (2006, pp. 157–158)
+few strata with several items each: <span class="bibtex-citation" id="id1">Barrada <em>et al.</em> [<a class="reference internal" href="#id34" title="Juan Ramón Barrada, Paloma Mazuela, and Julio Olea. Maximum information stratification method for controlling item exposure in computerized adaptive testing. Psicothema, 18(1):156–159, 2006. Open access. URL: https://www.psicothema.com/pdf/3191.pdf.">2006</a>, pp. 157–158]</span>
 split 250-item banks into 5 strata of 50 items and administered 6
 items from each in a 30-item test.</p></td>
 </tr>
@@ -689,10 +690,10 @@ items from each in a 30-item test.</p></td>
 <h2>Behavior and Comparison<a class="headerlink" href="#behavior-and-comparison" title="Link to this heading">#</a></h2>
 <p>Under the 1PL and 2PL models <span class="math notranslate nohighlight">\(\theta_i^{\max} = b_i\)</span> and <span class="math notranslate nohighlight">\(I_i^{\max}\)</span> ranks
 items like <span class="math notranslate nohighlight">\(a_i\)</span>, so MIS coincides with the a-stratified method.</p>
-<p>MIS improved precision over the a-stratified method in Barrada et al. (2006,
-pp. 158–159). They also found that blocking reduced the skewness of the exposure
-rates both with and without correlation between <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(b\)</span>, and recommended
-MIS-B whenever a stratified method is used.</p>
+<p>MIS improved precision over the a-stratified method in
+<span class="bibtex-citation" id="id18">Barrada <em>et al.</em> [<a class="reference internal" href="#id34" title="Juan Ramón Barrada, Paloma Mazuela, and Julio Olea. Maximum information stratification method for controlling item exposure in computerized adaptive testing. Psicothema, 18(1):156–159, 2006. Open access. URL: https://www.psicothema.com/pdf/3191.pdf.">2006</a>, pp. 158–159]</span>. They also found that blocking reduced the
+skewness of the exposure rates both with and without correlation between <span class="math notranslate nohighlight">\(a\)</span>
+and <span class="math notranslate nohighlight">\(b\)</span>, and recommended MIS-B whenever a stratified method is used.</p>
 </section>
 <section id="guarantees">
 <h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h2>
@@ -722,9 +723,25 @@ The strata are its exposure control.</p></li>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Chang, H.-H., &amp; Ying, Z. (1999). A-stratified multistage computerized adaptive testing. <em>Applied Psychological Measurement</em>, 23(3), 211-222. <a class="reference external" href="https://doi.org/10.1177/01466219922031338">https://doi.org/10.1177/01466219922031338</a>. Not openly available; Barrada et al. (2006) describe the method.</p>
-<p>Chang, H.-H., Qian, J., &amp; Ying, Z. (2001). A-stratified multistage computerized adaptive testing with b blocking. <em>Applied Psychological Measurement</em>, 25(4), 333-341. <a class="reference external" href="https://doi.org/10.1177/01466210122032181">https://doi.org/10.1177/01466210122032181</a>. Not openly available; Barrada et al. (2006) describe the method.</p>
-<p>Barrada, J. R., Mazuela, P., &amp; Olea, J. (2006). Maximum information stratification method for controlling item exposure in computerized adaptive testing. <em>Psicothema</em>, 18(1), 156-159. <a class="reference external" href="https://www.psicothema.com/pdf/3191.pdf">https://www.psicothema.com/pdf/3191.pdf</a> (open access).</p>
+<div class="docutils container" id="id19">
+<div role="list" class="citation-list">
+<div class="citation" id="id34" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>BMO06<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id3">1</a>,<a role="doc-backlink" href="#id6">2</a>,<a role="doc-backlink" href="#id9">3</a>,<a role="doc-backlink" href="#id10">4</a>,<a role="doc-backlink" href="#id11">5</a>,<a role="doc-backlink" href="#id13">6</a>,<a role="doc-backlink" href="#id15">7</a>,<a role="doc-backlink" href="#id16">8</a>,<a role="doc-backlink" href="#id17">9</a>,<a role="doc-backlink" href="#id1">10</a>,<a role="doc-backlink" href="#id18">11</a>,<a role="doc-backlink" href="#id3">12</a>,<a role="doc-backlink" href="#id4">13</a>)</span>
+<p>Juan Ramón Barrada, Paloma Mazuela, and Julio Olea. Maximum information stratification method for controlling item exposure in computerized adaptive testing. <em>Psicothema</em>, 18(1):156–159, 2006. Open access. URL: <a class="reference external" href="https://www.psicothema.com/pdf/3191.pdf">https://www.psicothema.com/pdf/3191.pdf</a>.</p>
+</div>
+<div class="citation" id="id32" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>CQY01<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id2">1</a>,<a role="doc-backlink" href="#id5">2</a>,<a role="doc-backlink" href="#id8">3</a>,<a role="doc-backlink" href="#id14">4</a>,<a role="doc-backlink" href="#id2">5</a>)</span>
+<p>H.-H. Chang, J. Qian, and Z. Ying. a-stratified multistage computerized adaptive testing with b blocking. <em>Applied Psychological Measurement</em>, 25(4):333–341, 2001. Not openly available; Barrada et al. (2006) describe the method. <a class="reference external" href="https://doi.org/10.1177/01466210122032181">doi:10.1177/01466210122032181</a>.</p>
+</div>
+<div class="citation" id="id33" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>CY99<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id4">2</a>,<a role="doc-backlink" href="#id7">3</a>,<a role="doc-backlink" href="#id12">4</a>,<a role="doc-backlink" href="#id1">5</a>)</span>
+<p>H.-H. Chang and Z. Ying. a-stratified multistage computerized adaptive testing. <em>Applied Psychological Measurement</em>, 23(3):211–222, 1999. Not openly available; Barrada et al. (2006) describe the method. <a class="reference external" href="https://doi.org/10.1177/01466219922031338">doi:10.1177/01466219922031338</a>.</p>
+</div>
+</div>
+</div>
 </section>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
@@ -828,7 +845,7 @@ blocking key. The strata are computed once per item bank.</p>
 <dt class="sig sig-object py" id="catsim.selection.AStratSelector">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">AStratSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_strata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/stratified.html#AStratSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.AStratSelector" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#catsim.selection.StratifiedSelector" title="catsim.selection.stratified.StratifiedSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">StratifiedSelector</span></code></a></p>
-<p>Implementation of the <span class="math notranslate nohighlight">\(\alpha\)</span>-stratified selector <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../../../references.html#id15" title="H.-H. Chang and Z. Ying. A-stratified multistage computerized adaptive testing. Applied Psychological Measurement, 23(3):211–222, 1999. doi:10.1177/01466219922031338.">Chang and Ying, 1999</a>]</span>.</p>
+<p>Implementation of the <span class="math notranslate nohighlight">\(\alpha\)</span>-stratified selector <span class="bibtex-citation" id="id1">[<a class="reference internal" href="#id33" title="H.-H. Chang and Z. Ying. a-stratified multistage computerized adaptive testing. Applied Psychological Measurement, 23(3):211–222, 1999. Not openly available; Barrada et al. (2006) describe the method. doi:10.1177/01466219922031338.">Chang and Ying, 1999</a>]</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -847,7 +864,7 @@ blocking key. The strata are computed once per item bank.</p>
 <dt class="sig sig-object py" id="catsim.selection.AStratBBlockSelector">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">AStratBBlockSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_strata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/stratified.html#AStratBBlockSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.AStratBBlockSelector" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#catsim.selection.AStratSelector" title="catsim.selection.stratified.AStratSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">AStratSelector</span></code></a></p>
-<p>Implementation of the <span class="math notranslate nohighlight">\(\alpha\)</span>-stratified selector with <span class="math notranslate nohighlight">\(b\)</span> blocking <span class="bibtex-citation" id="id2">[<a class="reference internal" href="../../../references.html#id14" title="H.-H. Chang, J. Qian, and Z. Ying. A-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. doi:10.1177/01466210122032181.">Chang <em>et al.</em>, 2001</a>]</span>.</p>
+<p>Implementation of the <span class="math notranslate nohighlight">\(\alpha\)</span>-stratified selector with <span class="math notranslate nohighlight">\(b\)</span> blocking <span class="bibtex-citation" id="id2">[<a class="reference internal" href="#id32" title="H.-H. Chang, J. Qian, and Z. Ying. a-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. Not openly available; Barrada et al. (2006) describe the method. doi:10.1177/01466210122032181.">Chang <em>et al.</em>, 2001</a>]</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -866,7 +883,7 @@ blocking key. The strata are computed once per item bank.</p>
 <dt class="sig sig-object py" id="catsim.selection.MaxInfoStratSelector">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">MaxInfoStratSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_strata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/stratified.html#MaxInfoStratSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.MaxInfoStratSelector" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#catsim.selection.StratifiedSelector" title="catsim.selection.stratified.StratifiedSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">StratifiedSelector</span></code></a></p>
-<p>Implementation of the maximum information stratification (MIS) selector <span class="bibtex-citation" id="id3">[<a class="reference internal" href="../../../references.html#id16" title="Juan Ramón Barrada, Paloma Mazuela, and Julio Olea. Maximum information stratification method for controlling item exposure in computerized adaptive testing. Psicothema, 18(1):156–159, 2006. URL: https://www.psicothema.com/pdf/3191.pdf.">Barrada <em>et al.</em>, 2006</a>]</span>.</p>
+<p>Implementation of the maximum information stratification (MIS) selector <span class="bibtex-citation" id="id3">[<a class="reference internal" href="#id34" title="Juan Ramón Barrada, Paloma Mazuela, and Julio Olea. Maximum information stratification method for controlling item exposure in computerized adaptive testing. Psicothema, 18(1):156–159, 2006. Open access. URL: https://www.psicothema.com/pdf/3191.pdf.">Barrada <em>et al.</em>, 2006</a>]</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -885,7 +902,7 @@ blocking key. The strata are computed once per item bank.</p>
 <dt class="sig sig-object py" id="catsim.selection.MaxInfoBBlockSelector">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">MaxInfoBBlockSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_strata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/stratified.html#MaxInfoBBlockSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.MaxInfoBBlockSelector" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#catsim.selection.MaxInfoStratSelector" title="catsim.selection.stratified.MaxInfoStratSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxInfoStratSelector</span></code></a></p>
-<p>Implementation of the maximum information stratification with blocking (MIS-B) selector <span class="bibtex-citation" id="id4">[<a class="reference internal" href="../../../references.html#id16" title="Juan Ramón Barrada, Paloma Mazuela, and Julio Olea. Maximum information stratification method for controlling item exposure in computerized adaptive testing. Psicothema, 18(1):156–159, 2006. URL: https://www.psicothema.com/pdf/3191.pdf.">Barrada <em>et al.</em>, 2006</a>]</span>.</p>
+<p>Implementation of the maximum information stratification with blocking (MIS-B) selector <span class="bibtex-citation" id="id4">[<a class="reference internal" href="#id34" title="Juan Ramón Barrada, Paloma Mazuela, and Julio Olea. Maximum information stratification method for controlling item exposure in computerized adaptive testing. Psicothema, 18(1):156–159, 2006. Open access. URL: https://www.psicothema.com/pdf/3191.pdf.">Barrada <em>et al.</em>, 2006</a>]</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">

@@ -472,7 +472,7 @@
 <dd class="field-odd"><p><a class="reference internal" href="#catsim.estimation.QuadratureGrid" title="catsim.estimation.QuadratureGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.QuadratureGrid</span></code></a></p>
 </dd>
 <dt class="field-even">Sources<span class="colon">:</span></dt>
-<dd class="field-even"><p>Bock &amp; Mislevy (1982); Bock &amp; Aitkin (1981)</p>
+<dd class="field-even"><p><span class="bibtex-citation" id="id1">Bock and Mislevy [<a class="reference internal" href="#id37" title="R. D. Bock and R. J. Mislevy. Adaptive EAP estimation of ability in a microcomputer environment. Applied Psychological Measurement, 6(4):431–444, 1982. Open copy: https://hdl.handle.net/11299/101546. doi:10.1177/014662168200600405.">1982</a>]</span>; <span class="bibtex-citation" id="id2">Bock and Aitkin [<a class="reference internal" href="#id36" title="R. D. Bock and M. Aitkin. Marginal maximum likelihood estimation of item parameters: application of an EM algorithm. Psychometrika, 46(4):443–459, 1981. Not openly available; Bock and Mislevy (1982, p. 432) describe its quadrature formulas. doi:10.1007/BF02293801.">1981</a>]</span></p>
 </dd>
 </dl>
 <section id="motivation">
@@ -502,7 +502,7 @@ posterior-weighted selectors (MPWI, KLP, MEPV) would reuse its posterior.</p>
 w_q\,p(\theta_q)\,L(\mathbf{u}\mid\theta_q),
 \qquad
 \sum_{q=1}^{Q}\tilde{p}(\theta_q \mid \mathbf{u}) = 1.\]</div>
-<p>The log-likelihoods are summed at each node, as Bock and Mislevy (1982, p. 432)
+<p>The log-likelihoods are summed at each node, as <span class="bibtex-citation" id="id3">Bock and Mislevy [<a class="reference internal" href="#id37" title="R. D. Bock and R. J. Mislevy. Adaptive EAP estimation of ability in a microcomputer environment. Applied Psychological Measurement, 6(4):431–444, 1982. Open copy: https://hdl.handle.net/11299/101546. doi:10.1177/014662168200600405.">1982</a>, p. 432]</span>
 recommend for adaptive testing, and the posterior is normalized after
 subtracting the largest log-posterior value, so long response vectors do not
 underflow. Downstream techniques reuse the same posterior moments:</p>
@@ -515,9 +515,9 @@ underflow. Downstream techniques reuse the same posterior moments:</p>
 =
 \sum_{q=1}^{Q}(\theta_q-\hat{\theta}_{\mathrm{EAP}})^2
 \tilde{p}(\theta_q \mid \mathbf{u}).\]</div>
-<p>These are Equations 4 and 5 of Bock and Mislevy (1982, p. 433), without the
-square root on the variance; they credit the quadrature formulas to Bock and
-Aitkin (1981) (p. 432). Like Bock and Mislevy, catsim uses evenly spaced nodes
+<p>These are Equations 4 and 5 of <span class="bibtex-citation" id="id4">Bock and Mislevy [<a class="reference internal" href="#id37" title="R. D. Bock and R. J. Mislevy. Adaptive EAP estimation of ability in a microcomputer environment. Applied Psychological Measurement, 6(4):431–444, 1982. Open copy: https://hdl.handle.net/11299/101546. doi:10.1177/014662168200600405.">1982</a>, p. 433]</span>, without the
+square root on the variance; on p. 432 they credit the quadrature formulas to
+<span class="bibtex-citation" id="id5">Bock and Aitkin [<a class="reference internal" href="#id36" title="R. D. Bock and M. Aitkin. Marginal maximum likelihood estimation of item parameters: application of an EM algorithm. Psychometrika, 46(4):443–459, 1981. Not openly available; Bock and Mislevy (1982, p. 432) describe its quadrature formulas. doi:10.1007/BF02293801.">1981</a>]</span>. Like Bock and Mislevy, catsim uses evenly spaced nodes
 rather than Gauss–Hermite points, which offer little advantage here because the
 likelihood is not a polynomial (p. 433).</p>
 <p>By default the grid has 121 equally spaced nodes on <span class="math notranslate nohighlight">\([-6, 6]\)</span> (spacing 0.1) and
@@ -529,8 +529,8 @@ the prior is <span class="math notranslate nohighlight">\(\mathcal{N}(0, 1)\)</s
 standard deviation to within about 0.25% while the posterior standard deviation
 is at least 0.065, which takes a test information of about 240. Below that it
 degrades: errors reach about 6% at a posterior standard deviation of 0.05 and
-about 44% at 0.035. The default follows the advice of Bock and Mislevy (1982,
-p. 433), who suggested about 80 points between <span class="math notranslate nohighlight">\(\pm 4\)</span> standard deviations, also
+about 44% at 0.035. The default follows the advice of <span class="bibtex-citation" id="id6">Bock and Mislevy [<a class="reference internal" href="#id37" title="R. D. Bock and R. J. Mislevy. Adaptive EAP estimation of ability in a microcomputer environment. Applied Psychological Measurement, 6(4):431–444, 1982. Open copy: https://hdl.handle.net/11299/101546. doi:10.1177/014662168200600405.">1982</a>, p. 433]</span>,
+who suggested about 80 points between <span class="math notranslate nohighlight">\(\pm 4\)</span> standard deviations, also
 a spacing of 0.1, to keep precision down to a posterior standard deviation of
 0.2.
 A coarser grid degrades sooner: with 41 nodes (spacing 0.3), errors reach about
@@ -599,8 +599,20 @@ rather than expands without bound.</p>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Bock, R. D., &amp; Aitkin, M. (1981). Marginal maximum likelihood estimation of item parameters: Application of an EM algorithm. <em>Psychometrika</em>, 46(4), 443-459. <a class="reference external" href="https://doi.org/10.1007/BF02293801">https://doi.org/10.1007/BF02293801</a>. Not openly available; Bock and Mislevy (1982, p. 432) describe its quadrature formulas.</p>
-<p>Bock, R. D., &amp; Mislevy, R. J. (1982). Adaptive EAP estimation of ability in a microcomputer environment. <em>Applied Psychological Measurement</em>, 6(4), 431-444. <a class="reference external" href="https://doi.org/10.1177/014662168200600405">https://doi.org/10.1177/014662168200600405</a>. Open copy: <a class="reference external" href="https://hdl.handle.net/11299/101546">University of Minnesota Digital Conservancy</a>.</p>
+<div class="docutils container" id="id7">
+<div role="list" class="citation-list">
+<div class="citation" id="id36" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>BA81<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id2">1</a>,<a role="doc-backlink" href="#id5">2</a>)</span>
+<p>R. D. Bock and M. Aitkin. Marginal maximum likelihood estimation of item parameters: application of an EM algorithm. <em>Psychometrika</em>, 46(4):443–459, 1981. Not openly available; Bock and Mislevy (1982, p. 432) describe its quadrature formulas. <a class="reference external" href="https://doi.org/10.1007/BF02293801">doi:10.1007/BF02293801</a>.</p>
+</div>
+<div class="citation" id="id37" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>BM82<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id3">2</a>,<a role="doc-backlink" href="#id4">3</a>,<a role="doc-backlink" href="#id6">4</a>)</span>
+<p>R. D. Bock and R. J. Mislevy. Adaptive EAP estimation of ability in a microcomputer environment. <em>Applied Psychological Measurement</em>, 6(4):431–444, 1982. Open copy: <a class="reference external" href="https://hdl.handle.net/11299/101546">https://hdl.handle.net/11299/101546</a>. <a class="reference external" href="https://doi.org/10.1177/014662168200600405">doi:10.1177/014662168200600405</a>.</p>
+</div>
+</div>
+</div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="eap-estimator.html"><span class="doc">Expected A Posteriori Estimator</span></a>,

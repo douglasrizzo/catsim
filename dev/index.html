@@ -409,6 +409,14 @@
 <p>catsim runs computerized adaptive tests based on item response theory: it chooses each examinee’s
 next item from an item bank, estimates the examinee’s ability after each response and decides when
 the test ends. One engine serves two kinds of work.</p>
+<div class="note admonition">
+<p class="admonition-title">Coming from catsim 0.x?</p>
+<p>catsim 1.0 has a different API, and code written for 0.x does not run unchanged. The
+<a class="reference external" href="https://github.com/douglasrizzo/catsim/releases/tag/1.0.0">1.0.0 release notes</a> say what to
+change, and the <a class="reference internal" href="getting-started.html"><span class="doc">guides</span></a> and <a class="reference internal" href="tutorials.html"><span class="doc">tutorials</span></a> teach the 1.0
+API. To keep running 0.x code, install it with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;catsim&lt;1&quot;</span></code>; its documentation is at
+the <a class="reference external" href="https://github.com/douglasrizzo/catsim/tree/0.21.0">0.21.0 tag</a> on GitHub.</p>
+</div>
 <section id="run-a-simulation-study">
 <h2>Run a simulation study<a class="headerlink" href="#run-a-simulation-study" title="Link to this heading">#</a></h2>
 <p>Researchers give a test to simulated examinees whose true abilities are known, and compare how well
@@ -429,8 +437,7 @@ by item, saves and resumes it, and shares item exposure across sessions.</p>
 <a class="reference internal" href="terms-and-notation.html"><span class="doc">Terms and Notation</span></a> lists the terms and symbols these pages use.</p></li>
 <li><p><a class="reference internal" href="api/techniques/index.html"><span class="doc">Techniques</span></a>: each method catsim implements, with its formulas, parameters and
 sources.</p></li>
-<li><p>The <a class="reference external" href="https://github.com/douglasrizzo/catsim/tree/main/notebooks">tutorial notebooks</a>: the guides
-as hands-on exercises, which open in Colab.</p></li>
+<li><p>The <a class="reference internal" href="tutorials.html"><span class="doc">Tutorials</span></a>: the guides as hands-on exercises, in notebooks that open in Colab.</p></li>
 <li><p><a class="reference internal" href="reproducibility.html"><span class="doc">Reproducibility</span></a> and <a class="reference internal" href="extending.html"><span class="doc">Extending catsim</span></a>: seeding a study, and writing your own strategies.</p></li>
 <li><p>The <a class="reference internal" href="api/index.html"><span class="doc">API Reference</span></a>: every public class and function.</p></li>
 <li><p>The <a class="reference external" href="https://github.com/douglasrizzo/catsim#readme">README</a>: installation, a quickstart and how to

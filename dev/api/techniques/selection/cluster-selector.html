@@ -481,12 +481,12 @@
 <dd class="field-odd"><p><a class="reference internal" href="#catsim.selection.ClusterSelector" title="catsim.selection.ClusterSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.ClusterSelector</span></code></a></p>
 </dd>
 <dt class="field-even">Sources<span class="colon">:</span></dt>
-<dd class="field-even"><p>Meneghetti (2015)</p>
+<dd class="field-even"><p><span class="bibtex-citation" id="id1">Meneghetti [<a class="reference internal" href="#id47" title="D. R. Meneghetti. Metodologia de selecao de itens em testes adaptativos informatizados baseada em agrupamento por similaridade. Master's thesis, Centro Universitario da FEI, 2015. URL: https://www.researchgate.net/publication/283944553_Metodologia_de_selecao_de_itens_em_Testes_Adaptativos_Informatizados_baseada_em_Agrupamento_por_Similaridade.">2015</a>]</span></p>
 </dd>
 </dl>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">#</a></h2>
-<p>The method comes from Meneghetti (2015). Cluster-based selection is an
+<p>The method comes from <span class="bibtex-citation" id="id2">Meneghetti [<a class="reference internal" href="#id47" title="D. R. Meneghetti. Metodologia de selecao de itens em testes adaptativos informatizados baseada em agrupamento por similaridade. Master's thesis, Centro Universitario da FEI, 2015. URL: https://www.researchgate.net/publication/283944553_Metodologia_de_selecao_de_itens_em_Testes_Adaptativos_Informatizados_baseada_em_Agrupamento_por_Similaridade.">2015</a>]</span>. Cluster-based selection is an
 exposure-management strategy that organizes items into externally supplied
 groups and chooses from those groups rather than from the entire bank at once.
 The aim is to distribute usage across groups of similar items while still
@@ -527,7 +527,7 @@ item inside that cluster:</p>
 <p>whenever such items exist. If none do, <code class="docutils literal notranslate"><span class="pre">r_control=&quot;passive&quot;</span></code> falls back to the
 highest-information item in the cluster, whereas <code class="docutils literal notranslate"><span class="pre">r_control=&quot;aggressive&quot;</span></code>
 chooses the lowest-exposure item in the cluster.</p>
-<p>Meneghetti and Aquino Junior (2018, pp. 9–10) describe the selector as one that
+<p><span class="bibtex-citation" id="id3">Meneghetti and Aquino Junior [<a class="reference internal" href="#id48" title="Douglas De Rizzo Meneghetti and Plinio Thomaz Aquino Junior. Application and simulation of computerized adaptive tests through the package catsim. arXiv:1707.03012v2, 2018. Open access. URL: https://arxiv.org/abs/1707.03012, doi:10.48550/arXiv.1707.03012.">2018</a>, pp. 9–10]</span> describe the selector as one that
 “clusters items according to their parameter values and selects items from the
 cluster that contains either the most informative item or the highest average
 information”. They do not say whether administered items count toward a
@@ -623,8 +623,19 @@ bank.</p></li>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Meneghetti, D. R. (2015). <em>Metodologia de selecao de itens em testes adaptativos informatizados baseada em agrupamento por similaridade</em> (Master’s thesis). Centro Universitario da FEI. <a class="reference external" href="https://www.researchgate.net/publication/283944553_Metodologia_de_selecao_de_itens_em_Testes_Adaptativos_Informatizados_baseada_em_Agrupamento_por_Similaridade">https://www.researchgate.net/publication/283944553_Metodologia_de_selecao_de_itens_em_Testes_Adaptativos_Informatizados_baseada_em_Agrupamento_por_Similaridade</a></p>
-<p>Meneghetti, D. D. R., &amp; Aquino Junior, P. T. (2018). <em>Application and simulation of computerized adaptive tests through the package catsim</em> (arXiv:1707.03012v2). <a class="reference external" href="https://arxiv.org/abs/1707.03012">https://arxiv.org/abs/1707.03012</a> (open access).</p>
+<div class="docutils container" id="id4">
+<div role="list" class="citation-list">
+<div class="citation" id="id47" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Men15<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>,<a role="doc-backlink" href="#id1">3</a>)</span>
+<p>D. R. Meneghetti. Metodologia de selecao de itens em testes adaptativos informatizados baseada em agrupamento por similaridade. Master's thesis, Centro Universitario da FEI, 2015. URL: <a class="reference external" href="https://www.researchgate.net/publication/283944553_Metodologia_de_selecao_de_itens_em_Testes_Adaptativos_Informatizados_baseada_em_Agrupamento_por_Similaridade">https://www.researchgate.net/publication/283944553_Metodologia_de_selecao_de_itens_em_Testes_Adaptativos_Informatizados_baseada_em_Agrupamento_por_Similaridade</a>.</p>
+</div>
+<div class="citation" id="id48" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">MAJ18</a><span class="fn-bracket">]</span></span>
+<p>Douglas De Rizzo Meneghetti and Plinio Thomaz Aquino Junior. Application and simulation of computerized adaptive tests through the package catsim. arXiv:1707.03012v2, 2018. Open access. URL: <a class="reference external" href="https://arxiv.org/abs/1707.03012">https://arxiv.org/abs/1707.03012</a>, <a class="reference external" href="https://doi.org/10.48550/arXiv.1707.03012">doi:10.48550/arXiv.1707.03012</a>.</p>
+</div>
+</div>
+</div>
 </section>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
@@ -633,7 +644,7 @@ bank.</p></li>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">ClusterSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#catsim.selection.ClusterMethod" title="catsim.selection.cluster.ClusterMethod"><span class="pre">ClusterMethod</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">ClusterMethod.ITEM_INFO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_control</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#catsim.selection.CapFallback" title="catsim.selection.cluster.CapFallback"><span class="pre">CapFallback</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">CapFallback.PASSIVE</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/cluster.html#ClusterSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ClusterSelector" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="index.html#catsim.selection.BaseSelector" title="catsim.selection.base.BaseSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></a></p>
 <p>Choose the best-scoring cluster of items, then the most informative remaining item in it.</p>
-<p>This is the cluster-based selection method of Meneghetti (2015). The caller labels each item with
+<p>This is the cluster-based selection method of <span class="bibtex-citation" id="id1">Meneghetti [<a class="reference internal" href="#id47" title="D. R. Meneghetti. Metodologia de selecao de itens em testes adaptativos informatizados baseada em agrupamento por similaridade. Master's thesis, Centro Universitario da FEI, 2015. URL: https://www.researchgate.net/publication/283944553_Metodologia_de_selecao_de_itens_em_Testes_Adaptativos_Informatizados_baseada_em_Agrupamento_por_Similaridade.">2015</a>]</span>. The caller labels each item with
 a cluster, for example by clustering the item parameters. At each step the selector scores every
 cluster that still has an item left, takes the best one, and administers that cluster’s most
 informative remaining item whose exposure rate is below <code class="docutils literal notranslate"><span class="pre">r_max</span></code>. Exact ties between clusters and

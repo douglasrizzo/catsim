@@ -481,14 +481,14 @@
 <dd class="field-odd"><p><a class="reference internal" href="#catsim.selection.The54321Selector" title="catsim.selection.The54321Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.The54321Selector</span></code></a></p>
 </dd>
 <dt class="field-even">Sources<span class="colon">:</span></dt>
-<dd class="field-even"><p>McBride &amp; Martin (1983)</p>
+<dd class="field-even"><p><span class="bibtex-citation" id="id1">McBride and Martin [<a class="reference internal" href="#id13" title="J. R. McBride and J. T. Martin. Reliability and validity of adaptive ability tests in a military setting. In D. J. Weiss, editor, New Horizons in Testing: Latent Trait Test Theory and Computerized Adaptive Testing, 223–236. Academic Press, 1983. Not openly available; Georgiadou et al. (2007) describe the method. doi:10.1016/B978-0-12-742780-5.50022-6.">1983</a>]</span></p>
 </dd>
 </dl>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">#</a></h2>
 <p>Under maximum-information selection every examinee starts from the same
 ability estimate, so the opening items of every test are the same few items.
-The 5-4-3-2-1 technique of McBride and Martin (1983) randomizes only those
+The 5-4-3-2-1 technique of <span class="bibtex-citation" id="id2">McBride and Martin [<a class="reference internal" href="#id13" title="J. R. McBride and J. T. Martin. Reliability and validity of adaptive ability tests in a military setting. In D. J. Weiss, editor, New Horizons in Testing: Latent Trait Test Theory and Computerized Adaptive Testing, 223–236. Academic Press, 1983. Not openly available; Georgiadou et al. (2007) describe the method. doi:10.1016/B978-0-12-742780-5.50022-6.">1983</a>]</span> randomizes only those
 opening items.</p>
 </section>
 <section id="definition">
@@ -501,7 +501,7 @@ at the current estimate;</p></li>
 <li><p>the third from 3 and the fourth from 2;</p></li>
 <li><p>from the fifth item on, the most informative remaining item is administered.</p></li>
 </ul>
-<p>This is the schedule described by Georgiadou et al. (2007, p. 9) in their
+<p>This is the schedule described by <span class="bibtex-citation" id="id3">Georgiadou <em>et al.</em> [<a class="reference internal" href="#id54" title="E. G. Georgiadou, E. Triantafillou, and A. A. Economides. A review of item exposure control strategies for computerized adaptive testing developed from 1983 to 2005. The Journal of Technology, Learning, and Assessment, 5(8):1–39, 2007. Open access. URL: https://ejournals.bc.edu/index.php/jtla/article/view/1647.">2007</a>, p. 9]</span> in their
 review of exposure-control strategies.</p>
 <p>With <code class="docutils literal notranslate"><span class="pre">initial_bin_size</span></code> <span class="math notranslate nohighlight">\(s\)</span>, the item at 0-indexed test position <span class="math notranslate nohighlight">\(k\)</span> is drawn
 from the <span class="math notranslate nohighlight">\(\max(1, s - k)\)</span> most informative items that are neither administered
@@ -535,9 +535,9 @@ following item draws from one fewer, down to 1.</p></td>
 <section id="behavior-and-comparison">
 <h2>Behavior and Comparison<a class="headerlink" href="#behavior-and-comparison" title="Link to this heading">#</a></h2>
 <p>Unlike the randomesque selector, which keeps drawing from a fixed number of
-items for the whole test (Georgiadou et al., 2007, p. 9), the late items, which
-matter most for precision, are chosen by maximum information. Magis and Raîche
-(2012, p. 12) list the technique among the methods that choose at random among
+items for the whole test <span class="bibtex-citation" id="id4">[<a class="reference internal" href="#id54" title="E. G. Georgiadou, E. Triantafillou, and A. A. Economides. A review of item exposure control strategies for computerized adaptive testing developed from 1983 to 2005. The Journal of Technology, Learning, and Assessment, 5(8):1–39, 2007. Open access. URL: https://ejournals.bc.edu/index.php/jtla/article/view/1647.">Georgiadou <em>et al.</em>, 2007</a>, p. 9]</span>, the late items, which
+matter most for precision, are chosen by maximum information.
+<span class="bibtex-citation" id="id5">Magis and Raîche [<a class="reference internal" href="#id18" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">2012</a>, p. 12]</span> list the technique among the methods that choose at random among
 several near-optimal items, without defining it.</p>
 </section>
 <section id="guarantees">
@@ -553,9 +553,24 @@ several near-optimal items, without defining it.</p>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>McBride, J. R., &amp; Martin, J. T. (1983). Reliability and validity of adaptive ability tests in a military setting. In D. J. Weiss (Ed.), <em>New horizons in testing: Latent trait test theory and computerized adaptive testing</em> (pp. 223-236). Academic Press. <a class="reference external" href="https://doi.org/10.1016/B978-0-12-742780-5.50022-6">https://doi.org/10.1016/B978-0-12-742780-5.50022-6</a>. Not openly available; Georgiadou et al. (2007) describe the method.</p>
-<p>Georgiadou, E. G., Triantafillou, E., &amp; Economides, A. A. (2007). A review of item exposure control strategies for computerized adaptive testing developed from 1983 to 2005. <em>The Journal of Technology, Learning, and Assessment</em>, 5(8). <a class="reference external" href="https://ejournals.bc.edu/index.php/jtla/article/view/1647">https://ejournals.bc.edu/index.php/jtla/article/view/1647</a> (open access).</p>
-<p>Magis, D., &amp; Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8), 1-31. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">https://doi.org/10.18637/jss.v048.i08</a> (open access).</p>
+<div class="docutils container" id="id6">
+<div role="list" class="citation-list">
+<div class="citation" id="id54" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>GTE07<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id3">1</a>,<a role="doc-backlink" href="#id4">2</a>)</span>
+<p>E. G. Georgiadou, E. Triantafillou, and A. A. Economides. A review of item exposure control strategies for computerized adaptive testing developed from 1983 to 2005. <em>The Journal of Technology, Learning, and Assessment</em>, 5(8):1–39, 2007. Open access. URL: <a class="reference external" href="https://ejournals.bc.edu/index.php/jtla/article/view/1647">https://ejournals.bc.edu/index.php/jtla/article/view/1647</a>.</p>
+</div>
+<div class="citation" id="id18" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">MR12</a><span class="fn-bracket">]</span></span>
+<p>D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8):1–31, 2012. Open access. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">doi:10.18637/jss.v048.i08</a>.</p>
+</div>
+<div class="citation" id="id13" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>MM83<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>,<a role="doc-backlink" href="#id1">3</a>)</span>
+<p>J. R. McBride and J. T. Martin. Reliability and validity of adaptive ability tests in a military setting. In D. J. Weiss, editor, <em>New Horizons in Testing: Latent Trait Test Theory and Computerized Adaptive Testing</em>, 223–236. Academic Press, 1983. Not openly available; Georgiadou et al. (2007) describe the method. <a class="reference external" href="https://doi.org/10.1016/B978-0-12-742780-5.50022-6">doi:10.1016/B978-0-12-742780-5.50022-6</a>.</p>
+</div>
+</div>
+</div>
 </section>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
@@ -564,7 +579,7 @@ several near-optimal items, without defining it.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">The54321Selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_bin_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/randomized.html#The54321Selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.The54321Selector" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="index.html#catsim.selection.BaseSelector" title="catsim.selection.base.BaseSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></a></p>
 <p>Draw each opening item at random from a shrinking bin of the most informative items.</p>
-<p>The 5-4-3-2-1 method of <span class="bibtex-citation" id="id1">McBride and Martin [<a class="reference internal" href="../../../references.html#id8" title="J. R. McBride and J. T. Martin. Reliability and validity of adaptive ability tests in a military setting. In New horizons in testing: Latent trait test theory and computerized adaptive testing, pages 223–236. Academic Press, New York, 1983. doi:10.1016/B978-0-12-742780-5.50022-6.">1983</a>]</span>: the first item is drawn from the 5 most informative
+<p>The 5-4-3-2-1 method of <span class="bibtex-citation" id="id1">McBride and Martin [<a class="reference internal" href="#id13" title="J. R. McBride and J. T. Martin. Reliability and validity of adaptive ability tests in a military setting. In D. J. Weiss, editor, New Horizons in Testing: Latent Trait Test Theory and Computerized Adaptive Testing, 223–236. Academic Press, 1983. Not openly available; Georgiadou et al. (2007) describe the method. doi:10.1016/B978-0-12-742780-5.50022-6.">1983</a>]</span>: the first item is drawn from the 5 most informative
 items at the current estimate, the second from the 4 most informative remaining ones, and so on,
 until from the fifth item on the most informative item is administered. Items tied with the least
 informative item of a bin also join it. The selector applies no exposure cap:
