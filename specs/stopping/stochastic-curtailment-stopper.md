@@ -2,7 +2,7 @@
 **Module:** `catsim.stopping.classification.StochasticCurtailmentStopper` (planned)
 **Reference:** Finkelman (2008, 2010)
 **Last validated:** 2026-11-23, against Huebner & Finkelman (2016) and Sie, Finkelman, Bartroff & Thompson (2015) (PubMed Central full texts), the abstracts of Finkelman (2008, 2010) and catR 3.17.
-**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in, a pure `classify(context)`, a single criterion for `StopRule`) on 2026-11-24.
+**Implementation guidance:** written against the 1.0 strategy contract (`StepContext` in, a pure `classify(context)`, a single criterion for `StopRule`) on 2026-11-26.
 
 # Stochastic Curtailment Stopper
 
@@ -166,7 +166,7 @@ To be answered before the stopper is implemented, and removed from the spec when
 
 :::{note}
 This section is for contributors and agents implementing this technique.
-It is removed when the spec is promoted to "Implemented" status.
+It is removed when the spec is promoted to a technique page.
 :::
 
 **Proposed location:** `src/catsim/stopping/classification.py`, next to `SPRTStopper`, which it
@@ -180,6 +180,9 @@ extends.
 from scipy import stats
 
 from .bank import _remaining
+
+if TYPE_CHECKING:
+  from ..typing import FloatArray
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -225,6 +228,7 @@ class StochasticCurtailmentStopper(SPRTStopper):
     """Return the midpoint of the SPRT's bounds, which decides the interim and the forced classification."""
     return (self.upper + self.lower) / 2
 
+  @override
   def classify(self, context: StepContext) -> Classification:
     """Return the interim decision, which is also the decision forced after `max_items` items.
 
@@ -261,22 +265,29 @@ class StochasticCurtailmentStopper(SPRTStopper):
     # estimate, as Finkelman (2008) chose them.
     information = irt.information(context.theta, item_bank.get_items(candidates))
     items = item_bank.get_items(candidates[numpy.argsort(-information, kind="stable")[:to_come]])
-    lower, upper = self.cut_score - self.indifference, self.cut_score + self.indifference
     # The boundary point least favorable to the interim decision. Open Question 1: the plug-in
     # variant would evaluate at context.theta instead.
-    theta_star = lower if above else upper
-    p_star, p_upper, p_lower = (irt.icc(theta, items) for theta in (theta_star, upper, lower))
-    log_ratio_correct = numpy.log(p_upper) - numpy.log(p_lower)
-    log_ratio_incorrect = numpy.log1p(-p_upper) - numpy.log1p(-p_lower)
-    means = p_star * log_ratio_correct + (1 - p_star) * log_ratio_incorrect
-    variances = p_star * log_ratio_correct**2 + (1 - p_star) * log_ratio_incorrect**2 - means**2
-    mean = statistic + float(means.sum())
-    sd = math.sqrt(max(float(variances.sum()), 0.0))
+    theta_star = self.cut_score - self.indifference if above else self.cut_score + self.indifference
+    increase, variance = self._increase(items, theta_star)
+    mean, sd = statistic + increase, math.sqrt(variance)
     if sd == 0:
       return 1.0 if (mean >= self.midpoint) == above else 0.0
     z = (self.midpoint - mean) / sd
     return float(stats.norm.sf(z) if above else stats.norm.cdf(z))
 
+  def _increase(self, items: FloatArray, theta: float) -> tuple[float, float]:
+    """Return the mean and the variance of the statistic's increase over ``items``, answered at ``theta``."""
+    lower, upper = self.cut_score - self.indifference, self.cut_score + self.indifference
+    # from the logits, so an item whose probability rounds to 0 or 1 at both points gives finite ratios
+    log_p_upper, log_q_upper = irt.log_response_probabilities(upper, items)
+    log_p_lower, log_q_lower = irt.log_response_probabilities(lower, items)
+    correct, incorrect = log_p_upper - log_p_lower, log_q_upper - log_q_lower
+    probability = irt.icc(theta, items)
+    means = probability * correct + (1 - probability) * incorrect
+    variances = probability * correct**2 + (1 - probability) * incorrect**2 - means**2
+    return float(means.sum()), max(float(variances.sum()), 0.0)
+
+  @override
   def stop(self, context: StepContext) -> bool:
     """Return whether the SPRT stops, or the forced decision is likely enough to agree with the interim one.
 
@@ -313,11 +324,10 @@ class StochasticCurtailmentStopper(SPRTStopper):
   `StopRule(StochasticCurtailmentStopper(0.0, max_items=30), MaxLengthStopper(30), min_items=5)`.
 - `_remaining` is the bank stoppers' helper (the minimum-information spec). Once two modules use
   it, move it to `stopping/base.py`.
-- `numpy.log1p(-p)` is $-\infty$ for an item whose probability rounds to 1 at both boundary
-  points, and the difference of two such values is NaN, which the comparison with `gamma` would
-  silently read as False. Compute the log-probabilities from the logits instead, with the
-  per-item helper the KL specs propose to move into `catsim.irt`, before banks with such items
-  can reach the stopper.
+- The log-likelihood ratios of the items to come use the log-probabilities that
+  `irt.log_response_probabilities` computes from the logits. Taking `numpy.log1p(-p)` of the probabilities instead gives
+  $-\infty$ for an item whose probability rounds to 1 at both boundary points, and the difference
+  of two such values is NaN, which the comparison with `gamma` would silently read as False.
 - The look-ahead assumes the items to come are about as informative as the representative set,
   which holds for an information-based selector and less for an exposure-controlled one.
 
