@@ -24,7 +24,7 @@ class BaseEstimator(ABC):
     r"""Return the updated ability estimate given the responses so far, with its standard error.
 
     Once an item has been administered, the estimate is finite and lies within the estimator's
-    bounds, whatever the response pattern, all correct and all incorrect included.
+    bounds, whatever the responses, all correct and all incorrect included.
 
     Parameters
     ----------
@@ -36,8 +36,8 @@ class BaseEstimator(ABC):
     Returns
     -------
     Estimate
-        The updated ability estimate :math:`\hat\theta`, its standard error (finite, or
-        ``math.inf``, never NaN) and the number of objective evaluations it took.
+        The updated ability estimate :math:`\hat\theta`, its standard error (positive, possibly
+        ``math.inf``) and the number of objective evaluations it took.
     """
 
   @staticmethod

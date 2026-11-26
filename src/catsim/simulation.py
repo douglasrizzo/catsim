@@ -35,7 +35,7 @@ _Array = TypeVar("_Array", bound=numpy.ndarray)
 class _Stream(enum.IntEnum):
   """The last entry of an examinee's spawn key, which says which of its two random streams it is (ADR-0013)."""
 
-  PATTERN = 0  # the examinee's response pattern, drawn before its test
+  PATTERN = 0  # the examinee's answers to every item, drawn before its test
   SESSION = 1  # the generator of its session's steps
 
 
@@ -51,9 +51,8 @@ def simulate(  # noqa: PLR0913 - the engine, two ways to give examinees, the see
 ) -> SimulationResult:
   r"""Run one CAT session per examinee on an engine, in parts that can run on several processes.
 
-  An examinee is a response pattern, one answer per item of the bank, and its session takes the
-  answer to every item it is given from that pattern (ADR-0014). The examinees are given in one of
-  three ways:
+  Each examinee has an answer to every item of the bank, and its session takes the answer to each
+  item it is given from them (ADR-0014). The examinees are given in one of three ways:
 
   - ``true_thetas`` alone: generated examinees. Before its test, examinee ``i`` draws one uniform
     number :math:`u_j` per item of the bank, and its answer to item :math:`j` is correct when
@@ -68,7 +67,7 @@ def simulate(  # noqa: PLR0913 - the engine, two ways to give examinees, the see
 
   Every random draw comes from ``rng`` (ADR-0013). The run takes one root entropy from it, and
   examinee ``i``, at position ``i`` of the run, draws from two streams of its own:
-  ``SeedSequence(entropy, spawn_key=(i, 0))`` for its response pattern, and
+  ``SeedSequence(entropy, spawn_key=(i, 0))`` for its answers to every item, and
   ``SeedSequence(entropy, spawn_key=(i, 1))`` for its session, the generator of its ``start``,
   ``select`` and ``answer`` steps, from which the initializer, the selector and the exposure control
   draw. A generated examinee therefore gives the same answer to an item whatever the engine and

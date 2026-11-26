@@ -27,7 +27,9 @@ class BaseInitializer(ABC):
     item_bank : ItemBank
         Item bank used by the session.
     rng : numpy.random.Generator
-        The run's random generator, for initializers that draw the estimate.
+        The generator of the call, for initializers that draw the estimate. When
+        :meth:`CatEngine.start <catsim.CatEngine.start>` calls the initializer, it is the one given
+        to ``start``.
 
     Returns
     -------
