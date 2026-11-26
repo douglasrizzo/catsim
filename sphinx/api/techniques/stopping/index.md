@@ -3,10 +3,10 @@
 ```{py:module} catsim.stopping
 ```
 
-Stopping criteria determine when an adaptive test should terminate. A stopper
-evaluates the current session state after each item and signals whether testing
-should continue or stop. Each stopper checks one criterion, and a
-{class}`~catsim.stopping.StopRule` combines several.
+Stopping criteria determine when an adaptive test should terminate. The engine
+asks its stopper about the session before the first item and after each
+response, and the stopper says whether the test ends there. Each stopper checks
+one criterion, and a {class}`~catsim.stopping.StopRule` combines several.
 
 ## Implemented
 
