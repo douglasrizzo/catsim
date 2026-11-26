@@ -473,6 +473,10 @@ draws on the <code class="docutils literal notranslate"><span class="pre">ax</sp
 name does not start mathtext. An x axis with one tick per item names each item while it has at most
 30, the most names that stay apart at matplotlib’s default figure width; a longer one ticks whole
 numbers, as each function’s description says.</p>
+<p>Plots follow the matplotlib style, set with <code class="docutils literal notranslate"><span class="pre">plt.style.use</span></code> or <code class="docutils literal notranslate"><span class="pre">plt.style.context</span></code>: its fonts,
+colours, title size and grid. matplotlib fixes most of an axes’ look when the axes are made, so
+make <code class="docutils literal notranslate"><span class="pre">ax</span></code> under the style the plot should take. A second y axis, on the right, draws its spine
+and no grid.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.plot.PlotType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.plot.</span></span><span class="sig-name descname"><span class="pre">PlotType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/plot.html#PlotType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.plot.PlotType" title="Link to this definition">#</a></dt>
@@ -497,7 +501,8 @@ numbers, as each function’s description says.</p>
 <dd><p>Plot an item’s characteristic curve, its information curve, or both.</p>
 <p>The curves span four units of ability on each side of the item’s difficulty, and a box in the
 upper left corner gives the item’s name and parameters. With <code class="docutils literal notranslate"><span class="pre">PlotType.BOTH</span></code> the information
-curve has its own y axis, on the right, and the plot has no grid.</p>
+curve has its own y axis, on the right, and the two curves take the first two colours of the
+style.</p>
 <figure class="align-default" id="id1">
 <img alt="../_images/plot-1.svg" class="plot-directive" src="../_images/plot-1.svg" />
 <figcaption>

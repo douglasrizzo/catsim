@@ -478,7 +478,7 @@
 <h1>ADR-0022: Plotting Is an Optional Module With One Calling Convention<a class="headerlink" href="#adr-0022-plotting-is-an-optional-module-with-one-calling-convention" title="Link to this heading">#</a></h1>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
-<p>Accepted 2026-11-25</p>
+<p>Accepted 2026-11-26</p>
 </section>
 <section id="context">
 <h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
@@ -486,7 +486,8 @@
 every installation carried it and its import cost, including those that never draw a figure. The
 plot functions also had no common calling convention: some took an item’s parameters as separate
 scalars, others put <code class="docutils literal notranslate"><span class="pre">ax</span></code> and <code class="docutils literal notranslate"><span class="pre">title</span></code> first and took either a result or raw arrays through mutually
-exclusive keywords, and three took a <code class="docutils literal notranslate"><span class="pre">figsize</span></code> that applied only when they created the figure.</p>
+exclusive keywords, and three took a <code class="docutils literal notranslate"><span class="pre">figsize</span></code> that applied only when they created the figure. They
+also set a grid and an 18-point title of their own, over whatever style the caller had chosen.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
@@ -503,6 +504,9 @@ result’s exposure rates), and its options as keyword-only arguments:</p>
 </li>
 <li><p>Every plot function draws on the axes the caller passes as <code class="docutils literal notranslate"><span class="pre">ax</span></code>, or on the axes of a new figure,
 and returns the axes it drew on. None takes a figure size.</p></li>
+<li><p>A plot follows the caller’s matplotlib style: the style sets the fonts, colours, title size and
+grid, and the functions set none of their own. A colour a function takes from the style’s cycle
+is fixed when it is called. A second y scale, on the right, draws its spine and no grid.</p></li>
 <li><p>Plots label items by name (ADR-0004).</p></li>
 </ul>
 </section>
@@ -515,6 +519,8 @@ and returns the axes it drew on. None takes a figure size.</p></li>
 since the function reads the session.</p></li>
 <li><p>Figures with several panels are laid out by the caller with matplotlib’s tools, and each plot
 function fills one axes.</p></li>
+<li><p>A caller changes how plots look with matplotlib’s styles alone. Without one, plots have
+matplotlib’s default look, which has no grid.</p></li>
 <li><p>The test suite, the documentation build and the notebooks need matplotlib, so the development and
 documentation dependency groups include it.</p></li>
 </ul>
@@ -528,6 +534,8 @@ missing installation.</p></li>
 <li><p>A separate plotting package: a second distribution to version and release for a few functions.</p></li>
 <li><p>Functions that take a result and a session index: they could not plot a session from elsewhere.</p></li>
 <li><p>A <code class="docutils literal notranslate"><span class="pre">figsize</span></code> argument: it does nothing when the caller passes <code class="docutils literal notranslate"><span class="pre">ax</span></code>, and <code class="docutils literal notranslate"><span class="pre">plt.subplots</span></code> provides it.</p></li>
+<li><p>Functions that set their own grid and title size: they override the caller’s style, and
+<code class="docutils literal notranslate"><span class="pre">ax.grid()</span></code> without arguments toggles the grid, so it removes the grid of a style that has one.</p></li>
 </ul>
 </section>
 </section>
