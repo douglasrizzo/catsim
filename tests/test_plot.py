@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from collections.abc import Callable
 from typing import TYPE_CHECKING, TypedDict
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+from matplotlib.colors import same_color, to_rgb
 from matplotlib.patches import Rectangle
 
 from catsim import Estimate, ItemBank, Session, plot
@@ -40,6 +42,12 @@ def _check_ticks_count(ax: Axes, names: tuple[str, ...]) -> None:
   assert len(positions) > 1
   np.testing.assert_array_equal(positions, np.round(positions))
   assert not {label for _, label, _ in ticks} & set(names)
+
+
+def _shows_grid(ax: Axes) -> bool:
+  """Return whether the drawn axes show any grid line."""
+  ax.figure.canvas.draw()
+  return any(line.get_visible() for line in [*ax.xaxis.get_gridlines(), *ax.yaxis.get_gridlines()])
 
 
 def _run_python(code: str) -> subprocess.CompletedProcess[str]:
@@ -149,6 +157,32 @@ class TestItemCurve:
     """
     ax = plot.item_curve(1, self.ITEM_BANK, kind=kind, max_info=max_info)
     assert [[line.get_label() for line in axes.get_lines()] for axes in ax.figure.axes] == expected
+
+  def test_item_curve_draws_both_curves_in_the_first_two_colours_of_the_style(self) -> None:
+    """With both curves, the characteristic curve and its axis take the style's first colour, information the second.
+
+    Fails if the information takes another colour of the cycle, such as the fourth, which is grey in matplotlib's ggplot
+    and Petroff cycles, if an axis's label or tick labels differ from its curve's colour, or if a colour is kept as a
+    reference such as "C1", which matplotlib looks up when the figure is drawn: a figure drawn after its
+    ``plt.style.context`` block, as a notebook draws it at the end of the cell, would then take the default style's
+    colours.
+    """
+    with plt.style.context({"axes.prop_cycle": plt.cycler(color=["#112233", "#445566", "#778899", "#aabbcc"])}):
+      ax = plot.item_curve(1, self.ITEM_BANK, kind=PlotType.BOTH)
+    (second,) = [axes for axes in ax.figure.axes if axes is not ax]
+    (characteristic,) = ax.get_lines()
+    information, dot = second.get_lines()
+
+    for artist, colour in [
+      (characteristic, "#112233"),
+      (ax.yaxis.label, "#112233"),
+      (information, "#445566"),
+      (dot, "#445566"),
+      (second.yaxis.label, "#445566"),
+      *[(label, "#112233") for label in ax.get_yticklabels()],
+      *[(label, "#445566") for label in second.get_yticklabels()],
+    ]:
+      assert same_color(artist.get_color(), colour), artist
 
   @pytest.mark.parametrize("kind", list(PlotType))
   def test_item_curve_box_names_the_item_and_rounds_its_parameters(self, kind: PlotType) -> None:
@@ -366,6 +400,27 @@ class TestSessionProgress:
 
     assert vertices == {(1.0, -0.3), (1.0, 1.9), (2.0, -0.4), (2.0, 1.4), (3.0, -0.1), (3.0, 1.3)}
 
+  def test_session_progress_keeps_the_styles_colours_once_the_style_ends(self) -> None:
+    """The estimate and its band take the style's first colour, difficulties the second, the standard error the third.
+
+    Fails if a colour is kept as a reference such as "C2", which matplotlib looks up when the figure is drawn: a figure
+    drawn after its ``plt.style.context`` block would then mix the default style's colours with the style's.
+    """
+    with plt.style.context({"axes.prop_cycle": plt.cycler(color=["#112233", "#445566", "#778899"])}):
+      ax = plot.session_progress(self.SESSION, self.ITEM_BANK)
+    lines = self._lines(ax)
+    (band,) = ax.collections
+    (second,) = [axes for axes in ax.figure.axes if axes is not ax]
+
+    for artist, colour in [
+      (lines[r"Ability estimate $\hat{\theta}$"], "#112233"),
+      (lines["Item difficulty"], "#445566"),
+      (lines["Standard error"], "#778899"),
+      (second.yaxis.label, "#778899"),
+    ]:
+      assert same_color(artist.get_color(), colour), artist
+    np.testing.assert_allclose(np.asarray(band.get_facecolor())[0, :3], to_rgb("#112233"))
+
   def test_session_progress_without_true_ability_draws_no_true_ability_line(self) -> None:
     """A recorded or live examinee has no known true ability, so the plot draws no line for one.
 
@@ -436,17 +491,64 @@ class TestSessionProgress:
   ids=["item_curve", "item_exposure", "session_progress"],
 )
 def test_plot_draws_on_the_given_axes_and_returns_them(draw) -> None:
-  """A plot function draws on the axes it is given, sets the title there and returns those axes.
+  """A plot function draws on the axes it is given, sets the title there in the style's size and returns those axes.
 
-  Fails if a function opens a figure of its own despite ``ax``, ignores ``title``, or returns other axes than the
-  caller's.
+  Fails if a function opens a figure of its own despite ``ax``, ignores ``title``, sets the title at a size of its own
+  rather than the style's, or returns other axes than the caller's.
   """
   figure, ax = plt.subplots()
 
-  assert draw(ax, "A title") is ax
+  with plt.style.context({"axes.titlesize": 9}):
+    assert draw(ax, "A title") is ax
   assert ax.get_title() == "A title"
+  assert ax.title.get_fontsize() == 9
   assert ax.get_lines() or ax.patches
   assert plt.get_fignums() == [figure.number]
+
+
+# Every kind of plot catsim draws, each on the axes it is given.
+_PLOTS: dict[str, Callable[[Axes], Axes]] = {
+  "icc": lambda ax: plot.item_curve(1, TestItemCurve.ITEM_BANK, kind=PlotType.ICC, ax=ax),
+  "iic": lambda ax: plot.item_curve(1, TestItemCurve.ITEM_BANK, kind=PlotType.IIC, ax=ax),
+  "both": lambda ax: plot.item_curve(1, TestItemCurve.ITEM_BANK, kind=PlotType.BOTH, ax=ax),
+  "exposure": lambda ax: plot.item_exposure(TestItemExposure.RATES, TestItemExposure.ITEM_BANK, ax=ax),
+  "exposure-by-b": lambda ax: plot.item_exposure(TestItemExposure.RATES, TestItemExposure.ITEM_BANK, par="b", ax=ax),
+  "exposure-histogram": lambda ax: plot.item_exposure(
+    TestItemExposure.RATES, TestItemExposure.ITEM_BANK, hist=True, ax=ax
+  ),
+  "session": lambda ax: plot.session_progress(TestSessionProgress.SESSION, TestSessionProgress.ITEM_BANK, ax=ax),
+}
+
+
+@pytest.mark.parametrize("grid", [True, False])
+@pytest.mark.parametrize("name", list(_PLOTS))
+def test_plot_has_a_grid_exactly_when_the_style_has_one(name: str, grid: bool) -> None:
+  """A plot shows a grid when the matplotlib style in effect has one, and none when it has none.
+
+  Fails if a function switches the grid itself, as ``ax.grid()`` with no arguments does: it toggles the grid, which
+  takes a style's grid away and gives a plain plot one.
+  """
+  with plt.style.context({"axes.grid": grid}):
+    _, ax = plt.subplots()
+    _PLOTS[name](ax)
+
+    assert _shows_grid(ax) is grid
+
+
+@pytest.mark.parametrize("name", ["both", "session"])
+def test_plot_right_hand_scale_has_a_spine_and_no_grid(name: str) -> None:
+  """The second y axis of a plot with two scales draws its spine and no grid, whatever the style.
+
+  Fails if the second axes take the style's grid, whose lines follow the right-hand scale and cross the first grid's,
+  or a style's hidden right spine, which leaves the right-hand ticks floating beside the plot.
+  """
+  with plt.style.context({"axes.grid": True, "axes.spines.right": False}):
+    _, ax = plt.subplots()
+    _PLOTS[name](ax)
+    (second,) = [axes for axes in ax.figure.axes if axes is not ax]
+
+    assert not _shows_grid(second)
+    assert second.spines.right.get_visible()
 
 
 def test_importing_every_plot_name_collects_no_test(pytester: pytest.Pytester) -> None:

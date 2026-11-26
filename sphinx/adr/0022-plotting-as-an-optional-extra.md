@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted 2026-11-25
+Accepted 2026-11-26
 
 ## Context
 
@@ -10,7 +10,8 @@ Accepted 2026-11-25
 every installation carried it and its import cost, including those that never draw a figure. The
 plot functions also had no common calling convention: some took an item's parameters as separate
 scalars, others put `ax` and `title` first and took either a result or raw arrays through mutually
-exclusive keywords, and three took a `figsize` that applied only when they created the figure.
+exclusive keywords, and three took a `figsize` that applied only when they created the figure. They
+also set a grid and an 18-point title of their own, over whatever style the caller had chosen.
 
 ## Decision
 
@@ -27,6 +28,9 @@ exclusive keywords, and three took a `figsize` that applied only when they creat
 
 - Every plot function draws on the axes the caller passes as `ax`, or on the axes of a new figure,
   and returns the axes it drew on. None takes a figure size.
+- A plot follows the caller's matplotlib style: the style sets the fonts, colours, title size and
+  grid, and the functions set none of their own. A colour a function takes from the style's cycle
+  is fixed when it is called. A second y scale, on the right, draws its spine and no grid.
 - Plots label items by name (ADR-0004).
 
 ## Consequences
@@ -37,6 +41,8 @@ exclusive keywords, and three took a `figsize` that applied only when they creat
   since the function reads the session.
 - Figures with several panels are laid out by the caller with matplotlib's tools, and each plot
   function fills one axes.
+- A caller changes how plots look with matplotlib's styles alone. Without one, plots have
+  matplotlib's default look, which has no grid.
 - The test suite, the documentation build and the notebooks need matplotlib, so the development and
   documentation dependency groups include it.
 
@@ -48,3 +54,5 @@ exclusive keywords, and three took a `figsize` that applied only when they creat
 - A separate plotting package: a second distribution to version and release for a few functions.
 - Functions that take a result and a session index: they could not plot a session from elsewhere.
 - A `figsize` argument: it does nothing when the caller passes `ax`, and `plt.subplots` provides it.
+- Functions that set their own grid and title size: they override the caller's style, and
+  `ax.grid()` without arguments toggles the grid, so it removes the grid of a style that has one.
