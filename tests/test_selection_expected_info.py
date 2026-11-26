@@ -127,13 +127,13 @@ class TestMEISelector:
 
     context = make_context(item_bank, [0], [True], theta=theta)
     expected = {}
-    for candidate in (1, 2, 3):
-      p_correct = probability(theta, difficulties[candidate])
-      expected[candidate] = p_correct * total_information(theta + 0.5, [0, candidate]) + (
-        1.0 - p_correct
-      ) * total_information(theta - 0.5, [0, candidate])
-      score = selector._expected_information(context, candidate)  # noqa: SLF001 - select shows only the best score
-      assert score == pytest.approx(expected[candidate], rel=1e-12)
+    for item in (1, 2, 3):
+      p_correct = probability(theta, difficulties[item])
+      expected[item] = p_correct * total_information(theta + 0.5, [0, item]) + (1.0 - p_correct) * total_information(
+        theta - 0.5, [0, item]
+      )
+      score = selector._expected_information(context, item)  # noqa: SLF001 - select shows only the best score
+      assert score == pytest.approx(expected[item], rel=1e-12)
 
     selected = selector.select(context)
     assert selected == max(expected, key=expected.__getitem__)

@@ -37,14 +37,14 @@ def _session(
   while True:
     context = make_context(item_bank, picks, responses, theta=data.draw(THETAS), rng=rng, excluded_items=excluded)
     try:
-      item_id = selector.select(context)
+      item = selector.select(context)
     except NoItemsAvailableError:
       return picks
-    assert type(item_id) is int
-    assert 0 <= item_id < item_bank.n_items
-    assert item_id not in picks
-    assert item_id not in excluded
-    picks.append(item_id)
+    assert type(item) is int
+    assert 0 <= item < item_bank.n_items
+    assert item not in picks
+    assert item not in excluded
+    picks.append(item)
     responses.append(data.draw(st.booleans()))
 
 

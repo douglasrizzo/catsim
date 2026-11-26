@@ -142,10 +142,10 @@ def test_select_takes_a_minimal_context(make_selector: Callable[[int], BaseSelec
   """
   item_bank = ItemBank.generate(1, rng=3)
 
-  item_id = make_selector(1).select(StepContext(item_bank=item_bank, rng=np.random.default_rng(0)))
+  item = make_selector(1).select(StepContext(item_bank=item_bank, rng=np.random.default_rng(0)))
 
-  assert type(item_id) is int
-  assert item_id == 0
+  assert type(item) is int
+  assert item == 0
 
 
 @pytest.mark.parametrize("make_selector", SELECTOR_FACTORIES.values(), ids=SELECTOR_FACTORIES.keys())

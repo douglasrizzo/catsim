@@ -174,9 +174,9 @@ def test_excluded_items_do_not_move_the_test_position() -> None:
   item_bank = ItemBank.generate(9, rng=0)
   first_stratum = np.argsort(item_bank.discrimination, kind="stable")[:3].tolist()
 
-  item_id = AStratSelector(test_size=3).select(make_context(item_bank, excluded_items=first_stratum[:2]))
+  item = AStratSelector(test_size=3).select(make_context(item_bank, excluded_items=first_stratum[:2]))
 
-  assert item_id == first_stratum[2]
+  assert item == first_stratum[2]
 
 
 @pytest.mark.parametrize("selector_class", STRATIFIED_SELECTORS)
