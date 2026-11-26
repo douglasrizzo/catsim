@@ -7,10 +7,9 @@ Accepted 2026-11-25
 ## Context
 
 A simulation study reports how accurate, long and exposure-balanced a design's tests are, overall
-and across the ability scale, and analyses the sessions in a statistics package. catR's
-`simulateRespondents` reports the bias, RMSE, test length, standard errors and exposure, and the same
-conditional on deciles of the true ability (`condBias`, `condRMSE`, `condnItems`), in R lists that
-users turn into data frames. Morris, White and Crowther (2019) recommend reporting each performance
+and across the ability scale, and analyses the sessions in a statistics package. Its usual measures
+are the bias, RMSE, test length, standard errors and exposure, overall and conditional on deciles of
+the true ability. Morris, White and Crowther (2019) recommend reporting each performance
 measure of a simulation study with its Monte Carlo standard error.
 
 `SimulationResult` gave its sessions and properties such as `final_thetas`, `rmse` and
@@ -35,7 +34,6 @@ measure of a simulation study with its Monte Carlo standard error.
 - `pandas.DataFrame(result.steps())` and polars accept the tables as they are, so neither becomes a
   dependency, and CSV writers take them too.
 - A difference between two designs can be judged against its Monte Carlo error.
-- Conditional metrics compare with catR's decile output.
 - With exposure feedback, sessions are not independent, so the Monte Carlo standard errors, which
   treat them as independent, are approximations; replications give the exact spread.
 - Metrics that need the true abilities raise for recorded examinees whose abilities are unknown.
@@ -43,7 +41,7 @@ measure of a simulation study with its Monte Carlo standard error.
 ## Alternatives Considered
 
 - pandas data frames: a dependency for a format pandas reads from plain columns.
-- Point estimates only, as catR: a difference between designs cannot be told from noise.
+- Point estimates only: a difference between designs cannot be told from noise.
 - A study layer of conditions, replications and aggregation: one design among many a study may need,
   which the study's own loop expresses directly; to reconsider if research use shows the loop is
   where the work is.

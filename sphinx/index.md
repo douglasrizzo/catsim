@@ -1,41 +1,41 @@
 # `catsim` - Computerized Adaptive Testing Toolkit
 
-catsim runs computerized adaptive tests based on item response theory: it chooses each examinee's
-next item from an item bank, estimates the examinee's ability after each response and decides when
-the test ends. One engine serves two kinds of work.
+catsim computes and evaluates computerized adaptive tests based on item response theory: it
+chooses each examinee's next item from an item bank, estimates the examinee's ability after each
+response and decides when the test ends, and it runs simulation studies that compare the methods
+for each of these steps.
 
-:::{admonition} Coming from catsim 0.x?
-:class: note
+:::{admonition} catsim 1.0 breaks 0.x code
+:class: warning
 
-catsim 1.0 has a different API, and code written for 0.x does not run unchanged. The
-[1.0.0 release notes](https://github.com/douglasrizzo/catsim/releases/tag/1.0.0) say what to
-change, and the {doc}`guides <getting-started>` and {doc}`tutorials <tutorials>` teach the 1.0
-API. To keep running 0.x code, install it with `pip install "catsim<1"`; its documentation is at
-the [0.21.0 tag](https://github.com/douglasrizzo/catsim/tree/0.21.0) on GitHub.
+Code written for catsim 0.x needs changes to run on 1.0, and seeded simulations give different
+numbers. To keep using 0.x, install `catsim<1`, documented at the
+[0.21.0 tag](https://github.com/douglasrizzo/catsim/tree/0.21.0). The
+[1.0.0 release notes](https://github.com/douglasrizzo/catsim/releases/tag/1.0.0) list every change.
 :::
 
 ## Run a simulation study
 
-Researchers give a test to simulated examinees whose true abilities are known, and compare how well
-different methods for starting the test, selecting items, estimating ability and stopping recover
-those abilities. {doc}`running-simulations` builds a test, runs it on a population, reads the
-results and compares strategies over replications.
+Researchers compare methods on simulated examinees: {doc}`running-simulations` builds a test, runs
+it and reads its metrics, and {doc}`reproducibility` seeds a study so that it repeats.
 
-## Run CAT in an application
+## Write a strategy
 
-Application developers let catsim choose the items and end the test, while their application shows
-the items, collects the responses and stores the sessions. {doc}`live-sessions` runs a session item
-by item, saves and resumes it, and shares item exposure across sessions.
+Method authors add a method of their own: {doc}`extending` writes one strategy of each kind and
+says what each must do.
+
+## Embed catsim in an application
+
+Developers let catsim compute each step of their application's tests: {doc}`embedding-catsim` runs
+a test step by step and says what the application owns.
 
 ## Find your way
 
 - New to adaptive testing? The {doc}`introduction` explains CAT and IRT, and
-  {doc}`terms-and-notation` lists the terms and symbols these pages use.
-- {doc}`api/techniques/index`: each method catsim implements, with its formulas, parameters and
-  sources.
-- The {doc}`tutorials`: the guides as hands-on exercises, in notebooks that open in Colab.
-- {doc}`reproducibility` and {doc}`extending`: seeding a study, and writing your own strategies.
-- The {doc}`api/index`: every public class and function.
+  {doc}`terms-and-notation` lists the terms and symbols.
+- {doc}`api/techniques/index`: each method, with its formulas and sources.
+- The {doc}`tutorials`: notebooks that open in Colab.
+- The {doc}`api/index` and the {doc}`architecture_decisions`.
 - The [README](https://github.com/douglasrizzo/catsim#readme): installation, a quickstart and how to
   cite catsim.
 

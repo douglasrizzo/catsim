@@ -41,6 +41,8 @@ class Session:
   recomputation could check them. Item indices are checked against the item bank when the session
   reaches the engine.
 
+  The :doc:`/embedding-catsim` guide runs a test step by step.
+
   Parameters
   ----------
   administered_items : Sequence[int], optional

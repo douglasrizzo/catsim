@@ -15,7 +15,8 @@ class BaseInitializer(ABC):
   :class:`~catsim.StepContext`, because no session state exists yet.
 
   An initializer holds its configuration and caches derived from the item bank, never per-session
-  state: one initializer starts every session of a run.
+  state: one initializer starts every session of a run. The :doc:`/extending` guide lists what each
+  strategy receives and returns.
   """
 
   @abstractmethod
@@ -27,7 +28,9 @@ class BaseInitializer(ABC):
     item_bank : ItemBank
         Item bank used by the session.
     rng : numpy.random.Generator
-        The run's random generator, for initializers that draw the estimate.
+        The generator of the call, for initializers that draw the estimate. When
+        :meth:`CatEngine.start <catsim.CatEngine.start>` calls the initializer, it is the generator
+        made from the ``rng`` given to ``start``, which is that ``rng`` itself when it is a generator.
 
     Returns
     -------

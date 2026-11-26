@@ -22,6 +22,10 @@ class LinearSelector(BaseSelector):
   ------
   ValueError
       If ``indices`` is empty or holds a negative index.
+
+  Notes
+  -----
+  For full algorithmic details, see :doc:`/api/techniques/selection/linear-selector`.
   """
 
   @override

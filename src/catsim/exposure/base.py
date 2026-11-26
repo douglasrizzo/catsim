@@ -34,6 +34,7 @@ class BaseExposureControl(ABC):
   (11, (10, 16), (10, 16))
 
   The control declined the selector's first two proposals, items 10 and 16, and accepted item 11.
+  The :doc:`/extending` guide lists what each strategy receives and returns.
   """
 
   @abstractmethod

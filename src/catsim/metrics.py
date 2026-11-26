@@ -458,10 +458,9 @@ def overlap_rate(administered_items: npt.ArrayLike, n_items: int) -> Metric[floa
   where :math:`S_r^2` is the variance (divisor :math:`M`) of the exposure rates
   (:cite:t:`Chen1999`, equations 11 and 14). It is :math:`L/M` when every item is equally exposed,
   and 1 when every examinee takes the same test; higher values mean examinees share more items,
-  which weakens test security. It is the overlap rate of catR's ``simulateRespondents`` and of
-  :cite:t:`Bar10`. The average over the :math:`N(N-1)/2` pairs of distinct examinees is
-  :math:`(N T - 1) / (N - 1)` (:cite:t:`Chen1999`, equation 10), which :math:`T` exceeds by
-  :math:`(1 - T) / (N - 1)`.
+  which weakens test security. It is the overlap rate of :cite:t:`Bar10`. The average over the
+  :math:`N(N-1)/2` pairs of distinct examinees is :math:`(N T - 1) / (N - 1)` (:cite:t:`Chen1999`,
+  equation 10), which :math:`T` exceeds by :math:`(1 - T) / (N - 1)`.
 
   The Monte Carlo standard error is the delta method's. :math:`T` is a function of the rates, the
   means over the sessions of each session's item indicators :math:`x_j`, and its gradient in them is

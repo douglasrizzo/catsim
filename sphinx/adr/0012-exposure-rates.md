@@ -1,4 +1,4 @@
-# ADR-0012: Exposure Rates Are an Input, Counted as catR Counts Them
+# ADR-0012: Exposure Rates Are an Input, Counted Over the Sessions Before Each One
 
 ## Status
 
@@ -12,8 +12,8 @@ Later an `ExposureTracker` on the run context counted administrations, and the e
 an application had to share one tracker across its live sessions and save it across restarts.
 
 The rates were first the counts divided by the planned size of the run, so early examinees saw every
-rate near zero, and without the planned size an `r_max` cap silently did nothing. catR's
-`simulateRespondents` divides by the examinees tested so far.
+rate near zero, and without the planned size an `r_max` cap silently did nothing. catR, the parity
+reference (ADR-0020), divides by the examinees tested so far.
 
 ## Decision
 
@@ -22,9 +22,9 @@ rate near zero, and without the planned size an `r_max` cap silently did nothing
 - An application computes the rates from the counts it keeps, by whatever rule suits sessions that
   run side by side.
 - `simulate` keeps the counts of a run, or of each part of a parallel run (ADR-0015), and computes
-  catR's rate: each item's administrations divided by the number of sessions started before the
+  each item's rate as its administrations divided by the number of sessions started before the
   current one. The first session sees no rates.
-- An `r_max` of 1 applies no cap, as in catR: an item every earlier examinee received has a rate of
+- An `r_max` of 1 applies no cap: an item every earlier examinee received has a rate of
   exactly 1, which a strict `rate < r_max` test would pass over.
 - `SimulationResult.exposure_rates` divides the run's counts by all its sessions: the exposure at
   the end of the run, not the rates any session saw.

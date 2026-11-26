@@ -20,16 +20,6 @@ architecture is centered on:
 - `simulate`, which runs sessions over generated or recorded examinees, in parts on workers
   (ADR-0014, ADR-0015), and returns a `SimulationResult` (ADR-0016)
 
-### Rescoping in progress (temporary; remove when `rescope` merges into dev)
-
-The `rescope` branch moves the code to the ADRs above; `.plans/rescope/` holds the plan. Until it
-merges into dev, the code may still show the previous design (`CatSessionState`, `RunContext`,
-`ExposureTracker`, `SimulationRunner`): follow the ADRs, not the code, when they differ. On this
-branch the notebooks, the narrative documentation, the README and the website may be out of date;
-their checks are off (commit e504be7a) and they are brought up to date at the end. Tests, doctests,
-ruff, ty, pylint, import-linter and vulture stay on. Feature branches start from `rescope`, and
-their PRs target it.
-
 ## Repository Layout
 
 - `src/catsim/`: package source code
@@ -108,14 +98,12 @@ Hard rules:
 
 - A docstring is the call contract: no method math, design rationale or history.
 - History ("now", "no longer", "replaces", card IDs, PR numbers) goes only in the GitHub release
-  notes and the 1.0 notice. There is no CHANGELOG file.
+  notes, the 1.0 notice and the Context section of an ADR. There is no CHANGELOG file.
 - Use the terms and symbols of `sphinx/terms-and-notation.md`.
 - No internal names or design rationale in user pages: link the ADR.
 - One home per topic; other documents link to it.
 - When a public API changes, update its docstrings, the Sphinx pages, the notebooks and the README
-  in the same PR. No test runs the code in Sphinx pages or the README: run it by hand. On the
-  `rescope` branch, update the docstrings in the same PR, and leave the Sphinx pages, notebooks and
-  README to the end of the rescoping (see "Rescoping in progress").
+  in the same PR. No test runs the code in Sphinx pages or the README: run it by hand.
 
 ## Testing And Validation
 

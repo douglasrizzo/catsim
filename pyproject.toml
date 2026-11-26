@@ -222,6 +222,7 @@ docs = [
     "pydata-sphinx-theme>=0.16.0",
     "sphinxcontrib-mermaid>=2.1.1",
     "sphinx-reredirects>=1.1.0",
+    "sphinx-design>=0.6.1",
 ]
 
 [tool.pytest.ini_options]

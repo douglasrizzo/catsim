@@ -10,17 +10,16 @@
 [![Latest Version](https://badge.fury.io/py/catsim.svg)](https://pypi.org/project/catsim/)
 [![Digital Object Identifier](https://zenodo.org/badge/doi/10.5281/zenodo.46420.svg)](https://doi.org/10.5281/zenodo.46420)
 
-_catsim_ is a Python package for computerized adaptive testing (CAT) with item response theory.
-Researchers use it to run simulation studies that compare methods of item selection, ability
-estimation and stopping, and application developers use the same engine to run adaptive tests in
-their products.
+_catsim_ is a Python package for computerized adaptive testing (CAT) with item response theory. It
+computes each step of an adaptive test and runs simulation studies that compare methods of item
+selection, ability estimation and stopping, and applications can use the same computations to give
+adaptive tests.
 
-> **Coming from catsim 0.x?** catsim 1.0 has a different API, and code written for 0.x does not run
-> unchanged. The [1.0.0 release notes](https://github.com/douglasrizzo/catsim/releases/tag/1.0.0) say
-> what to change, and the [guides](https://douglasrizzo.com.br/catsim/getting-started.html) and
-> [tutorials](https://douglasrizzo.com.br/catsim/tutorials.html) teach the 1.0 API. To keep running
-> 0.x code, install it with `pip install "catsim<1"`; its documentation is at the
-> [0.21.0 tag](https://github.com/douglasrizzo/catsim/tree/0.21.0) on GitHub.
+> ⚠️ **catsim 1.0 breaks 0.x code.** Code written for catsim 0.x needs changes to run on 1.0,
+> and seeded simulations give different numbers. To keep using 0.x, install `catsim<1`, documented
+> at the [0.21.0 tag](https://github.com/douglasrizzo/catsim/tree/0.21.0). The
+> [1.0.0 release notes](https://github.com/douglasrizzo/catsim/releases/tag/1.0.0) list every
+> change.
 
 ## Installation
 
@@ -38,59 +37,55 @@ _catsim_ supports Python 3.11 to 3.15.
 
 ## Quickstart
 
-This simulates adaptive tests for ten examinees on a generated bank of 100 items. Each test gives
+This simulates adaptive tests for 200 examinees on a generated bank of 100 items. Each test gives
 the item with the most information at the current ability estimate, and stops once the estimate's
 standard error is at most 0.5, or after 20 items.
 
 ```python
 import numpy
-from catsim import CatEngine, ItemBank, SimulationRunner
-from catsim.estimation import NumericalSearchEstimator
-from catsim.initialization import UniformInitializer
+from catsim import CatEngine, ItemBank, simulate
+from catsim.estimation import EAPEstimator
+from catsim.initialization import FixedPointInitializer
 from catsim.selection import MaxInfoSelector
 from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
 
 engine = CatEngine(
     ItemBank.generate(100, rng=0),
-    UniformInitializer(),
+    FixedPointInitializer(0.0),
     MaxInfoSelector(),
-    NumericalSearchEstimator(),
+    EAPEstimator(),
     StopRule(StandardErrorStopper(0.5), MaxLengthStopper(20)),
 )
-true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)
-result = SimulationRunner(engine).run(true_thetas, rng=0)
-print(result.rmse, result.test_lengths)
+true_thetas = numpy.random.default_rng(1).normal(0, 1, 200)
+result = simulate(engine, true_thetas=true_thetas, rng=0)
+rmse, mc_se = result.rmse()
+print(f"RMSE {rmse:.3f} ± {mc_se:.3f}, mean test length {result.test_length().value:.1f}")
 ```
 
-It prints the root mean squared error of the final estimates and each test's length; most tests
-reach the target before the 20-item limit. The result also holds each examinee's estimates,
-standard errors and responses, and the same `rng` gives the same result on every run.
+```text
+RMSE 0.470 ± 0.025, mean test length 13.9
+```
+
+It prints the root mean squared error of the final estimates, with its Monte Carlo standard error,
+and the mean test length: most tests reach the target before the 20-item limit. The result also
+holds every examinee's test, as tables, and the same `rng` gives the same result on every run.
 
 ## Where to go next
 
 - [Introduction to CAT and IRT](https://douglasrizzo.com.br/catsim/introduction.html), if adaptive
   testing is new to you.
 - The guides: [Running simulations](https://douglasrizzo.com.br/catsim/running-simulations.html),
-  [Live CAT sessions](https://douglasrizzo.com.br/catsim/live-sessions.html),
-  [Reproducibility](https://douglasrizzo.com.br/catsim/reproducibility.html) and
-  [Extending catsim](https://douglasrizzo.com.br/catsim/extending.html).
+  [Reproducibility](https://douglasrizzo.com.br/catsim/reproducibility.html),
+  [Extending catsim](https://douglasrizzo.com.br/catsim/extending.html) and
+  [Embedding catsim](https://douglasrizzo.com.br/catsim/embedding-catsim.html).
 - [Techniques](https://douglasrizzo.com.br/catsim/api/techniques/index.html): each initialization,
   selection, estimation and stopping method, with its formulas and sources.
-- The [tutorial notebooks](https://douglasrizzo.com.br/catsim/tutorials.html), which open in Colab:
-  [getting started](https://github.com/douglasrizzo/catsim/blob/main/notebooks/01_getting_started.ipynb),
-  [comparing strategies](https://github.com/douglasrizzo/catsim/blob/main/notebooks/02_comparing_strategies.ipynb),
-  [live sessions](https://github.com/douglasrizzo/catsim/blob/main/notebooks/03_live_sessions.ipynb) and
-  [custom strategies](https://github.com/douglasrizzo/catsim/blob/main/notebooks/04_custom_strategies.ipynb).
+- The [tutorial notebooks](https://douglasrizzo.com.br/catsim/tutorials.html), which open in Colab.
 - The [API reference](https://douglasrizzo.com.br/catsim/api/index.html).
-
-## Important links
-
-- Documentation: <https://douglasrizzo.com.br/catsim>
-- Source code: <https://github.com/douglasrizzo/catsim>
-- Issue tracker: <https://github.com/douglasrizzo/catsim/issues>
-- [Architecture decision records](https://douglasrizzo.com.br/catsim/architecture_decisions.html):
+- The [architecture decision records](https://douglasrizzo.com.br/catsim/architecture_decisions.html):
   why _catsim_ is designed the way it is.
-- How to contribute: <https://douglasrizzo.com.br/catsim/contributing.html>
+
+Source code and issues: <https://github.com/douglasrizzo/catsim>.
 
 ## Citing catsim
 

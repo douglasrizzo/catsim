@@ -207,7 +207,7 @@ and $b$, and recommended MIS-B whenever a stratified method is used.
    raises `ValueError` naming both numbers, so a stopper that allows longer tests
    than `test_size` fails loudly rather than end sessions as if the bank were
    exhausted.
-7. It applies no exposure cap: the run's exposure rates do not change its choice.
+7. It applies no exposure cap: the exposure rates do not change its choice.
    The strata are its exposure control.
 
 ## References

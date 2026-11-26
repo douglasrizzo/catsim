@@ -13,9 +13,8 @@ screen, share exposure counts between sessions run side by side, and support aud
 of the API before 1.0 found that this promise drove most of its complexity, and that every result
 it found silently wrong came from catsim's state outliving one run.
 
-The R ecosystem splits the two. catR is a package of functions that compute the steps of a CAT from
-explicit arguments and simulate studies with them; Concerto, a separate testing platform, uses catR
-as the computing core of its live tests. mirtCAT does both in one package, with a shiny interface.
+The two can live apart: the Concerto testing platform, for one, serves live tests and leaves their
+computations to the catR package.
 
 ## Decision
 
@@ -26,8 +25,7 @@ catsim is a library for computing and evaluating computerized adaptive tests:
   control, built in or written by method authors;
 - simulation studies that run and compare them.
 
-A live testing application can use catsim's computations as its core, as Concerto uses catR.
-catsim does not run, store or serve live tests: storing sessions, the item on screen, concurrency,
+A live testing application can use catsim's computations as its core. catsim does not run, store or serve live tests: storing sessions, the item on screen, concurrency,
 sharing exposure counts across sessions, persistence and audits belong to the application
 (ADR-0006).
 
@@ -46,7 +44,7 @@ catsim does not calibrate items, and it has no graphical or web interface.
 
 ## Alternatives Considered
 
-- Serving and computing in one package, as mirtCAT does: the serving concerns shape every object,
+- Serving and computing in one package: the serving concerns shape every object,
   and they are what made catsim's results silently wrong.
 - Computation only, with no simulation studies: comparing strategies is what catsim's first
   audience does, and simulation is where catsim's computations are exercised together.

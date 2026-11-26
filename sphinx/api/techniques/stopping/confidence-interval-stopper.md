@@ -80,6 +80,22 @@ single ability threshold: a confidence interval for ability is built after every
 item, and the test stops once the threshold is no longer inside it. catsim
 generalizes this to several boundaries; with one boundary the two rules agree.
 
+:::{dropdown} Comparison with catR
+
+With one boundary the stopper is catR's `classification` rule, with
+`confidence` equal to 1 minus catR's `alpha`. The parity tests
+({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`) find catR's decisions with
+the interval above, across and below the threshold, at `alpha` of 0.05, 0.1 and
+0.01, before any response, and with the interval's end $10^{-9}$ either side of
+the threshold. catR's `stop` list can hold several classification rules, and
+stops once the interval clears any one threshold: that is a
+{class}`~catsim.stopping.StopRule` of one-boundary stoppers, such as
+`StopRule(ConfidenceIntervalStopper([-1.0]), ConfidenceIntervalStopper([1.0]))`,
+whose decisions the tests also find, and not one stopper with both boundaries,
+which waits until the interval lies within one band. No whole test compares the
+rule.
+:::
+
 ## Guarantees
 
 1. The stopper stops the test exactly when the full confidence interval lies within a single induced classification interval.

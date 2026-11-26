@@ -11,10 +11,6 @@ so a researcher had to keep a separate list to tell which item of a published ba
 a report could not name an item. A researcher reproducing a study in catsim found items had no
 identification.
 
-catR computes with row numbers too, but reads the item bank's row names: `nextItem` returns the
-selected item's number as `item` and its row name as `name`, or `NULL` without row names, and
-`randomCAT` returns `testItems` and `itemNames`.
-
 ## Decision
 
 - Every item has a name: a non-empty string, unique within its bank. `ItemBank(items, names=None)`
@@ -47,4 +43,4 @@ selected item's number as `item` and its row name as `name`, or `NULL` without r
   as soon as a study renumbers or subsets a bank.
 - One-based generated names, as R users might expect: they would be off by one from every index
   catsim reports.
-- Per-item inputs keyed by name: two ways to pass the same input, and catR passes them by position.
+- Per-item inputs keyed by name: two ways to pass the same input.

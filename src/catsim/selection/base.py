@@ -48,7 +48,7 @@ def remaining(context: StepContext) -> IntArray:
 
 
 def below_cap(candidates: IntArray, exposure_rates: FloatArray | None, r_max: float) -> IntArray:
-  """Return the candidates whose exposure rate is below ``r_max``, or all of them if none is.
+  """Return the candidate items whose exposure rate is below ``r_max``, or all of them if none is.
 
   Parameters
   ----------
@@ -66,7 +66,7 @@ def below_cap(candidates: IntArray, exposure_rates: FloatArray | None, r_max: fl
       The candidates whose exposure rate is below ``r_max``, in their order in ``candidates``, or
       ``candidates`` itself if none is below it or ``r_max`` is 1.
   """
-  # As in catR, a cap of 1 is no cap: an item that every earlier examinee received has a rate of
+  # A cap of 1 is no cap: an item that every earlier examinee received has a rate of
   # exactly 1, which the strict comparison below would pass over.
   if exposure_rates is None or r_max >= 1:
     return candidates
@@ -75,7 +75,7 @@ def below_cap(candidates: IntArray, exposure_rates: FloatArray | None, r_max: fl
 
 
 def pick_best(candidates: IntArray, scores: FloatArray, rng: Generator) -> int:
-  """Return the candidate with the highest score, breaking exact ties uniformly at random.
+  """Return the candidate item with the highest score, breaking exact ties uniformly at random.
 
   This is the package's single tie-breaking rule: the candidates whose score equals the best score
   exactly are tied, and one of them is drawn uniformly with ``rng``. With a single best candidate,
@@ -111,7 +111,7 @@ def pick_best(candidates: IntArray, scores: FloatArray, rng: Generator) -> int:
 
 
 def best_pool(candidates: IntArray, scores: FloatArray, size: int) -> IntArray:
-  """Return the candidates scoring at least the ``size``-th best score, best first.
+  """Return the candidate items scoring at least the ``size``-th best score, best first.
 
   Every candidate tied with the ``size``-th best score joins the pool, so the pool holds more than
   ``size`` items only when items tie at the cutoff. Tied candidates keep
@@ -205,14 +205,14 @@ class BaseSelector(ABC):
   """Base class for item selectors.
 
   A selector chooses the next item to administer from what a :class:`~catsim.StepContext` tells it
-  about the session. A custom selector behaves like the built-in ones when it draws its candidates
+  about the session. A custom selector behaves like the built-in ones when it draws its candidate items
   with :func:`remaining`, applies its exposure cap with :func:`below_cap`, and chooses with
   :func:`pick_best` or :func:`best_pool`, which break ties the same way.
 
   A selector that passes a changed context to another adds to its excluded items, never replaces
   them. A selector holds its configuration and caches derived from the item bank, never
   per-session state: one selector serves every session of a run, which an application may
-  interleave.
+  interleave. The :doc:`/extending` guide writes one.
   """
 
   @abstractmethod

@@ -121,9 +121,7 @@ jobs:
         run: uv run pytest --verbose --cov-branch --cov-report=xml --cov=catsim
 
       - name: Run tutorial notebooks
-        # RESCOPE: not on PRs into the rescope branch, whose notebooks are updated at the end. Revert
-        # this commit before rescope merges into dev.
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14' && github.base_ref != 'rescope'
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'
         run: uv run pytest --nbmake --nbmake-timeout=300 notebooks/*.ipynb
 
       - name: Upload coverage reports to Codecov
@@ -288,10 +286,8 @@ jobs:
   build-docs:
     name: Build documentation
     # Build docs for every PR (stacked PRs too), pushes to dev/main, and releases
-    # RESCOPE: not on PRs into the rescope branch, whose documentation is updated at the end. Revert
-    # this commit before rescope merges into dev.
     if: |
-      (github.event_name == 'pull_request' && github.base_ref != 'rescope') ||
+      github.event_name == 'pull_request' ||
       (github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')) ||
       github.event_name == 'release'
     runs-on: ubuntu-latest
@@ -351,8 +347,7 @@ jobs:
   deploy-docs-dev:
     name: Deploy documentation (dev preview)
     # Deploy preview docs on pushes to dev, and on the same-repository PR from dev to main,
-    # whose TestPyPI upload waits for this job in the same run (CONTRIBUTING.md, "Building the
-    # documentation")
+    # whose TestPyPI upload waits for this job in the same run (CONTRIBUTING.md, "Releasing")
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
       (github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev' &&
@@ -399,7 +394,7 @@ jobs:
   deploy-docs-production:
     name: Deploy documentation (production)
     # Deploy production docs on pushes to main, and on releases, whose PyPI upload waits for this
-    # job in the same run (CONTRIBUTING.md, "Building the documentation")
+    # job in the same run (CONTRIBUTING.md, "Releasing")
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
       github.event_name == 'release'

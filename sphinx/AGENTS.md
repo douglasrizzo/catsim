@@ -35,14 +35,28 @@ and may not know software design; integrators know Python and may not know IRT.
   `from catsim.selection import MaxInfoSelector`, not from the module file that defines it
   (`catsim.engine`, `catsim.selection.information`).
 
+### catR and other packages
+
+catsim's methods rest on their published sources, not on another package. catR, the reference
+implementation the parity tests compare catsim with, appears in three places only:
+
+- each technique page's closed "Comparison with catR" dropdown, the page's only mention of catR;
+- the catR ADR, which says why catR is the reference;
+- the parity section of `CONTRIBUTING.md`, on running and recording the parity tests.
+
+An ADR may name another package in a sentence where its practice was one of the forces behind the
+decision. No document says what another package lacks, or presents a catsim choice as an
+improvement on another package's. Citing a paper by catR's authors as the source of a formula is a
+citation, not a mention: cite it like any other source.
+
 ### History
 
 - The GitHub release notes are the only place for "what changed". Each release gets a hand-written
   summary (highlights, breaking changes, results that change for the same seed), followed by
   GitHub's generated list of pull requests. There is no CHANGELOG file and no migration page.
-- The 1.0 notice, in the README and on the landing page, tells 0.x users that the API changed and
-  points them to the 1.0.0 release notes, the guides and `catsim<1`. It is written with the 1.0.0
-  release notes and holds no details: those are in the release notes.
+- The 1.0 notice, in the README and on the landing page, is a warning: 0.x code needs changes and
+  seeded results differ. It points to `catsim<1` and the 1.0.0 release notes, and lists no changes:
+  those are in the release notes.
 
 ### Where a formula lives
 
@@ -95,7 +109,7 @@ do not re-explain it. The map names ADRs by topic.
 | A metric's formula (bias, MSE, RMSE, overlap rate) | the metric function's docstring | "Running simulations" |
 | Planned methods | Planned techniques page | their specs in `specs/` |
 | How to contribute; the gate; the release process | `CONTRIBUTING.md` | |
-| How catsim is checked against catR (the parity tests) | `CONTRIBUTING.md` | the catR ADR for why; each technique page states its departures |
+| How catsim is checked against catR (the parity tests) | `CONTRIBUTING.md` | the catR ADR for why; each technique page's catR dropdown states its departures |
 | Why the architecture is shaped this way | the ADR | guides, technique pages |
 | What changed in a release | the GitHub release notes | the 1.0 notice |
 
@@ -182,7 +196,10 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
 - **Belongs:**
   - the method's formulas, each cited where it appears, with the source's page and equation, as the
     citation convention in `specs/README.md` sets out;
-  - every departure from the sources or from catR, stated;
+  - every departure from the sources, stated;
+  - in a closed "Comparison with catR" dropdown at the end of Behavior and Comparison, the matching
+    catR function and settings, what the parity tests find and each departure from catR; no
+    dropdown when catR has no counterpart;
   - the parameter ranges the literature recommends;
   - Guarantees: properties a user relies on and can observe ("never repeats an item", "falls back
     when every item is over the cap", "finite for all-correct patterns").
@@ -210,6 +227,7 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
   - Is every formula cited to a page or equation that someone has read?
   - Does every source the page relies on have a bib entry with its DOI and its note?
   - Does the page say where catsim departs from its sources?
+  - Is catR mentioned only inside the page's dropdown?
   - Is every guarantee something a user can observe?
   - Does the class docstring rendered under "API Reference" repeat a formula from the page?
 
@@ -225,8 +243,7 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
   - one link: the technique page for a strategy, otherwise the guide that covers the object, if
     any.
 - **Not here:** a method's math (its technique page), design rationale (the linked page cites the
-  ADR), history, comparisons with other packages such as catR unless a caller needs them (the
-  technique page's Behavior and Comparison section).
+  ADR), history, comparisons with other packages such as catR (the technique page's catR dropdown).
 - **Length:** about 80 words of prose, counting the text before the first numpydoc section. Only the
   core types and functions (`CatEngine`, `Session`, `simulate`, `SimulationResult`, `ItemBank`,
   `StepContext`) may run longer, and only with what a caller needs.
@@ -330,10 +347,11 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
 
 ### The 1.0 notice (README and landing page)
 
-- **Job:** tell 0.x users that the API changed, and point them to the 1.0.0 release notes, the guides
-  and `catsim<1`.
+- **Job:** warn 0.x users that their code needs changes and their seeded results differ, and point
+  them to `catsim<1` and the 1.0.0 release notes. A warning box on the landing page, a blockquote in
+  the README.
 - **Audience and level:** 0.x users; introductory.
-- **Not here:** details (the release notes).
+- **Not here:** any list of changes, including the API's new shape (the release notes).
 - **Length:** two or three sentences.
 
 ## Terms and notation
@@ -347,6 +365,8 @@ a term or symbol the page lacks, add it to the page first. The terms most often 
 - **upper asymptote** $d$; $1 - d$ is the slipping parameter;
 - **responses** $u$, not response vector or response pattern;
 - **standard error** $SE(\hat{\theta})$, not SEE or SEM;
+- **candidate item** for an item a selector may still choose, written in full at its first use on a
+  page; "candidate" never means an examinee or a trial value of $\theta$;
 - **stopper** for a stopping-criterion object; `StopRule` only for the class that combines stoppers,
   so do not write "stopping rule";
 - $n$ for the test length, $N$ for the number of examinees, $M$ for the bank size, $i$ for the item

@@ -32,7 +32,7 @@ def _gauss_legendre(n_nodes: int) -> tuple[FloatArray, FloatArray]:
 class KLSelector(BaseSelector):
   r"""Select the item with the most Kullback-Leibler information around the current estimate.
 
-  Each candidate's KL divergence between the response distributions at the estimate and at nearby
+  Each candidate item's KL divergence between the response distributions at the estimate and at nearby
   abilities is integrated over a window around the estimate, which narrows as items are
   administered, and the item with the largest integral is selected.
 

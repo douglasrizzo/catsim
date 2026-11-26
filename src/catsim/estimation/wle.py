@@ -32,7 +32,7 @@ class WarmLikelihoodEstimator(BaseEstimator):
   r"""Weighted likelihood estimator (WLE) of :cite:t:`Warm1989`.
 
   The root of Warm's modified score equation, which removes the MLE's first-order bias and stays
-  finite for all-correct and all-incorrect response patterns; see
+  finite for all-correct and all-incorrect responses; see
   :doc:`/api/techniques/estimation/warm-wle`. If the equation has several roots within ``bounds``,
   the one with the largest weighted likelihood is returned; if it has none, the bound the modified
   score points to.

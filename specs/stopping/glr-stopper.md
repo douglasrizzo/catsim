@@ -2,7 +2,7 @@
 **Module:** `catsim.stopping.classification.GLRStopper` (planned)
 **Reference:** Bartroff, Finkelman, and Lai (2008)
 **Last validated:** 2026-11-23, against Bartroff, Finkelman & Lai (2008, arXiv copy), Magis & Raîche (2012) and catR 3.17.
-**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in, a pure `classify(context)`, a single criterion for `StopRule`) on 2026-11-24.
+**Implementation guidance:** written against the 1.0 strategy contract (`StepContext` in, a pure `classify(context)`, a single criterion for `StopRule`) on 2026-11-26.
 
 # Generalized Likelihood Ratio Stopper
 
@@ -69,9 +69,8 @@ The planned stopper departs from Bartroff et al. in four ways:
 - **Maximum length.** At `max_items`, the implementation guidance classifies by
   the side of $\theta_c$ on which $\hat{\theta}_n$ lies, instead of Equation 10.
 
-catR has no GLR rule; its only classification rule is the confidence-interval
-rule (`checkStopRule.R`, `rule = "classification"`, catR 3.17; Magis & Raîche,
-2012, p. 11), which the SPRT spec compares with the likelihood-ratio rules.
+The SPRT spec compares the likelihood-ratio rules with catsim's
+confidence-interval stopper.
 
 ## Parameters
 
@@ -117,7 +116,7 @@ Magis, D., & Raîche, G. (2012). Random generation of response patterns under co
 
 :::{note}
 This section is for contributors and agents implementing this technique.
-It is removed when the spec is promoted to "Implemented" status.
+It is removed when the spec is promoted to a technique page.
 :::
 
 **Proposed location:** `src/catsim/stopping/classification.py`, next to `SPRTStopper` and the
@@ -209,6 +208,7 @@ class GLRStopper(BaseStopper):
       return Classification.BELOW_CUT
     return None
 
+  @override
   def stop(self, context: StepContext) -> bool:
     """Return whether either statistic has reached the threshold.
 
@@ -251,10 +251,11 @@ class GLRStopper(BaseStopper):
 
 - No per-session state: `stop` and `classify` compute the statistics from the context each time
   instead of storing the last classification or statistic. An application classifies a finished
-  session from its context, built as the SPRT spec shows; it must carry
-  `theta=session.current_theta`, because the statistics and the fallback read it, and a context
-  built without it has `theta = 0` and classifies wrongly without an error. `StopRule.satisfied`
-  on the same context tells whether this stopper or the length cap ended the test.
+  session from its context, `stopper.classify(engine.context(session))`, which carries the
+  session's current estimate; the statistics and the fallback read it, so a context built by hand
+  must set `theta`, whose default of 0 would classify wrongly without an error.
+  `StopRule.satisfied` on the same context tells whether this stopper or the length cap ended the
+  test.
 - The statistics are not set to 0 inside the indifference region: the definition keeps both
   defined there, and the test can stop there (Contract 1).
 - $\hat\theta$ is the context's `theta`, the engine's current estimate. The definition's

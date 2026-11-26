@@ -10,10 +10,10 @@ run it from a clone of the repository as the
 
 **For** researchers new to catsim. **Level:** beginner.
 
-Build an item bank, generated or from your own calibrated parameters, and plot what its items
-measure. Run a simulation whose precision target ends most tests, read its result, follow one
-examinee's test item by item, and repeat the run from one seed. The reference is
-{doc}`running-simulations`.
+Build an item bank, generated or read from a CSV file of calibrated parameters, and plot what its
+items measure. Run a simulation whose precision target ends most tests, read its metrics with their
+Monte Carlo errors and its tables by examinee, by step and by decile, follow one examinee's test item
+by item, and repeat the run from its seed. The reference is {doc}`running-simulations`.
 
 [View on GitHub](https://github.com/douglasrizzo/catsim/blob/main/notebooks/01_getting_started.ipynb) ·
 [Open in Colab](https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/01_getting_started.ipynb)
@@ -22,31 +22,35 @@ examinee's test item by item, and repeat the run from one seed. The reference is
 
 **For** researchers who have run a first simulation. **Level:** intermediate.
 
-Compare strategies on one bank and one population over seeded replications, by their paired
-differences: four estimators, three selectors, four kinds of exposure control and two
-variable-length stoppers, with the metrics that tell them apart and which criterion ended each
-test. The references are {doc}`running-simulations` and {doc}`reproducibility`.
+Compare strategies on one bank and one population, every design on the same seed, by differences
+paired examinee by examinee and judged against their Monte Carlo errors: four estimators, three
+selectors, four kinds of exposure control and two variable-length stoppers. Check one run's Monte
+Carlo error against replications, and run a design in parts on several processes. The references are
+{doc}`running-simulations` and {doc}`reproducibility`.
 
 [View on GitHub](https://github.com/douglasrizzo/catsim/blob/main/notebooks/02_comparing_strategies.ipynb) ·
 [Open in Colab](https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/02_comparing_strategies.ipynb)
 
-## Live sessions
+## A test step by step
 
-**For** application developers. **Level:** intermediate.
+**For** researchers who want to see inside one test, and integrators who use catsim's computations
+in an application. **Level:** intermediate.
 
-Run a test one response at a time, as an application does: choose each item, record the response,
-read why the session stopped, save the session as JSON and resume it, and share item exposure
-across sessions. The reference is {doc}`live-sessions`.
+Run one test with the engine's three steps, `start`, `select` and `answer`, read the session they
+return, see why it ended and what an ended session does, end a test whose selector runs out of
+items, pass exposure rates to the selector, and check that a simulation runs the same steps. The
+reference is {doc}`embedding-catsim`.
 
-[View on GitHub](https://github.com/douglasrizzo/catsim/blob/main/notebooks/03_live_sessions.ipynb) ·
-[Open in Colab](https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/03_live_sessions.ipynb)
+[View on GitHub](https://github.com/douglasrizzo/catsim/blob/main/notebooks/03_a_test_step_by_step.ipynb) ·
+[Open in Colab](https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/03_a_test_step_by_step.ipynb)
 
 ## Custom strategies
 
 **For** method authors. **Level:** advanced.
 
-Write a strategy of your own by subclassing one of catsim's base classes, reading the session from
-its context and, for an estimator, returning an estimate. The reference is {doc}`extending`.
+Write a selector, a stopper and an exposure control of your own by subclassing catsim's base
+classes, call one directly on a session, run them in a simulation, and see why a strategy that runs
+on several processes must live in a module. The reference is {doc}`extending`.
 
 [View on GitHub](https://github.com/douglasrizzo/catsim/blob/main/notebooks/04_custom_strategies.ipynb) ·
 [Open in Colab](https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/04_custom_strategies.ipynb)
