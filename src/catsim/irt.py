@@ -590,9 +590,17 @@ def log_response_probabilities(theta: float | FloatArray, items: FloatArray) -> 
 
   They are the logarithms of the :py:func:`icc` :math:`P_i` and of its complement :math:`Q_i = 1 - P_i`,
   computed from the logit :math:`a_i(\theta - b_i)`, never from a :math:`P_i` that has rounded to 0 or
-  1. They are exact at any distance from the difficulty: far below it :math:`\log P_i` tends to
+  1, so they stay finite at any distance from the difficulty: far below it :math:`\log P_i` tends to
   :math:`\log c_i`, far above it :math:`\log Q_i` tends to :math:`\log(1 - d_i)`, and without guessing
   or slipping they keep falling linearly in the logit.
+
+  Each value is accurate to about :math:`10^{-16}` in absolute terms, so :math:`P_i` and :math:`Q_i`
+  are accurate to that relative error. :math:`\log P_i` is also accurate in relative terms when
+  :math:`c_i = 0`, and :math:`\log Q_i` when :math:`d_i = 1`. Otherwise, where a probability nears 1,
+  its logarithm is accurate in absolute terms only, and can round to 0 or just above it, such as
+  :math:`5.6 \times 10^{-17}`: :math:`\log P_i` far above the difficulty of an item with
+  :math:`c_i > 0` and :math:`d_i = 1`, and :math:`\log Q_i` far below that of an item with
+  :math:`c_i = 0` and :math:`d_i < 1`.
 
   Parameters
   ----------
@@ -646,8 +654,9 @@ def log_likelihood(theta: float | FloatArray, responses: Sequence[bool], items: 
 
   where :math:`u_i` is 1 for a correct response and 0 otherwise, :math:`P_i` is the :py:func:`icc`
   and :math:`Q_i = 1 - P_i` :cite:p:`Ayala2009`. Both logarithms are computed as in
-  :py:func:`log_response_probabilities`, exact at any distance from the difficulty: far from
-  it, a correct guess costs :math:`\log c_i` and a slip :math:`\log(1 - d_i)`. With no items the
+  :py:func:`log_response_probabilities`: finite at any distance from the difficulty, and accurate to
+  about :math:`10^{-16}` in absolute terms, the accuracy a sum needs. Far from the difficulty, a
+  correct guess costs :math:`\log c_i` and a slip :math:`\log(1 - d_i)`. With no items the
   log-likelihood is 0.
 
   Parameters
