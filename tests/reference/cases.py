@@ -42,7 +42,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy
 
-from catsim import ItemBank, irt
+from catsim import ItemBank, NoItemsAvailableError, irt
 from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,
@@ -56,7 +56,6 @@ from catsim.estimation import (
   posterior_variance,
   uniform_log_prior,
 )
-from catsim.exceptions import NoItemsAvailableError
 from catsim.exposure import BaseExposureControl
 from catsim.initialization import BaseInitializer, FixedPointInitializer, NormalInitializer, UniformInitializer
 from catsim.selection import (

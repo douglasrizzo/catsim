@@ -8,11 +8,9 @@ from hypothesis import example, given, settings
 from hypothesis import strategies as st
 from hypothesis.strategies import DrawFn, composite
 
-from catsim import CatEngine, StopReason, simulate
+from catsim import CatEngine, ItemBank, NoItemsAvailableError, StopReason, simulate
 from catsim.estimation import NumericalSearchEstimator
-from catsim.exceptions import NoItemsAvailableError
 from catsim.initialization import FixedPointInitializer
-from catsim.item_bank import ItemBank
 from catsim.selection import AStratBBlockSelector, AStratSelector, MaxInfoBBlockSelector, MaxInfoStratSelector
 from catsim.stopping import MaxLengthStopper
 from tests.contexts import make_context

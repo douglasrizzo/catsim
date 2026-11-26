@@ -1,4 +1,4 @@
-"""Property-based tests for :class:`catsim.engine.CatEngine`."""
+"""Property-based tests for :class:`catsim.CatEngine`."""
 
 from __future__ import annotations
 

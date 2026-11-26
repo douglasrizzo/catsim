@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from catsim.item_bank import ItemBank
+from catsim import ItemBank
 from catsim.selection import RandomesqueSelector, RandomSelector, The54321Selector
 from tests.contexts import make_context
 

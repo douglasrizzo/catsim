@@ -13,7 +13,7 @@ from scipy.integrate import IntegrationWarning, quad
 from scipy.optimize import brentq, minimize_scalar
 from scipy.special import expit
 
-from catsim import Estimate, StepContext, irt
+from catsim import Estimate, ItemBank, StepContext, irt
 from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,
@@ -28,7 +28,6 @@ from catsim.estimation import (
   posterior_variance,
   uniform_log_prior,
 )
-from catsim.item_bank import ItemBank
 from tests.contexts import make_context
 
 

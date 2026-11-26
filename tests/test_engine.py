@@ -11,10 +11,18 @@ from dataclasses import dataclass
 import numpy as np
 import pytest
 
-from catsim import CatEngine, Estimate, ExcludedItemError, ItemBank, Session, StepContext, StopReason
+from catsim import (
+  CatEngine,
+  Estimate,
+  ExcludedItemError,
+  ItemBank,
+  NoItemsAvailableError,
+  Session,
+  StepContext,
+  StopReason,
+)
 from catsim.compat import override
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
-from catsim.exceptions import NoItemsAvailableError
 from catsim.exposure import BaseExposureControl
 from catsim.initialization import BaseInitializer
 from catsim.selection import BaseSelector, LinearSelector, MaxInfoSelector, MEISelector, RandomSelector, remaining

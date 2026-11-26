@@ -1,4 +1,4 @@
-"""Tests for catsim.context.StepContext and catsim.Estimate, and the input checks they make (ADR-0009)."""
+"""Tests for catsim.StepContext and catsim.Estimate, and the input checks they make (ADR-0009)."""
 
 import dataclasses
 import math

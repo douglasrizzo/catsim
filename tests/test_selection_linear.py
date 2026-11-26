@@ -2,7 +2,7 @@
 
 import pytest
 
-from catsim.item_bank import ItemBank
+from catsim import ItemBank
 from catsim.selection import LinearSelector
 from tests.contexts import make_context
 

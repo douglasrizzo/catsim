@@ -14,6 +14,7 @@ import pytest
 
 import catsim
 
+TESTS = Path(__file__).parent
 PACKAGES = [
   "catsim",
   "catsim.selection",
@@ -157,6 +158,26 @@ def test_every_public_definition_of_an_internal_module_is_exported(package_name:
   }
 
   assert unexported == set()
+
+
+def test_the_tests_import_each_public_name_from_its_public_path() -> None:
+  """A test that imports ItemBank from ``catsim.item_bank`` breaks when that internal module is renamed.
+
+  ADR-0023 lets catsim split, merge or rename its internal modules, so code outside catsim imports each name from its
+  public path. A private name, which only its own tests reach, may come from its module, and so may ``catsim.compat``'s
+  ``override``, which is the standard library's.
+  """
+  public_paths = {*PACKAGES, *PUBLIC_MODULES, "catsim.compat"}
+  offenders = {
+    f"{path.relative_to(TESTS)}: from {node.module} import {alias.name}"
+    for path in TESTS.rglob("*.py")
+    for node in ast.walk(ast.parse(path.read_text(encoding="utf-8")))
+    if isinstance(node, ast.ImportFrom) and node.module and node.module.startswith("catsim.")
+    for alias in node.names
+    if node.module not in public_paths and not alias.name.startswith("_")
+  }
+
+  assert offenders == set()
 
 
 def test_no_public_signature_takes_a_retired_name() -> None:

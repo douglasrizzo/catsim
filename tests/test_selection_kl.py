@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from scipy.integrate import quad
 
-from catsim.item_bank import ItemBank
+from catsim import ItemBank
 from catsim.selection import KLSelector
 from tests.contexts import make_context
 
