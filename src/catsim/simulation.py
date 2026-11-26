@@ -77,7 +77,7 @@ def simulate(  # noqa: PLR0913 - the engine, two ways to give examinees, the see
 
   The examinees are split, in order, into ``parts`` contiguous parts of near-equal size, and each
   part runs its sessions one after another (ADR-0015). Each session's selections are capped
-  against catR's exposure rates: each item's administrations over the sessions before it in its
+  against the items' exposure rates: each item's administrations over the sessions before it in its
   part (ADR-0012), so the first session of a part sees no rates. This exposure feedback is the only
   way one session depends on another, and the parts are part of the run's configuration: with an
   ``r_max`` cap, a session sees only the exposure of its own part, so ``parts`` changes the result,
@@ -569,7 +569,7 @@ def _run_part(engine: CatEngine, part: _Part, done: Callable[[], object] | None)
   proposal_counts = numpy.zeros(engine.item_bank.n_items, dtype=int)
   sessions: list[Session] = []
   for before, row in enumerate(_rows(engine.item_bank, part)):
-    # catR's rate: each item's administrations over the sessions of the part started before this one,
+    # Each item's administrations over the sessions of the part started before this one,
     # so the part's first session sees none (ADR-0012). Only this session changes the counts until
     # it ends, and it is never offered an item again once given it, so its rates are fixed when it
     # starts.
@@ -655,7 +655,7 @@ _N_DECILES = 10
 
 
 def _deciles(true_thetas: FloatArray) -> IntArray:
-  """Return each examinee's decile of true ability, from 0 for the lowest abilities to 9, as catR groups them.
+  """Return each examinee's decile of true ability, from 0 for the lowest abilities to 9.
 
   Parameters
   ----------
@@ -866,16 +866,13 @@ class SimulationResult:
   gives NaN. Bias, MSE and RMSE, and every metric by decile, need the true abilities, and raise
   without them.
 
-  **Deciles.** As in catR's ``simulateRespondents`` :cite:p:`Magis2017`, decile :math:`k`, from 0 to
-  9, holds the sessions whose true ability :math:`\theta` has :math:`q_k \leq \theta < q_{k+1}`,
-  where :math:`q_0, \ldots, q_{10}` are the quantiles of the run's true abilities at
-  :math:`0, 0.1, \ldots, 1`, interpolated linearly (NumPy's default, R's type 7), and decile 9 also
-  holds the abilities equal to :math:`q_{10}`, the highest. With :math:`N` distinct abilities, each
-  decile holds :math:`N/10` sessions when 10 divides :math:`N`. Equal abilities always share a
-  decile, so with ties some deciles may hold more sessions and others none: when every examinee has
-  the same ability, all are in decile 9. catR computes the quantiles at ``seq(0, 1, 0.1)``, whose
-  0.3, 0.6 and 0.7 are a rounding error above the tenths, so an ability equal to one of those three
-  cuts can fall a decile lower in catR.
+  **Deciles.** Decile :math:`k`, from 0 to 9, holds the sessions whose true ability :math:`\theta`
+  has :math:`q_k \leq \theta < q_{k+1}`, where :math:`q_0, \ldots, q_{10}` are the quantiles of the
+  run's true abilities at :math:`0, 0.1, \ldots, 1`, interpolated linearly (NumPy's default, R's
+  type 7), and decile 9 also holds the abilities equal to :math:`q_{10}`, the highest. With
+  :math:`N` distinct abilities, each decile holds :math:`N/10` sessions when 10 divides :math:`N`.
+  Equal abilities always share a decile, so with ties some deciles may hold more sessions and others
+  none: when every examinee has the same ability, all are in decile 9.
 
   The :doc:`/running-simulations` guide reads a result.
 
@@ -1091,9 +1088,6 @@ class SimulationResult:
 
   def deciles(self) -> dict[str, numpy.ndarray]:
     """Return the table of the run's metrics by decile of the true ability: one row per decile, from the lowest.
-
-    It holds what catR's ``simulateRespondents`` reports by decile (``condTheta``, ``condBias``,
-    ``condRMSE``, ``condnItems``, ``condSE`` and ``ndecile``), with the Monte Carlo errors.
 
     Returns
     -------

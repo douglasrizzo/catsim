@@ -66,7 +66,7 @@ def below_cap(candidates: IntArray, exposure_rates: FloatArray | None, r_max: fl
       The candidates whose exposure rate is below ``r_max``, in their order in ``candidates``, or
       ``candidates`` itself if none is below it or ``r_max`` is 1.
   """
-  # As in catR, a cap of 1 is no cap: an item that every earlier examinee received has a rate of
+  # A cap of 1 is no cap: an item that every earlier examinee received has a rate of
   # exactly 1, which the strict comparison below would pass over.
   if exposure_rates is None or r_max >= 1:
     return candidates
