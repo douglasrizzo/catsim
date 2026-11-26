@@ -27,7 +27,7 @@ cutoff joins the pool.
 
 ## Decision
 
-Every selector that picks the best item by a score uses one rule, catR's: the candidates whose
+Every selector that picks the best item by a score uses one rule, catR's: the candidate items whose
 score equals the best score exactly are tied, and one of them is drawn uniformly with the generator of
 the call. Randomesque and 5-4-3-2-1 bins hold every candidate tied with the bin's least
 informative item. `pick_best` and `best_pool`, exported from `catsim.selection`, implement the

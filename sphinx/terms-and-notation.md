@@ -7,7 +7,7 @@ that the formulas use.
 ## Examinees and items
 
 examinee
-: The person who takes a test. Also called *respondent*, *test taker* or *candidate*.
+: The person who takes a test. Also called *respondent* or *test taker*.
 
 ability $\theta$
 : The latent trait a test measures, on a continuous scale. Also called *proficiency*, *latent
@@ -79,6 +79,12 @@ administered items
 excluded items
 : Items a session must not be given although it has not had them, such as the items its exposure
   control declined. They do not count toward the test length. In the API: `excluded_items`.
+
+candidate items
+: The items a selector may still choose: those neither administered nor excluded. A selector may
+  narrow them further, for example to the items below its exposure cap. In these pages a
+  *candidate* is always an item, never an examinee. In the API: the `candidates` of the selection
+  helpers.
 
 test length $n$
 : The number of administered items. In the API: the `test_length` column and metric of a simulation

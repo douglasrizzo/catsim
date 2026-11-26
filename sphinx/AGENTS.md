@@ -348,6 +348,8 @@ a term or symbol the page lacks, add it to the page first. The terms most often 
 - **upper asymptote** $d$; $1 - d$ is the slipping parameter;
 - **responses** $u$, not response vector or response pattern;
 - **standard error** $SE(\hat{\theta})$, not SEE or SEM;
+- **candidate item** for an item a selector may still choose, written in full at its first use on a
+  page; "candidate" never means an examinee or a trial value of $\theta$;
 - **stopper** for a stopping-criterion object; `StopRule` only for the class that combines stoppers,
   so do not write "stopping rule";
 - $n$ for the test length, $N$ for the number of examinees, $M$ for the bank size, $i$ for the item

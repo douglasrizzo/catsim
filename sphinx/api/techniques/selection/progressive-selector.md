@@ -15,8 +15,8 @@ near-Fisher behavior late, and no need for offline calibration.
 
 ## Definition
 
-At test position $n$ out of a planned total length $N$, the candidate
-score for item $i$ is
+At test position $n$ out of a planned total length $N$, the score
+of item $i$ is
 
 $$
 S_i^{(n)}

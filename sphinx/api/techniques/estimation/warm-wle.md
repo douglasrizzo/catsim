@@ -77,7 +77,7 @@ default range the points are 0.1 apart, so two roots closer than that can fall
 in one interval and go unseen. Each sign change from positive to negative brackets a maximum
 of the weighted likelihood and is refined with Brent's method. If several maxima
 exist, which can happen with guessing, the one with the largest weighted
-likelihood is returned; candidates are ranked by integrating the modified score,
+likelihood is returned; the maxima are ranked by integrating the modified score,
 the derivative of the weighted log-likelihood. If the modified score never changes
 sign, the estimate is the bound it points to. This mirrors `catR`
 {cite:p}`Magis12`, whose

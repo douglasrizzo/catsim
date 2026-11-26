@@ -15,8 +15,8 @@ choose at random among several optimal items near the current estimate.
 
 At each step the selector ranks the items that are neither administered nor excluded by Fisher
 information at the current ability estimate, keeps the `bin_size` most informative of them, and
-draws one uniformly at random from that candidate set. Items tied in information with the last of
-those candidates also join the set, as in catR ({doc}`/adr/0017-random-tie-breaking`).
+draws one uniformly at random from them. Items tied in information with the last of them also
+join the set ({doc}`/adr/0017-random-tie-breaking`).
 
 ## Parameters
 
