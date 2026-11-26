@@ -239,7 +239,7 @@ def test_strategies_the_workers_cannot_import_run_in_the_calling_process(parts: 
 
   result = simulate(engine, true_thetas=thetas, rng=3, parts=parts, workers=workers)
 
-  assert result.test_lengths.tolist() == [4, 4, 4]
+  assert result.examinees()["test_length"].tolist() == [4, 4, 4]
   assert result.sessions == simulate(engine, true_thetas=thetas, rng=3).sessions
 
 

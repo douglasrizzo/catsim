@@ -7,8 +7,9 @@ contexts, building an engine and running whole tests, the exposure control the w
 the metric functions. A later item that changes one of those rewrites the functions here, keeping
 their signatures and what they return, and leaves the cases and the recorded data as they are.
 
-This version is written for the immutable sessions of ADR-0006 and for ``simulate``, which runs
-the whole tests on recorded examinees (ADR-0014) and counts the run's exposure (ADR-0012).
+This version is written for the immutable sessions of ADR-0006, for ``simulate``, which runs the
+whole tests on recorded examinees (ADR-0014) and counts the run's exposure (ADR-0012), and for the
+metrics of ADR-0016, which come with their Monte Carlo errors: the adapters return their values.
 """
 
 from __future__ import annotations
@@ -21,6 +22,7 @@ from typing import TYPE_CHECKING
 from catsim import CatEngine, StepContext, metrics, simulate
 from catsim.compat import override
 from catsim.exposure import BaseExposureControl
+from catsim.metrics import _overlap  # noqa: PLC2701 - the overlap cases give exposure rates, not tests
 
 if TYPE_CHECKING:
   from collections.abc import Sequence
@@ -191,10 +193,7 @@ def run_recorded(
       The sessions and the run's exposure and metrics.
   """
   result = simulate(engine, responses=responses, true_thetas=true_thetas, rng=rng)
-  proposal_counts = result.proposal_counts
-  proposal_rates = result.proposal_rates
-  assert proposal_counts is not None
-  assert proposal_rates is not None
+  overlap = result.overlap_rate()
   known = true_thetas is not None
   return RecordedRun(
     sessions=[
@@ -210,31 +209,36 @@ def run_recorded(
       for session in result.sessions
     ],
     exposure_counts=result.exposure_counts.tolist(),
-    proposal_counts=proposal_counts.tolist(),
-    exposure_rates=result.exposure_rates.tolist(),
-    proposal_rates=proposal_rates.tolist(),
-    overlap_rate=result.overlap_rate,
-    bias=result.bias if known else None,
-    mse=result.mse if known else None,
-    rmse=result.rmse if known else None,
+    proposal_counts=result.proposal_counts.tolist(),
+    exposure_rates=result.exposure_rates().value.tolist(),
+    proposal_rates=result.proposal_rates().value.tolist(),
+    overlap_rate=None if overlap is None else overlap.value,
+    bias=result.bias().value if known else None,
+    mse=result.mse().value if known else None,
+    rmse=result.rmse().value if known else None,
   )
 
 
 def bias(actual: npt.ArrayLike, predicted: npt.ArrayLike) -> float:
   """Return the mean of the estimates minus the true abilities."""
-  return metrics.bias(actual, predicted)
+  return metrics.bias(actual, predicted).value
 
 
 def mse(actual: npt.ArrayLike, predicted: npt.ArrayLike) -> float:
   """Return the mean squared difference between the estimates and the true abilities."""
-  return metrics.mse(actual, predicted)
+  return metrics.mse(actual, predicted).value
 
 
 def rmse(actual: npt.ArrayLike, predicted: npt.ArrayLike) -> float:
   """Return the square root of the mean squared error."""
-  return metrics.rmse(actual, predicted)
+  return metrics.rmse(actual, predicted).value
 
 
 def overlap_rate(exposure_rates: FloatArray, test_size: int) -> float:
-  """Return the expected share of items two examinees' tests of ``test_size`` items share."""
-  return metrics.overlap_rate(exposure_rates, test_size)
+  """Return the expected share of items two examinees' tests of ``test_size`` items share.
+
+  ``metrics.overlap_rate`` takes the tests and computes this value from their exposure rates. Some
+  of the cases' rates belong to no run of tests of ``test_size`` items, since they do not sum to it,
+  so the case reaches the formula from the rates directly.
+  """
+  return _overlap(exposure_rates, test_size)
