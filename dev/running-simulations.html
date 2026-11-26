@@ -706,12 +706,24 @@ strategies must be defined in a module; <a class="reference internal" href="repr
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
+<figure class="align-default">
+<img alt="_images/running-simulations-1_00.svg" class="plot-directive" src="_images/running-simulations-1_00.svg" />
+</figure>
+<figure class="align-default">
+<img alt="_images/running-simulations-1_01.svg" class="plot-directive" src="_images/running-simulations-1_01.svg" />
+</figure>
 <p>The first figure follows one examinee: the ability estimate after each item, with a band of one
 standard error on each side, the difficulty of each item given and the true ability. The band
 narrows as items are given, and the test ends when the standard error reaches the target. The
 second figure draws each item’s exposure rate at its difficulty. In this run, the items given most
 are among the most discriminating, with difficulties near the middle of the population, and more
 than half of the bank is never given. <a class="reference internal" href="api/plot.html#module-catsim.plot" title="catsim.plot"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a> lists the other plots.</p>
+<p>The figures in this documentation use its own style, <a class="reference download internal" download="" href="_downloads/12d9388a5fec835393de70069916c0cd/figures.mplstyle"><code class="xref download docutils literal notranslate"><span class="pre">figures.mplstyle</span></code></a>:
+STIX text and math, ticks inside a closed box and matplotlib’s Petroff 10 colours. catsim’s plots
+take whichever matplotlib style is in effect, so <code class="docutils literal notranslate"><span class="pre">plt.style.use(&quot;figures.mplstyle&quot;)</span></code>, with the path
+to the saved file, draws yours the same way. <code class="docutils literal notranslate"><span class="pre">plt.style.context(&quot;figures.mplstyle&quot;)</span></code> applies it to
+the figures made inside a <code class="docutils literal notranslate"><span class="pre">with</span></code> block, and <code class="docutils literal notranslate"><span class="pre">plt.style.use(&quot;default&quot;)</span></code> returns to matplotlib’s own
+style.</p>
 </section>
 </section>
 

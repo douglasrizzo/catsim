@@ -1,0 +1,41 @@
+# The style of the figures in catsim's documentation: STIX text and math, ticks inward on all four
+# sides of a closed box, framed legends, outlined bars and matplotlib's Petroff 10 colour cycle
+# (https://arxiv.org/abs/2107.02270). Every font it names ships with matplotlib.
+#
+# Apply it with plt.style.use("figures.mplstyle"), or to some figures only with
+# plt.style.context("figures.mplstyle"); plt.style.use("default") returns to matplotlib's own style.
+
+font.family: serif
+font.serif: STIXGeneral, DejaVu Serif
+mathtext.fontset: stix
+font.size: 10
+axes.titlesize: 11
+axes.labelsize: 10
+legend.fontsize: 9
+
+axes.prop_cycle: cycler(color=["3f90da", "ffa90e", "bd1f01", "94a4a2", "832db6", "a96b59", "e76300", "b9ac70", "717581", "92dadd"])
+patch.facecolor: 3f90da
+
+axes.linewidth: 0.8
+axes.edgecolor: black
+axes.grid: False
+axes.formatter.use_mathtext: True
+xtick.direction: in
+ytick.direction: in
+xtick.top: True
+ytick.right: True
+xtick.major.size: 4
+ytick.major.size: 4
+xtick.major.width: 0.8
+ytick.major.width: 0.8
+
+lines.linewidth: 1.4
+lines.markersize: 5
+patch.force_edgecolor: True
+patch.edgecolor: black
+patch.linewidth: 0.6
+
+legend.frameon: True
+legend.fancybox: False
+legend.edgecolor: black
+legend.framealpha: 1
