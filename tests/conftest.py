@@ -12,8 +12,8 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 
+from catsim import ItemBank
 from catsim.estimation import NumericalSearchEstimator
-from catsim.item_bank import ItemBank
 from catsim.selection import (
   AStratBBlockSelector,
   AStratSelector,

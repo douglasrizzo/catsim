@@ -13,7 +13,7 @@ from scipy.integrate import IntegrationWarning, quad
 from scipy.optimize import brentq, minimize_scalar
 from scipy.special import expit
 
-from catsim import Estimate, StepContext, irt
+from catsim import Estimate, ItemBank, StepContext, irt
 from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,
@@ -28,7 +28,6 @@ from catsim.estimation import (
   posterior_variance,
   uniform_log_prior,
 )
-from catsim.item_bank import ItemBank
 from tests.contexts import make_context
 
 
@@ -558,7 +557,7 @@ class TestBayesianHelpers:
     """Responses without matching items should raise, not silently return the prior."""
     grid = QuadratureGrid.uniform()
 
-    with pytest.raises(ValueError, match="same length"):
+    with pytest.raises(ValueError, match="there must be one response per item"):
       posterior([True, False], np.empty((0, 4)), grid, normal_log_prior())
 
   def test_posterior_shifts_positive_after_correct_response(self) -> None:

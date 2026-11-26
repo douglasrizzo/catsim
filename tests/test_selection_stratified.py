@@ -8,11 +8,9 @@ from hypothesis import example, given, settings
 from hypothesis import strategies as st
 from hypothesis.strategies import DrawFn, composite
 
-from catsim import CatEngine, StopReason, simulate
+from catsim import CatEngine, ItemBank, NoItemsAvailableError, StopReason, simulate
 from catsim.estimation import NumericalSearchEstimator
-from catsim.exceptions import NoItemsAvailableError
 from catsim.initialization import FixedPointInitializer
-from catsim.item_bank import ItemBank
 from catsim.selection import AStratBBlockSelector, AStratSelector, MaxInfoBBlockSelector, MaxInfoStratSelector
 from catsim.stopping import MaxLengthStopper
 from tests.contexts import make_context
@@ -174,9 +172,9 @@ def test_excluded_items_do_not_move_the_test_position() -> None:
   item_bank = ItemBank.generate(9, rng=0)
   first_stratum = np.argsort(item_bank.discrimination, kind="stable")[:3].tolist()
 
-  item_id = AStratSelector(test_size=3).select(make_context(item_bank, excluded_items=first_stratum[:2]))
+  item = AStratSelector(test_size=3).select(make_context(item_bank, excluded_items=first_stratum[:2]))
 
-  assert item_id == first_stratum[2]
+  assert item == first_stratum[2]
 
 
 @pytest.mark.parametrize("selector_class", STRATIFIED_SELECTORS)

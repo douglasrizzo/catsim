@@ -9,8 +9,7 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from catsim.exceptions import NoItemsAvailableError
-from catsim.item_bank import ItemBank
+from catsim import ItemBank, NoItemsAvailableError
 from catsim.selection import BaseSelector, ClusterSelector
 from tests.conftest import HALF_BANK_SELECTORS, SELECTOR_FACTORIES
 from tests.contexts import make_context
@@ -37,14 +36,14 @@ def _session(
   while True:
     context = make_context(item_bank, picks, responses, theta=data.draw(THETAS), rng=rng, excluded_items=excluded)
     try:
-      item_id = selector.select(context)
+      item = selector.select(context)
     except NoItemsAvailableError:
       return picks
-    assert type(item_id) is int
-    assert 0 <= item_id < item_bank.n_items
-    assert item_id not in picks
-    assert item_id not in excluded
-    picks.append(item_id)
+    assert type(item) is int
+    assert 0 <= item < item_bank.n_items
+    assert item not in picks
+    assert item not in excluded
+    picks.append(item)
     responses.append(data.draw(st.booleans()))
 
 

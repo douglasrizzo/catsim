@@ -1,4 +1,4 @@
-"""Property-based tests for :class:`catsim.item_bank.ItemBank`."""
+"""Property-based tests for :class:`catsim.ItemBank`."""
 
 from __future__ import annotations
 
@@ -11,8 +11,7 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from catsim import irt
-from catsim.item_bank import ItemBank
+from catsim import ItemBank, irt
 from tests.hypothesis_strategies import item_params_matrix
 
 BANK_SETTINGS = settings(max_examples=25)

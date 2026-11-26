@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import numpy
 
-from .checks import _check_in_bank, _exposure_rates, _item, _item_indices, _response
+from .checks import _check_in_bank, _exposure_rates, _item, _item_indices, _named, _response
 from .context import Estimate, StepContext, _replaced, _unchecked
 from .exceptions import ExcludedItemError, NoItemsAvailableError
 from .item_bank import ItemBank
@@ -154,7 +154,7 @@ class CatEngine:
         If an excluded item is outside the bank or repeats, or the initializer's estimate is not
         finite.
     """
-    excluded = _item_indices("excluded_items", excluded_items, self.item_bank.n_items)
+    excluded = _item_indices("excluded_items", excluded_items, self.item_bank.names)
     return self._start(numpy.random.default_rng(rng), excluded)
 
   def select(
@@ -353,10 +353,12 @@ class CatEngine:
     """
     item = _item(label, value, self.item_bank.n_items)
     if item in session.administered_items:
-      msg = f"{label} is {item}; the session has already been given item {item}"
+      msg = f"{label} is {_named(item, self.item_bank.names)}; the session has already been given that item"
       raise ValueError(msg)
     if item in session.excluded_items:
-      msg = f"{label} is {item}; the session excluded item {item}, which it must not be given"
+      msg = (
+        f"{label} is {_named(item, self.item_bank.names)}; the session excluded that item, which it must not be given"
+      )
       raise ExcludedItemError(msg)
     return item
 

@@ -4,8 +4,7 @@ import numpy as np
 import pytest
 from scipy.integrate import quad
 
-from catsim import irt
-from catsim.item_bank import ItemBank
+from catsim import ItemBank, irt
 from catsim.selection import IntervalInfoSelector, MaxInfoSelector, UrrySelector
 from tests.banks import two_pl_bank
 from tests.contexts import make_context

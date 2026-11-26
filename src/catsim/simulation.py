@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, NamedTuple, TypeVar, cast
 import numpy
 
 from . import metrics
+from .checks import _named
 from .compat import override
 from .engine import CatEngine
 from .item_bank import ItemBank
@@ -201,7 +202,7 @@ def simulate(  # noqa: PLR0913 - the engine, two ways to give examinees, the see
     raise TypeError(msg)
   parts = _positive("parts", parts)
   workers = _positive("workers", workers)
-  thetas, matrix, n_examinees = _examinees(true_thetas, responses, engine.item_bank.n_items)
+  thetas, matrix, n_examinees = _examinees(true_thetas, responses, engine.item_bank.names)
   if parts > n_examinees:
     msg = f"parts is {parts} and the run has {n_examinees} examinees; every part needs at least one examinee"
     raise ValueError(msg)
@@ -263,7 +264,7 @@ def _positive(name: str, value: object) -> int:
 
 
 def _examinees(
-  true_thetas: npt.ArrayLike | None, responses: npt.ArrayLike | None, n_items: int
+  true_thetas: npt.ArrayLike | None, responses: npt.ArrayLike | None, names: Sequence[str]
 ) -> tuple[FloatArray | None, FloatArray | None, int]:
   """Return a run's checked true abilities and recorded responses, either None when not given, and how many examinees.
 
@@ -273,8 +274,8 @@ def _examinees(
       The true abilities passed to :func:`simulate`.
   responses : array-like or None
       The recorded responses passed to :func:`simulate`.
-  n_items : int
-      The number of items in the engine's bank.
+  names : Sequence[str]
+      The names of the items of the engine's bank.
 
   Returns
   -------
@@ -289,7 +290,7 @@ def _examinees(
   ValueError
       If both are given, with different numbers of examinees.
   """
-  matrix = None if responses is None else _response_matrix(responses, n_items)
+  matrix = None if responses is None else _response_matrix(responses, names)
   if true_thetas is None:
     if matrix is None:
       msg = "simulate needs examinees: true_thetas for generated ones, responses for recorded ones, or both"
@@ -352,15 +353,15 @@ def _true_thetas(true_thetas: npt.ArrayLike) -> FloatArray:
   return thetas
 
 
-def _response_matrix(responses: npt.ArrayLike, n_items: int) -> FloatArray:
+def _response_matrix(responses: npt.ArrayLike, names: Sequence[str]) -> FloatArray:
   """Return recorded responses as a float matrix of 1.0 (correct), 0.0 (incorrect) and NaN (missing), checking them.
 
   Parameters
   ----------
   responses : array-like
       The recorded responses passed to :func:`simulate`.
-  n_items : int
-      The number of items in the engine's bank.
+  names : Sequence[str]
+      The names of the items of the engine's bank, one per column, which the messages give.
 
   Returns
   -------
@@ -387,8 +388,8 @@ def _response_matrix(responses: npt.ArrayLike, n_items: int) -> FloatArray:
       f"{matrix.shape}"
     )
     raise TypeError(msg)
-  if matrix.shape[1] != n_items:
-    msg = f"responses has shape {matrix.shape}; there must be one column per item of the bank ({n_items})"
+  if matrix.shape[1] != len(names):
+    msg = f"responses has shape {matrix.shape}; there must be one column per item of the bank ({len(names)})"
     raise ValueError(msg)
   kind = matrix.dtype.kind
   if kind == "b":
@@ -408,7 +409,7 @@ def _response_matrix(responses: npt.ArrayLike, n_items: int) -> FloatArray:
     rule = (
       "an integer response must be 0 or 1" if kind in "iu" else "a response must be 0 or 1, or NaN where it is missing"
     )
-    msg = f"responses[{row}, {column}] is {matrix[row, column].item()!r}; {rule}"
+    msg = f"responses[{row}, {column}] is {matrix[row, column].item()!r}, for item {_named(column, names)}; {rule}"
     raise ValueError(msg)
   return matrix.astype(float)
 
@@ -754,7 +755,9 @@ def _check_items(sessions: Sequence[Session], n_items: int) -> None:
         raise ValueError(msg)
 
 
-def _proposal_counts(proposal_counts: npt.ArrayLike, exposure_counts: IntArray, n_sessions: int) -> IntArray:
+def _proposal_counts(
+  proposal_counts: npt.ArrayLike, exposure_counts: IntArray, n_sessions: int, names: Sequence[str]
+) -> IntArray:
   """Return a result's proposal counts as a read-only integer array, checking them against its administrations.
 
   Parameters
@@ -765,6 +768,8 @@ def _proposal_counts(proposal_counts: npt.ArrayLike, exposure_counts: IntArray, 
       Each item's administrations.
   n_sessions : int
       The number of sessions.
+  names : Sequence[str]
+      The names of the bank's items, which the message gives.
 
   Returns
   -------
@@ -793,8 +798,8 @@ def _proposal_counts(proposal_counts: npt.ArrayLike, exposure_counts: IntArray, 
   if outside.any():
     item = int(numpy.flatnonzero(outside)[0])
     msg = (
-      f"proposal_counts[{item}] is {counts[item].item()}; an item's proposals are at least its "
-      f"{exposure_counts[item]} administrations and at most the {n_sessions} sessions"
+      f"proposal_counts[{item}] is {counts[item].item()}, for item {_named(item, names)}; an item's proposals are "
+      f"at least its {exposure_counts[item]} administrations and at most the {n_sessions} sessions"
     )
     raise ValueError(msg)
   return _read_only(numpy.array(counts, dtype=int))
@@ -967,7 +972,8 @@ class SimulationResult:
     exposure_counts = _read_only(_counts(sessions, n_items))
     object.__setattr__(self, "sessions", sessions)
     object.__setattr__(self, "exposure_counts", exposure_counts)
-    object.__setattr__(self, "proposal_counts", _proposal_counts(self.proposal_counts, exposure_counts, len(sessions)))
+    proposal_counts = _proposal_counts(self.proposal_counts, exposure_counts, len(sessions), self.item_bank.names)
+    object.__setattr__(self, "proposal_counts", proposal_counts)
     if self.true_thetas is not None:
       object.__setattr__(self, "true_thetas", _result_true_thetas(self.true_thetas, len(sessions)))
     if isinstance(self.parts, (bool, numpy.bool_)) or not isinstance(self.parts, (int, numpy.integer)):

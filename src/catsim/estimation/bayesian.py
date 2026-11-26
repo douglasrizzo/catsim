@@ -245,7 +245,8 @@ def posterior(
   Parameters
   ----------
   responses : Sequence[bool]
-      Responses to the administered items, in the same order as ``items``.
+      Responses to the administered items, in the same order as ``items``: each a Boolean or the
+      integer 0 or 1.
   items : numpy.ndarray
       Parameter matrix of the administered items, one row per item.
   grid : QuadratureGrid
@@ -262,9 +263,10 @@ def posterior(
   ------
   ValueError
       If the log-prior or log-likelihood is NaN or :math:`+\infty` at any node, if every node has
-      zero posterior mass, or if ``responses`` and ``items`` differ in length.
+      zero posterior mass, if ``responses`` and ``items`` differ in length, or if an integer response
+      is not 0 or 1.
   TypeError
-      If a response is not a ``bool`` or ``numpy.bool_``.
+      If a response is neither a Boolean nor an integer.
   """
   log_lik = irt.log_likelihood(grid.nodes, responses, items)
   log_post = log_prior(grid.nodes) + log_lik + numpy.log(grid.weights)

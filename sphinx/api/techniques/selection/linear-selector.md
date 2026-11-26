@@ -24,7 +24,7 @@ step it returns the first item of the list that is neither administered nor excl
    * - Parameter
      - Default
      - Description
-   * - ``items``
+   * - ``indices``
      - required
      - Non-empty list of non-negative item indices, administered in the order
        given.

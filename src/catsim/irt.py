@@ -13,6 +13,7 @@ import numpy
 from scipy import stats
 from scipy.special import expit, log_expit
 
+from .checks import _response
 from .typing import FloatArray
 
 THETA_MIN_TYPICAL = -4.0
@@ -589,9 +590,17 @@ def log_response_probabilities(theta: float | FloatArray, items: FloatArray) -> 
 
   They are the logarithms of the :py:func:`icc` :math:`P_i` and of its complement :math:`Q_i = 1 - P_i`,
   computed from the logit :math:`a_i(\theta - b_i)`, never from a :math:`P_i` that has rounded to 0 or
-  1. They are exact at any distance from the difficulty: far below it :math:`\log P_i` tends to
+  1, so they stay finite at any distance from the difficulty: far below it :math:`\log P_i` tends to
   :math:`\log c_i`, far above it :math:`\log Q_i` tends to :math:`\log(1 - d_i)`, and without guessing
   or slipping they keep falling linearly in the logit.
+
+  Each value is accurate to about :math:`10^{-16}` in absolute terms, so :math:`P_i` and :math:`Q_i`
+  are accurate to that relative error. :math:`\log P_i` is also accurate in relative terms when
+  :math:`c_i = 0`, and :math:`\log Q_i` when :math:`d_i = 1`. Otherwise, where a probability nears 1,
+  its logarithm is accurate in absolute terms only, and can round to 0 or just above it, such as
+  :math:`5.6 \times 10^{-17}`: :math:`\log P_i` far above the difficulty of an item with
+  :math:`c_i > 0` and :math:`d_i = 1`, and :math:`\log Q_i` far below that of an item with
+  :math:`c_i = 0` and :math:`d_i < 1`.
 
   Parameters
   ----------
@@ -645,8 +654,9 @@ def log_likelihood(theta: float | FloatArray, responses: Sequence[bool], items: 
 
   where :math:`u_i` is 1 for a correct response and 0 otherwise, :math:`P_i` is the :py:func:`icc`
   and :math:`Q_i = 1 - P_i` :cite:p:`Ayala2009`. Both logarithms are computed as in
-  :py:func:`log_response_probabilities`, exact at any distance from the difficulty: far from
-  it, a correct guess costs :math:`\log c_i` and a slip :math:`\log(1 - d_i)`. With no items the
+  :py:func:`log_response_probabilities`: finite at any distance from the difficulty, and accurate to
+  about :math:`10^{-16}` in absolute terms, the accuracy a sum needs. Far from the difficulty, a
+  correct guess costs :math:`\log c_i` and a slip :math:`\log(1 - d_i)`. With no items the
   log-likelihood is 0.
 
   Parameters
@@ -654,7 +664,7 @@ def log_likelihood(theta: float | FloatArray, responses: Sequence[bool], items: 
   theta : float or numpy.ndarray
       An ability, or an array of abilities.
   responses : Sequence[bool]
-      One response per item, True for a correct one.
+      One response per item: True or 1 for a correct one, False or 0 for an incorrect one.
   items : numpy.ndarray
       The answered items, a matrix of shape ``(n, 4)`` whose items satisfy
       :math:`0 \leq c < d \leq 1`, as :py:class:`~catsim.ItemBank` validates.
@@ -668,9 +678,9 @@ def log_likelihood(theta: float | FloatArray, responses: Sequence[bool], items: 
   Raises
   ------
   ValueError
-      If ``responses`` does not hold one response per item.
+      If ``responses`` does not hold one response per item, or an integer response is not 0 or 1.
   TypeError
-      If a response is not a ``bool`` or ``numpy.bool_``.
+      If a response is neither a Boolean nor an integer.
 
   Examples
   --------
@@ -694,7 +704,7 @@ def log_likelihood_function(
   Parameters
   ----------
   responses : Sequence[bool]
-      One response per item, True for a correct one.
+      One response per item: True or 1 for a correct one, False or 0 for an incorrect one.
   items : numpy.ndarray
       The answered items, a matrix of shape ``(n, 4)`` whose items satisfy
       :math:`0 \leq c < d \leq 1`, as :py:class:`~catsim.ItemBank` validates.
@@ -708,9 +718,10 @@ def log_likelihood_function(
   Raises
   ------
   ValueError
-      If ``items`` is not an ``(n, 4)`` matrix or ``responses`` does not hold one response per item.
+      If ``items`` is not an ``(n, 4)`` matrix, ``responses`` does not hold one response per item,
+      or an integer response is not 0 or 1.
   TypeError
-      If a response is not a ``bool`` or ``numpy.bool_``.
+      If a response is neither a Boolean nor an integer.
 
   Examples
   --------
@@ -743,30 +754,28 @@ def log_likelihood_function(
 
 
 def validate_response_vector(responses: Sequence[bool], n_items: int) -> None:
-  """Check that ``responses`` holds one Boolean answer per administered item.
+  """Check that ``responses`` holds one answer per administered item, each a Boolean or the integer 0 or 1.
 
-  An answer must be a ``bool`` or a ``numpy.bool_``, such as an element of a NumPy Boolean array;
-  1, 0, 1.0 and 0.0 are rejected.
+  An answer is a ``bool``, a ``numpy.bool_``, such as an element of a NumPy Boolean array, or the
+  integer 0 or 1, as the engine takes them (ADR-0009). Floats such as 1.0, and anything else, are
+  rejected rather than converted.
 
   Parameters
   ----------
   responses : Sequence[bool]
-      The examinee's answers, where True indicates a correct response.
+      The examinee's answers, where True or 1 indicates a correct response.
   n_items : int
       Number of administered items the answers belong to.
 
   Raises
   ------
   ValueError
-      If ``responses`` does not have ``n_items`` elements.
+      If ``responses`` does not have ``n_items`` elements, or an integer answer is not 0 or 1.
   TypeError
-      If an element of ``responses`` is not a ``bool`` or ``numpy.bool_``.
+      If an answer is neither a Boolean nor an integer.
   """
+  for position, response in enumerate(responses):
+    _response(f"responses[{position}]", response)
   if len(responses) != n_items:
-    msg = f"responses and items must have the same length, got {len(responses)} and {n_items}"
+    msg = f"responses has {len(responses)} entries and items {n_items} rows; there must be one response per item"
     raise ValueError(msg)
-  # Rejected rather than converted: bool(1.0), bool("no") or bool(None) would silently misscore.
-  for response in responses:
-    if not isinstance(response, (bool, numpy.bool_)):
-      msg = f"a response must be a bool or a numpy.bool_, got {type(response).__name__} {response!r}"
-      raise TypeError(msg)

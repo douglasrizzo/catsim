@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from catsim.item_bank import ItemBank
+from catsim import ItemBank
 from catsim.selection import ClusterSelector
 from tests.banks import two_pl_bank
 from tests.contexts import make_context

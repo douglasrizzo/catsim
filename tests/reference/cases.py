@@ -22,8 +22,8 @@ The families:
   random number, so the random model of the run cannot change them; two of them cap exposure, which
   makes each session depend on the ones before it.
 
-:func:`uncovered` lists any public strategy class or function that no case exercises, and the
-generator refuses to record while it lists one.
+:func:`uncovered` lists any public strategy class, function or result member that no case
+exercises, and the generator refuses to record while it lists one.
 
 The estimators' evaluation counts are not recorded: they count calls that SciPy's searches,
 root finders and quadrature make, which change with SciPy's version (QUADPACK's count did between
@@ -42,7 +42,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy
 
-from catsim import ItemBank, irt
+from catsim import ItemBank, NoItemsAvailableError, SimulationResult, irt
 from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,
@@ -56,7 +56,6 @@ from catsim.estimation import (
   posterior_variance,
   uniform_log_prior,
 )
-from catsim.exceptions import NoItemsAvailableError
 from catsim.exposure import BaseExposureControl
 from catsim.initialization import BaseInitializer, FixedPointInitializer, NormalInitializer, UniformInitializer
 from catsim.selection import (
@@ -940,6 +939,23 @@ def whole_test(name: str, seed: int = WHOLE_TEST_SEED) -> dict[str, object]:
   }
 
 
+# Public members of SimulationResult that the whole tests do not record, with the reason. The whole tests record the
+# members their outputs are named after: the sessions, the exposure and proposal counts and rates, the overlap rate and
+# the accuracy metrics.
+RESULT_EXEMPT = {
+  "item_bank": "the bank the whole test runs on, an input",
+  "true_thetas": "the true abilities the whole test is given, an input",
+  "parts": "the number of parts, an input; every whole test runs in one part",
+  "duration": "the wall-clock time of the run, which changes from run to run",
+  # Added after adda72dc by ADR-0016 from the sessions the whole tests record, and tested by tests/test_simulation.py.
+  "steps": "the table of the sessions' steps, added after adda72dc",
+  "examinees": "the table of the sessions, added after adda72dc",
+  "deciles": "the metrics by decile of the true ability, added after adda72dc",
+  "test_length": "the mean length of the sessions, added after adda72dc",
+  "se": "the mean standard error of the sessions' final estimates, added after adda72dc",
+}
+
+
 def _whole_test_cases() -> dict[str, Case]:
   cases: dict[str, Case] = {name: functools.partial(whole_test, name) for name in WHOLE_TESTS}
   cases["inputs|responses"] = lambda: RESPONSES
@@ -1069,12 +1085,13 @@ _STRATEGY_PACKAGES: dict[str, tuple[type, Callable[[], set[type]], str, dict[str
 
 
 def uncovered() -> list[str]:
-  """Return every public strategy class and computational function that no case exercises.
+  """Return every public strategy class, computational function and result member that no case exercises.
 
   Every concrete strategy class a strategy package exports must be the type of a strategy the cases
   configure. Every other name a strategy package exports, every public function of ``catsim.irt``
   and ``catsim.metrics``, and every public member of ``ItemBank`` must name a case, be one of the
-  item bank's derived values, or be exempt with a reason.
+  item bank's derived values, or be exempt with a reason. Every public member of
+  ``SimulationResult`` must name an output of the whole tests, or be exempt with a reason.
 
   Returns
   -------
@@ -1093,4 +1110,7 @@ def uncovered() -> list[str]:
   derived = set(_bank_values(BANKS["4pl"])) | ITEM_BANK_EXEMPT.keys()
   members = {name for name in vars(ItemBank) if not name.startswith("_")}
   missing |= {f"catsim.ItemBank.{name}" for name in members - derived if not _named("item_bank", name)}
+  recorded = set(whole_test(next(iter(WHOLE_TESTS)))) | RESULT_EXEMPT.keys()
+  results = {name for name in dir(SimulationResult) if not name.startswith("_")}
+  missing |= {f"catsim.SimulationResult.{name}" for name in results - recorded}
   return sorted(missing)

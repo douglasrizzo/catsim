@@ -11,10 +11,18 @@ from dataclasses import dataclass
 import numpy as np
 import pytest
 
-from catsim import CatEngine, Estimate, ExcludedItemError, ItemBank, Session, StepContext, StopReason
+from catsim import (
+  CatEngine,
+  Estimate,
+  ExcludedItemError,
+  ItemBank,
+  NoItemsAvailableError,
+  Session,
+  StepContext,
+  StopReason,
+)
 from catsim.compat import override
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
-from catsim.exceptions import NoItemsAvailableError
 from catsim.exposure import BaseExposureControl
 from catsim.initialization import BaseInitializer
 from catsim.selection import BaseSelector, LinearSelector, MaxInfoSelector, MEISelector, RandomSelector, remaining
@@ -277,7 +285,7 @@ def test_start_keeps_the_excluded_items_it_is_given_in_order(item_bank: ItemBank
     pytest.param(
       [50], ValueError, "excluded_items[0] is 50; item indices must be between 0 and 49", id="past-the-bank"
     ),
-    pytest.param([3, 3], ValueError, "excluded_items[1] is 3; item indices must not repeat", id="repeated"),
+    pytest.param([3, 3], ValueError, "excluded_items[1] is 3 ('item_03'); item indices must not repeat", id="repeated"),
     pytest.param([1, 3.7], TypeError, "excluded_items[1] is 3.7; item indices must be integers", id="fraction"),
   ],
 )
@@ -287,6 +295,7 @@ def test_start_rejects_excluded_items_that_are_not_distinct_items_of_the_bank(
   """An exclusion outside the bank, repeated or fractional fails at start, before the initializer draws.
 
   Fails if start accepts it: NumPy would read 3.7 as item 3, and an item past the bank would fail later in a selector.
+  A repeated item is named by its index and its name (ADR-0004).
   """
   initializer = RecordingInitializer(0.0)
   engine = CatEngine(item_bank, initializer, RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False))
@@ -614,9 +623,14 @@ def test_answer_rejects_a_stopped_session(item_bank: ItemBank) -> None:
     pytest.param(True, TypeError, "item is True; item indices must be integers, not bools", id="bool"),
     pytest.param(50, ValueError, "item is 50; item indices must be between 0 and 49", id="past-the-bank"),
     pytest.param(-1, ValueError, "item is -1; item indices must be between 0 and 49", id="negative"),
-    pytest.param(1, ValueError, "item is 1; the session has already been given item 1", id="administered"),
     pytest.param(
-      8, ExcludedItemError, "item is 8; the session excluded item 8, which it must not be given", id="excluded"
+      1, ValueError, "item is 1 ('item_01'); the session has already been given that item", id="administered"
+    ),
+    pytest.param(
+      8,
+      ExcludedItemError,
+      "item is 8 ('item_08'); the session excluded that item, which it must not be given",
+      id="excluded",
     ),
   ],
 )
@@ -627,7 +641,7 @@ def test_answer_rejects_an_item_select_could_not_have_proposed(
 
   Fails if 2.0 is stored as a float, a bank-sized index reads past the item parameters, -1 reads the last item, a
   response counts twice in the estimate, or an item the exposure control declined is administered (ExcludedItemError,
-  so an application can tell it from a bad index).
+  so an application can tell it from a bad index). An item of the bank is named by its index and its name (ADR-0004).
   """
   estimator = RecordingEstimator(0.5)
 
@@ -716,10 +730,16 @@ def test_select_ends_the_session_when_the_selector_has_no_item(item_bank: ItemBa
     pytest.param(-1, ValueError, "the item RecordingSelector proposed is -1; item indices must be between", id="neg"),
     pytest.param(50, ValueError, "the item RecordingSelector proposed is 50; item indices must be between", id="past"),
     pytest.param(
-      1, ValueError, "the item RecordingSelector proposed is 1; the session has already been given", id="had"
+      1,
+      ValueError,
+      "the item RecordingSelector proposed is 1 ('item_01'); the session has already been given that item",
+      id="had",
     ),
     pytest.param(
-      7, ExcludedItemError, "the item RecordingSelector proposed is 7; the session excluded item 7", id="excl"
+      7,
+      ExcludedItemError,
+      "the item RecordingSelector proposed is 7 ('item_07'); the session excluded that item",
+      id="excl",
     ),
   ],
 )
@@ -729,7 +749,8 @@ def test_select_checks_the_proposal_before_the_control_sees_it(
   """An invalid item from the selector raises in select, naming the selector, before the exposure control is asked.
 
   Fails if the engine hands it on: a negative index would show the bank's last item, an item given again would count
-  twice, and an excluded item would be shown to an examinee it was withheld from.
+  twice, and an excluded item would be shown to an examinee it was withheld from. An item of the bank is named by its
+  index and its name (ADR-0004).
   """
   control = DecliningControl(declines=frozenset())
   engine = stub_engine(item_bank, selector=RecordingSelector(proposal), exposure_control=control)
@@ -820,7 +841,7 @@ def test_a_selector_proposing_a_declined_item_again_raises_instead_of_looping(it
   control = DecliningControl(declines=frozenset({3}))
   engine = stub_engine(item_bank, selector=RecordingSelector(3), exposure_control=control)
 
-  with pytest.raises(ExcludedItemError, match="the session excluded item 3"):
+  with pytest.raises(ExcludedItemError, match=re.escape("is 3 ('item_03'); the session excluded that item")):
     engine.select(Session(estimates=(INITIAL,)), rng=0)
 
   assert control.calls == [(3, (), ())]

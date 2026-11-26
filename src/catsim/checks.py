@@ -5,8 +5,9 @@ position, the value and the rule, such as "administered_items[1] is 3.7; item in
 integers". Nothing is converted silently: an accepted value is only stored in catsim's own types,
 such as a ``numpy.int64`` index as an ``int`` and a response of 1 as ``True``.
 
-The functions are internal: :class:`~catsim.Session`, :class:`~catsim.StepContext` and
-:class:`~catsim.CatEngine` call them on the inputs they receive.
+The functions are internal: :class:`~catsim.Session`, :class:`~catsim.StepContext`,
+:class:`~catsim.CatEngine` and the functions of :mod:`catsim.irt` that take responses call them
+on the inputs they receive.
 """
 
 from __future__ import annotations
@@ -19,9 +20,14 @@ from typing import TYPE_CHECKING
 import numpy
 
 if TYPE_CHECKING:
-  from collections.abc import Iterable
+  from collections.abc import Iterable, Sequence
 
   from .typing import FloatArray
+
+
+def _named(item: int, names: Sequence[str]) -> str:
+  """Return an item's index followed by its quoted name, such as ``4 ('item_04')``, for a message (ADR-0004)."""
+  return f"{item} ({names[item]!r})"
 
 
 def _item(label: str, value: object, n_items: int | None) -> int:
@@ -68,7 +74,7 @@ def _item(label: str, value: object, n_items: int | None) -> int:
   return item
 
 
-def _item_indices(name: str, items: Iterable[object], n_items: int | None = None) -> tuple[int, ...]:
+def _item_indices(name: str, items: Iterable[object], names: Sequence[str] | None = None) -> tuple[int, ...]:
   """Return item indices as a tuple of ints, checking that they are distinct integers of the bank.
 
   Parameters
@@ -77,9 +83,9 @@ def _item_indices(name: str, items: Iterable[object], n_items: int | None = None
       The input the indices are, such as ``"administered_items"``, for the messages.
   items : Iterable[object]
       The indices, in order.
-  n_items : int or None, optional
-      The number of items in the bank, or None where the bank is not known, which checks only that
-      no index is negative. Default is None.
+  names : Sequence[str] or None, optional
+      The names of the bank's items, which the messages give, or None where the bank is not known,
+      which checks only that no index is negative. Default is None.
 
   Returns
   -------
@@ -93,13 +99,15 @@ def _item_indices(name: str, items: Iterable[object], n_items: int | None = None
   ValueError
       If an index is outside the bank, or repeats an earlier one.
   """
+  n_items = None if names is None else len(names)
   indices = tuple(_item(f"{name}[{position}]", value, n_items) for position, value in enumerate(items))
   if len(set(indices)) != len(indices):
     # A repeated item counts twice in every estimate after it.
     first: dict[int, int] = {}
     for position, item in enumerate(indices):
       if item in first:
-        msg = f"{name}[{position}] is {item}; item indices must not repeat, and {name}[{first[item]}] is {item} too"
+        shown = item if names is None else _named(item, names)
+        msg = f"{name}[{position}] is {shown}; item indices must not repeat, and {name}[{first[item]}] is {item} too"
         raise ValueError(msg)
       first[item] = position
   return indices
@@ -128,7 +136,9 @@ def _check_in_bank(name: str, items: tuple[int, ...], n_items: int) -> None:
     raise ValueError(msg)
 
 
-def _check_disjoint(administered_items: tuple[int, ...], excluded_items: tuple[int, ...]) -> None:
+def _check_disjoint(
+  administered_items: tuple[int, ...], excluded_items: tuple[int, ...], names: Sequence[str] | None = None
+) -> None:
   """Check that no item is both administered and excluded.
 
   Parameters
@@ -137,6 +147,9 @@ def _check_disjoint(administered_items: tuple[int, ...], excluded_items: tuple[i
       The items given, in order.
   excluded_items : tuple[int, ...]
       The items withheld, in order.
+  names : Sequence[str] or None, optional
+      The names of the bank's items, which the message gives, or None where the bank is not known.
+      Default is None.
 
   Raises
   ------
@@ -146,8 +159,9 @@ def _check_disjoint(administered_items: tuple[int, ...], excluded_items: tuple[i
   if not excluded_items or set(administered_items).isdisjoint(excluded_items):
     return
   position, item = next((position, item) for position, item in enumerate(excluded_items) if item in administered_items)
+  shown = item if names is None else _named(item, names)
   msg = (
-    f"excluded_items[{position}] is {item}; an item cannot be both administered and excluded, and "
+    f"excluded_items[{position}] is {shown}; an item cannot be both administered and excluded, and "
     f"administered_items[{administered_items.index(item)}] is {item} too"
   )
   raise ValueError(msg)

@@ -612,19 +612,19 @@ def test_progress_is_told_after_each_session_how_many_have_finished(
     pytest.param(
       {"responses": np.where(np.arange(100).reshape(2, 50) == 54, 2, 0)},
       ValueError,
-      r"responses\[1, 4\] is 2; an integer response must be 0 or 1",
+      r"responses\[1, 4\] is 2, for item 4 \('item_04'\); an integer response must be 0 or 1",
       id="integer-response-2",
     ),
     pytest.param(
       {"responses": np.where(np.arange(100).reshape(2, 50) == 7, 0.5, 1.0)},
       ValueError,
-      r"responses\[0, 7\] is 0.5; a response must be 0 or 1, or NaN where it is missing",
+      r"responses\[0, 7\] is 0.5, for item 7 \('item_07'\); a response must be 0 or 1, or NaN where it is missing",
       id="float-response-one-half",
     ),
     pytest.param(
       {"responses": np.where(np.arange(100).reshape(2, 50) == 60, np.inf, 0.0)},
       ValueError,
-      r"responses\[1, 10\] is inf; a response must be 0 or 1, or NaN where it is missing",
+      r"responses\[1, 10\] is inf, for item 10 \('item_10'\); a response must be 0 or 1, or NaN where it is missing",
       id="infinite-response",
     ),
     pytest.param(
@@ -923,13 +923,14 @@ class TestResultValue:
       pytest.param(
         {"proposal_counts": [0, 0, 1, 1, 0]},
         ValueError,
-        r"proposal_counts\[1\] is 0; an item's proposals are at least its 1 administrations and at most the 2 sessions",
+        r"proposal_counts\[1\] is 0, for item 1 \('item_1'\); an item's proposals are at least its 1 administrations "
+        "and at most the 2 sessions",
         id="fewer-proposals-than-administrations",
       ),
       pytest.param(
         {"proposal_counts": [0, 3, 1, 1, 0]},
         ValueError,
-        r"proposal_counts\[1\] is 3; an item's proposals are at least",
+        r"proposal_counts\[1\] is 3, for item 1 \('item_1'\); an item's proposals are at least",
         id="more-proposals-than-sessions",
       ),
       pytest.param(

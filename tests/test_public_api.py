@@ -5,6 +5,7 @@ import dataclasses
 import importlib
 import inspect
 import pkgutil
+import re
 from collections.abc import Callable, Iterator
 from pathlib import Path
 from types import ModuleType
@@ -13,6 +14,7 @@ import pytest
 
 import catsim
 
+TESTS = Path(__file__).parent
 PACKAGES = [
   "catsim",
   "catsim.selection",
@@ -24,6 +26,8 @@ PACKAGES = [
 # Top-level modules that are import paths of their own; catsim's other modules are internal.
 PUBLIC_MODULES = ["catsim.irt", "catsim.metrics", "catsim.plot", "catsim.typing"]
 # Names that ADR-0023's list retired, each for the one its concept keeps; item_id is one of its rejected alternatives.
+# The rescoping retired the last four: a step result's selected_item_id (item), the metrics' actual and predicted
+# (true_thetas and thetas) and the engine's state (session).
 RETIRED_NAMES = {
   "administered_item_ids",
   "est_theta",
@@ -35,6 +39,10 @@ RETIRED_NAMES = {
   "response_vectors",
   "seed",
   "updated_theta",
+  "selected_item_id",
+  "actual",
+  "predicted",
+  "state",
 }
 
 
@@ -50,7 +58,24 @@ RETIRED_EXPORTS = {
   "SimulatedResponseProvider",
   "SimulationRunner",
 }
-RETIRED_ENGINE_METHODS = {"apply_response", "run_session", "select_next", "should_stop", "start_session", "step"}
+# The members that the classes catsim keeps lost: the engine's methods that changed a session in place (ADR-0006); the
+# session's identifier and true ability, which the caller keeps beside it (ADR-0006), and its flags and counts, which
+# stop_reason and its fields already give (ADR-0010); and the result's lists and aggregates of the sessions, which its
+# tables and its metric methods replace (ADR-0016).
+RETIRED_MEMBERS = {
+  catsim.CatEngine: {"apply_response", "run_session", "select_next", "should_stop", "start_session", "step"},
+  catsim.Session: {"administered_count", "is_stopped", "session_id", "snapshot", "true_theta"},
+  catsim.SimulationResult: {
+    "administered_items",
+    "evaluations",
+    "final_ses",
+    "final_thetas",
+    "mean_evaluations",
+    "responses",
+    "test_lengths",
+    "theta_histories",
+  },
+}
 
 
 def _internal_modules(package: ModuleType) -> Iterator[ModuleType]:
@@ -158,6 +183,26 @@ def test_every_public_definition_of_an_internal_module_is_exported(package_name:
   assert unexported == set()
 
 
+def test_the_tests_import_each_public_name_from_its_public_path() -> None:
+  """A test that imports ItemBank from ``catsim.item_bank`` breaks when that internal module is renamed.
+
+  ADR-0023 lets catsim split, merge or rename its internal modules, so code outside catsim imports each name from its
+  public path. A private name, which only its own tests reach, may come from its module, and so may ``catsim.compat``'s
+  ``override``, which is the standard library's.
+  """
+  public_paths = {*PACKAGES, *PUBLIC_MODULES, "catsim.compat"}
+  offenders = {
+    f"{path.relative_to(TESTS)}: from {node.module} import {alias.name}"
+    for path in TESTS.rglob("*.py")
+    for node in ast.walk(ast.parse(path.read_text(encoding="utf-8")))
+    if isinstance(node, ast.ImportFrom) and node.module and node.module.startswith("catsim.")
+    for alias in node.names
+    if node.module not in public_paths and not alias.name.startswith("_")
+  }
+
+  assert offenders == set()
+
+
 def test_no_public_signature_takes_a_retired_name() -> None:
   """A public function, constructor or method with a parameter of a retired name, such as est_theta or seed, fails here.
 
@@ -171,6 +216,23 @@ def test_no_public_signature_takes_a_retired_name() -> None:
     for qualified, function in _callables(label, obj)
     for parameter in inspect.signature(function).parameters
     if parameter in RETIRED_NAMES
+  }
+
+  assert offenders == set()
+
+
+def test_a_parameter_named_items_is_an_item_matrix() -> None:
+  """A public parameter named ``items`` that takes item indices, as ``LinearSelector(items)`` did, fails here.
+
+  ADR-0023 gives ``items`` to an item parameter matrix, one row per item, and ``indices`` to a list of item indices, so
+  an ``items`` annotation never holds integers.
+  """
+  offenders = {
+    f"{qualified}(items: {parameter.annotation})"
+    for label, obj in _public_objects()
+    for qualified, function in _callables(label, obj)
+    if (parameter := inspect.signature(function).parameters.get("items")) is not None
+    and re.search(r"\bint\b|IntArray", str(parameter.annotation))
   }
 
   assert offenders == set()
@@ -194,9 +256,10 @@ def test_no_public_attribute_uses_a_retired_name() -> None:
 def test_the_mutable_runtime_is_gone() -> None:
   """A retired session type, run context, exposure tracker, runner or response provider, or an engine method that
   changed a session in place, left reachable gives a second way to run a test, with the state that outlived a run
-  (ADR-0006) or the responses drawn as items are given (ADR-0014).
+  (ADR-0006) or the responses drawn as items are given (ADR-0014). A session that held its true ability again, or a
+  result's final_thetas beside its examinees table, is a second record of one fact.
   """
   exported = RETIRED_EXPORTS & {name for name in dir(catsim) if not name.startswith("_")}
-  methods = {name for name in RETIRED_ENGINE_METHODS if hasattr(catsim.CatEngine, name)}
+  members = {f"{cls.__name__}.{name}" for cls, names in RETIRED_MEMBERS.items() for name in names if hasattr(cls, name)}
 
-  assert (exported, methods) == (set(), set())
+  assert (exported, members) == (set(), set())

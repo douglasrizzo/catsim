@@ -115,16 +115,16 @@ class StepContext:
 
   def __post_init__(self) -> None:
     """Store the item and response sequences as tuples, after checking them, the estimate and the rates."""
-    n_items = self.item_bank.n_items
-    administered = _item_indices("administered_items", self.administered_items, n_items)
-    excluded = _item_indices("excluded_items", self.excluded_items, n_items)
-    _check_disjoint(administered, excluded)
+    names = self.item_bank.names
+    administered = _item_indices("administered_items", self.administered_items, names)
+    excluded = _item_indices("excluded_items", self.excluded_items, names)
+    _check_disjoint(administered, excluded, names)
     object.__setattr__(self, "administered_items", administered)
     object.__setattr__(self, "excluded_items", excluded)
     object.__setattr__(self, "responses", _responses(self.responses, len(administered)))
     _check_theta("theta", self.theta)
     _check_se("se", self.se)
-    object.__setattr__(self, "exposure_rates", _exposure_rates(self.exposure_rates, n_items))
+    object.__setattr__(self, "exposure_rates", _exposure_rates(self.exposure_rates, len(names)))
 
 
 @dataclass(frozen=True, slots=True)
