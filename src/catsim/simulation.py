@@ -51,8 +51,9 @@ def simulate(  # noqa: PLR0913 - the engine, two ways to give examinees, the see
 ) -> SimulationResult:
   r"""Run one CAT session per examinee on an engine, in parts that can run on several processes.
 
-  Each examinee has an answer to every item of the bank, and its session takes the answer to each
-  item it is given from them (ADR-0014). The examinees are given in one of three ways:
+  Each examinee has an answer to every item of the bank, possibly missing for a recorded examinee,
+  and its session takes the answer to each item it is given from them (ADR-0014). The examinees are
+  given in one of three ways:
 
   - ``true_thetas`` alone: generated examinees. Before its test, examinee ``i`` draws one uniform
     number :math:`u_j` per item of the bank, and its answer to item :math:`j` is correct when
