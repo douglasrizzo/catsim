@@ -54,7 +54,8 @@ class StepContext:
 
   The context checks its fields when it is built, so a strategy receives checked inputs. A
   wrapper passes a changed copy on with :func:`dataclasses.replace`, which checks it the same way.
-  :meth:`CatEngine.context <catsim.CatEngine.context>` gives the context of a session.
+  :meth:`CatEngine.context <catsim.CatEngine.context>` gives the context of a session. The
+  :doc:`/extending` guide lists what each strategy reads from it.
 
   Parameters
   ----------

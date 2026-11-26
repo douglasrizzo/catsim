@@ -70,7 +70,8 @@ class ItemBank:  # noqa: PLR0904 - the core type: parameters, names, derived val
   caches the values that depend only on the parameters, such as each item's point of maximum
   information. Its arrays are read-only, so the cached values cannot go stale. Two banks are equal
   when their parameters and names are. Build a bank from an item matrix, read one with
-  :py:meth:`from_csv`, or draw one with :py:meth:`generate`.
+  :py:meth:`from_csv`, or draw one with :py:meth:`generate`. The :doc:`/running-simulations` guide
+  builds a bank for a study.
 
   Parameters
   ----------

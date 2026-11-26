@@ -212,7 +212,7 @@ class BaseSelector(ABC):
   A selector that passes a changed context to another adds to its excluded items, never replaces
   them. A selector holds its configuration and caches derived from the item bank, never
   per-session state: one selector serves every session of a run, which an application may
-  interleave.
+  interleave. The :doc:`/extending` guide writes one.
   """
 
   @abstractmethod

@@ -67,6 +67,8 @@ class CatEngine:
   ``StopReason.NO_ITEMS`` (ADR-0010). The inputs of each step are checked where they enter
   (ADR-0009).
 
+  The :doc:`/embedding-catsim` guide runs a test step by step.
+
   Parameters
   ----------
   item_bank : ItemBank

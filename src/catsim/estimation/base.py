@@ -16,7 +16,8 @@ class BaseEstimator(ABC):
 
   An estimator holds its configuration and caches derived from the item bank, never per-session
   state: one estimator serves every session of a run, which an application may interleave, and
-  look-ahead selectors such as MEI call it with hypothetical responses.
+  look-ahead selectors such as MEI call it with hypothetical responses. The :doc:`/extending` guide
+  lists what an estimator receives and returns.
   """
 
   @abstractmethod

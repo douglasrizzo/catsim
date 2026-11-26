@@ -15,7 +15,8 @@ class BaseInitializer(ABC):
   :class:`~catsim.StepContext`, because no session state exists yet.
 
   An initializer holds its configuration and caches derived from the item bank, never per-session
-  state: one initializer starts every session of a run.
+  state: one initializer starts every session of a run. The :doc:`/extending` guide lists what each
+  strategy receives and returns.
   """
 
   @abstractmethod

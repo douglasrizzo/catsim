@@ -14,7 +14,8 @@ class BaseStopper(ABC):
 
   Stoppers are pure: the same context always gives the same answer. A stopper holds its
   configuration and caches derived from the item bank, never per-session state: one stopper serves
-  every session of a run, which an application may interleave.
+  every session of a run, which an application may interleave. The :doc:`/extending` guide writes
+  one.
   """
 
   @abstractmethod

@@ -92,6 +92,8 @@ def simulate(  # noqa: PLR0913 - the engine, two ways to give examinees, the see
   it in a module and import it from there. A script that runs on workers calls ``simulate`` under
   ``if __name__ == "__main__":``, as every process pool of Python requires.
 
+  The :doc:`/running-simulations` guide runs a study and reads its result.
+
   Parameters
   ----------
   engine : CatEngine
@@ -873,6 +875,8 @@ class SimulationResult:
   the same ability, all are in decile 9. catR computes the quantiles at ``seq(0, 1, 0.1)``, whose
   0.3, 0.6 and 0.7 are a rounding error above the tenths, so an ability equal to one of those three
   cuts can fall a decile lower in catR.
+
+  The :doc:`/running-simulations` guide reads a result.
 
   Parameters
   ----------
