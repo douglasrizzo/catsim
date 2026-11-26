@@ -53,9 +53,9 @@ the examinee's true ability, so a strategy cannot see the simulated truth. A con
 fields when it is built, so a strategy receives checked inputs.
 
 An estimator returns an {py:class}`~catsim.Estimate`: `theta`, which must be finite; `se`, its
-standard error by the estimator's own formula, which may be `math.inf` but never NaN, because the
-precision stoppers compare it with their targets; and `evaluations`, how many times the estimator
-evaluated its objective, or `None`. For the likelihood, {py:func}`catsim.irt.log_likelihood_function`
+standard error by the estimator's own formula, which must be positive and may be `math.inf`, since
+the precision stoppers compare it with their targets; and `evaluations`, how many times the
+estimator evaluated its objective, or `None`. For the likelihood, {py:func}`catsim.irt.log_likelihood_function`
 returns the log-likelihood of the responses as a function of the ability, and
 {py:func}`catsim.irt.log_response_probabilities` returns $\log P_i(\theta)$ and $\log Q_i(\theta)$.
 Bayesian estimators can build on the priors and the posterior of

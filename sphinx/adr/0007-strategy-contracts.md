@@ -52,7 +52,7 @@ class BaseInitializer(ABC):
 - Adding a field to the context is not a breaking change: a new field gets a default, and a strategy
   reads only the fields it needs. Removing or renaming a field is.
 - `estimate` returns a frozen `catsim.Estimate(theta, se, evaluations)`: the estimate, its standard
-  error by the estimator's own formula (finite or `math.inf`, never NaN) and its objective
+  error by the estimator's own formula (positive, possibly `math.inf`; ADR-0009) and its objective
   evaluations, or `None`. The precision stoppers judge `context.se`.
 
 ## Consequences
