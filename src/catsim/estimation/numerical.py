@@ -12,7 +12,7 @@ from .base import BaseEstimator
 
 
 def _dodd(theta: float, item_bank: ItemBank, *, correct: bool, bounds: tuple[float, float]) -> float:
-  r"""Return Dodd's estimate after a response pattern that is all correct or all incorrect.
+  r"""Return Dodd's estimate after responses that are all correct or all incorrect.
 
   Dodd's variable step size :cite:p:`Dod90` moves the estimate half the distance to the bank's
   largest difficulty after correct answers, or to its smallest after incorrect ones. Beyond that
