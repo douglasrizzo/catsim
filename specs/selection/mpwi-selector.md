@@ -2,7 +2,7 @@
 **Module:** `catsim.selection.weighted_info.MPWISelector` (planned)
 **Reference:** van der Linden (1998)
 **Last validated:** 2026-11-23, against van der Linden (1996, RR 96-01); Choi & Swartz (2009); Magis & Raîche (2012); catR 3.17 (`MWI.R`, `nextItem.R`).
-**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in) on 2026-11-24.
+**Implementation guidance:** written against the 1.0 strategy contract (`StepContext` in) on 2026-11-26.
 
 # Maximum Posterior Weighted Information Selector
 
@@ -93,7 +93,7 @@ change the ranking; the grid and its range change the approximation slightly.
 Any correct implementation must satisfy the following properties:
 
 1. Scores are posterior-weighted expected item information values, not likelihood-weighted values.
-2. With an empty response vector, the selector reduces to prior-weighted expected information.
+2. With no responses, the selector reduces to prior-weighted expected information.
 3. The scores depend on the context's responses, through the posterior, and not on its `theta`.
 4. Exposure filtering applies before the final argmax, with fallback to the unrestricted remaining pool if every constrained candidate is excluded.
 
@@ -111,7 +111,7 @@ Magis, D., & Raîche, G. (2012). Random generation of response patterns under co
 
 :::{note}
 This section is for contributors and agents implementing this technique.
-It is removed when the spec is promoted to "Implemented" status.
+It is removed when the spec is promoted to a technique page.
 :::
 
 **Proposed location:** `src/catsim/selection/weighted_info.py`, next to `MLWISelector`.
@@ -126,8 +126,9 @@ from collections.abc import Callable
 import numpy
 
 from .. import irt
+from ..compat import override
 from ..context import StepContext
-from ..estimation.bayesian import LogPrior, QuadratureGrid, normal_log_prior, posterior
+from ..estimation import LogPrior, QuadratureGrid, normal_log_prior, posterior
 from ..item_bank import ItemBank
 from ..typing import FloatArray
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
@@ -136,23 +137,16 @@ from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 def _table_at_nodes(
   item_bank: ItemBank, nodes: FloatArray, function: Callable[[FloatArray, FloatArray], FloatArray]
 ) -> FloatArray:
-  """Return ``function`` of every item at every node, one row per node, cached in the item bank.
-
-  The table depends only on the bank's parameters, which are read-only, and on the nodes, so one
-  table serves every session and every selector that uses the same nodes.
+  """Return ``function`` of every item at every node, one row per node.
 
   Returns
   -------
   numpy.ndarray
       The read-only table, of shape ``(len(nodes), item_bank.n_items)``.
   """
-  cache = item_bank._selector_cache  # noqa: SLF001 - the cache ItemBank keeps for selectors
-  key = f"{function.__name__}:{nodes.tobytes().hex()}"
-  if key not in cache:
-    table = function(nodes, item_bank.items)
-    table.flags.writeable = False
-    cache[key] = table
-  return cache[key]
+  table = function(nodes, item_bank.items)
+  table.flags.writeable = False
+  return table
 
 
 class MPWISelector(BaseSelector):
@@ -185,7 +179,10 @@ class MPWISelector(BaseSelector):
     self._grid = grid if grid is not None else QuadratureGrid.uniform()
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
     self._r_max = check_r_max(r_max)
+    # The last bank selected for and its information table: derived data, cached by the selector
+    self._table: tuple[ItemBank, FloatArray] | None = None
 
+  @override
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument, with None for a default."""
     return (
@@ -193,6 +190,7 @@ class MPWISelector(BaseSelector):
       f"r_max={self._r_max!r})"
     )
 
+  @override
   def select(self, context: StepContext) -> int:
     """Return the available item with the largest information weighted by the posterior of the responses.
 
@@ -210,26 +208,30 @@ class MPWISelector(BaseSelector):
     candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
     item_bank = context.item_bank
     post = posterior(context.responses, item_bank.get_items(context.administered_items), self._grid, self._log_prior)
-    information = _table_at_nodes(item_bank, self._grid.nodes, irt.information)
-    return pick_best(candidates, post @ information[:, candidates], context.rng)
+    table = self._table
+    if table is None or table[0] is not item_bank:
+      table = self._table = (item_bank, _table_at_nodes(item_bank, self._grid.nodes, irt.information))
+    # a sum over the node axis adds each column in the same order, so identical items tie exactly
+    # (ADR-0017); a matrix product may round columns differently
+    return pick_best(candidates, (post[:, numpy.newaxis] * table[1][:, candidates]).sum(axis=0), context.rng)
 ```
 
 **Implementation notes:**
 
-- The information table depends only on the item bank and the grid's nodes, so it is computed
-  once per bank and node set and cached in `ItemBank._selector_cache`, which exists for this
-  selector and MEPV; the bank's parameters are read-only, so the table cannot go stale. The key
-  holds the node values themselves, not `id(grid)`, which Python reuses once a grid is garbage
-  collected. MEPV caches its probability table through the same helper, with `irt.icc`.
-- `_selector_cache` is private to `ItemBank`, so Ruff's SLF001 flags the access from a selector;
-  the sketch exempts that one line.
+- The information table depends only on the item bank and the grid's nodes, which never change,
+  so the selector computes it once per bank and keeps it with that bank, as the stratified
+  selectors keep their strata: derived data is cached by the strategy, keyed by the bank
+  ({doc}`ADR-0008 </adr/0008-what-may-be-cached>`). The bank's parameters are read-only, so the
+  table cannot go stale, and the bank and its table are replaced as one tuple, so a thread never
+  reads one bank's table for another. MEPV computes its probability table through the same
+  helper, with `irt.icc`, and caches it the same way.
 - The posterior comes from the context's responses at every call: estimators keep no per-session
-  posterior ({doc}`ADR-0005 </adr/0005-explicit-strategy-contracts>`), and `posterior()` is one
+  posterior ({doc}`ADR-0007 </adr/0007-strategy-contracts>`), and `posterior()` is one
   vectorized pass over the grid. With no responses it is the prior on the grid (Contract 2).
 - The selection and estimation layers do not import each other (`[tool.importlinter]` in
-  `pyproject.toml`). Add `"catsim.selection.weighted_info -> catsim.estimation.bayesian"` to that
-  contract's `ignore_imports`, as `MEISelector` does for its estimator, or move the grid and
-  posterior helpers to a lower layer.
+  `pyproject.toml`), except where that contract's `ignore_imports` allows it. Its entry
+  `"catsim.selection.weighted_info -> catsim.estimation"`, which `MLWISelector` needs for the same
+  helpers, covers this selector, as long as it imports them from `catsim.estimation`.
 - catR's 33 nodes on $[-4, 4]$ with the trapezoidal rule are a `QuadratureGrid` with trapezoid
   weights, for comparisons with catR; the normalizing constant does not change the ranking.
 
@@ -241,7 +243,11 @@ class MPWISelector(BaseSelector):
 - Contract 1 and 3: on a bank built for it, MPWI and MLWI select different items for the same
   responses under an informative prior, and the same items with different responses select
   different items.
-- The cache: a second selector with an equal grid reuses the table, and a grid with other nodes
-  gets its own.
+- The cache: a second selection on the same bank reuses the table, and a selection on another
+  bank computes its own.
 - Contract 4: a cap that leaves some candidates, and one that leaves none, falling back to all
   remaining items.
+- Parity with catR (ADR-0020): add `criterion = "MPWI"` cases to
+  `tests/parity/catr/selection.R`, in the contexts the MLWI cases use, and compare the rankings
+  and the criterion values from catR's `MWI(type = "MPWI")` on a grid with trapezoid weights, up
+  to the posterior's normalizing constant.

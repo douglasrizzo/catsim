@@ -362,30 +362,60 @@ class TestLogLikelihood:
 
     log_likelihood_function raises before it is given an ability; checking only inside the returned function does not.
     """
-    with pytest.raises(ValueError, match="responses and items must have the same length, got 2 and 1"):
+    with pytest.raises(
+      ValueError, match="responses has 2 entries and items 1 rows; there must be one response per item"
+    ):
       build([True, False], np.array([[1.0, 0.0, 0.0, 1.0]]))
+
+  @pytest.mark.parametrize(
+    "responses",
+    [
+      pytest.param([1, 0], id="ints"),
+      pytest.param([True, 0], id="bool-and-int"),
+      pytest.param(np.array([1, 0], dtype=np.int64), id="numpy-ints"),
+    ],
+  )
+  def test_log_likelihood_scores_the_integers_0_and_1_as_booleans(self, responses: list[bool]) -> None:
+    """Responses stored as 1 and 0 are scored as True and False, as the engine takes them (ADR-0009).
+
+    At theta = 0, a right answer to [1, -1, 0, 1] and a wrong one to [1, 1, 0, 1] each have log-probability
+    -log(1 + e^-1). Fails if the integers are rejected, as they were before, while a session accepts them.
+    """
+    items = np.array([[1.0, -1.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0]])
+
+    value = irt.log_likelihood(0.0, responses, items)
+
+    assert value == pytest.approx(-2 * math.log1p(math.exp(-1.0)), rel=1e-12)
 
   @pytest.mark.parametrize("build", _LOG_LIKELIHOOD_BUILDERS)
   @pytest.mark.parametrize(
-    ("responses", "offender"),
+    ("responses", "error", "message"),
     [
-      pytest.param([1, 0], "int 1", id="ints"),
-      pytest.param([1.0, 0.0], "float 1.0", id="floats"),
-      pytest.param(np.array([1, 0], dtype=np.int64), "int64 np.int64(1)", id="numpy-ints"),
-      pytest.param([True, 2], "int 2", id="two"),
-      pytest.param([True, None], "NoneType None", id="none"),
-      pytest.param([True, "no"], "str 'no'", id="string"),
+      pytest.param(
+        [1.0, 0.0], TypeError, "responses[0] is 1.0; responses must be bools or the integers 0 and 1", id="floats"
+      ),
+      pytest.param([True, 2], ValueError, "responses[1] is 2; an integer response must be 0 or 1", id="two"),
+      pytest.param(
+        [True, None], TypeError, "responses[1] is None; responses must be bools or the integers 0 and 1", id="none"
+      ),
+      pytest.param(
+        [True, "no"], TypeError, "responses[1] is 'no'; responses must be bools or the integers 0 and 1", id="string"
+      ),
     ],
   )
-  def test_log_likelihood_rejects_responses_that_are_not_booleans(
-    self, build: Callable[[list[bool], np.ndarray], object], responses: list[bool], offender: str
+  def test_log_likelihood_rejects_responses_that_are_neither_booleans_nor_0_or_1(
+    self,
+    build: Callable[[list[bool], np.ndarray], object],
+    responses: list[bool],
+    error: type[Exception],
+    message: str,
   ) -> None:
-    """Only bool and numpy.bool_ responses are scored; the error names the first other response's type and value.
+    """A response other than a Boolean, 0 or 1 raises, naming its position, its value and the rule (ADR-0009).
 
-    Fails if 1, 0, 1.0 or 0.0 pass because they compare equal to True and False, if 2, None or "no" pass, or if
+    Fails if 1.0 or 0.0 pass because they compare equal to True and False, if 2, None or "no" pass, or if
     log_likelihood_function checks only inside the function it returns, once it is given an ability.
     """
-    with pytest.raises(TypeError, match=f"got {re.escape(offender)}$"):
+    with pytest.raises(error, match=re.escape(message)):
       build(responses, np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0]]))
 
   def test_log_likelihood_scores_a_numpy_boolean_array(self) -> None:

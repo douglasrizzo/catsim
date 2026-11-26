@@ -2,9 +2,9 @@
 
 import numpy
 from scipy.optimize import minimize_scalar
-from typing_extensions import override
 
 from .. import irt
+from ..compat import override
 from ..context import Estimate, StepContext
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from ..item_bank import ItemBank
@@ -12,7 +12,7 @@ from .base import BaseEstimator
 
 
 def _dodd(theta: float, item_bank: ItemBank, *, correct: bool, bounds: tuple[float, float]) -> float:
-  r"""Return Dodd's estimate after a response pattern that is all correct or all incorrect.
+  r"""Return Dodd's estimate after responses that are all correct or all incorrect.
 
   Dodd's variable step size :cite:p:`Dod90` moves the estimate half the distance to the bank's
   largest difficulty after correct answers, or to its smallest after incorrect ones. Beyond that

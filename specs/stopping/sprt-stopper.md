@@ -2,7 +2,7 @@
 **Module:** `catsim.stopping.classification.SPRTStopper` (planned)
 **Reference:** Reckase (1983); Wald (1947)
 **Last validated:** 2026-11-23, against Reckase (1981), Bartroff, Finkelman & Lai (2008, arXiv copy), Magis & Raîche (2012) and catR 3.17.
-**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in, a pure `classify(context)`, a single criterion for `StopRule`) on 2026-11-24.
+**Implementation guidance:** written against the 1.0 strategy contract (`StepContext` in, a pure `classify(context)`, a single criterion for `StopRule`) on 2026-11-26.
 
 # Sequential Probability Ratio Test Stopper
 
@@ -84,15 +84,13 @@ cut scores, with an indifference region of one standard error of measurement on
 either side of each; Weissman (2007) also pairs the SPRT with a four-category
 test. The planned stopper takes a single cut score.
 
-catR has no SPRT. Its only classification rule (`checkStopRule.R`,
-`rule = "classification"`, catR 3.17) stops once the confidence interval
-$\hat{\theta} \pm z\,SE(\hat{\theta})$, with $z$ set by catR's `alpha`, no
-longer contains the cut score (Magis & Raîche, 2012, p. 11), the rule catsim
-implements as the confidence-interval stopper. The SPRT departs from it: it
-compares the likelihood at two points around the cut instead of using the
-estimate and its standard error, its $\alpha$ and $\beta$ are classification
-error rates at those points rather than the significance level of an interval,
-and it needs an indifference region, which catR's rule does not have.
+The SPRT differs from catsim's confidence-interval stopper, which stops once the
+confidence interval $\hat{\theta} \pm z\,SE(\hat{\theta})$ no longer contains
+the cut score (Magis & Raîche, 2012, p. 11): it compares the likelihood at two
+points around the cut instead of using the estimate and its standard error, its
+$\alpha$ and $\beta$ are classification error rates at those points rather than
+the significance level of an interval, and it needs an indifference region, which
+the interval rule does not have.
 
 ## Parameters
 
@@ -122,7 +120,7 @@ and it needs an indifference region, which catR's rule does not have.
 
 Any correct implementation must satisfy the following properties:
 
-1. The stopper uses the response vector directly through a log-likelihood ratio; `theta` itself is not the primary decision statistic.
+1. The stopper uses the responses directly through a log-likelihood ratio; `theta` itself is not the primary decision statistic.
 2. Crossing the upper bound classifies above the cut and crossing the lower bound classifies below the cut.
 3. If neither bound is crossed, the stopper does not stop the test; another stopper of its `StopRule`, such as a `MaxLengthStopper`, can, and the classification then falls back to the sign of the statistic.
 4. The stopper reports the classification and the log-likelihood ratio of any session from that session's context, through pure methods; it keeps neither between calls.
@@ -146,7 +144,7 @@ Weissman, A. (2007). Mutual information item selection in adaptive classificatio
 
 :::{note}
 This section is for contributors and agents implementing this technique.
-It is removed when the spec is promoted to "Implemented" status.
+It is removed when the spec is promoted to a technique page.
 :::
 
 **Proposed location:** `src/catsim/stopping/classification.py`, a new module for the
@@ -168,6 +166,7 @@ from typing import TYPE_CHECKING
 import numpy
 
 from .. import irt
+from ..compat import override
 from .base import BaseStopper
 
 if TYPE_CHECKING:
@@ -246,6 +245,7 @@ class SPRTStopper(BaseStopper):
     at_lower, at_upper = irt.log_likelihood(points, context.responses, items)
     return float(at_upper - at_lower)
 
+  @override
   def stop(self, context: StepContext) -> bool:
     """Return whether the statistic has reached either bound.
 
@@ -287,13 +287,12 @@ class SPRTStopper(BaseStopper):
 
 - No per-session state: one stopper serves every session of a run, so `stop` and `classify`
   compute the statistic from the context each time instead of storing the last classification
-  or statistic. An application classifies a finished session by building its context, the kind
-  `StopRule.satisfied` takes: `StepContext(item_bank=bank, rng=rng,
-  administered_items=tuple(session.administered_items), responses=tuple(session.responses),
-  theta=session.current_theta, se=session.current_se)`. The SPRT reads only the items and
-  responses, but the other stoppers of a rule, and the GLR and curtailment stoppers, read the
-  estimate and its error, which default to 0 and infinity. `classify` is the decision whether the
-  SPRT or the cap ended the test; `StopRule.satisfied` on the same context tells which.
+  or statistic. An application classifies a finished session from its context,
+  `stopper.classify(engine.context(session))`, the context `StopRule.satisfied` takes too. The
+  SPRT reads only the items and responses; the other stoppers of a rule, and the GLR and
+  curtailment stoppers, also read the estimate and its error, which `CatEngine.context` takes
+  from the session. `classify` is the decision whether the SPRT or the cap ended the test;
+  `StopRule.satisfied` on the same context tells which.
 - The stopper is one criterion. A minimum length and the cap at which the fallback applies come
   from the rule: `StopRule(SPRTStopper(cut_score=0.0), MaxLengthStopper(20), min_items=5)`.
 - The statistic needs no ability estimate, so the stopper works with any estimator.

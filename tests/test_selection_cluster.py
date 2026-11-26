@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from catsim.item_bank import ItemBank
+from catsim import ItemBank
 from catsim.selection import ClusterSelector
 from tests.banks import two_pl_bank
 from tests.contexts import make_context
@@ -134,7 +134,7 @@ class TestClusterSelector:
     assert self._select([], exposure_rates, method="weighted_info", r_max=0.5, r_control=r_control) == expected
 
   def test_aggressive_control_breaks_exposure_ties_at_random(self) -> None:
-    """Items tied for the smallest exposure rate are drawn uniformly (ADR-0011)."""
+    """Items tied for the smallest exposure rate are drawn uniformly (ADR-0017)."""
     item_bank = ItemBank.generate(12, rng=4)
     rates = np.full(12, 0.5)
     rates[[3, 7, 9]] = 0.2

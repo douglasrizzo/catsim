@@ -2,7 +2,7 @@
 **Module:** `catsim.estimation.bayesian.OwenEstimator` (planned)
 **Reference:** Owen (1975)
 **Last validated:** 2026-11-23, against Jensema (1977), McBride (1977) and Weiss & McBride (1984).
-**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in, `Estimate` out) on 2026-11-24.
+**Implementation guidance:** written against the 1.0 strategy contract (`StepContext` in, `Estimate` out) on 2026-11-26.
 
 # Owen Sequential Bayesian Estimator
 
@@ -156,7 +156,7 @@ Weiss, D. J., & McBride, J. R. (1984). Bias and information of Bayesian adaptive
 
 :::{note}
 This section is for contributors and agents implementing this technique.
-It is removed when the spec is promoted to "Implemented" status.
+It is removed when the spec is promoted to a technique page.
 :::
 
 **Proposed location:** `src/catsim/estimation/bayesian.py`, next to `EAPEstimator`.
@@ -171,6 +171,7 @@ import math
 import numpy
 
 from .. import irt
+from ..compat import override
 from ..context import Estimate, StepContext
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from ..typing import FloatArray
@@ -182,7 +183,7 @@ _MIN_VARIANCE = 1e-10
 
 
 def _owen_update(
-  mu: float, sigma: float, item: FloatArray, response: bool, n_nodes: int, half_width: float
+  mu: float, sigma: float, item: FloatArray, *, response: bool, n_nodes: int, half_width: float
 ) -> tuple[float, float]:
   """Return the mean and standard deviation of N(mu, sigma^2) reweighted by the likelihood of one response.
 
@@ -209,7 +210,7 @@ class OwenEstimator(BaseEstimator):
   The estimator keeps no moments between calls. Each call replays the context's responses in
   administration order, starting from the prior, so one instance serves every session of a run and
   look-ahead selectors can call it with hypothetical responses. The reported estimate is clipped to
-  ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``, the package's ability scale (ADR-0012).
+  ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``, the package's ability scale (ADR-0018).
 
   Parameters
   ----------
@@ -245,6 +246,7 @@ class OwenEstimator(BaseEstimator):
     self._n_nodes = int(n_nodes)
     self._half_width = float(half_width)
 
+  @override
   def __repr__(self) -> str:
     """Return the estimator as a constructor call that names every argument."""
     return (
@@ -252,6 +254,7 @@ class OwenEstimator(BaseEstimator):
       f"n_nodes={self._n_nodes!r}, half_width={self._half_width!r})"
     )
 
+  @override
   def estimate(self, context: StepContext) -> Estimate:
     """Return the mean and standard deviation of the normal approximation after every response, in order.
 
@@ -269,14 +272,14 @@ class OwenEstimator(BaseEstimator):
     mu, sigma = self._prior_mean, self._prior_sd
     items = context.item_bank.get_items(context.administered_items)
     for item, response in zip(items, context.responses, strict=True):
-      mu, sigma = _owen_update(mu, sigma, item, response, self._n_nodes, self._half_width)
+      mu, sigma = _owen_update(mu, sigma, item, response=response, n_nodes=self._n_nodes, half_width=self._half_width)
     theta = min(max(mu, THETA_MIN_EXTENDED), THETA_MAX_EXTENDED)
     return Estimate(theta=theta, se=sigma, evaluations=len(context.responses) * self._n_nodes)
 ```
 
 **Implementation notes:**
 
-- Replay is the price of keeping no per-session state on the estimator (ADR-0005): a session of
+- Replay is the price of keeping no per-session state on the estimator (ADR-0007): a session of
   $n$ items costs $n(n+1)/2$ updates in all, $21 \cdot 465 \approx 10^4$ node evaluations of a
   single item for a 30-item test, each far cheaper than an EAP node, which sums the log-likelihood
   of every administered item.
@@ -287,7 +290,7 @@ class OwenEstimator(BaseEstimator):
 - The update follows the spec's departure from Owen's normal-ogive model: catsim's four-parameter
   logistic curve, with the moments summed on the local grid. `irt.log_likelihood` evaluates
   the log-likelihood from the logit, so no clipping of $P$ is needed.
-- Every estimator returns an estimate inside its bounds (ADR-0012), and Owen's procedure has none:
+- Every estimator returns an estimate inside its bounds (ADR-0018), and Owen's procedure has none:
   a correct response to a hard, discriminating item can move the mean by several standard
   deviations, and a run of them can carry it past 6. The sketch clips only the reported estimate
   to the package's scale, so the moments it replays follow the definition; truncating the local

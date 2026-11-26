@@ -3,9 +3,9 @@
 import dataclasses
 
 import numpy
-from typing_extensions import override
 
 from .. import irt
+from ..compat import override
 from ..context import StepContext
 from ..estimation.base import BaseEstimator
 from ..estimation.numerical import NumericalSearchEstimator
@@ -60,14 +60,14 @@ class MEISelector(BaseSelector):
     """Return the maximum exposure rate accepted by the selector."""
     return self._r_max
 
-  def _expected_information(self, context: StepContext, candidate: int) -> float:
-    """Return the candidate's information, expected over its two responses, at the one-step-ahead estimates."""
-    administered_items = (*context.administered_items, candidate)
+  def _expected_information(self, context: StepContext, item: int) -> float:
+    """Return a candidate item's information, expected over its two responses, at the one-step-ahead estimates."""
+    administered_items = (*context.administered_items, item)
     correct = dataclasses.replace(context, administered_items=administered_items, responses=(*context.responses, True))
     incorrect = dataclasses.replace(correct, responses=(*context.responses, False))
     theta_correct = self._estimator.estimate(correct).theta
     theta_incorrect = self._estimator.estimate(incorrect).theta
-    p_correct = irt.icc(context.theta, context.item_bank.items[candidate])
+    p_correct = irt.icc(context.theta, context.item_bank.items[item])
     info_correct = context.item_bank.total_information(theta_correct, administered_items)
     info_incorrect = context.item_bank.total_information(theta_incorrect, administered_items)
     return float(p_correct * info_correct + (1.0 - p_correct) * info_incorrect)
@@ -90,5 +90,5 @@ class MEISelector(BaseSelector):
         Index of the selected item.
     """
     candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
-    scores = numpy.array([self._expected_information(context, int(idx)) for idx in candidates], dtype=float)
+    scores = numpy.array([self._expected_information(context, int(item)) for item in candidates], dtype=float)
     return pick_best(candidates, scores, context.rng)

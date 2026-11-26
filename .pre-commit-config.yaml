@@ -122,7 +122,8 @@ repos:
       - id: pretty-format-json
         args:
           - "--autofix"
-        exclude: \.ipynb$
+        # the catR parity data: generate.R writes 17 significant digits, which this hook would shorten
+        exclude: ^(.*\.ipynb|tests/parity/catr/.*\.json)$
       - id: requirements-txt-fixer
 
   - repo: https://github.com/hukkin/mdformat

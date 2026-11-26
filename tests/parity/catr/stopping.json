@@ -1,0 +1,381 @@
+{
+  "cases": [
+    {
+      "alpha": 0.050000000000000003,
+      "decision": false,
+      "id": "length/below",
+      "n_items": 9,
+      "per_rule": [
+        false
+      ],
+      "rules": [
+        "length"
+      ],
+      "se": 0.40000000000000002,
+      "theta": 0.20000000000000001,
+      "thresholds": [
+        10
+      ]
+    },
+    {
+      "alpha": 0.050000000000000003,
+      "decision": true,
+      "id": "length/at",
+      "n_items": 10,
+      "per_rule": [
+        true
+      ],
+      "rules": [
+        "length"
+      ],
+      "se": 0.40000000000000002,
+      "theta": 0.20000000000000001,
+      "thresholds": [
+        10
+      ]
+    },
+    {
+      "alpha": 0.050000000000000003,
+      "decision": true,
+      "id": "length/above",
+      "n_items": 11,
+      "per_rule": [
+        true
+      ],
+      "rules": [
+        "length"
+      ],
+      "se": 0.40000000000000002,
+      "theta": 0.20000000000000001,
+      "thresholds": [
+        10
+      ]
+    },
+    {
+      "alpha": 0.050000000000000003,
+      "decision": false,
+      "id": "precision/above",
+      "n_items": 6,
+      "per_rule": [
+        false
+      ],
+      "rules": [
+        "precision"
+      ],
+      "se": 0.30000009999999999,
+      "theta": 0.20000000000000001,
+      "thresholds": [
+        0.29999999999999999
+      ]
+    },
+    {
+      "alpha": 0.050000000000000003,
+      "decision": true,
+      "id": "precision/at",
+      "n_items": 6,
+      "per_rule": [
+        true
+      ],
+      "rules": [
+        "precision"
+      ],
+      "se": 0.29999999999999999,
+      "theta": 0.20000000000000001,
+      "thresholds": [
+        0.29999999999999999
+      ]
+    },
+    {
+      "alpha": 0.050000000000000003,
+      "decision": true,
+      "id": "precision/below",
+      "n_items": 6,
+      "per_rule": [
+        true
+      ],
+      "rules": [
+        "precision"
+      ],
+      "se": 0.2999,
+      "theta": 0.20000000000000001,
+      "thresholds": [
+        0.29999999999999999
+      ]
+    },
+    {
+      "alpha": 0.050000000000000003,
+      "decision": false,
+      "id": "precision/no_response",
+      "n_items": 0,
+      "per_rule": [
+        false
+      ],
+      "rules": [
+        "precision"
+      ],
+      "se": "Inf",
+      "theta": 0,
+      "thresholds": [
+        0.29999999999999999
+      ]
+    },
+    {
+      "alpha": 0.050000000000000003,
+      "decision": true,
+      "id": "classification/above_threshold",
+      "n_items": 8,
+      "per_rule": [
+        true
+      ],
+      "rules": [
+        "classification"
+      ],
+      "se": 0.29999999999999999,
+      "theta": 1.2,
+      "thresholds": [
+        0.5
+      ]
+    },
+    {
+      "alpha": 0.050000000000000003,
+      "decision": false,
+      "id": "classification/straddles",
+      "n_items": 8,
+      "per_rule": [
+        false
+      ],
+      "rules": [
+        "classification"
+      ],
+      "se": 0.29999999999999999,
+      "theta": 0.80000000000000004,
+      "thresholds": [
+        0.5
+      ]
+    },
+    {
+      "alpha": 0.050000000000000003,
+      "decision": true,
+      "id": "classification/below_threshold",
+      "n_items": 8,
+      "per_rule": [
+        true
+      ],
+      "rules": [
+        "classification"
+      ],
+      "se": 0.20000000000000001,
+      "theta": -0.40000000000000002,
+      "thresholds": [
+        0
+      ]
+    },
+    {
+      "alpha": 0.10000000000000001,
+      "decision": true,
+      "id": "classification/alpha_0.1",
+      "n_items": 8,
+      "per_rule": [
+        true
+      ],
+      "rules": [
+        "classification"
+      ],
+      "se": 0.23999999999999999,
+      "theta": -0.40000000000000002,
+      "thresholds": [
+        0
+      ]
+    },
+    {
+      "alpha": 0.01,
+      "decision": false,
+      "id": "classification/alpha_0.01",
+      "n_items": 8,
+      "per_rule": [
+        false
+      ],
+      "rules": [
+        "classification"
+      ],
+      "se": 0.23999999999999999,
+      "theta": -0.40000000000000002,
+      "thresholds": [
+        0
+      ]
+    },
+    {
+      "alpha": 0.050000000000000003,
+      "decision": false,
+      "id": "classification/no_response",
+      "n_items": 0,
+      "per_rule": [
+        false
+      ],
+      "rules": [
+        "classification"
+      ],
+      "se": "Inf",
+      "theta": 0,
+      "thresholds": [
+        0
+      ]
+    },
+    {
+      "alpha": 0.050000000000000003,
+      "decision": true,
+      "id": "classification/just_clears",
+      "n_items": 8,
+      "per_rule": [
+        true
+      ],
+      "rules": [
+        "classification"
+      ],
+      "se": 0.29999999999999999,
+      "theta": 1.0879891963620161,
+      "thresholds": [
+        0.5
+      ]
+    },
+    {
+      "alpha": 0.050000000000000003,
+      "decision": false,
+      "id": "classification/just_straddles",
+      "n_items": 8,
+      "per_rule": [
+        false
+      ],
+      "rules": [
+        "classification"
+      ],
+      "se": 0.29999999999999999,
+      "theta": 1.0879891943620159,
+      "thresholds": [
+        0.5
+      ]
+    },
+    {
+      "alpha": 0.050000000000000003,
+      "decision": true,
+      "id": "length_or_precision/precision",
+      "n_items": 7,
+      "per_rule": [
+        false,
+        true
+      ],
+      "rules": [
+        "length",
+        "precision"
+      ],
+      "se": 0.25,
+      "theta": 0.20000000000000001,
+      "thresholds": [
+        10,
+        0.29999999999999999
+      ]
+    },
+    {
+      "alpha": 0.050000000000000003,
+      "decision": true,
+      "id": "length_or_precision/length",
+      "n_items": 10,
+      "per_rule": [
+        true,
+        false
+      ],
+      "rules": [
+        "length",
+        "precision"
+      ],
+      "se": 0.5,
+      "theta": 0.20000000000000001,
+      "thresholds": [
+        10,
+        0.29999999999999999
+      ]
+    },
+    {
+      "alpha": 0.050000000000000003,
+      "decision": false,
+      "id": "length_or_precision/neither",
+      "n_items": 7,
+      "per_rule": [
+        false,
+        false
+      ],
+      "rules": [
+        "length",
+        "precision"
+      ],
+      "se": 0.5,
+      "theta": 0.20000000000000001,
+      "thresholds": [
+        10,
+        0.29999999999999999
+      ]
+    },
+    {
+      "alpha": 0.050000000000000003,
+      "decision": true,
+      "id": "two_thresholds/clears_both",
+      "n_items": 8,
+      "per_rule": [
+        true,
+        true
+      ],
+      "rules": [
+        "classification",
+        "classification"
+      ],
+      "se": 0.29999999999999999,
+      "theta": 0.20000000000000001,
+      "thresholds": [
+        -1,
+        1
+      ]
+    },
+    {
+      "alpha": 0.050000000000000003,
+      "decision": true,
+      "id": "two_thresholds/clears_one",
+      "n_items": 8,
+      "per_rule": [
+        true,
+        false
+      ],
+      "rules": [
+        "classification",
+        "classification"
+      ],
+      "se": 0.29999999999999999,
+      "theta": 0.90000000000000002,
+      "thresholds": [
+        -1,
+        1
+      ]
+    },
+    {
+      "alpha": 0.050000000000000003,
+      "decision": false,
+      "id": "two_thresholds/clears_neither",
+      "n_items": 8,
+      "per_rule": [
+        false,
+        false
+      ],
+      "rules": [
+        "classification",
+        "classification"
+      ],
+      "se": 0.59999999999999998,
+      "theta": 0,
+      "thresholds": [
+        -1,
+        1
+      ]
+    }
+  ],
+  "catr_version": "3.17",
+  "r_version": "R version 4.6.1 (2026-06-24)"
+}

@@ -8,8 +8,8 @@ cluster has no item below the exposure cap.
 from enum import StrEnum
 
 import numpy
-from typing_extensions import override
 
+from ..compat import override
 from ..context import StepContext
 from ..item_bank import ItemBank
 from ..typing import FloatArray, IntArray

@@ -23,6 +23,7 @@ extensions = [
   "sphinxcontrib.bibtex",
   "sphinxcontrib.mermaid",
   "sphinx_reredirects",
+  "sphinx_design",
   "class_tree",
 ]
 
@@ -147,6 +148,9 @@ redirects = {
   "simulation": "api/simulation.html",
   "stopping": "api/techniques/stopping/index.html",
   "api/cat": "metrics.html",
+  # Guides and reference pages renamed.
+  "live-sessions": "embedding-catsim.html",
+  "api/state": "session.html",
   # Technique pages merged into another page or renamed.
   "api/techniques/initialization/fixed-point-initializer": "index.html",
   "api/techniques/initialization/random-initializer": "index.html",
@@ -168,24 +172,65 @@ redirects = {
   "api/techniques/stopping/predicted-sem-stopper": "../../../planned-techniques.html",
   "api/techniques/stopping/sprt-stopper": "../../../planned-techniques.html",
   "api/techniques/stopping/stochastic-curtailment-stopper": "../../../planned-techniques.html",
-  # Renumbered ADRs, and the two whose content is in the contributing guide.
-  "adr/0001-explicit-cat-engine": "0003-explicit-cat-engine.html",
-  "adr/0002-remove-legacy-simulator-apis": "0003-explicit-cat-engine.html",
-  "adr/0003-runtime-state-ownership": "0004-runtime-state-ownership.html",
-  "adr/0004-explicit-strategy-contracts": "0005-explicit-strategy-contracts.html",
-  "adr/0005-immutable-step-results": "0009-immutable-step-results.html",
+  # ADRs of earlier numberings, mapped to their successors in the current set, and the two whose
+  # content is in the contributing guide.
+  "adr/0001-explicit-cat-engine": "0006-steps-from-explicit-inputs.html",
+  "adr/0001-unidimensional-dichotomous-scope": "0002-unidimensional-dichotomous-scope.html",
+  "adr/0002-four-parameter-item-matrix": "0003-four-parameter-item-matrix.html",
+  "adr/0002-remove-legacy-simulator-apis": "0006-steps-from-explicit-inputs.html",
+  "adr/0003-explicit-cat-engine": "0006-steps-from-explicit-inputs.html",
+  "adr/0003-runtime-state-ownership": "0012-exposure-rates.html",
+  "adr/0004-explicit-strategy-contracts": "0007-strategy-contracts.html",
+  "adr/0004-runtime-state-ownership": "0012-exposure-rates.html",
+  "adr/0005-explicit-strategy-contracts": "0007-strategy-contracts.html",
+  "adr/0005-immutable-step-results": "0006-steps-from-explicit-inputs.html",
+  "adr/0006-public-import-paths-and-names": "0023-public-import-paths-and-names.html",
   "adr/0006-versioned-tutorial-notebooks": "../contributing.html",
+  "adr/0007-how-a-session-ends": "0010-how-a-session-ends.html",
   "adr/0007-release-gated-by-docs": "../contributing.html",
-  "adr/0008-random-tie-breaking": "0011-random-tie-breaking.html",
-  "adr/0009-ability-scale-and-extreme-patterns": "0012-ability-scale-and-extreme-patterns.html",
-  "adr/0010-published-progressive-schedule": "0013-published-progressive-schedule.html",
-  "adr/0011-how-a-session-ends": "0007-how-a-session-ends.html",
-  "adr/0012-unidimensional-dichotomous-scope": "0001-unidimensional-dichotomous-scope.html",
-  "adr/0013-random-numbers-and-reproducibility": "0010-random-numbers-and-reproducibility.html",
-  "adr/0014-public-import-paths-and-names": "0006-public-import-paths-and-names.html",
-  "adr/0015-plotting-as-an-optional-extra": "0014-plotting-as-an-optional-extra.html",
-  "adr/0016-session-exclusions-and-exposure-control": "0008-session-exclusions-and-exposure-control.html",
+  "adr/0008-random-tie-breaking": "0017-random-tie-breaking.html",
+  "adr/0008-session-exclusions-and-exposure-control": "0011-exclusions-and-exposure-control.html",
+  "adr/0009-ability-scale-and-extreme-patterns": "0018-ability-scale-and-extreme-patterns.html",
+  "adr/0009-immutable-step-results": "0006-steps-from-explicit-inputs.html",
+  "adr/0010-published-progressive-schedule": "0019-published-progressive-schedule.html",
+  "adr/0010-random-numbers-and-reproducibility": "0013-random-numbers-and-reproducibility.html",
+  "adr/0011-how-a-session-ends": "0010-how-a-session-ends.html",
+  "adr/0011-random-tie-breaking": "0017-random-tie-breaking.html",
+  "adr/0012-ability-scale-and-extreme-patterns": "0018-ability-scale-and-extreme-patterns.html",
+  "adr/0012-unidimensional-dichotomous-scope": "0002-unidimensional-dichotomous-scope.html",
+  "adr/0013-published-progressive-schedule": "0019-published-progressive-schedule.html",
+  "adr/0014-plotting-as-an-optional-extra": "0022-plotting-as-an-optional-extra.html",
+  "adr/0014-public-import-paths-and-names": "0023-public-import-paths-and-names.html",
+  "adr/0015-plotting-as-an-optional-extra": "0022-plotting-as-an-optional-extra.html",
+  "adr/0016-session-exclusions-and-exposure-control": "0011-exclusions-and-exposure-control.html",
 }
+
+# -- Options for the linkcheck builder ------------------------------------
+
+# Hosts that answer automated clients with 403 Forbidden, although their pages open in a browser.
+# A DOI or handle link to one of them is still checked: doi.org or hdl.handle.net must redirect to
+# it, which a DOI or handle that does not exist does not, and linkcheck reports the redirect as
+# ignored instead of following it. A direct link to one of these hosts is not checked.
+_REFUSE_AUTOMATED_CLIENTS = [
+  r"https?://journals\.sagepub\.com/",
+  r"https?://(bpspsychub\.)?onlinelibrary\.wiley\.com/",
+  r"https?://www\.tandfonline\.com/",
+  r"https?://conservancy\.umn\.edu/",
+  r"https?://research\.utwente\.nl/",
+  r"https?://www\.researchgate\.net/",
+  r"https?://pmc\.ncbi\.nlm\.nih\.gov/",
+]
+# Targets that the release built from these sources publishes, so they cannot resolve before it
+# deploys: its release notes, the notebooks on main, and the site's API pages, which the site serves
+# at other addresses until then. Drop each entry once its target is online.
+_PUBLISHED_BY_THE_RELEASE = [
+  r"https://github\.com/douglasrizzo/catsim/releases/tag/1\.0\.0$",
+  r"https://github\.com/douglasrizzo/catsim/(blob|tree)/main/notebooks(/|$)",
+  r"https://douglasrizzo\.com\.br/catsim/api/",
+]
+linkcheck_ignore = [*_REFUSE_AUTOMATED_CLIENTS, *_PUBLISHED_BY_THE_RELEASE]
+# GitHub draws its anchors, such as #readme, with JavaScript, which linkcheck does not run.
+linkcheck_anchors_ignore_for_url = [r"https://github\.com/"]
 
 numpydoc_show_class_members = False
 
@@ -197,6 +242,9 @@ nitpick_ignore = [
   ("py:class", "numpy._typing._array_like.NDArray"),
   ("py:class", "numpy._typing._array_like.ArrayLike"),
   ("py:class", "npt.ArrayLike"),
+  # catsim.metrics.Metric's fields share a private type variable: float, or an array for per-item metrics.
+  ("py:class", "_T"),
+  ("py:class", "catsim.metrics._T"),
 ]
 
 # The build fails for a public callable whose docstring leaves out a parameter (numpydoc's PR01).
@@ -205,14 +253,15 @@ numpydoc_validation_checks = {"PR01"}
 # A class documents its constructor's parameters; autodoc renders the class docstring alone, so
 # __init__ is never checked.
 numpydoc_validation_exclude = {
-  # numpydoc reads the call signature of an Enum's or a Protocol's metaclass as the class's
+  # numpydoc reads the call signature of an Enum's metaclass as the class's
   # parameters, and that of an array alias as the alias's.
-  r"^catsim\.(IrtModel|StopReason|ResponseProvider)$",
+  r"^catsim\.(IrtModel|StopReason)$",
   r"^catsim\.selection\.(CapFallback|ClusterMethod)$",
   r"^catsim\.plot\.PlotType$",
   r"^catsim\.typing\.(FloatArray|IntArray)$",
   # Autodoc reads the docstrings of the names a module imports before it leaves them off the page.
   r"^catsim\.irt\.overload$",
+  r"^catsim\.metrics\.NamedTuple$",
   r"^catsim\.plot\.(Axes|MaxNLocator|StrEnum|assert_never)$",
   r"^catsim\.typing\.Any$",
 }

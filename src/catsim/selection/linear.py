@@ -1,7 +1,6 @@
 """Linear selector implementation."""
 
-from typing_extensions import override
-
+from ..compat import override
 from ..context import StepContext
 from ..exceptions import NoItemsAvailableError
 from .base import BaseSelector, remaining
@@ -15,36 +14,40 @@ class LinearSelector(BaseSelector):
 
   Parameters
   ----------
-  items : list[int]
+  indices : list[int]
       Indices of the items to administer, in order. They are checked against the item bank at
       every selection.
 
   Raises
   ------
   ValueError
-      If ``items`` is empty or holds a negative index.
+      If ``indices`` is empty or holds a negative index.
+
+  Notes
+  -----
+  For full algorithmic details, see :doc:`/api/techniques/selection/linear-selector`.
   """
 
   @override
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument."""
-    return f"{type(self).__name__}(items={self._items!r})"
+    return f"{type(self).__name__}(indices={self._indices!r})"
 
-  def __init__(self, items: list[int]) -> None:
-    if len(items) == 0:
-      msg = "items cannot be empty"
+  def __init__(self, indices: list[int]) -> None:
+    if len(indices) == 0:
+      msg = "indices cannot be empty"
       raise ValueError(msg)
-    if min(items) < 0:
-      msg = f"item indices must be non-negative, got {min(items)}"
+    if min(indices) < 0:
+      msg = f"item indices must be non-negative, got {min(indices)}"
       raise ValueError(msg)
 
     super().__init__()
-    self._items = list(items)
+    self._indices = list(indices)
 
   @property
-  def items(self) -> list[int]:
+  def indices(self) -> list[int]:
     """Get the indices of the items to administer, in order."""
-    return list(self._items)
+    return list(self._indices)
 
   @override
   def select(self, context: StepContext) -> int:
@@ -68,17 +71,17 @@ class LinearSelector(BaseSelector):
         If every one of the selector's items has been administered or excluded.
     """
     n_items = context.item_bank.n_items
-    outside = [item for item in self._items if item >= n_items]
+    outside = [item for item in self._indices if item >= n_items]
     if outside:
-      msg = f"items {outside} are not in the item bank, whose indices run from 0 to {n_items - 1}"
+      msg = f"indices {outside} are not in the item bank, whose indices run from 0 to {n_items - 1}"
       raise ValueError(msg)
 
     available = set(remaining(context).tolist())
-    item = next((candidate for candidate in self._items if candidate in available), None)
+    item = next((candidate for candidate in self._indices if candidate in available), None)
     if item is None:
       msg = (
         "Every item of the selector's list has been administered or excluded.\n"
-        f"Items to be administered:\t{sorted(self._items)} (size: {len(self._items)})\n"
+        f"Items to be administered:\t{sorted(self._indices)} (size: {len(self._indices)})\n"
         f"Administered items:\t\t{sorted(context.administered_items)} (size: {len(context.administered_items)})\n"
         f"Excluded items:\t\t{sorted(context.excluded_items)} (size: {len(context.excluded_items)})"
       )

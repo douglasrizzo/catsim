@@ -68,9 +68,10 @@ define each estimator's standard error.
 Before the first response the standard error is infinite and the interval is
 the whole ability scale (p. 11, Equation 16). The report keeps this unbounded
 interval while the total score is zero or perfect; catsim keeps it only while
-the standard error is infinite. A standard error of zero, or nearly zero, collapses
-the interval onto $\hat{\theta}$; catsim then selects by the items' information at
-$\hat{\theta}$, the limit of the information averaged over the interval. With a
+the standard error is infinite. A standard error so small that the interval's
+half-width is below about $10^{-8}$ collapses the interval onto $\hat{\theta}$;
+catsim then selects by the items' information at $\hat{\theta}$, the limit of the
+information averaged over the interval. With a
 fixed `interval` $\delta$, the interval is $[\hat{\theta} - \delta, \hat{\theta} + \delta]$
 throughout the test.
 
@@ -100,13 +101,20 @@ the integral over the whole scale is $a_i$ (Equation 28).
      - Confidence level :math:`\gamma` of the default interval.
 ```
 
+## Behavior and Comparison
+
+With the default interval, the selector judges the estimate by the standard error
+its estimator reports, so the same responses usually give a narrower interval, and
+more local choices, under EAP or MAP than under maximum likelihood (see the
+{doc}`estimation index </api/techniques/estimation/index>`).
+
 ## Guarantees
 
 1. It returns the remaining item whose information, integrated over the interval,
    is largest.
 2. It never returns an item that was already administered or excluded.
 3. When no item remains, it raises `NoItemsAvailableError`.
-4. It applies no exposure cap: the run's exposure rates do not change its choice.
+4. It applies no exposure cap: the exposure rates do not change its choice.
 
 ## References
 

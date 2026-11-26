@@ -1,61 +1,36 @@
-"""Tests for the explicit CAT engine architecture."""
+"""Tests for CatEngine: a test's configuration and the start, select and answer steps (ADR-0006, ADR-0010, ADR-0011)."""
 
 from __future__ import annotations
 
-import copy
 import dataclasses
 import math
-from dataclasses import FrozenInstanceError, dataclass
+import re
+from collections.abc import Callable
+from dataclasses import dataclass
 
 import numpy as np
 import pytest
-from typing_extensions import override
 
-from catsim import Estimate, ExcludedItemError, StepContext
-from catsim.engine import CatEngine, RunContext
+from catsim import (
+  CatEngine,
+  Estimate,
+  ExcludedItemError,
+  ItemBank,
+  NoItemsAvailableError,
+  Session,
+  StepContext,
+  StopReason,
+)
+from catsim.compat import override
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
-from catsim.exceptions import NoItemsAvailableError
 from catsim.exposure import BaseExposureControl
 from catsim.initialization import BaseInitializer
-from catsim.item_bank import ItemBank
 from catsim.selection import BaseSelector, LinearSelector, MaxInfoSelector, MEISelector, RandomSelector, remaining
-from catsim.state import CatSessionSnapshot, CatSessionState, ExposureTracker, StopReason
 from catsim.stopping import BaseStopper, MaxLengthStopper, StandardErrorStopper, StopRule
+from catsim.typing import FloatArray
 from tests.contexts import make_context
 
-
-@dataclass
-class FixedResponseProvider:
-  """Simple response provider for deterministic engine tests."""
-
-  response: bool
-
-  def answer(self, item_bank, item_id, session, rng) -> bool:  # noqa: ARG002
-    """Return the fixed response."""
-    return self.response
-
-
-@dataclass
-class ScriptedResponseProvider:
-  """Response provider that gives the n-th scripted response to the n-th item, whichever item it is."""
-
-  responses: list[bool]
-
-  def answer(self, item_bank, item_id, session, rng) -> bool:  # noqa: ARG002
-    """Return the scripted response for the session's next position."""
-    return self.responses[len(session.responses)]
-
-
-@dataclass
-class RecordingResponseProvider:
-  """Response provider that answers correctly and records what each call was given."""
-
-  calls: list[tuple[ItemBank, int, CatSessionSnapshot, np.random.Generator]] = dataclasses.field(default_factory=list)
-
-  def answer(self, item_bank: ItemBank, item_id: int, session: CatSessionSnapshot, rng: np.random.Generator) -> bool:
-    """Record the call's arguments and answer correctly."""
-    self.calls.append((item_bank, item_id, session, rng))
-    return True
+INITIAL = Estimate(0.0, math.inf, 0)
 
 
 class ExhaustedSelector(BaseSelector):
@@ -87,32 +62,32 @@ class RecordingInitializer(BaseInitializer):
 
 @dataclass
 class RecordingSelector(BaseSelector):
-  """Selector stub that records the context it is given."""
+  """Selector stub that records the contexts it is given and proposes a fixed item."""
 
-  item_id: int
-  seen: StepContext | None = None
+  item: int | np.integer | float | str | None
+  seen: list[StepContext] = dataclasses.field(default_factory=list)
 
   @override
   def select(self, context: StepContext) -> int:
     """Record the context and return the fixed item."""
-    self.seen = context
-    return self.item_id
+    self.seen.append(context)
+    return self.item  # ty: ignore[invalid-explicit-return]
 
 
 @dataclass
 class RecordingEstimator(BaseEstimator):
-  """Estimator stub that records the context it is given."""
+  """Estimator stub that records the context it is given and returns a fixed estimate."""
 
   theta: float
   se: float = 0.5
-  evaluations: int | None = None
+  evaluations: int | np.integer | None = None
   seen: StepContext | None = None
 
   @override
   def estimate(self, context: StepContext) -> Estimate:
     """Record the context and return the fixed estimate."""
     self.seen = context
-    return Estimate(theta=self.theta, se=self.se, evaluations=self.evaluations)
+    return Estimate(theta=self.theta, se=self.se, evaluations=self.evaluations)  # ty: ignore[invalid-argument-type]
 
 
 @dataclass
@@ -137,36 +112,13 @@ class FloatEstimator(BaseEstimator):
     return 0.5
 
 
-class FailingEstimator(BaseEstimator):
-  """Estimator stub that fails on every call."""
+class DrawingEstimator(BaseEstimator):
+  """Estimator stub whose estimate is a draw from its context's generator."""
 
   @override
   def estimate(self, context: StepContext) -> Estimate:
-    """Raise ValueError."""
-    del context
-    msg = "estimation failed"
-    raise ValueError(msg)
-
-
-class FailingInitializer(BaseInitializer):
-  """Initializer stub that fails on every call."""
-
-  @override
-  def initialize(self, *, item_bank: ItemBank, rng: np.random.Generator) -> float:
-    """Raise ValueError."""
-    del item_bank, rng
-    msg = "initialization failed"
-    raise ValueError(msg)
-
-
-class FailingStopper(BaseStopper):
-  """Stopper stub that fails on every call."""
-
-  @override
-  def stop(self, context: StepContext) -> bool:
-    del context
-    msg = "stopping failed"
-    raise ValueError(msg)
+    """Return a uniform draw as the estimate."""
+    return Estimate(theta=float(context.rng.uniform()), se=1.0)
 
 
 class CountingLengthStopper(BaseStopper):
@@ -184,16 +136,16 @@ class CountingLengthStopper(BaseStopper):
 
 @dataclass
 class RecordingStopper(BaseStopper):
-  """Stopper stub that records the context it is given."""
+  """Stopper stub that records the context it is given and returns a fixed decision."""
 
-  should_stop: bool
+  decision: bool | np.bool_
   seen: StepContext | None = None
 
   @override
   def stop(self, context: StepContext) -> bool:
     """Record the context and return the fixed decision."""
     self.seen = context
-    return self.should_stop
+    return self.decision  # ty: ignore[invalid-explicit-return]
 
 
 class LowestIndexSelector(BaseSelector):
@@ -212,11 +164,11 @@ class DecliningControl(BaseExposureControl):
   calls: list[tuple[int, tuple[int, ...], tuple[int, ...]]] = dataclasses.field(default_factory=list)
 
   @override
-  def accept(self, context: StepContext, item_id: int) -> bool:
-    self.calls.append((item_id, context.excluded_items, context.administered_items))
+  def accept(self, context: StepContext, item: int) -> bool:
+    self.calls.append((item, context.excluded_items, context.administered_items))
     # a selector proposing a declined item again would otherwise loop forever in a broken engine
     assert len(self.calls) <= 50, "the control was asked about too many proposals"
-    return item_id not in self.declines
+    return item not in self.declines
 
 
 class CorrectCountEstimator(BaseEstimator):
@@ -244,163 +196,166 @@ class HalfInitializer(BaseInitializer):
     return 0.5
 
 
-def test_engine_rejects_item_parameters_that_are_not_an_item_bank(item_bank) -> None:
+def stub_engine(
+  item_bank: ItemBank,
+  *,
+  selector: BaseSelector | None = None,
+  estimator: BaseEstimator | None = None,
+  stopper: BaseStopper | None = None,
+  exposure_control: BaseExposureControl | None = None,
+) -> CatEngine:
+  """Return an engine of stubs: start at 0, propose item 0, estimate 0.5 and never stop, unless told otherwise."""
+  return CatEngine(
+    item_bank,
+    RecordingInitializer(0.0),
+    selector or RecordingSelector(0),
+    estimator or RecordingEstimator(0.5),
+    stopper or RecordingStopper(decision=False),
+    exposure_control=exposure_control,
+  )
+
+
+def counting_engine(item_bank: ItemBank, exposure_control: BaseExposureControl | None = None) -> CatEngine:
+  """Return an engine that starts at 0.5, gives the lowest remaining item, counts correct answers and stops at 3."""
+  return CatEngine(
+    item_bank,
+    HalfInitializer(),
+    LowestIndexSelector(),
+    CorrectCountEstimator(),
+    ThreeItemStopper(),
+    exposure_control=exposure_control,
+  )
+
+
+def run(engine: CatEngine, respond: Callable[[int, Session], bool], *, rng: int = 0, start: Session | None = None):
+  """Run a session to its end through select and answer, as ADR-0010's loop does, and return it."""
+  generator = np.random.default_rng(rng)
+  session = engine.start(rng=generator) if start is None else start
+  while True:
+    selection = engine.select(session, rng=generator)
+    session = selection.session
+    if selection.item is None:
+      return session
+    session = engine.answer(session, selection.item, respond(selection.item, session), rng=generator)
+
+
+def session_after(items: tuple[int, ...], responses: tuple[bool, ...], *, excluded: tuple[int, ...] = ()) -> Session:
+  """Return a running session that gave ``items`` (at least one) with ``responses``, at -0.25 with an SE of 0.6."""
+  estimates = (INITIAL, *(Estimate(0.1 * k, 0.9) for k in range(1, len(items))), Estimate(-0.25, 0.6))
+  return Session(administered_items=items, responses=responses, estimates=estimates, excluded_items=excluded)
+
+
+def test_engine_rejects_item_parameters_that_are_not_an_item_bank(item_bank: ItemBank) -> None:
   """A bare parameter array was accepted and failed only at the first session, with an AttributeError on n_items."""
   with pytest.raises(TypeError, match=r"item_bank must be an ItemBank, got ndarray; wrap item parameters in ItemBank"):
-    CatEngine(
-      item_bank.items, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.0), RecordingStopper(False)
-    )
+    stub_engine(item_bank.items)  # ty: ignore[invalid-argument-type]
 
 
-def test_start_session_passes_item_bank_and_rng_to_initializer(item_bank) -> None:
-  """start_session gives the initializer the bank and the run's generator, and starts a running session at its estimate.
+def test_start_gives_the_initializer_the_bank_and_generator_and_begins_at_its_estimate(item_bank: ItemBank) -> None:
+  """start hands the initializer the bank and the generator it is given, and records its estimate as the initial one.
 
-  Fails if the initializer gets another bank or generator, or if the session starts with another estimate or true
-  theta, or already stopped.
+  Fails if the initializer gets another bank or a copy of the generator, or if the session starts with items, another
+  estimate, a finite standard error (precision stoppers would judge it) or a stop reason.
   """
   initializer = RecordingInitializer(theta=1.25)
-  selector = RandomSelector()
-  estimator = NumericalSearchEstimator()
-  stopper = MaxLengthStopper(5)
-  engine = CatEngine(item_bank, initializer, selector, estimator, stopper)
+  engine = CatEngine(item_bank, initializer, RandomSelector(), NumericalSearchEstimator(), MaxLengthStopper(5))
   rng = np.random.default_rng(123)
-  context = RunContext(rng=rng)
 
-  session = engine.start_session(session_id=7, context=context, true_theta=-0.5)
+  session = engine.start(rng=rng)
 
   assert initializer.seen_item_bank is item_bank
   assert initializer.seen_rng is rng
-  assert session.session_id == 7
-  assert session.current_theta == pytest.approx(1.25)
-  assert session.true_theta == pytest.approx(-0.5)
-  assert session.theta_history == (pytest.approx(1.25),)
-  assert session.stop_reason is None
+  assert session == Session(estimates=(Estimate(1.25, math.inf, 0),))
 
 
-def test_start_session_counts_a_session_in_the_tracker_only_once_it_has_started(item_bank) -> None:
-  """A session whose initializer raises is not counted in the exposure tracker; one that starts is.
+def test_start_keeps_the_excluded_items_it_is_given_in_order(item_bank: ItemBank) -> None:
+  """Items withheld from the start, such as those an examinee saw before, are the session's first exclusions.
 
-  Fails if the tracker counts the session before the initializer runs: every later session would see rates divided
-  by one session too many.
+  Fails if start drops them (the selector would offer them), sorts them, or takes NumPy integers as given.
   """
-  tracker = ExposureTracker(item_bank.n_items)
-  context = RunContext(rng=np.random.default_rng(0), exposure_tracker=tracker)
-  strategies = (RecordingSelector(0), RecordingEstimator(0.0), RecordingStopper(False))
+  session = stub_engine(item_bank).start(rng=0, excluded_items=[np.int64(9), 2])  # ty: ignore[invalid-argument-type]
 
-  with pytest.raises(ValueError, match="initialization failed"):
-    CatEngine(item_bank, FailingInitializer(), *strategies).start_session(0, context)
-  CatEngine(item_bank, RecordingInitializer(0.0), *strategies).start_session(1, context)
-
-  assert tracker.n_sessions == 1
+  assert session.excluded_items == (9, 2)
+  assert [type(item) for item in session.excluded_items] == [int, int]
 
 
-def test_should_stop_passes_runtime_state_to_stopper(item_bank) -> None:
-  """The stopper sees the session's bank, items, responses, latest estimate and its SE, and the run's generator.
+@pytest.mark.parametrize(
+  ("excluded", "error", "message"),
+  [
+    pytest.param(
+      [50], ValueError, "excluded_items[0] is 50; item indices must be between 0 and 49", id="past-the-bank"
+    ),
+    pytest.param([3, 3], ValueError, "excluded_items[1] is 3 ('item_03'); item indices must not repeat", id="repeated"),
+    pytest.param([1, 3.7], TypeError, "excluded_items[1] is 3.7; item indices must be integers", id="fraction"),
+  ],
+)
+def test_start_rejects_excluded_items_that_are_not_distinct_items_of_the_bank(
+  item_bank: ItemBank, excluded: list[object], error: type[Exception], message: str
+) -> None:
+  """An exclusion outside the bank, repeated or fractional fails at start, before the initializer draws.
 
-  Fails if any of them is dropped or taken from elsewhere, such as the initial estimate instead of the current one.
+  Fails if start accepts it: NumPy would read 3.7 as item 3, and an item past the bank would fail later in a selector.
+  A repeated item is named by its index and its name (ADR-0004).
   """
-  stopper = RecordingStopper(should_stop=True)
-  engine = CatEngine(item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.0), stopper)
-  state = CatSessionState(
-    session_id=3,
-    estimates=[Estimate(0.0, math.inf), Estimate(0.5, 0.9), Estimate(1.75, 0.6)],
-    administered_items=[2, 4],
-    responses=[True, False],
-  )
-  rng = np.random.default_rng(5)
+  initializer = RecordingInitializer(0.0)
+  engine = CatEngine(item_bank, initializer, RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False))
 
-  stopped = engine.should_stop(state, RunContext(rng=rng))
+  with pytest.raises(error, match=re.escape(message)):
+    engine.start(rng=0, excluded_items=excluded)  # ty: ignore[invalid-argument-type]
+  assert initializer.seen_rng is None
 
-  assert stopped is True
+
+def test_start_ends_a_session_whose_initial_state_satisfies_the_stopper(item_bank: ItemBank) -> None:
+  """A stopper satisfied before the first item ends the session in start, and select then proposes nothing.
+
+  Fails if the stopper is not asked about the initial state (the session would get an item it should not), if it is
+  asked about another state, or if select still asks the selector.
+  """
+  selector, stopper = RecordingSelector(0), RecordingStopper(decision=True)
+  engine = stub_engine(item_bank, selector=selector, stopper=stopper)
+  rng = np.random.default_rng(4)
+
+  session = engine.start(rng=rng, excluded_items=(7,))
+  selection = engine.select(session, rng=rng)
+
+  assert session.stop_reason is StopReason.STOPPER
   assert stopper.seen is not None
-  assert stopper.seen.item_bank is item_bank
+  assert (stopper.seen.administered_items, stopper.seen.excluded_items, stopper.seen.theta) == ((), (7,), 0.0)
   assert stopper.seen.rng is rng
-  assert (stopper.seen.administered_items, stopper.seen.responses) == ((2, 4), (True, False))
-  assert (stopper.seen.theta, stopper.seen.se) == (1.75, 0.6)
+  assert (selection.item, selection.declined) == (None, ())
+  assert selection.session is session
+  assert selector.seen == []
 
 
-def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
-  """select_next hands the selector the bank, the session's items, responses, excluded items and current estimate with
-  its SE, the generator and the rates, and engine.context returns that same context.
+def test_select_gives_the_selector_the_session_the_generator_and_the_rates(item_bank: ItemBank) -> None:
+  """select hands the selector the bank, the session's items, responses, exclusions and current estimate with its SE,
+  the generator it is given and the exposure rates, and engine.context builds that same context.
 
-  Two earlier sessions administered [0, 3] and [0], so the rates are 1 for item 0 and 0.5 for item 3. Fails if any
-  input is dropped or taken from elsewhere, such as the initial estimate instead of the current one, or if
-  engine.context differs from what the selector is given.
+  Fails if any input is dropped or taken from elsewhere, such as the initial estimate instead of the current one, if
+  the generator is copied, or if engine.context differs from what the selector is given.
   """
-  selector = RecordingSelector(item_id=4)
-  tracker = ExposureTracker(item_bank.n_items)
-  for items in ([0, 3], [0]):
-    tracker.start_session()
-    for item_id in items:
-      tracker.record(item_id)
-  tracker.start_session()
+  selector = RecordingSelector(item=4)
+  engine = stub_engine(item_bank, selector=selector)
+  session = session_after((1, 2), (True, False), excluded=(5, 0))
+  rates = np.zeros(item_bank.n_items)
+  rates[[0, 3]] = [1.0, 0.5]
   rng = np.random.default_rng(99)
-  context = RunContext(rng=rng, exposure_tracker=tracker)
-  engine = CatEngine(item_bank, RecordingInitializer(0.0), selector, RecordingEstimator(0.0), RecordingStopper(False))
-  state = CatSessionState(
-    session_id=0,
-    estimates=[Estimate(0.0, math.inf), Estimate(0.5, 0.9), Estimate(-0.25, 0.6)],
-    administered_items=[1, 2],
-    responses=[True, False],
-    excluded_items=[5, 0],
-  )
 
-  selected = engine.select_next(state, context)
+  selection = engine.select(session, rng=rng, exposure_rates=rates)
 
-  assert selected == 4
-  assert selector.seen is not None
-  assert selector.seen.item_bank is item_bank
-  assert (selector.seen.administered_items, selector.seen.responses) == ((1, 2), (True, False))
-  assert selector.seen.excluded_items == (5, 0)
-  assert (selector.seen.theta, selector.seen.se) == (-0.25, 0.6)
-  assert selector.seen.rng is rng
-  expected_rates = np.zeros(item_bank.n_items)
-  expected_rates[[0, 3]] = [1.0, 0.5]
-  assert np.array_equal(selector.seen.exposure_rates, expected_rates)
-  assert _context_fields(engine.context(state, context)) == _context_fields(selector.seen)
+  (seen,) = selector.seen
+  assert (selection.item, selection.session, selection.declined) == (4, session, ())
+  assert seen.item_bank is item_bank
+  assert seen.rng is rng
+  assert (seen.administered_items, seen.responses, seen.excluded_items) == ((1, 2), (True, False), (5, 0))
+  assert (seen.theta, seen.se) == (-0.25, 0.6)
+  assert seen.exposure_rates is not None
+  assert seen.exposure_rates.tolist() == rates.tolist()
+  context = engine.context(session, rng=rng, exposure_rates=rates)
+  assert _fields(context) == _fields(seen)
 
 
-def test_a_tracker_caps_exposure_across_sessions_with_no_other_setting() -> None:
-  """A tracker in the context is all r_max needs: an item the earlier examinees reached is held back.
-
-  At theta 0 the items rank 0, 1, 2, 3 by information, and each session takes one item. The second session sees
-  item 0 at 1/1, the third sees items 0 and 1 at 1/2, both at the cap of 0.5, and the fourth sees items 0, 1 and 2
-  at 1/3, below it. Fails if the selector gets no rates from a context that holds only a tracker (every session
-  takes item 0), or if the rates divide by anything but the number of sessions started before the current one.
-  """
-  item_bank = ItemBank(np.array([[a, 0.0, 0.0, 1.0] for a in (2.0, 1.5, 1.0, 0.5)]))
-  engine = CatEngine(
-    item_bank, RecordingInitializer(0.0), MaxInfoSelector(r_max=0.5), RecordingEstimator(0.0), RecordingStopper(False)
-  )
-  context = RunContext(rng=np.random.default_rng(0), exposure_tracker=ExposureTracker(item_bank.n_items))
-
-  first_items = []
-  for session_id in range(4):
-    session = engine.start_session(session_id, context)
-    item_id = engine.select_next(session, context)
-    assert item_id is not None
-    engine.apply_response(session, item_id, response=True, context=context)
-    first_items.append(item_id)
-
-  assert first_items == [0, 1, 2, 0]
-
-
-def test_select_next_passes_no_exposure_rates_without_a_tracker(item_bank) -> None:
-  """Without an exposure tracker in the context, the selector gets no rates, and so applies no cap.
-
-  Fails if the engine makes up rates for a run that does not track exposure, or fails on the missing tracker.
-  """
-  selector = RecordingSelector(item_id=2)
-  engine = CatEngine(item_bank, RecordingInitializer(0.0), selector, RecordingEstimator(0.0), RecordingStopper(False))
-  context = RunContext(rng=np.random.default_rng(11))
-  session = engine.start_session(0, context)
-
-  assert engine.select_next(session, context) == 2
-  assert selector.seen is not None
-  assert selector.seen.exposure_rates is None
-
-
-def _context_fields(context: StepContext) -> tuple[object, ...]:
+def _fields(context: StepContext) -> tuple[object, ...]:
   """Return a context's fields, with its exposure rates as a list, for comparison."""
   rates = None if context.exposure_rates is None else context.exposure_rates.tolist()
   return (
@@ -415,23 +370,103 @@ def _context_fields(context: StepContext) -> tuple[object, ...]:
   )
 
 
-def test_context_without_a_run_context_has_the_session_and_no_exposure_rates(item_bank) -> None:
-  """A session asked about without its run, as a finished one from a result is, gets its own fields and no rates.
+def test_select_without_rates_gives_the_selector_none(item_bank: ItemBank) -> None:
+  """Without exposure rates the selector gets None, under which no cap applies (ADR-0012).
 
-  Fails if a missing run context raises, if the engine makes up rates, such as all zeros, for a run it does not see,
-  or if the generator is seeded, so that every call draws the same numbers.
+  Fails if the engine makes up rates, such as all zeros, for a caller that keeps no exposure counts.
   """
-  engine = CatEngine(
-    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.0), RecordingStopper(False)
-  )
-  state = CatSessionState(
-    session_id=0, estimates=[Estimate(0.0, math.inf), Estimate(0.4, 0.8)], administered_items=[6], responses=[True]
-  )
+  selector = RecordingSelector(item=2)
 
-  context = engine.context(state)
+  stub_engine(item_bank, selector=selector).select(Session(estimates=(INITIAL,)), rng=0)
 
-  assert _context_fields(context)[2:] == ((6,), (True,), (), 0.4, 0.8, None)
-  assert engine.context(state).rng.integers(2**62) != engine.context(state).rng.integers(2**62)
+  assert selector.seen[0].exposure_rates is None
+
+
+def test_select_with_the_same_seed_proposes_the_same_item(item_bank: ItemBank) -> None:
+  """An int rng seeds a new generator for the call, so a random selector proposes the same item for the same seed.
+
+  Fails if select ignores the seed, or draws from a generator kept between calls.
+  """
+  engine = stub_engine(item_bank, selector=RandomSelector())
+  session = Session(estimates=(INITIAL,))
+
+  proposals = {seed: [engine.select(session, rng=seed).item for _ in range(3)] for seed in (1, 2)}
+
+  assert all(len(set(items)) == 1 for items in proposals.values())
+  assert proposals[1] != proposals[2]
+
+
+@pytest.mark.parametrize(
+  ("rates", "message"),
+  [
+    pytest.param(
+      np.array([4] + [0] * 49), "exposure_rates[0] is 4.0; exposure rates must be between 0 and 1", id="counts"
+    ),
+    pytest.param(
+      np.full(30, 0.1),
+      "exposure_rates has shape (30,); there must be one exposure rate per item of the bank (50)",
+      id="wrong-length",
+    ),
+  ],
+)
+def test_select_rejects_exposure_rates_that_are_not_rates_of_the_bank(item_bank: ItemBank, rates, message: str) -> None:
+  """Counts passed as rates turned the cap off, and rates of another bank failed deep in NumPy (D29).
+
+  Fails if select accepts them and the selector caps against them.
+  """
+  selector = RecordingSelector(item=0)
+
+  with pytest.raises(ValueError, match=re.escape(message)):
+    stub_engine(item_bank, selector=selector).select(Session(estimates=(INITIAL,)), rng=0, exposure_rates=rates)
+  assert selector.seen == []
+
+
+@pytest.mark.parametrize("step", ["select", "answer", "context"])
+def test_the_steps_reject_a_session_with_items_outside_the_bank(item_bank: ItemBank, step: str) -> None:
+  """A session built without the bank, such as one stored for another bank, is checked against the engine's bank.
+
+  Fails if an index past the bank reaches a strategy, where NumPy raises a bare IndexError, or wraps around.
+  """
+  engine = stub_engine(item_bank)
+  session = session_after((3, 50), (True, False))
+  calls = {
+    "select": lambda: engine.select(session, rng=0),
+    "answer": lambda: engine.answer(session, 4, True, rng=0),
+    "context": lambda: engine.context(session),
+  }
+
+  with pytest.raises(ValueError, match=re.escape("administered_items[1] is 50; item indices must be between 0 and 49")):
+    calls[step]()
+
+
+@pytest.mark.parametrize("step", ["select", "answer", "context"])
+def test_the_steps_reject_what_is_not_a_session(item_bank: ItemBank, step: str) -> None:
+  """A session's stored fields passed as a dict would fail inside the engine with an AttributeError on its items."""
+  engine = stub_engine(item_bank)
+  stored = {"administered_items": (), "responses": (), "estimates": (INITIAL,)}
+  calls = {
+    "select": lambda: engine.select(stored, rng=0),  # ty: ignore[invalid-argument-type]
+    "answer": lambda: engine.answer(stored, 4, True, rng=0),  # ty: ignore[invalid-argument-type]
+    "context": lambda: engine.context(stored),  # ty: ignore[invalid-argument-type]
+  }
+
+  with pytest.raises(TypeError, match="session is a dict; it must be a Session"):
+    calls[step]()
+
+
+def test_context_without_a_generator_draws_fresh_entropy_and_has_no_rates(item_bank: ItemBank) -> None:
+  """The context of a session asked about on its own has the session's fields, no rates and an unseeded generator.
+
+  Fails if the engine makes up rates, such as all zeros, or seeds the generator, so that every call draws the same
+  numbers.
+  """
+  engine = stub_engine(item_bank)
+  session = session_after((6,), (True,))
+
+  context = engine.context(session)
+
+  assert _fields(context)[2:] == ((6,), (True,), (), -0.25, 0.6, None)
+  assert engine.context(session).rng.integers(2**62) != engine.context(session).rng.integers(2**62)
 
 
 @pytest.mark.parametrize(
@@ -439,7 +474,7 @@ def test_context_without_a_run_context_has_the_session_and_no_exposure_rates(ite
   [(3, [0.9, 0.7, 0.5], "cap"), (5, [0.9, 0.6, 0.35], "precision")],
 )
 def test_a_stop_rule_names_the_criterion_that_ended_a_finished_session(
-  item_bank, max_items: int, ses: list[float], ended_by: str
+  item_bank: ItemBank, max_items: int, ses: list[float], ended_by: str
 ) -> None:
   """Both sessions end after 3 items against a target SE of 0.4.
 
@@ -449,589 +484,283 @@ def test_a_stop_rule_names_the_criterion_that_ended_a_finished_session(
   """
   cap, precision = MaxLengthStopper(max_items), StandardErrorStopper(0.4)
   rule = StopRule(cap, precision)
-  engine = CatEngine(item_bank, RecordingInitializer(0.0), LowestIndexSelector(), ScriptedSEEstimator(ses), rule)
-  run = RunContext(rng=np.random.default_rng(0))
-  session = engine.run_session(engine.start_session(0, run), FixedResponseProvider(True), run)
+  engine = CatEngine(item_bank, HalfInitializer(), LowestIndexSelector(), ScriptedSEEstimator(ses), rule)
 
-  assert session.administered_count == 3
+  session = run(engine, lambda item, session: True)
+
+  assert len(session.administered_items) == 3
   assert rule.satisfied(engine.context(session)) == (cap if ended_by == "cap" else precision,)
 
 
-def test_apply_response_records_exposure_and_returns_complete_step_result(item_bank) -> None:
-  """apply_response counts the item once in the tracker and reports the step the session took.
+def test_answer_estimates_from_the_current_estimate_and_returns_the_next_session(item_bank: ItemBank) -> None:
+  """answer gives the estimator the session with the new item and response, starting from the current estimate and
+  SE, with the generator it is given, and returns a new session with the item, the response and the estimator's
+  estimate added.
 
-  Fails if the administration is not recorded or recorded twice, if the estimator gets other items, responses or
-  estimate than the session's, or if the result reports another item, response, estimate or stop state.
+  The current estimate is -0.25 with an SE of 0.6, unlike StepContext's defaults of 0 and infinity. Fails if the
+  estimator starts from the defaults or the initial estimate, gets another bank, items, responses or generator, if the
+  new session records another item, response or estimate, or if the given session changes.
   """
-  estimator = RecordingEstimator(theta=1.1)
-  tracker = ExposureTracker(item_bank.n_items)
-  # A non-zero start tells an estimator handed StepContext's default theta of 0 apart from one handed the session's.
-  engine = CatEngine(item_bank, RecordingInitializer(0.7), RecordingSelector(0), estimator, RecordingStopper(False))
-  context = RunContext(rng=np.random.default_rng(42), exposure_tracker=tracker)
-  session = engine.start_session(session_id=1, context=context, true_theta=0.2)
+  estimator = RecordingEstimator(theta=1.1, se=0.42, evaluations=7)
+  engine = stub_engine(item_bank, estimator=estimator)
+  session = session_after((1,), (True,), excluded=(8,))
+  rng = np.random.default_rng(3)
 
-  result = engine.apply_response(session, item_id=3, response=True, context=context)
+  answered = engine.answer(session, 3, False, rng=rng)
 
-  assert tracker.counts[3] == 1
-  assert tracker.counts.sum() == 1
   assert estimator.seen is not None
   assert estimator.seen.item_bank is item_bank
-  assert (estimator.seen.administered_items, estimator.seen.responses) == ((3,), (True,))
-  assert estimator.seen.theta == pytest.approx(0.7)
-  assert session.stop_reason is None
-  assert result.selected_item_id == 3
-  assert result.response is True
-  assert result.current_theta == pytest.approx(1.1)
-  assert result.stopped is False
-  assert result.stop_reason is None
-  assert result.session.stop_reason is None
-  assert result.session.administered_items == (3,)
-  assert result.session.responses == (True,)
-  assert result.session.theta_history == pytest.approx((0.7, 1.1))
-
-
-def test_apply_response_starts_the_estimator_from_the_current_estimate_and_its_se(item_bank) -> None:
-  """The estimator gets the session's current theta and SE, and the session then reports the ones it returned.
-
-  The session's current estimate is 0.5 with an SE of 0.9, unlike StepContext's defaults of 0 and infinity. Fails if
-  the estimator starts from the defaults or the initial estimate, or if current_se is not the SE the estimator
-  returned.
-  """
-  estimator = RecordingEstimator(theta=1.1, se=0.42)
-  engine = CatEngine(item_bank, RecordingInitializer(0.0), RecordingSelector(0), estimator, RecordingStopper(False))
-  session = CatSessionState(
-    session_id=0, estimates=[Estimate(0.0, math.inf), Estimate(0.5, 0.9)], administered_items=[1], responses=[True]
+  assert estimator.seen.rng is rng
+  assert (estimator.seen.administered_items, estimator.seen.responses) == ((1, 3), (True, False))
+  assert (estimator.seen.theta, estimator.seen.se) == (-0.25, 0.6)
+  assert answered == Session(
+    administered_items=(1, 3),
+    responses=(True, False),
+    estimates=(*session.estimates, Estimate(1.1, 0.42, 7)),
+    excluded_items=(8,),
   )
-
-  engine.apply_response(session, item_id=3, response=False, context=RunContext(rng=np.random.default_rng(0)))
-
-  assert estimator.seen is not None
-  assert (estimator.seen.theta, estimator.seen.se) == (0.5, 0.9)
-  assert (session.current_theta, session.current_se) == (1.1, 0.42)
+  assert session == session_after((1,), (True,), excluded=(8,))
 
 
-def test_apply_response_sets_stop_fields_when_stopper_trips(item_bank) -> None:
-  """A stopper satisfied by the new state ends the session, and the step result reports it.
+def test_answer_asks_the_stopper_about_the_new_state(item_bank: ItemBank) -> None:
+  """A stopper satisfied by the state after the response ends the session that answer returns.
 
   Fails if the stopper judges a stale state (without the new item and response, or with the previous estimate or its
-  SE), if the decision is dropped, so the session runs past its criterion, or if the result or its snapshot reports
-  the session still running.
+  SE) or gets another generator than answer's, or if its decision is dropped, so the session runs past its criterion.
   """
-  stopper = RecordingStopper(True)
-  engine = CatEngine(
-    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(theta=0.3, se=0.42), stopper
-  )
-  context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, context=context, true_theta=0.0)
+  stopper = RecordingStopper(decision=True)
+  engine = stub_engine(item_bank, estimator=RecordingEstimator(theta=0.3, se=0.42), stopper=stopper)
+  rng = np.random.default_rng(3)
 
-  result = engine.apply_response(session, item_id=0, response=False, context=context)
+  answered = engine.answer(Session(estimates=(INITIAL,)), 0, False, rng=rng)
 
   assert stopper.seen is not None
+  assert stopper.seen.rng is rng
   assert (stopper.seen.administered_items, stopper.seen.responses) == ((0,), (False,))
   assert (stopper.seen.theta, stopper.seen.se) == (0.3, 0.42)
-  assert session.stop_reason is StopReason.STOPPER
-  assert result.stopped is True
-  assert result.stop_reason is StopReason.STOPPER
-  assert result.current_theta == pytest.approx(0.3)
-  assert result.session.stop_reason is StopReason.STOPPER
+  assert answered.stop_reason is StopReason.STOPPER
+
+
+def test_answer_with_the_same_seed_gives_the_same_session(item_bank: ItemBank) -> None:
+  """An int rng seeds a new generator for the call, so an estimator that draws records the same estimate for a seed.
+
+  Fails if answer ignores its rng: with fresh entropy the same seed gives other estimates, and with a fixed generator
+  of its own two seeds give the same one.
+  """
+  engine = stub_engine(item_bank, estimator=DrawingEstimator())
+  session = Session(estimates=(INITIAL,))
+
+  estimates = {seed: [engine.answer(session, 2, True, rng=seed).current_theta for _ in range(2)] for seed in (5, 6)}
+
+  assert all(len(set(thetas)) == 1 for thetas in estimates.values())
+  assert estimates[5] != estimates[6]
+
+
+def test_answer_rejects_an_estimator_that_returns_a_bare_float(item_bank: ItemBank) -> None:
+  """An estimator written for the contract that returned a float fails with a TypeError saying so.
+
+  Fails if the engine reads ``.theta`` off the float and raises an AttributeError that names no estimator.
+  """
+  engine = stub_engine(item_bank, estimator=FloatEstimator())
+
+  with pytest.raises(TypeError, match=re.escape("FloatEstimator.estimate must return an Estimate, got float")):
+    engine.answer(Session(estimates=(INITIAL,)), 3, True, rng=0)
+
+
+@pytest.mark.parametrize(("response", "stored"), [(1, True), (0, False), (np.True_, True), (np.int64(0), False)])
+def test_answer_stores_a_response_of_1_or_0_as_a_bool(item_bank: ItemBank, response: object, stored: bool) -> None:
+  """An application that stores answers as 0 and 1 passes them as they are, and the session holds bools (ADR-0009).
+
+  Fails if 1 and 0 are rejected, or stored as given: the session's responses would mix ints and bools.
+  """
+  answered = stub_engine(item_bank).answer(Session(estimates=(INITIAL,)), 3, response, rng=0)  # ty: ignore[invalid-argument-type]
+
+  assert answered.responses == (stored,)
+  assert type(answered.responses[0]) is bool
 
 
 @pytest.mark.parametrize(
-  ("estimator", "stopper", "exception", "error"),
+  ("response", "error", "message"),
   [
-    (FailingEstimator(), RecordingStopper(False), ValueError, "estimation failed"),
-    (
-      FloatEstimator(),
-      RecordingStopper(False),
-      TypeError,
-      "FloatEstimator.estimate must return an Estimate, got float",
-    ),
-    (RecordingEstimator(0.5), FailingStopper(), ValueError, "stopping failed"),
+    pytest.param(1.0, TypeError, "response is 1.0; responses must be bools or the integers 0 and 1", id="float"),
+    pytest.param("yes", TypeError, "response is 'yes'; responses must be bools or the integers 0 and 1", id="str"),
+    pytest.param(None, TypeError, "response is None; responses must be bools or the integers 0 and 1", id="None"),
+    pytest.param(2, ValueError, "response is 2; an integer response must be 0 or 1", id="two"),
   ],
-  ids=["estimator", "estimator-returning-a-float", "stopper"],
 )
-def test_apply_response_leaves_the_session_unchanged_when_a_strategy_fails(
-  item_bank, estimator, stopper, exception, error
+def test_answer_rejects_a_response_that_is_not_a_boolean_or_0_or_1(
+  item_bank: ItemBank, response: object, error: type[Exception], message: str
 ) -> None:
-  """A response whose estimate or stop decision fails is not applied at all.
+  """bool(1.0), bool("yes") and bool(2) are all True, so a converted response would score an answer never given.
 
-  Fails if the item, the response or its exposure is recorded before the estimator and the
-  stopper run: the half-applied step left the session with one more response than estimates, and
-  retrying the item was rejected as already administered. An estimator that returns a float
-  instead of an Estimate must fail with a TypeError that says so, not an AttributeError.
+  Fails too if the bad response reaches the estimator.
   """
-  tracker = ExposureTracker(item_bank.n_items)
-  context = RunContext(rng=np.random.default_rng(42), exposure_tracker=tracker)
-  engine = CatEngine(item_bank, RecordingInitializer(0.0), RecordingSelector(0), estimator, stopper)
-  session = engine.start_session(session_id=0, context=context)
-  before = copy.deepcopy(session)
+  estimator = RecordingEstimator(0.5)
 
-  with pytest.raises(exception, match=error):
-    engine.apply_response(session, item_id=3, response=True, context=context)
-
-  assert session == before
-  assert tracker.counts.sum() == 0
+  with pytest.raises(error, match=re.escape(message)):
+    stub_engine(item_bank, estimator=estimator).answer(Session(estimates=(INITIAL,)), 3, response, rng=0)  # ty: ignore[invalid-argument-type]
+  assert estimator.seen is None
 
 
-@pytest.mark.parametrize("response", [1, 0, 1.0, "yes", None])
-def test_apply_response_rejects_a_response_that_is_not_a_bool(item_bank, response) -> None:
-  """Only ``bool`` and ``numpy.bool_`` responses are accepted, and a rejected one changes nothing.
+def test_answer_rejects_a_stopped_session(item_bank: ItemBank) -> None:
+  """A session that has stopped accepts no more responses (ADR-0010).
 
-  Fails if 1, 0 or 1.0 are stored as given in the session's list of booleans, or if "yes" or None
-  reach the estimator.
+  Fails if answer appends an item to a session its stopper has already ended.
   """
-  tracker = ExposureTracker(item_bank.n_items)
-  context = RunContext(rng=np.random.default_rng(42), exposure_tracker=tracker)
-  engine = CatEngine(
-    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False)
-  )
-  session = engine.start_session(session_id=0, context=context)
-  before = copy.deepcopy(session)
+  stopped = Session(estimates=(INITIAL,), stop_reason=StopReason.NO_ITEMS)
 
-  with pytest.raises(TypeError, match="response must be a bool"):
-    engine.apply_response(session, item_id=3, response=response, context=context)
-
-  assert session == before
-  assert tracker.counts.sum() == 0
+  with pytest.raises(
+    ValueError, match=re.escape("the session has stopped (stop_reason 'no_items') and accepts no more responses")
+  ):
+    stub_engine(item_bank).answer(stopped, 1, True, rng=0)
 
 
-def test_apply_response_rejects_a_stopped_session(item_bank) -> None:
-  """A session that has stopped accepts no more responses.
+@pytest.mark.parametrize(
+  ("item", "error", "message"),
+  [
+    pytest.param(2.0, TypeError, "item is 2.0; item indices must be integers", id="float"),
+    pytest.param("3", TypeError, "item is '3'; item indices must be integers", id="str"),
+    pytest.param(True, TypeError, "item is True; item indices must be integers, not bools", id="bool"),
+    pytest.param(50, ValueError, "item is 50; item indices must be between 0 and 49", id="past-the-bank"),
+    pytest.param(-1, ValueError, "item is -1; item indices must be between 0 and 49", id="negative"),
+    pytest.param(
+      1, ValueError, "item is 1 ('item_01'); the session has already been given that item", id="administered"
+    ),
+    pytest.param(
+      8,
+      ExcludedItemError,
+      "item is 8 ('item_08'); the session excluded that item, which it must not be given",
+      id="excluded",
+    ),
+  ],
+)
+def test_answer_rejects_an_item_select_could_not_have_proposed(
+  item_bank: ItemBank, item: object, error: type[Exception], message: str
+) -> None:
+  """An item that is not an index, outside the bank, already given or excluded fails before the estimator runs.
 
-  Fails if apply_response appends an item to a session its stopper has already ended.
+  Fails if 2.0 is stored as a float, a bank-sized index reads past the item parameters, -1 reads the last item, a
+  response counts twice in the estimate, or an item the exposure control declined is administered (ExcludedItemError,
+  so an application can tell it from a bad index). An item of the bank is named by its index and its name (ADR-0004).
   """
-  engine = CatEngine(
-    item_bank,
-    RecordingInitializer(0.0),
-    RecordingSelector(0),
-    RecordingEstimator(0.5),
-    CountingLengthStopper(max_items=1),
-  )
-  context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, context=context)
-  engine.apply_response(session, item_id=0, response=True, context=context)
-  before = copy.deepcopy(session)
+  estimator = RecordingEstimator(0.5)
 
-  with pytest.raises(ValueError, match=r"Session 0 has stopped \(reason: stopper\)"):
-    engine.apply_response(session, item_id=1, response=True, context=context)
-
-  assert session == before
+  with pytest.raises(error, match=re.escape(message)):
+    stub_engine(item_bank, estimator=estimator).answer(session_after((1,), (True,), excluded=(8,)), item, True, rng=0)  # ty: ignore[invalid-argument-type]
+  assert estimator.seen is None
 
 
-def test_session_state_holds_builtin_python_values(item_bank) -> None:
-  """The engine stores Python scalars whatever numeric types the strategies and the examinee return.
+def test_a_session_holds_builtin_python_values(item_bank: ItemBank) -> None:
+  """The engine stores Python scalars whatever numeric types the strategies and the caller give it.
 
-  Fails if an int initial theta, an estimate whose theta, standard error or evaluation count is a NumPy scalar, a
-  ``numpy.int64`` item index (from the selector, or passed to apply_response by the caller), a ``numpy.bool_``
-  response or a ``numpy.bool_`` stop decision is stored as given.
+  Fails if a NumPy initial theta, an estimate whose theta, standard error or evaluation count is a NumPy scalar, a
+  ``numpy.int64`` item index (from the selector, or passed to answer) or a ``numpy.bool_`` response or stop decision
+  is stored as given.
   """
   engine = CatEngine(
     item_bank,
-    RecordingInitializer(theta=0),
-    RecordingSelector(item_id=np.int64(3)),  # ty: ignore[invalid-argument-type]
-    RecordingEstimator(theta=np.float64(0.25), se=np.float64(0.4), evaluations=np.int64(7)),  # ty: ignore[invalid-argument-type]
-    RecordingStopper(np.False_),  # ty: ignore[invalid-argument-type]
+    RecordingInitializer(theta=np.float64(0.0)),
+    RecordingSelector(item=np.int64(3)),
+    RecordingEstimator(theta=np.float64(0.25), se=np.float64(0.4), evaluations=np.int64(7)),
+    RecordingStopper(np.False_),
   )
-  context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, context=context)
+  session = engine.start(rng=0)
+  selection = engine.select(session, rng=0)
+  assert selection.item is not None
 
-  result = engine.step(session, FixedResponseProvider(np.True_), context)  # ty: ignore[invalid-argument-type]
-  engine.apply_response(session, item_id=np.int64(5), response=np.False_, context=context)  # ty: ignore[invalid-argument-type]
+  session = engine.answer(selection.session, selection.item, np.True_, rng=0)  # ty: ignore[invalid-argument-type]
+  session = engine.answer(session, np.int64(5), np.False_, rng=0)  # ty: ignore[invalid-argument-type]
 
+  assert type(selection.item) is int
   assert session.theta_history == (0.0, 0.25, 0.25)
-  assert [type(theta) for theta in session.theta_history] == [float, float, float]
-  assert type(session.current_theta) is float
-  assert session.estimates[1:] == [Estimate(0.25, 0.4, 7)] * 2
-  assert [(type(e.theta), type(e.se), type(e.evaluations)) for e in session.estimates[1:]] == [(float, float, int)] * 2
-  assert session.administered_items == [3, 5]
-  assert [type(item) for item in session.administered_items] == [int, int]
-  assert session.responses == [True, False]
-  assert [type(response) for response in session.responses] == [bool, bool]
-  assert (type(result.selected_item_id), type(result.response), type(result.current_theta), type(result.stopped)) == (
-    int,
-    bool,
-    float,
-    bool,
-  )
+  assert session.estimates[1:] == (Estimate(0.25, 0.4, 7),) * 2
+  scalars = [session.current_theta, *session.administered_items, *session.responses, session.estimates[1].evaluations]
+  assert [type(value) for value in scalars] == [float, int, int, bool, bool, int]
+  assert session.stop_reason is None
 
 
-@pytest.mark.parametrize("item_id", [2.0, "3", None])
-def test_apply_response_rejects_an_item_index_that_is_not_an_integer(item_bank, item_id) -> None:
-  """An item index that is not an integer is rejected, and changes nothing.
+def test_the_stopper_is_asked_once_per_session_state(item_bank: ItemBank, max_info_selector: MaxInfoSelector) -> None:
+  """A session of n items asks its stopper n + 1 times: about the initial state and after each response (ADR-0010).
 
-  Fails if 2.0 passes the range check and is stored as a float, or if a string or None reaches the
-  comparisons.
-  """
-  context = RunContext(rng=np.random.default_rng(42))
-  engine = CatEngine(
-    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False)
-  )
-  session = engine.start_session(session_id=0, context=context)
-  before = copy.deepcopy(session)
-
-  with pytest.raises(TypeError, match="item_id must be an integer"):
-    engine.apply_response(session, item_id=item_id, response=True, context=context)
-
-  assert session == before
-
-
-def test_a_session_rebuilt_from_a_snapshot_takes_the_next_step(item_bank) -> None:
-  """A session rebuilt from a snapshot's fields continues like the original, and the snapshot stays as it was.
-
-  Fails if the rebuilt state keeps the snapshot's tuples: apply_response appended the item and the response,
-  then failed on the history tuple, leaving a step half-applied and the item impossible to retry.
-  """
-  engine = CatEngine(
-    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False)
-  )
-  context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, context=context)
-  engine.apply_response(session, item_id=3, response=True, context=context)
-  snapshot = session.snapshot()
-  rebuilt = CatSessionState(**{field.name: getattr(snapshot, field.name) for field in dataclasses.fields(snapshot)})
-
-  engine.apply_response(rebuilt, item_id=4, response=False, context=context)
-
-  assert (rebuilt.administered_items, rebuilt.responses, rebuilt.theta_history) == (
-    [3, 4],
-    [True, False],
-    (0.0, 0.5, 0.5),
-  )
-  assert (snapshot.administered_items, snapshot.responses, snapshot.theta_history) == ((3,), (True,), (0.0, 0.5))
-
-
-def test_a_step_result_keeps_the_session_as_the_step_left_it(item_bank) -> None:
-  """A step result's snapshot does not change when the session takes further steps.
-
-  Fails if the snapshot shares the session's lists, so the next response also shows up in the
-  earlier result.
-  """
-  engine = CatEngine(
-    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False)
-  )
-  context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, context=context)
-
-  first = engine.apply_response(session, item_id=0, response=True, context=context)
-  second = engine.apply_response(session, item_id=1, response=False, context=context)
-
-  assert (first.session.administered_items, first.session.responses) == ((0,), (True,))
-  assert first.session.theta_history == (0.0, 0.5)
-  assert (second.session.administered_items, second.session.responses) == ((0, 1), (True, False))
-  assert second.session.theta_history == (0.0, 0.5, 0.5)
-
-
-def test_a_step_result_cannot_be_changed(item_bank) -> None:
-  """Neither a step result's fields nor the sequences in its session snapshot can be changed.
-
-  Fails if CatStepResult is not frozen, or if the snapshot holds lists: ADR-0009 promises immutable
-  step results, but ``result.response = False`` and ``result.session.responses.append(True)`` both
-  worked.
-  """
-  engine = CatEngine(
-    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False)
-  )
-  context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, context=context)
-  result = engine.apply_response(session, item_id=3, response=True, context=context)
-
-  with pytest.raises(FrozenInstanceError, match="cannot assign to field 'response'"):
-    result.response = False  # ty: ignore[invalid-assignment]
-  for sequence in (result.session.administered_items, result.session.responses, result.session.estimates):
-    with pytest.raises(AttributeError, match="object has no attribute 'append'"):
-      sequence.append(sequence[0])  # ty: ignore[missing-attribute]
-  assert (result.session.administered_items, result.session.responses) == ((3,), (True,))
-
-
-def test_snapshots_of_the_same_session_state_are_equal_and_hash_alike(item_bank) -> None:
-  """A snapshot is hashable: two snapshots of one state collapse into one set member, and a later state does not.
-
-  Fails if a snapshot field is a list or a dict, which made ``hash(snapshot)`` raise TypeError.
-  """
-  engine = CatEngine(
-    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False)
-  )
-  context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, context=context)
-  first = engine.apply_response(session, item_id=3, response=True, context=context)
-  same_state = session.snapshot()
-  engine.apply_response(session, item_id=4, response=False, context=context)
-
-  assert hash(first.session) == hash(same_state)
-  assert len({first.session, same_state, session.snapshot()}) == 2
-
-
-def test_step_applies_the_providers_response_to_the_selected_item(item_bank) -> None:
-  """One step administers the item the selector chose and records the provider's response to it.
-
-  Fails if step applies a different item or response, or skips the estimate.
-  """
-  engine = CatEngine(
-    item_bank, RecordingInitializer(0.0), RecordingSelector(4), RecordingEstimator(0.7), RecordingStopper(False)
-  )
-  context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, context=context)
-
-  result = engine.step(session, FixedResponseProvider(False), context)
-
-  assert (result.selected_item_id, result.response, result.current_theta) == (4, False, pytest.approx(0.7))
-  assert session.administered_items == [4]
-  assert session.responses == [False]
-  assert session.theta_history == (0.0, pytest.approx(0.7))
-
-
-def test_step_gives_the_provider_a_snapshot_of_the_session_and_the_runs_generator(item_bank) -> None:
-  """The provider gets the engine's bank, the selected item, the session before the response and the run's rng.
-
-  Fails if step hands the provider the live session (a provider could then change it, and what it
-  holds would move on with the step), another bank or item, or a generator other than the run's.
-  """
-  provider = RecordingResponseProvider()
-  engine = CatEngine(
-    item_bank, RecordingInitializer(0.2), RecordingSelector(4), RecordingEstimator(0.7), RecordingStopper(False)
-  )
-  context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=9, context=context, true_theta=1.0)
-  before = session.snapshot()
-
-  engine.step(session, provider, context)
-
-  seen_bank, seen_item, seen_session, seen_rng = provider.calls[0]
-  assert seen_bank is item_bank
-  assert seen_item == 4
-  assert seen_rng is context.rng
-  assert isinstance(seen_session, CatSessionSnapshot)
-  assert seen_session == before
-  assert seen_session.administered_items == ()
-
-
-def test_run_session_stops_at_fixed_length(
-  item_bank,
-  fixed_initializer,
-  random_selector,
-  estimator,
-) -> None:
-  """run_session runs until the stopper says stop: three items for a three-item test.
-
-  Fails if it returns before the session ends or keeps administering items after the stopper is satisfied.
-  """
-  stopper = MaxLengthStopper(3)
-  engine = CatEngine(item_bank, fixed_initializer, random_selector, estimator, stopper)
-  context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, context=context, true_theta=0.0)
-
-  final_session = engine.run_session(session, FixedResponseProvider(True), context)
-
-  assert final_session.stop_reason is StopReason.STOPPER
-  assert len(final_session.administered_items) == 3
-
-
-def test_the_stopper_is_evaluated_once_per_session_state(item_bank, max_info_selector) -> None:
-  """A session of n items asks its stopper n + 1 times: about the initial state and after each response.
-
-  Fails if step asks the stopper again before selecting, about the state apply_response has just
-  evaluated, which doubled the calls (a 5-item session made 10).
+  Fails if select also asks the stopper, about the state answer has just judged, which doubled the calls (a 5-item
+  session made 10).
   """
   stopper = CountingLengthStopper(max_items=5)
   engine = CatEngine(item_bank, RecordingInitializer(0.0), max_info_selector, RecordingEstimator(0.0), stopper)
-  context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, context=context)
 
-  engine.run_session(session, FixedResponseProvider(True), context)
+  session = run(engine, lambda item, session: True)
 
-  assert session.administered_count == 5
+  assert len(session.administered_items) == 5
   assert stopper.calls == 6
 
 
-def test_stepping_a_stopped_session_keeps_its_stop_reason(item_bank) -> None:
-  """Stepping a session that has already stopped changes nothing about it.
+def test_selecting_for_a_stopped_session_returns_it_unchanged(item_bank: ItemBank) -> None:
+  """select on a session that has ended proposes nothing and returns the same session, with its stop reason.
 
-  Fails if the engine decides again why a stopped session ended: a session whose selector ran out
-  was relabelled as stopped by its selector on the next step.
+  Fails if the engine decides again why a stopped session ended: a session whose selector ran out was relabelled as
+  stopped by its stopper on the next step, or asked the selector again.
   """
-  engine = CatEngine(
-    item_bank, RecordingInitializer(0.0), ExhaustedSelector(), RecordingEstimator(0.0), RecordingStopper(False)
-  )
-  context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, context=context)
-  engine.step(session, FixedResponseProvider(True), context)
+  selector = RecordingSelector(0)
+  ended = Session(estimates=(INITIAL,), stop_reason=StopReason.NO_ITEMS)
 
-  result = engine.step(session, FixedResponseProvider(True), context)
+  selection = stub_engine(item_bank, selector=selector, stopper=RecordingStopper(True)).select(ended, rng=0)
 
-  assert (result.stopped, result.selected_item_id, result.stop_reason) == (True, None, StopReason.NO_ITEMS)
-  assert session.stop_reason is StopReason.NO_ITEMS
-  assert session.administered_items == []
+  assert (selection.item, selection.declined) == (None, ())
+  assert selection.session is ended
+  assert selector.seen == []
 
 
-def test_apply_response_rejects_invalid_item_index(
-  item_bank,
-  fixed_initializer,
-  random_selector,
-  estimator,
-  fixed_length_stopper,
-) -> None:
-  """An item index past the end of the bank raises ValueError naming the valid range.
+def test_select_ends_the_session_when_the_selector_has_no_item(item_bank: ItemBank) -> None:
+  """A selector that raises NoItemsAvailableError ends the session with NO_ITEMS, and select proposes nothing.
 
-  Fails if apply_response records the index: the estimator would then fail on it half-way through the step, or a
-  bank-sized index would read past the item parameters.
+  Fails if select lets the error escape, or returns no item while leaving the session running: every loop then had
+  to copy the handling, and notebook 02's did not.
   """
-  engine = CatEngine(item_bank, fixed_initializer, random_selector, estimator, fixed_length_stopper)
-  context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, context=context, true_theta=0.0)
+  session = session_after((2,), (True,))
 
-  with pytest.raises(
-    ValueError,
-    match=rf"Invalid item index {item_bank.n_items}\. Must be between 0 and {item_bank.n_items - 1}",
-  ):
-    engine.apply_response(session, item_bank.n_items, response=True, context=context)
+  selection = stub_engine(item_bank, selector=ExhaustedSelector()).select(session, rng=0)
+
+  assert (selection.item, selection.declined) == (None, ())
+  assert selection.session == dataclasses.replace(session, stop_reason=StopReason.NO_ITEMS)
 
 
 @pytest.mark.parametrize(
-  "invalid_item",
-  [pytest.param(lambda bank: -1, id="negative"), pytest.param(lambda bank: bank.n_items, id="past the bank")],
+  ("proposal", "error", "message"),
+  [
+    pytest.param(-1, ValueError, "the item RecordingSelector proposed is -1; item indices must be between", id="neg"),
+    pytest.param(50, ValueError, "the item RecordingSelector proposed is 50; item indices must be between", id="past"),
+    pytest.param(
+      1,
+      ValueError,
+      "the item RecordingSelector proposed is 1 ('item_01'); the session has already been given that item",
+      id="had",
+    ),
+    pytest.param(
+      7,
+      ExcludedItemError,
+      "the item RecordingSelector proposed is 7 ('item_07'); the session excluded that item",
+      id="excl",
+    ),
+  ],
 )
-def test_step_checks_the_selected_item_before_asking_for_a_response(item_bank, invalid_item) -> None:
-  """An invalid item from the selector raises before the response provider is asked about it.
-
-  Fails if step asks the provider first: in a live session the provider shows the item to an examinee, and a
-  negative index would show the bank's last item.
-  """
-  provider = RecordingResponseProvider()
-  selector = RecordingSelector(item_id=invalid_item(item_bank))
-  engine = CatEngine(item_bank, RecordingInitializer(0.0), selector, RecordingEstimator(0.0), RecordingStopper(False))
-  context = RunContext(rng=np.random.default_rng(0))
-  session = engine.start_session(session_id=0, context=context)
-
-  with pytest.raises(ValueError, match=r"Invalid item index"):
-    engine.step(session, provider, context)
-
-  assert provider.calls == []
-
-
-def test_apply_response_rejects_duplicate_items(
-  item_bank,
-  fixed_initializer,
-  random_selector,
-  estimator,
-  fixed_length_stopper,
+def test_select_checks_the_proposal_before_the_control_sees_it(
+  item_bank: ItemBank, proposal: int, error: type[Exception], message: str
 ) -> None:
-  """A response to an item the session already had raises ValueError.
+  """An invalid item from the selector raises in select, naming the selector, before the exposure control is asked.
 
-  Fails if the item is administered again: its response would count twice in the estimate and its administration
-  twice in the exposure tracker.
+  Fails if the engine hands it on: a negative index would show the bank's last item, an item given again would count
+  twice, and an excluded item would be shown to an examinee it was withheld from. An item of the bank is named by its
+  index and its name (ADR-0004).
   """
-  engine = CatEngine(item_bank, fixed_initializer, random_selector, estimator, fixed_length_stopper)
-  context = RunContext(rng=np.random.default_rng(42))
-  session = CatSessionState(
-    session_id=0, estimates=[Estimate(0.0, math.inf), Estimate(0.5, 1.0)], administered_items=[0], responses=[True]
-  )
+  control = DecliningControl(declines=frozenset())
+  engine = stub_engine(item_bank, selector=RecordingSelector(proposal), exposure_control=control)
 
-  with pytest.raises(ValueError, match=r"Item 0 has already been administered in this session"):
-    engine.apply_response(session, 0, response=False, context=context)
+  with pytest.raises(error, match=re.escape(message)):
+    engine.select(session_after((1,), (True,), excluded=(7,)), rng=0)
+  assert control.calls == []
 
 
-def test_apply_response_rejects_an_item_the_session_excluded(item_bank) -> None:
-  """A response to an item in the session's excluded items raises ExcludedItemError and changes nothing.
-
-  Fails if the engine administers an item that the exposure control declined for the rest of the test, if it raises
-  a plain ValueError that an application cannot tell from a bad index, or if the rejected step records the item in
-  the session or the tracker.
-  """
-  tracker = ExposureTracker(item_bank.n_items)
-  context = RunContext(rng=np.random.default_rng(0), exposure_tracker=tracker)
-  engine = CatEngine(
-    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False)
-  )
-  session = engine.start_session(session_id=0, context=context)
-  session.excluded_items.append(3)
-
-  with pytest.raises(ExcludedItemError, match="Item 3 is excluded from this session"):
-    engine.apply_response(session, 3, response=True, context=context)
-
-  assert (session.administered_items, session.responses, session.excluded_items) == ([], [], [3])
-  assert int(tracker.counts[3]) == 0
-
-
-def test_step_rejects_an_excluded_item_from_the_selector_before_asking_for_a_response(item_bank) -> None:
-  """A selector that proposes an item the session excluded raises ExcludedItemError before the provider is asked.
-
-  Fails if step shows a live examinee an item withheld from them, such as one seen in an earlier attempt, or administers
-  it.
-  """
-  provider = RecordingResponseProvider()
-  engine = CatEngine(
-    item_bank, RecordingInitializer(0.0), RecordingSelector(7), RecordingEstimator(0.0), RecordingStopper(False)
-  )
-  context = RunContext(rng=np.random.default_rng(0))
-  session = engine.start_session(session_id=0, context=context)
-  session.excluded_items.append(7)
-
-  with pytest.raises(ExcludedItemError, match="Item 7 is excluded"):
-    engine.step(session, provider, context)
-
-  assert provider.calls == []
-  assert session.administered_items == []
-
-
-def test_a_session_rebuilt_with_excluded_items_is_never_given_them(item_bank) -> None:
-  """A session rebuilt from a snapshot keeps its excluded items, and the engine passes them over for the rest of it.
-
-  The session had item 1 and excluded items 0 and 2; the lowest-index selector then gives 3 and 4. Fails if the
-  snapshot or the rebuilt session drops the exclusions, or the engine does not pass them to the selector: the
-  session would get items 0 and 2.
-  """
-  engine = CatEngine(item_bank, HalfInitializer(), LowestIndexSelector(), CorrectCountEstimator(), ThreeItemStopper())
-  context = RunContext(rng=np.random.default_rng(0))
-  session = engine.start_session(0, context)
-  engine.apply_response(session, 1, response=True, context=context)
-  session.excluded_items.extend([0, 2])
-  snapshot = session.snapshot()
-
-  rebuilt = CatSessionState(**{field.name: getattr(snapshot, field.name) for field in dataclasses.fields(snapshot)})
-  engine.run_session(rebuilt, FixedResponseProvider(True), context)
-
-  assert rebuilt.administered_items == [1, 3, 4]
-  assert rebuilt.excluded_items == [0, 2]
-
-
-def test_step_ends_a_session_whose_initial_state_satisfies_the_stopper(item_bank) -> None:
-  """A stopper satisfied before the first item ends the session without selecting one.
-
-  Fails if the stopper is not asked about the initial state, so the session gets an item it should
-  not, or if the terminal step result misreports the session.
-  """
-  selector = RecordingSelector(item_id=0)
-  engine = CatEngine(item_bank, RecordingInitializer(0.4), selector, RecordingEstimator(0.0), RecordingStopper(True))
-  context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, context=context)
-
-  result = engine.step(session, FixedResponseProvider(True), context)
-
-  assert selector.seen is None
-  assert (result.stopped, result.selected_item_id, result.response) == (True, None, None)
-  assert result.current_theta == pytest.approx(0.4)
-  assert result.stop_reason is StopReason.STOPPER
-  assert result.session.stop_reason is StopReason.STOPPER
-  assert session.stop_reason is StopReason.STOPPER
-
-
-def test_select_next_ends_the_session_when_the_selector_has_no_item(item_bank) -> None:
-  """A selector that raises ``NoItemsAvailableError`` ends the session with ``NO_ITEMS``.
-
-  Fails if select_next lets the error escape, or returns None, while leaving the session in progress: a manual loop
-  then had to copy step's handling, and notebook 02's did not.
-  """
-  engine = CatEngine(
-    item_bank, RecordingInitializer(0.0), ExhaustedSelector(), RecordingEstimator(0.0), RecordingStopper(False)
-  )
-  context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, context=context)
-
-  assert engine.select_next(session, context) is None
-  assert session.stop_reason is StopReason.NO_ITEMS
-
-
-def test_a_declined_item_is_excluded_for_the_rest_of_the_test(item_bank) -> None:
+def test_a_declined_item_is_excluded_for_the_rest_of_the_test(item_bank: ItemBank) -> None:
   """An item the exposure control declines joins the session's excluded items and is never proposed again.
 
   The lowest-index selector proposes item 0 first at every step; the control declines it once, and the session gives
@@ -1039,202 +768,128 @@ def test_a_declined_item_is_excluded_for_the_rest_of_the_test(item_bank) -> None
   0 at every step, the control would be asked about it three times, and the session would keep no record of it.
   """
   control = DecliningControl(declines=frozenset({0}))
-  engine = CatEngine(
-    item_bank,
-    HalfInitializer(),
-    LowestIndexSelector(),
-    CorrectCountEstimator(),
-    ThreeItemStopper(),
-    exposure_control=control,
-  )
-  context = RunContext(rng=np.random.default_rng(0))
-  session = engine.start_session(0, context)
 
-  engine.run_session(session, FixedResponseProvider(True), context)
+  session = run(counting_engine(item_bank, control), lambda item, session: True)
 
-  assert session.administered_items == [1, 2, 3]
-  assert session.excluded_items == [0]
-  assert [item_id for item_id, _, _ in control.calls] == [0, 1, 2, 3]
+  assert session.administered_items == (1, 2, 3)
+  assert session.excluded_items == (0,)
+  assert [item for item, _, _ in control.calls] == [0, 1, 2, 3]
 
 
-def test_the_control_sees_each_proposal_with_the_declines_so_far_at_the_same_position(item_bank) -> None:
+def test_the_control_sees_each_proposal_with_the_declines_so_far_at_the_same_position(item_bank: ItemBank) -> None:
   """Each proposal reaches the control in a context that adds the selection's declines to the session's exclusions.
 
   The session gave item 5 and had excluded item 7; the control declines items 0 and 1, so the selector proposes 0, 1
   and 2. Fails if a later proposal's context drops the earlier declines (the selector would propose 0 again), replaces
-  the session's own exclusions, or moves the test position.
+  the session's own exclusions, or moves the test position, or if select does not return the declines.
   """
   control = DecliningControl(declines=frozenset({0, 1}))
-  engine = CatEngine(
-    item_bank,
-    HalfInitializer(),
-    LowestIndexSelector(),
-    CorrectCountEstimator(),
-    ThreeItemStopper(),
-    exposure_control=control,
-  )
-  context = RunContext(rng=np.random.default_rng(0))
-  session = CatSessionState(
-    session_id=0,
-    estimates=[Estimate(0.5, math.inf), Estimate(1.0, 1.0)],
-    administered_items=[5],
-    responses=[True],
-    excluded_items=[7],
-  )
+  session = session_after((5,), (True,), excluded=(7,))
 
-  assert engine.select_next(session, context) == 2
+  selection = counting_engine(item_bank, control).select(session, rng=0)
+
   assert control.calls == [(0, (7,), (5,)), (1, (7, 0), (5,)), (2, (7, 0, 1), (5,))]
-  assert session.excluded_items == [7, 0, 1]
+  assert (selection.item, selection.declined) == (2, (0, 1))
+  assert selection.session == dataclasses.replace(session, excluded_items=(7, 0, 1))
 
 
 def test_a_session_whose_remaining_items_are_all_declined_ends_with_no_items() -> None:
   """When the control declines every item left, the session ends with NO_ITEMS and keeps the declines.
 
   On a 4-item bank where item 2 was given, the control declines 0, 1 and 3 in turn. Fails if the engine loops
-  forever, lets NoItemsAvailableError escape, ends the session without recording the items it declined, or reports
-  it stopped by the stopper.
+  forever, lets NoItemsAvailableError escape, ends the session without recording or returning the items it declined,
+  or reports it stopped by the stopper.
   """
   bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0]] * 4))
-  engine = CatEngine(
-    bank,
-    HalfInitializer(),
-    LowestIndexSelector(),
-    CorrectCountEstimator(),
-    ThreeItemStopper(),
-    exposure_control=DecliningControl(declines=frozenset(range(4))),
-  )
-  context = RunContext(rng=np.random.default_rng(0))
-  session = CatSessionState(
-    session_id=0, estimates=[Estimate(0.5, math.inf), Estimate(1.0, 1.0)], administered_items=[2], responses=[True]
-  )
+  engine = counting_engine(bank, DecliningControl(declines=frozenset(range(4))))
 
-  assert engine.select_next(session, context) is None
-  assert session.stop_reason is StopReason.NO_ITEMS
-  assert session.excluded_items == [0, 1, 3]
+  selection = engine.select(session_after((2,), (True,)), rng=0)
+
+  assert (selection.item, selection.declined) == (None, (0, 1, 3))
+  assert selection.session.stop_reason is StopReason.NO_ITEMS
+  assert selection.session.excluded_items == (0, 1, 3)
 
 
-class ControlFailingAfterADecline(BaseExposureControl):
-  """Exposure control that declines item 0 and fails on any other item."""
+class ExhaustedControl(BaseExposureControl):
+  """Exposure control that declines item 0 and then has nothing left to accept."""
 
   @override
-  def accept(self, context: StepContext, item_id: int) -> bool:
-    del context
-    if item_id == 0:
+  def accept(self, context: StepContext, item: int) -> bool:
+    if item == 0:
       return False
-    msg = "control failed"
-    raise RuntimeError(msg)
+    msg = "every remaining item is over-exposed"
+    raise NoItemsAvailableError(msg)
 
 
-def test_a_control_that_fails_after_a_decline_leaves_the_session_and_tracker_unchanged(item_bank) -> None:
-  """A selection whose control raises commits none of the declines it made before, to the session or the tracker.
+def test_a_control_with_no_item_to_accept_ends_the_session_with_no_items(item_bank: ItemBank) -> None:
+  """An exposure control that raises NoItemsAvailableError ends the session with NO_ITEMS, keeping its declines.
 
-  The control declines item 0, then fails on item 1. Fails if item 0 stays excluded or counted as proposed although
-  the selection never finished: retrying the step would give another item than a run in which the control had not
-  failed, and the proposal would be counted again on the retry.
+  Fails if the error escapes select: a simulation run would then abort at that examinee, as it did not before.
   """
-  engine = CatEngine(
-    item_bank,
-    HalfInitializer(),
-    LowestIndexSelector(),
-    CorrectCountEstimator(),
-    ThreeItemStopper(),
-    exposure_control=ControlFailingAfterADecline(),
-  )
-  tracker = ExposureTracker(item_bank.n_items)
-  context = RunContext(rng=np.random.default_rng(0), exposure_tracker=tracker)
-  session = engine.start_session(0, context)
+  selection = counting_engine(item_bank, ExhaustedControl()).select(Session(estimates=(INITIAL,)), rng=0)
 
-  with pytest.raises(RuntimeError, match="control failed"):
-    engine.select_next(session, context)
-
-  assert session.excluded_items == []
-  assert session.stop_reason is None
-  assert int(tracker.proposals.sum()) == 0
+  assert (selection.item, selection.declined) == (None, (0,))
+  assert (selection.session.excluded_items, selection.session.stop_reason) == ((0,), StopReason.NO_ITEMS)
 
 
-def test_selecting_again_before_the_response_counts_no_proposal_twice(item_bank) -> None:
-  """A second select_next before the answer, as on a page reload, adds nothing to the tracker's proposals.
-
-  The control declines item 0, so both calls give item 1; after its response, items 0 and 1 have one proposal each.
-  Fails if proposals are counted each time select_next returns an item (item 1 would have two, and its proposal
-  rate could exceed 1) or if the decline is counted again.
-  """
-  engine = CatEngine(
-    item_bank,
-    HalfInitializer(),
-    LowestIndexSelector(),
-    CorrectCountEstimator(),
-    ThreeItemStopper(),
-    exposure_control=DecliningControl(declines=frozenset({0})),
-  )
-  tracker = ExposureTracker(item_bank.n_items)
-  context = RunContext(rng=np.random.default_rng(0), exposure_tracker=tracker)
-  session = engine.start_session(0, context)
-
-  assert engine.select_next(session, context) == 1
-  assert engine.select_next(session, context) == 1
-  engine.apply_response(session, 1, response=True, context=context)
-
-  assert tracker.proposals[:3].tolist() == [1, 1, 0]
-  assert tracker.counts[:3].tolist() == [0, 1, 0]
-  assert int(tracker.proposals.sum()) == 2
-
-
-def test_a_selector_proposing_a_declined_item_again_raises_instead_of_looping(item_bank) -> None:
+def test_a_selector_proposing_a_declined_item_again_raises_instead_of_looping(item_bank: ItemBank) -> None:
   """A selector that ignores excluded_items and proposes the item just declined raises ExcludedItemError.
 
   The selector always proposes item 3, which the control declines. Fails if the engine asks the control about item 3
   again (forever, but for the stub's limit), or hands a declined item to the examinee.
   """
   control = DecliningControl(declines=frozenset({3}))
-  engine = CatEngine(
-    item_bank,
-    HalfInitializer(),
-    RecordingSelector(3),
-    CorrectCountEstimator(),
-    ThreeItemStopper(),
-    exposure_control=control,
-  )
-  context = RunContext(rng=np.random.default_rng(0))
-  session = engine.start_session(0, context)
+  engine = stub_engine(item_bank, selector=RecordingSelector(3), exposure_control=control)
 
-  with pytest.raises(ExcludedItemError, match="Item 3 is excluded"):
-    engine.select_next(session, context)
+  with pytest.raises(ExcludedItemError, match=re.escape("is 3 ('item_03'); the session excluded that item")):
+    engine.select(Session(estimates=(INITIAL,)), rng=0)
 
   assert control.calls == [(3, (), ())]
-  assert session.excluded_items == []
 
 
-def test_custom_strategies_written_against_the_base_classes_run_a_session(item_bank) -> None:
+def test_a_session_rebuilt_from_its_stored_fields_continues_like_the_original(item_bank: ItemBank) -> None:
+  """A session rebuilt from stored fields, exclusions included, takes the same next steps as the one it was stored from.
+
+  The session had item 1 and excluded items 0 and 2; the lowest-index selector then gives 3 and 4. Fails if the
+  rebuilt session drops the exclusions, or the engine does not pass them to the selector: the session would get
+  items 0 and 2.
+  """
+  engine = counting_engine(item_bank)
+  original = engine.answer(engine.start(rng=0, excluded_items=(0, 2)), 1, True, rng=0)
+  stored = {field.name: list(getattr(original, field.name)) for field in dataclasses.fields(Session)[:4]}
+
+  rebuilt = Session(**stored)  # ty: ignore[invalid-argument-type]
+  finished = run(engine, lambda item, session: True, start=rebuilt)
+
+  assert rebuilt == original
+  assert finished.administered_items == (1, 3, 4)
+  assert finished.excluded_items == (0, 2)
+
+
+def test_custom_strategies_written_against_the_base_classes_run_a_session(item_bank: ItemBank) -> None:
   """Strategies that subclass the base classes and read only their documented inputs run a whole session.
 
   With every response correct, the estimates count them, 1, 2 and 3, after the initial 0.5, and the session stops at
   three items. Fails if the engine calls a strategy with anything but its documented signature, or gives it a context
   without the session's items and responses.
   """
-  engine = CatEngine(item_bank, HalfInitializer(), LowestIndexSelector(), CorrectCountEstimator(), ThreeItemStopper())
-  context = RunContext(rng=np.random.default_rng(0))
-  session = engine.start_session(0, context)
+  session = run(counting_engine(item_bank), lambda item, session: True)
 
-  engine.run_session(session, FixedResponseProvider(True), context)
-
-  assert session.administered_items == [0, 1, 2]
+  assert session.administered_items == (0, 1, 2)
   assert session.theta_history == (0.5, 1.0, 2.0, 3.0)
   assert session.stop_reason is StopReason.STOPPER
 
 
-MIXED_PATTERN = [True, False, False, True, True, False]
+MIXED_PATTERN = (True, False, False, True, True, False)
 
 
-def _run_scripted_session(item_bank: ItemBank, selector: BaseSelector, estimator: BaseEstimator) -> CatSessionState:
+def _scripted_session(item_bank: ItemBank, selector: BaseSelector, estimator: BaseEstimator) -> Session:
   """Return a session that answered MIXED_PATTERN to the items the selector chose, from an initial estimate of 0."""
   engine = CatEngine(item_bank, RecordingInitializer(0.0), selector, estimator, MaxLengthStopper(len(MIXED_PATTERN)))
-  context = RunContext(rng=np.random.default_rng(0))
-  session = engine.start_session(0, context)
-  return engine.run_session(session, ScriptedResponseProvider(MIXED_PATTERN), context)
+  return run(engine, lambda item, session: MIXED_PATTERN[len(session.responses)])
 
 
-def test_a_session_records_the_estimate_the_estimator_returns_for_each_step(item_bank) -> None:
+def test_a_session_records_the_estimate_the_estimator_returns_for_each_step(item_bank: ItemBank) -> None:
   """Each recorded Estimate, evaluation count included, is what the estimator returns for that step's context.
 
   The context of step k is rebuilt here from the session's first k items and responses and its estimate k - 1, and
@@ -1243,7 +898,7 @@ def test_a_session_records_the_estimate_the_estimator_returns_for_each_step(item
   Dodd's step, which evaluates nothing; every later step searches, so its count is not 0.
   """
   estimator = NumericalSearchEstimator()
-  session = _run_scripted_session(item_bank, MaxInfoSelector(), estimator)
+  session = _scripted_session(item_bank, MaxInfoSelector(), estimator)
   items, responses, estimates = session.administered_items, session.responses, session.estimates
 
   direct = [
@@ -1253,12 +908,12 @@ def test_a_session_records_the_estimate_the_estimator_returns_for_each_step(item
     for k in range(1, len(responses) + 1)
   ]
 
-  assert estimates[0] == Estimate(0.0, math.inf, 0)
-  assert estimates[1:] == direct
+  assert estimates[0] == INITIAL
+  assert list(estimates[1:]) == direct
   assert all(estimate.evaluations for estimate in direct[1:])
 
 
-def test_mei_look_ahead_adds_nothing_to_the_recorded_estimates(item_bank) -> None:
+def test_mei_look_ahead_adds_nothing_to_the_recorded_estimates(item_bank: ItemBank) -> None:
   """A session selected by MEISelector records what a session given the same items without look-ahead records.
 
   MEISelector estimates twice per candidate item with the engine's own estimator here. Fails if those look-ahead
@@ -1266,9 +921,26 @@ def test_mei_look_ahead_adds_nothing_to_the_recorded_estimates(item_bank) -> Non
   change the recorded estimates.
   """
   estimator = NumericalSearchEstimator()
-  mei = _run_scripted_session(item_bank, MEISelector(estimator=estimator), estimator)
+  mei = _scripted_session(item_bank, MEISelector(estimator=estimator), estimator)
 
-  replay = _run_scripted_session(item_bank, LinearSelector(mei.administered_items), estimator)
+  replay = _scripted_session(item_bank, LinearSelector(list(mei.administered_items)), estimator)
 
   assert replay.administered_items == mei.administered_items
   assert replay.estimates == mei.estimates
+
+
+def test_the_rates_select_is_given_are_the_rates_the_selector_caps_against() -> None:
+  """With r_max 0.5 and rates of 0.5 for items 0 and 1, MaxInfoSelector passes over them for item 2 at theta 0.
+
+  At theta 0 the items rank 0, 1, 2, 3 by information. Fails if select drops the rates, so the selector takes item 0,
+  or hands it rates other than the ones given.
+  """
+  bank = ItemBank(np.array([[a, 0.0, 0.0, 1.0] for a in (2.0, 1.5, 1.0, 0.5)]))
+  engine = CatEngine(
+    bank, RecordingInitializer(0.0), MaxInfoSelector(r_max=0.5), RecordingEstimator(0.0), MaxLengthStopper(4)
+  )
+  rates: FloatArray = np.array([0.5, 0.5, 1 / 3, 0.0])
+  session = engine.start(rng=0)
+
+  assert engine.select(session, rng=0).item == 0
+  assert engine.select(session, rng=0, exposure_rates=rates).item == 2

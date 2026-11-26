@@ -1,10 +1,11 @@
 # Introduction
 
-{py:mod}`catsim` is a Python package for computerized adaptive testing (CAT). It runs adaptive
-tests one item at a time, in an application, and simulates them on examinees whose abilities are
-known, to compare testing methods. This page introduces CAT and the item response theory behind it,
-and ends with a map of catsim's parts. {doc}`terms-and-notation` lists the terms and symbols these
-pages use.
+{py:mod}`catsim` is a Python package for computerized adaptive testing (CAT). It computes the
+steps of an adaptive test, from the choice of each item to the decision to stop, and simulates
+tests on examinees whose abilities are known, to compare testing methods. An application that
+gives adaptive tests can use those computations as its core. This page introduces CAT and the item
+response theory behind it, and ends with a map of catsim's parts. {doc}`terms-and-notation` lists
+the terms and symbols these pages use.
 
 ## What a Test Measures
 
@@ -41,7 +42,7 @@ the standard normal distribution $N(0, 1)$, under which about 99.99% of examinee
 and $4$. The ability cannot be observed, so it is estimated from the responses: the *ability
 estimate* $\hat{\theta}$, which tends to get closer to the true $\theta$ as the test gets longer.
 By default, {py:mod}`catsim`'s estimators keep their estimates within $[-6, 6]$, wider than any plausible
-examinee or item bank ({doc}`/adr/0012-ability-scale-and-extreme-patterns`).
+examinee or item bank ({doc}`/adr/0018-ability-scale-and-extreme-patterns`).
 
 Under the logistic models, item $i$ has up to four parameters:
 
@@ -94,7 +95,7 @@ figure draws both curves for one item: the item is most informative near its dif
     from catsim.plot import PlotType, item_curve
 
     item_bank = ItemBank.generate(1, rng=0)
-    item_curve(item_bank[0], kind=PlotType.BOTH)
+    item_curve(0, item_bank, kind=PlotType.BOTH)
     plt.show()
 ```
 
@@ -140,7 +141,9 @@ ItemBank(n_items=5, model=4PL)
 
 These examples draw five items under each logistic model. Whatever the model, the item matrix has
 four columns. In the last example, the discrimination and the difficulty have a correlation of
-$0.5$, which simulations may need {cite:p}`Chang2001`.
+$0.5$, which simulations may need {cite:p}`Chang2001`. Each item also has a name, so that results
+can say which item is which; a calibrated bank and its names can be read from a CSV file
+({py:class}`~catsim.ItemBank`).
 
 ## Computerized Adaptive Tests
 
@@ -178,7 +181,7 @@ phase.
 #### Initialization
 
 The initializer runs once per examinee and sets the initial ability estimate $\hat\theta_0$. It may
-give every examinee the same value ({py:class}`catsim.initialization.FixedPointInitializer`), draw
+give every examinee the same value ({py:class}`catsim.initialization.FixedPointInitializer`), or draw
 one from a uniform or a normal distribution ({py:class}`catsim.initialization.UniformInitializer`,
 {py:class}`catsim.initialization.NormalInitializer`). The literature also starts at other points,
 such as the ability at which the item bank is most informative.
@@ -202,8 +205,8 @@ $$
 where $q_i$ is the number of examinees given item $i$ and $N$ the number of examinees. An item given
 to many examinees becomes known to future ones. Exposure-control methods keep the rates below a cap
 $r_{\max}$ or choose among the best items at random
-({doc}`selection techniques </api/techniques/selection/index>`). A simulation reports the rates as
-{py:attr}`~catsim.SimulationResult.exposure_rates`.
+({doc}`selection techniques </api/techniques/selection/index>`). A simulation reports the rates with
+{py:meth}`~catsim.SimulationResult.exposure_rates`.
 
 In {py:mod}`catsim`, selectors are in the {py:mod}`catsim.selection` module.
 
@@ -211,8 +214,8 @@ In {py:mod}`catsim`, selectors are in the {py:mod}`catsim.selection` module.
 
 After each response, the estimator updates the ability estimate $\hat{\theta}$ from the responses
 so far, each correct or incorrect, and the parameters of the items answered. In {py:mod}`catsim`,
-the responses are a list of booleans, `True` for a correct response, one for each administered
-item, in the order they were given:
+the responses are a sequence with one entry for each administered item, in the order they were
+given: `True` or 1 for a correct response, `False` or 0 for an incorrect one.
 
 ```pycon
 >>> responses = [True, True, False, True, False]
@@ -238,22 +241,35 @@ holds, after an optional minimum number of items.
 
 In {py:mod}`catsim`, stoppers are in the {py:mod}`catsim.stopping` module.
 
-## Architecture
+## catsim's Parts
 
 ```{mermaid}
 flowchart LR
-    bank[(Item bank)] --> engine[CatEngine]
+    bank[(ItemBank)] --> engine[CatEngine]
     strategies["Strategies:<br>initializer, selector,<br>estimator, stopper"] --> engine
-    app([Your application]) -- "one session,<br>item by item" --> engine
-    runner[SimulationRunner] -- "one session per<br>simulated examinee" --> engine
-    runner -- returns --> result[SimulationResult]
+    app([Your application]) -- "start, select, answer:<br>one session, step by step" --> engine
+    simulate[simulate] -- "one session per<br>examinee" --> engine
+    simulate -- returns --> result[SimulationResult]
 ```
 
-A {py:class}`~catsim.CatEngine` holds an item bank and four strategies, one for each phase of the
-lifecycle above, and runs each examinee's test one item at a time. An application asks it for each
-item and gives it each response ({doc}`live-sessions`). A {py:class}`~catsim.SimulationRunner` gives
-the same test to simulated examinees whose true abilities are known, and returns a
-{py:class}`~catsim.SimulationResult` that compares the final estimates with those abilities
-({doc}`running-simulations`). {doc}`reproducibility` shows how to seed a simulation study so that
-it repeats, and {doc}`extending` how to write a strategy of your own.
-{doc}`/adr/0003-explicit-cat-engine` records why catsim is built around the engine.
+- **The item bank.** An {py:class}`~catsim.ItemBank` holds the calibrated items, their parameters
+  and their names, and never changes.
+- **The engine and the session.** A {py:class}`~catsim.CatEngine` holds an item bank and the
+  strategies of a test. Its three steps follow the lifecycle above: `start` sets the initial
+  estimate, `select` chooses the next item and `answer` records a response, updates the estimate
+  and asks the stopper whether the test ends. `start` returns a {py:class}`~catsim.Session`, the
+  record of one examinee's test so far, and `select` and `answer` take one and return the next.
+  catsim keeps nothing between steps:
+  an application that gives tests keeps its sessions and calls the steps as its examinees answer
+  ({doc}`embedding-catsim`).
+- **The strategies.** One for each phase, and an optional exposure control that may decline the
+  item the selector proposes. The technique pages describe the built-in ones
+  ({doc}`/api/techniques/index`), and a method author can write others ({doc}`extending`).
+- **Simulations and their results.** {py:func}`~catsim.simulate` runs one session for each simulated
+  examinee, given by a true ability or by recorded responses, and returns a
+  {py:class}`~catsim.SimulationResult`, whose tables and metrics compare the final estimates with
+  the true abilities ({doc}`running-simulations`). {doc}`reproducibility` shows how to seed a study
+  so that it repeats.
+
+{doc}`/adr/0006-steps-from-explicit-inputs` records why each step takes everything it needs as an
+input.

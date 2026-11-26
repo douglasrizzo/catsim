@@ -13,7 +13,7 @@ from scipy.integrate import IntegrationWarning, quad
 from scipy.optimize import brentq, minimize_scalar
 from scipy.special import expit
 
-from catsim import Estimate, StepContext, irt
+from catsim import Estimate, ItemBank, StepContext, irt
 from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,
@@ -28,7 +28,6 @@ from catsim.estimation import (
   posterior_variance,
   uniform_log_prior,
 )
-from catsim.item_bank import ItemBank
 from tests.contexts import make_context
 
 
@@ -232,6 +231,34 @@ def test_repr_shows_a_given_grid_and_prior_rather_than_none() -> None:
 
   assert repr(EAPEstimator(grid=grid, log_prior=prior)) == f"EAPEstimator(grid={grid!r}, log_prior={prior!r})"
   assert repr(MAPEstimator(log_prior=prior)) == f"MAPEstimator(log_prior={prior!r}, tol=1e-06, bounds=(-6.0, 6.0))"
+
+
+@pytest.mark.parametrize(
+  "source",
+  [
+    "EAPEstimator(grid=None, log_prior=normal_log_prior(mean=0.5, sd=2.0))",
+    "MAPEstimator(log_prior=uniform_log_prior(low=-3.0, high=3.0), tol=0.001, bounds=(-4.0, 4.0))",
+  ],
+)
+def test_repr_of_a_built_in_prior_is_its_factory_call(source: str) -> None:
+  """A built-in prior's repr is the call that builds it, so an EAP or MAP repr that shows one evaluates back to it.
+
+  The priors were closures, whose repr is an address such as ``<function normal_log_prior.<locals>._log_prior at ...>``.
+  """
+  namespace = vars(importlib.import_module("catsim.estimation"))
+
+  assert repr(eval(source, namespace)) == source
+
+
+def test_prior_from_numpy_floats_has_a_repr_that_evaluates() -> None:
+  """A prior that kept NumPy floats as given printed ``np.float64(0.5)``, which catsim.estimation cannot evaluate."""
+  normal = normal_log_prior(np.float64(0.5), np.float64(2.0))
+  uniform = uniform_log_prior(np.float64(-3.0), np.float64(3.0))
+
+  assert (repr(normal), repr(uniform)) == (
+    "normal_log_prior(mean=0.5, sd=2.0)",
+    "uniform_log_prior(low=-3.0, high=3.0)",
+  )
 
 
 def test_repr_table_covers_every_exported_estimator() -> None:
@@ -530,7 +557,7 @@ class TestBayesianHelpers:
     """Responses without matching items should raise, not silently return the prior."""
     grid = QuadratureGrid.uniform()
 
-    with pytest.raises(ValueError, match="same length"):
+    with pytest.raises(ValueError, match="there must be one response per item"):
       posterior([True, False], np.empty((0, 4)), grid, normal_log_prior())
 
   def test_posterior_shifts_positive_after_correct_response(self) -> None:

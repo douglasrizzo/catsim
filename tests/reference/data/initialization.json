@@ -1,0 +1,131 @@
+{
+  "about": "Reference outputs of catsim, recorded by tests/reference/generate.py from the source that provenance.json names. They change only where an ADR changes a result, and the pull request that changes them names the ADR and the outputs. Floats compare to 1e-12 of their magnitude or unit, and the estimates of a numerical search, away from the recording environment, to its tolerance; everything else exactly (see tests/reference/records.py).",
+  "cases": {
+    "FixedPointInitializer(-1.3)|seed=0": [
+      -1.3,
+      -1.3,
+      -1.3,
+      -1.3,
+      -1.3
+    ],
+    "FixedPointInitializer(-1.3)|seed=1": [
+      -1.3,
+      -1.3,
+      -1.3,
+      -1.3,
+      -1.3
+    ],
+    "FixedPointInitializer(-1.3)|seed=42": [
+      -1.3,
+      -1.3,
+      -1.3,
+      -1.3,
+      -1.3
+    ],
+    "FixedPointInitializer(0.7)|seed=0": [
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7
+    ],
+    "FixedPointInitializer(0.7)|seed=1": [
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7
+    ],
+    "FixedPointInitializer(0.7)|seed=42": [
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7
+    ],
+    "NormalInitializer()|seed=0": [
+      0.1257302210933933,
+      -0.1321048632913019,
+      0.6404226504432821,
+      0.10490011715303971,
+      -0.535669373161111
+    ],
+    "NormalInitializer()|seed=1": [
+      0.345584192064786,
+      0.8216181435011584,
+      0.33043707618338714,
+      -1.303157231604361,
+      0.9053558666731177
+    ],
+    "NormalInitializer()|seed=42": [
+      0.30471707975443135,
+      -1.0399841062404955,
+      0.7504511958064572,
+      0.9405647163912139,
+      -1.9510351886538364
+    ],
+    "NormalInitializer(0.5, 2.0)|seed=0": [
+      0.7514604421867865,
+      0.23579027341739622,
+      1.7808453008865641,
+      0.7098002343060794,
+      -0.5713387463222219
+    ],
+    "NormalInitializer(0.5, 2.0)|seed=1": [
+      1.191168384129572,
+      2.143236287002317,
+      1.1608741523667743,
+      -2.106314463208722,
+      2.3107117333462357
+    ],
+    "NormalInitializer(0.5, 2.0)|seed=42": [
+      1.1094341595088628,
+      -1.579968212480991,
+      2.0009023916129145,
+      2.3811294327824277,
+      -3.402070377307673
+    ],
+    "UniformInitializer()|seed=0": [
+      0.1369616873214543,
+      -0.2302132862361297,
+      -0.4590264760638053,
+      -0.4834723644714709,
+      0.3132702392002724
+    ],
+    "UniformInitializer()|seed=1": [
+      0.011821624700256717,
+      0.4504636963259353,
+      -0.35584038728036627,
+      0.44864944713724386,
+      -0.18816854798951455
+    ],
+    "UniformInitializer()|seed=42": [
+      0.27395604855596334,
+      -0.06112156024794768,
+      0.35859791991138246,
+      0.1973680290593639,
+      -0.40582265211235047
+    ],
+    "UniformInitializer(-2.0, 3.0)|seed=0": [
+      1.1848084366072715,
+      -0.6510664311806484,
+      -1.7951323803190267,
+      -1.9173618223573545,
+      2.066351196001362
+    ],
+    "UniformInitializer(-2.0, 3.0)|seed=1": [
+      0.5591081235012836,
+      2.7523184816296764,
+      -1.2792019364018312,
+      2.743247235686219,
+      -0.4408427399475727
+    ],
+    "UniformInitializer(-2.0, 3.0)|seed=42": [
+      1.8697802427798167,
+      0.1943921987602616,
+      2.292989599556912,
+      1.4868401452968194,
+      -1.5291132605617523
+    ]
+  }
+}

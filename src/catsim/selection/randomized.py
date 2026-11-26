@@ -2,17 +2,17 @@
 
 import operator
 
-from typing_extensions import override
-
+from ..compat import override
 from ..context import StepContext
 from .base import BaseSelector, best_pool, remaining
 
 
 class RandomSelector(BaseSelector):
-  """Selector that randomly selects items for application.
+  """Draw each item uniformly at random from the remaining items, a non-adaptive baseline.
 
-  This selector is useful for baseline comparisons or for studying the impact of
-  item selection strategies.
+  Notes
+  -----
+  For full algorithmic details, see :doc:`/api/techniques/selection/random-selector`.
   """
 
   @override
@@ -122,6 +122,10 @@ class RandomesqueSelector(BaseSelector):
       If ``bin_size`` is not an integer.
   ValueError
       If ``bin_size`` is smaller than 1.
+
+  Notes
+  -----
+  For full algorithmic details, see :doc:`/api/techniques/selection/randomesque-selector`.
   """
 
   @override

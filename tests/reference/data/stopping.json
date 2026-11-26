@@ -1,0 +1,5457 @@
+{
+  "about": "Reference outputs of catsim, recorded by tests/reference/generate.py from the source that provenance.json names. They change only where an ADR changes a result, and the pull request that changes them names the ADR and the outputs. Floats compare to 1e-12 of their magnitude or unit, and the estimates of a numerical search, away from the recording environment, to its tolerance; everything else exactly (see tests/reference/records.py).",
+  "cases": {
+    "ConfidenceIntervalStopper((-1, 0, 1))": {
+      "n=0|theta=-0.2|se=inf": false,
+      "n=0|theta=-1.5|se=inf": false,
+      "n=0|theta=0.05|se=inf": false,
+      "n=0|theta=0.9|se=inf": false,
+      "n=0|theta=2.2|se=inf": false,
+      "n=1|theta=-0.2|se=0.1": true,
+      "n=1|theta=-0.2|se=0.29": false,
+      "n=1|theta=-0.2|se=0.3": false,
+      "n=1|theta=-0.2|se=0.31": false,
+      "n=1|theta=-0.2|se=0.4": false,
+      "n=1|theta=-0.2|se=0.5": false,
+      "n=1|theta=-0.2|se=1.2": false,
+      "n=1|theta=-1.5|se=0.1": true,
+      "n=1|theta=-1.5|se=0.29": false,
+      "n=1|theta=-1.5|se=0.3": false,
+      "n=1|theta=-1.5|se=0.31": false,
+      "n=1|theta=-1.5|se=0.4": false,
+      "n=1|theta=-1.5|se=0.5": false,
+      "n=1|theta=-1.5|se=1.2": false,
+      "n=1|theta=0.05|se=0.1": false,
+      "n=1|theta=0.05|se=0.29": false,
+      "n=1|theta=0.05|se=0.3": false,
+      "n=1|theta=0.05|se=0.31": false,
+      "n=1|theta=0.05|se=0.4": false,
+      "n=1|theta=0.05|se=0.5": false,
+      "n=1|theta=0.05|se=1.2": false,
+      "n=1|theta=0.9|se=0.1": false,
+      "n=1|theta=0.9|se=0.29": false,
+      "n=1|theta=0.9|se=0.3": false,
+      "n=1|theta=0.9|se=0.31": false,
+      "n=1|theta=0.9|se=0.4": false,
+      "n=1|theta=0.9|se=0.5": false,
+      "n=1|theta=0.9|se=1.2": false,
+      "n=1|theta=2.2|se=0.1": true,
+      "n=1|theta=2.2|se=0.29": true,
+      "n=1|theta=2.2|se=0.3": true,
+      "n=1|theta=2.2|se=0.31": true,
+      "n=1|theta=2.2|se=0.4": true,
+      "n=1|theta=2.2|se=0.5": true,
+      "n=1|theta=2.2|se=1.2": false,
+      "n=3|theta=-0.2|se=0.1": true,
+      "n=3|theta=-0.2|se=0.29": false,
+      "n=3|theta=-0.2|se=0.3": false,
+      "n=3|theta=-0.2|se=0.31": false,
+      "n=3|theta=-0.2|se=0.4": false,
+      "n=3|theta=-0.2|se=0.5": false,
+      "n=3|theta=-0.2|se=1.2": false,
+      "n=3|theta=-1.5|se=0.1": true,
+      "n=3|theta=-1.5|se=0.29": false,
+      "n=3|theta=-1.5|se=0.3": false,
+      "n=3|theta=-1.5|se=0.31": false,
+      "n=3|theta=-1.5|se=0.4": false,
+      "n=3|theta=-1.5|se=0.5": false,
+      "n=3|theta=-1.5|se=1.2": false,
+      "n=3|theta=0.05|se=0.1": false,
+      "n=3|theta=0.05|se=0.29": false,
+      "n=3|theta=0.05|se=0.3": false,
+      "n=3|theta=0.05|se=0.31": false,
+      "n=3|theta=0.05|se=0.4": false,
+      "n=3|theta=0.05|se=0.5": false,
+      "n=3|theta=0.05|se=1.2": false,
+      "n=3|theta=0.9|se=0.1": false,
+      "n=3|theta=0.9|se=0.29": false,
+      "n=3|theta=0.9|se=0.3": false,
+      "n=3|theta=0.9|se=0.31": false,
+      "n=3|theta=0.9|se=0.4": false,
+      "n=3|theta=0.9|se=0.5": false,
+      "n=3|theta=0.9|se=1.2": false,
+      "n=3|theta=2.2|se=0.1": true,
+      "n=3|theta=2.2|se=0.29": true,
+      "n=3|theta=2.2|se=0.3": true,
+      "n=3|theta=2.2|se=0.31": true,
+      "n=3|theta=2.2|se=0.4": true,
+      "n=3|theta=2.2|se=0.5": true,
+      "n=3|theta=2.2|se=1.2": false,
+      "n=5|theta=-0.2|se=0.1": true,
+      "n=5|theta=-0.2|se=0.29": false,
+      "n=5|theta=-0.2|se=0.3": false,
+      "n=5|theta=-0.2|se=0.31": false,
+      "n=5|theta=-0.2|se=0.4": false,
+      "n=5|theta=-0.2|se=0.5": false,
+      "n=5|theta=-0.2|se=1.2": false,
+      "n=5|theta=-1.5|se=0.1": true,
+      "n=5|theta=-1.5|se=0.29": false,
+      "n=5|theta=-1.5|se=0.3": false,
+      "n=5|theta=-1.5|se=0.31": false,
+      "n=5|theta=-1.5|se=0.4": false,
+      "n=5|theta=-1.5|se=0.5": false,
+      "n=5|theta=-1.5|se=1.2": false,
+      "n=5|theta=0.05|se=0.1": false,
+      "n=5|theta=0.05|se=0.29": false,
+      "n=5|theta=0.05|se=0.3": false,
+      "n=5|theta=0.05|se=0.31": false,
+      "n=5|theta=0.05|se=0.4": false,
+      "n=5|theta=0.05|se=0.5": false,
+      "n=5|theta=0.05|se=1.2": false,
+      "n=5|theta=0.9|se=0.1": false,
+      "n=5|theta=0.9|se=0.29": false,
+      "n=5|theta=0.9|se=0.3": false,
+      "n=5|theta=0.9|se=0.31": false,
+      "n=5|theta=0.9|se=0.4": false,
+      "n=5|theta=0.9|se=0.5": false,
+      "n=5|theta=0.9|se=1.2": false,
+      "n=5|theta=2.2|se=0.1": true,
+      "n=5|theta=2.2|se=0.29": true,
+      "n=5|theta=2.2|se=0.3": true,
+      "n=5|theta=2.2|se=0.31": true,
+      "n=5|theta=2.2|se=0.4": true,
+      "n=5|theta=2.2|se=0.5": true,
+      "n=5|theta=2.2|se=1.2": false,
+      "n=6|theta=-0.2|se=0.1": true,
+      "n=6|theta=-0.2|se=0.29": false,
+      "n=6|theta=-0.2|se=0.3": false,
+      "n=6|theta=-0.2|se=0.31": false,
+      "n=6|theta=-0.2|se=0.4": false,
+      "n=6|theta=-0.2|se=0.5": false,
+      "n=6|theta=-0.2|se=1.2": false,
+      "n=6|theta=-1.5|se=0.1": true,
+      "n=6|theta=-1.5|se=0.29": false,
+      "n=6|theta=-1.5|se=0.3": false,
+      "n=6|theta=-1.5|se=0.31": false,
+      "n=6|theta=-1.5|se=0.4": false,
+      "n=6|theta=-1.5|se=0.5": false,
+      "n=6|theta=-1.5|se=1.2": false,
+      "n=6|theta=0.05|se=0.1": false,
+      "n=6|theta=0.05|se=0.29": false,
+      "n=6|theta=0.05|se=0.3": false,
+      "n=6|theta=0.05|se=0.31": false,
+      "n=6|theta=0.05|se=0.4": false,
+      "n=6|theta=0.05|se=0.5": false,
+      "n=6|theta=0.05|se=1.2": false,
+      "n=6|theta=0.9|se=0.1": false,
+      "n=6|theta=0.9|se=0.29": false,
+      "n=6|theta=0.9|se=0.3": false,
+      "n=6|theta=0.9|se=0.31": false,
+      "n=6|theta=0.9|se=0.4": false,
+      "n=6|theta=0.9|se=0.5": false,
+      "n=6|theta=0.9|se=1.2": false,
+      "n=6|theta=2.2|se=0.1": true,
+      "n=6|theta=2.2|se=0.29": true,
+      "n=6|theta=2.2|se=0.3": true,
+      "n=6|theta=2.2|se=0.31": true,
+      "n=6|theta=2.2|se=0.4": true,
+      "n=6|theta=2.2|se=0.5": true,
+      "n=6|theta=2.2|se=1.2": false,
+      "n=8|theta=-0.2|se=0.1": true,
+      "n=8|theta=-0.2|se=0.29": false,
+      "n=8|theta=-0.2|se=0.3": false,
+      "n=8|theta=-0.2|se=0.31": false,
+      "n=8|theta=-0.2|se=0.4": false,
+      "n=8|theta=-0.2|se=0.5": false,
+      "n=8|theta=-0.2|se=1.2": false,
+      "n=8|theta=-1.5|se=0.1": true,
+      "n=8|theta=-1.5|se=0.29": false,
+      "n=8|theta=-1.5|se=0.3": false,
+      "n=8|theta=-1.5|se=0.31": false,
+      "n=8|theta=-1.5|se=0.4": false,
+      "n=8|theta=-1.5|se=0.5": false,
+      "n=8|theta=-1.5|se=1.2": false,
+      "n=8|theta=0.05|se=0.1": false,
+      "n=8|theta=0.05|se=0.29": false,
+      "n=8|theta=0.05|se=0.3": false,
+      "n=8|theta=0.05|se=0.31": false,
+      "n=8|theta=0.05|se=0.4": false,
+      "n=8|theta=0.05|se=0.5": false,
+      "n=8|theta=0.05|se=1.2": false,
+      "n=8|theta=0.9|se=0.1": false,
+      "n=8|theta=0.9|se=0.29": false,
+      "n=8|theta=0.9|se=0.3": false,
+      "n=8|theta=0.9|se=0.31": false,
+      "n=8|theta=0.9|se=0.4": false,
+      "n=8|theta=0.9|se=0.5": false,
+      "n=8|theta=0.9|se=1.2": false,
+      "n=8|theta=2.2|se=0.1": true,
+      "n=8|theta=2.2|se=0.29": true,
+      "n=8|theta=2.2|se=0.3": true,
+      "n=8|theta=2.2|se=0.31": true,
+      "n=8|theta=2.2|se=0.4": true,
+      "n=8|theta=2.2|se=0.5": true,
+      "n=8|theta=2.2|se=1.2": false
+    },
+    "ConfidenceIntervalStopper((-2, -0.5, 0.5, 2), confidence=0.99)": {
+      "n=0|theta=-0.2|se=inf": false,
+      "n=0|theta=-1.5|se=inf": false,
+      "n=0|theta=0.05|se=inf": false,
+      "n=0|theta=0.9|se=inf": false,
+      "n=0|theta=2.2|se=inf": false,
+      "n=1|theta=-0.2|se=0.1": true,
+      "n=1|theta=-0.2|se=0.29": false,
+      "n=1|theta=-0.2|se=0.3": false,
+      "n=1|theta=-0.2|se=0.31": false,
+      "n=1|theta=-0.2|se=0.4": false,
+      "n=1|theta=-0.2|se=0.5": false,
+      "n=1|theta=-0.2|se=1.2": false,
+      "n=1|theta=-1.5|se=0.1": true,
+      "n=1|theta=-1.5|se=0.29": false,
+      "n=1|theta=-1.5|se=0.3": false,
+      "n=1|theta=-1.5|se=0.31": false,
+      "n=1|theta=-1.5|se=0.4": false,
+      "n=1|theta=-1.5|se=0.5": false,
+      "n=1|theta=-1.5|se=1.2": false,
+      "n=1|theta=0.05|se=0.1": true,
+      "n=1|theta=0.05|se=0.29": false,
+      "n=1|theta=0.05|se=0.3": false,
+      "n=1|theta=0.05|se=0.31": false,
+      "n=1|theta=0.05|se=0.4": false,
+      "n=1|theta=0.05|se=0.5": false,
+      "n=1|theta=0.05|se=1.2": false,
+      "n=1|theta=0.9|se=0.1": true,
+      "n=1|theta=0.9|se=0.29": false,
+      "n=1|theta=0.9|se=0.3": false,
+      "n=1|theta=0.9|se=0.31": false,
+      "n=1|theta=0.9|se=0.4": false,
+      "n=1|theta=0.9|se=0.5": false,
+      "n=1|theta=0.9|se=1.2": false,
+      "n=1|theta=2.2|se=0.1": false,
+      "n=1|theta=2.2|se=0.29": false,
+      "n=1|theta=2.2|se=0.3": false,
+      "n=1|theta=2.2|se=0.31": false,
+      "n=1|theta=2.2|se=0.4": false,
+      "n=1|theta=2.2|se=0.5": false,
+      "n=1|theta=2.2|se=1.2": false,
+      "n=3|theta=-0.2|se=0.1": true,
+      "n=3|theta=-0.2|se=0.29": false,
+      "n=3|theta=-0.2|se=0.3": false,
+      "n=3|theta=-0.2|se=0.31": false,
+      "n=3|theta=-0.2|se=0.4": false,
+      "n=3|theta=-0.2|se=0.5": false,
+      "n=3|theta=-0.2|se=1.2": false,
+      "n=3|theta=-1.5|se=0.1": true,
+      "n=3|theta=-1.5|se=0.29": false,
+      "n=3|theta=-1.5|se=0.3": false,
+      "n=3|theta=-1.5|se=0.31": false,
+      "n=3|theta=-1.5|se=0.4": false,
+      "n=3|theta=-1.5|se=0.5": false,
+      "n=3|theta=-1.5|se=1.2": false,
+      "n=3|theta=0.05|se=0.1": true,
+      "n=3|theta=0.05|se=0.29": false,
+      "n=3|theta=0.05|se=0.3": false,
+      "n=3|theta=0.05|se=0.31": false,
+      "n=3|theta=0.05|se=0.4": false,
+      "n=3|theta=0.05|se=0.5": false,
+      "n=3|theta=0.05|se=1.2": false,
+      "n=3|theta=0.9|se=0.1": true,
+      "n=3|theta=0.9|se=0.29": false,
+      "n=3|theta=0.9|se=0.3": false,
+      "n=3|theta=0.9|se=0.31": false,
+      "n=3|theta=0.9|se=0.4": false,
+      "n=3|theta=0.9|se=0.5": false,
+      "n=3|theta=0.9|se=1.2": false,
+      "n=3|theta=2.2|se=0.1": false,
+      "n=3|theta=2.2|se=0.29": false,
+      "n=3|theta=2.2|se=0.3": false,
+      "n=3|theta=2.2|se=0.31": false,
+      "n=3|theta=2.2|se=0.4": false,
+      "n=3|theta=2.2|se=0.5": false,
+      "n=3|theta=2.2|se=1.2": false,
+      "n=5|theta=-0.2|se=0.1": true,
+      "n=5|theta=-0.2|se=0.29": false,
+      "n=5|theta=-0.2|se=0.3": false,
+      "n=5|theta=-0.2|se=0.31": false,
+      "n=5|theta=-0.2|se=0.4": false,
+      "n=5|theta=-0.2|se=0.5": false,
+      "n=5|theta=-0.2|se=1.2": false,
+      "n=5|theta=-1.5|se=0.1": true,
+      "n=5|theta=-1.5|se=0.29": false,
+      "n=5|theta=-1.5|se=0.3": false,
+      "n=5|theta=-1.5|se=0.31": false,
+      "n=5|theta=-1.5|se=0.4": false,
+      "n=5|theta=-1.5|se=0.5": false,
+      "n=5|theta=-1.5|se=1.2": false,
+      "n=5|theta=0.05|se=0.1": true,
+      "n=5|theta=0.05|se=0.29": false,
+      "n=5|theta=0.05|se=0.3": false,
+      "n=5|theta=0.05|se=0.31": false,
+      "n=5|theta=0.05|se=0.4": false,
+      "n=5|theta=0.05|se=0.5": false,
+      "n=5|theta=0.05|se=1.2": false,
+      "n=5|theta=0.9|se=0.1": true,
+      "n=5|theta=0.9|se=0.29": false,
+      "n=5|theta=0.9|se=0.3": false,
+      "n=5|theta=0.9|se=0.31": false,
+      "n=5|theta=0.9|se=0.4": false,
+      "n=5|theta=0.9|se=0.5": false,
+      "n=5|theta=0.9|se=1.2": false,
+      "n=5|theta=2.2|se=0.1": false,
+      "n=5|theta=2.2|se=0.29": false,
+      "n=5|theta=2.2|se=0.3": false,
+      "n=5|theta=2.2|se=0.31": false,
+      "n=5|theta=2.2|se=0.4": false,
+      "n=5|theta=2.2|se=0.5": false,
+      "n=5|theta=2.2|se=1.2": false,
+      "n=6|theta=-0.2|se=0.1": true,
+      "n=6|theta=-0.2|se=0.29": false,
+      "n=6|theta=-0.2|se=0.3": false,
+      "n=6|theta=-0.2|se=0.31": false,
+      "n=6|theta=-0.2|se=0.4": false,
+      "n=6|theta=-0.2|se=0.5": false,
+      "n=6|theta=-0.2|se=1.2": false,
+      "n=6|theta=-1.5|se=0.1": true,
+      "n=6|theta=-1.5|se=0.29": false,
+      "n=6|theta=-1.5|se=0.3": false,
+      "n=6|theta=-1.5|se=0.31": false,
+      "n=6|theta=-1.5|se=0.4": false,
+      "n=6|theta=-1.5|se=0.5": false,
+      "n=6|theta=-1.5|se=1.2": false,
+      "n=6|theta=0.05|se=0.1": true,
+      "n=6|theta=0.05|se=0.29": false,
+      "n=6|theta=0.05|se=0.3": false,
+      "n=6|theta=0.05|se=0.31": false,
+      "n=6|theta=0.05|se=0.4": false,
+      "n=6|theta=0.05|se=0.5": false,
+      "n=6|theta=0.05|se=1.2": false,
+      "n=6|theta=0.9|se=0.1": true,
+      "n=6|theta=0.9|se=0.29": false,
+      "n=6|theta=0.9|se=0.3": false,
+      "n=6|theta=0.9|se=0.31": false,
+      "n=6|theta=0.9|se=0.4": false,
+      "n=6|theta=0.9|se=0.5": false,
+      "n=6|theta=0.9|se=1.2": false,
+      "n=6|theta=2.2|se=0.1": false,
+      "n=6|theta=2.2|se=0.29": false,
+      "n=6|theta=2.2|se=0.3": false,
+      "n=6|theta=2.2|se=0.31": false,
+      "n=6|theta=2.2|se=0.4": false,
+      "n=6|theta=2.2|se=0.5": false,
+      "n=6|theta=2.2|se=1.2": false,
+      "n=8|theta=-0.2|se=0.1": true,
+      "n=8|theta=-0.2|se=0.29": false,
+      "n=8|theta=-0.2|se=0.3": false,
+      "n=8|theta=-0.2|se=0.31": false,
+      "n=8|theta=-0.2|se=0.4": false,
+      "n=8|theta=-0.2|se=0.5": false,
+      "n=8|theta=-0.2|se=1.2": false,
+      "n=8|theta=-1.5|se=0.1": true,
+      "n=8|theta=-1.5|se=0.29": false,
+      "n=8|theta=-1.5|se=0.3": false,
+      "n=8|theta=-1.5|se=0.31": false,
+      "n=8|theta=-1.5|se=0.4": false,
+      "n=8|theta=-1.5|se=0.5": false,
+      "n=8|theta=-1.5|se=1.2": false,
+      "n=8|theta=0.05|se=0.1": true,
+      "n=8|theta=0.05|se=0.29": false,
+      "n=8|theta=0.05|se=0.3": false,
+      "n=8|theta=0.05|se=0.31": false,
+      "n=8|theta=0.05|se=0.4": false,
+      "n=8|theta=0.05|se=0.5": false,
+      "n=8|theta=0.05|se=1.2": false,
+      "n=8|theta=0.9|se=0.1": true,
+      "n=8|theta=0.9|se=0.29": false,
+      "n=8|theta=0.9|se=0.3": false,
+      "n=8|theta=0.9|se=0.31": false,
+      "n=8|theta=0.9|se=0.4": false,
+      "n=8|theta=0.9|se=0.5": false,
+      "n=8|theta=0.9|se=1.2": false,
+      "n=8|theta=2.2|se=0.1": false,
+      "n=8|theta=2.2|se=0.29": false,
+      "n=8|theta=2.2|se=0.3": false,
+      "n=8|theta=2.2|se=0.31": false,
+      "n=8|theta=2.2|se=0.4": false,
+      "n=8|theta=2.2|se=0.5": false,
+      "n=8|theta=2.2|se=1.2": false
+    },
+    "ConfidenceIntervalStopper((0.5,), confidence=0.9)": {
+      "n=0|theta=-0.2|se=inf": false,
+      "n=0|theta=-1.5|se=inf": false,
+      "n=0|theta=0.05|se=inf": false,
+      "n=0|theta=0.9|se=inf": false,
+      "n=0|theta=2.2|se=inf": false,
+      "n=1|theta=-0.2|se=0.1": true,
+      "n=1|theta=-0.2|se=0.29": true,
+      "n=1|theta=-0.2|se=0.3": true,
+      "n=1|theta=-0.2|se=0.31": true,
+      "n=1|theta=-0.2|se=0.4": true,
+      "n=1|theta=-0.2|se=0.5": false,
+      "n=1|theta=-0.2|se=1.2": false,
+      "n=1|theta=-1.5|se=0.1": true,
+      "n=1|theta=-1.5|se=0.29": true,
+      "n=1|theta=-1.5|se=0.3": true,
+      "n=1|theta=-1.5|se=0.31": true,
+      "n=1|theta=-1.5|se=0.4": true,
+      "n=1|theta=-1.5|se=0.5": true,
+      "n=1|theta=-1.5|se=1.2": true,
+      "n=1|theta=0.05|se=0.1": true,
+      "n=1|theta=0.05|se=0.29": false,
+      "n=1|theta=0.05|se=0.3": false,
+      "n=1|theta=0.05|se=0.31": false,
+      "n=1|theta=0.05|se=0.4": false,
+      "n=1|theta=0.05|se=0.5": false,
+      "n=1|theta=0.05|se=1.2": false,
+      "n=1|theta=0.9|se=0.1": true,
+      "n=1|theta=0.9|se=0.29": false,
+      "n=1|theta=0.9|se=0.3": false,
+      "n=1|theta=0.9|se=0.31": false,
+      "n=1|theta=0.9|se=0.4": false,
+      "n=1|theta=0.9|se=0.5": false,
+      "n=1|theta=0.9|se=1.2": false,
+      "n=1|theta=2.2|se=0.1": true,
+      "n=1|theta=2.2|se=0.29": true,
+      "n=1|theta=2.2|se=0.3": true,
+      "n=1|theta=2.2|se=0.31": true,
+      "n=1|theta=2.2|se=0.4": true,
+      "n=1|theta=2.2|se=0.5": true,
+      "n=1|theta=2.2|se=1.2": false,
+      "n=3|theta=-0.2|se=0.1": true,
+      "n=3|theta=-0.2|se=0.29": true,
+      "n=3|theta=-0.2|se=0.3": true,
+      "n=3|theta=-0.2|se=0.31": true,
+      "n=3|theta=-0.2|se=0.4": true,
+      "n=3|theta=-0.2|se=0.5": false,
+      "n=3|theta=-0.2|se=1.2": false,
+      "n=3|theta=-1.5|se=0.1": true,
+      "n=3|theta=-1.5|se=0.29": true,
+      "n=3|theta=-1.5|se=0.3": true,
+      "n=3|theta=-1.5|se=0.31": true,
+      "n=3|theta=-1.5|se=0.4": true,
+      "n=3|theta=-1.5|se=0.5": true,
+      "n=3|theta=-1.5|se=1.2": true,
+      "n=3|theta=0.05|se=0.1": true,
+      "n=3|theta=0.05|se=0.29": false,
+      "n=3|theta=0.05|se=0.3": false,
+      "n=3|theta=0.05|se=0.31": false,
+      "n=3|theta=0.05|se=0.4": false,
+      "n=3|theta=0.05|se=0.5": false,
+      "n=3|theta=0.05|se=1.2": false,
+      "n=3|theta=0.9|se=0.1": true,
+      "n=3|theta=0.9|se=0.29": false,
+      "n=3|theta=0.9|se=0.3": false,
+      "n=3|theta=0.9|se=0.31": false,
+      "n=3|theta=0.9|se=0.4": false,
+      "n=3|theta=0.9|se=0.5": false,
+      "n=3|theta=0.9|se=1.2": false,
+      "n=3|theta=2.2|se=0.1": true,
+      "n=3|theta=2.2|se=0.29": true,
+      "n=3|theta=2.2|se=0.3": true,
+      "n=3|theta=2.2|se=0.31": true,
+      "n=3|theta=2.2|se=0.4": true,
+      "n=3|theta=2.2|se=0.5": true,
+      "n=3|theta=2.2|se=1.2": false,
+      "n=5|theta=-0.2|se=0.1": true,
+      "n=5|theta=-0.2|se=0.29": true,
+      "n=5|theta=-0.2|se=0.3": true,
+      "n=5|theta=-0.2|se=0.31": true,
+      "n=5|theta=-0.2|se=0.4": true,
+      "n=5|theta=-0.2|se=0.5": false,
+      "n=5|theta=-0.2|se=1.2": false,
+      "n=5|theta=-1.5|se=0.1": true,
+      "n=5|theta=-1.5|se=0.29": true,
+      "n=5|theta=-1.5|se=0.3": true,
+      "n=5|theta=-1.5|se=0.31": true,
+      "n=5|theta=-1.5|se=0.4": true,
+      "n=5|theta=-1.5|se=0.5": true,
+      "n=5|theta=-1.5|se=1.2": true,
+      "n=5|theta=0.05|se=0.1": true,
+      "n=5|theta=0.05|se=0.29": false,
+      "n=5|theta=0.05|se=0.3": false,
+      "n=5|theta=0.05|se=0.31": false,
+      "n=5|theta=0.05|se=0.4": false,
+      "n=5|theta=0.05|se=0.5": false,
+      "n=5|theta=0.05|se=1.2": false,
+      "n=5|theta=0.9|se=0.1": true,
+      "n=5|theta=0.9|se=0.29": false,
+      "n=5|theta=0.9|se=0.3": false,
+      "n=5|theta=0.9|se=0.31": false,
+      "n=5|theta=0.9|se=0.4": false,
+      "n=5|theta=0.9|se=0.5": false,
+      "n=5|theta=0.9|se=1.2": false,
+      "n=5|theta=2.2|se=0.1": true,
+      "n=5|theta=2.2|se=0.29": true,
+      "n=5|theta=2.2|se=0.3": true,
+      "n=5|theta=2.2|se=0.31": true,
+      "n=5|theta=2.2|se=0.4": true,
+      "n=5|theta=2.2|se=0.5": true,
+      "n=5|theta=2.2|se=1.2": false,
+      "n=6|theta=-0.2|se=0.1": true,
+      "n=6|theta=-0.2|se=0.29": true,
+      "n=6|theta=-0.2|se=0.3": true,
+      "n=6|theta=-0.2|se=0.31": true,
+      "n=6|theta=-0.2|se=0.4": true,
+      "n=6|theta=-0.2|se=0.5": false,
+      "n=6|theta=-0.2|se=1.2": false,
+      "n=6|theta=-1.5|se=0.1": true,
+      "n=6|theta=-1.5|se=0.29": true,
+      "n=6|theta=-1.5|se=0.3": true,
+      "n=6|theta=-1.5|se=0.31": true,
+      "n=6|theta=-1.5|se=0.4": true,
+      "n=6|theta=-1.5|se=0.5": true,
+      "n=6|theta=-1.5|se=1.2": true,
+      "n=6|theta=0.05|se=0.1": true,
+      "n=6|theta=0.05|se=0.29": false,
+      "n=6|theta=0.05|se=0.3": false,
+      "n=6|theta=0.05|se=0.31": false,
+      "n=6|theta=0.05|se=0.4": false,
+      "n=6|theta=0.05|se=0.5": false,
+      "n=6|theta=0.05|se=1.2": false,
+      "n=6|theta=0.9|se=0.1": true,
+      "n=6|theta=0.9|se=0.29": false,
+      "n=6|theta=0.9|se=0.3": false,
+      "n=6|theta=0.9|se=0.31": false,
+      "n=6|theta=0.9|se=0.4": false,
+      "n=6|theta=0.9|se=0.5": false,
+      "n=6|theta=0.9|se=1.2": false,
+      "n=6|theta=2.2|se=0.1": true,
+      "n=6|theta=2.2|se=0.29": true,
+      "n=6|theta=2.2|se=0.3": true,
+      "n=6|theta=2.2|se=0.31": true,
+      "n=6|theta=2.2|se=0.4": true,
+      "n=6|theta=2.2|se=0.5": true,
+      "n=6|theta=2.2|se=1.2": false,
+      "n=8|theta=-0.2|se=0.1": true,
+      "n=8|theta=-0.2|se=0.29": true,
+      "n=8|theta=-0.2|se=0.3": true,
+      "n=8|theta=-0.2|se=0.31": true,
+      "n=8|theta=-0.2|se=0.4": true,
+      "n=8|theta=-0.2|se=0.5": false,
+      "n=8|theta=-0.2|se=1.2": false,
+      "n=8|theta=-1.5|se=0.1": true,
+      "n=8|theta=-1.5|se=0.29": true,
+      "n=8|theta=-1.5|se=0.3": true,
+      "n=8|theta=-1.5|se=0.31": true,
+      "n=8|theta=-1.5|se=0.4": true,
+      "n=8|theta=-1.5|se=0.5": true,
+      "n=8|theta=-1.5|se=1.2": true,
+      "n=8|theta=0.05|se=0.1": true,
+      "n=8|theta=0.05|se=0.29": false,
+      "n=8|theta=0.05|se=0.3": false,
+      "n=8|theta=0.05|se=0.31": false,
+      "n=8|theta=0.05|se=0.4": false,
+      "n=8|theta=0.05|se=0.5": false,
+      "n=8|theta=0.05|se=1.2": false,
+      "n=8|theta=0.9|se=0.1": true,
+      "n=8|theta=0.9|se=0.29": false,
+      "n=8|theta=0.9|se=0.3": false,
+      "n=8|theta=0.9|se=0.31": false,
+      "n=8|theta=0.9|se=0.4": false,
+      "n=8|theta=0.9|se=0.5": false,
+      "n=8|theta=0.9|se=1.2": false,
+      "n=8|theta=2.2|se=0.1": true,
+      "n=8|theta=2.2|se=0.29": true,
+      "n=8|theta=2.2|se=0.3": true,
+      "n=8|theta=2.2|se=0.31": true,
+      "n=8|theta=2.2|se=0.4": true,
+      "n=8|theta=2.2|se=0.5": true,
+      "n=8|theta=2.2|se=1.2": false
+    },
+    "MaxLengthStopper(1)": {
+      "n=0|theta=-0.2|se=inf": false,
+      "n=0|theta=-1.5|se=inf": false,
+      "n=0|theta=0.05|se=inf": false,
+      "n=0|theta=0.9|se=inf": false,
+      "n=0|theta=2.2|se=inf": false,
+      "n=1|theta=-0.2|se=0.1": true,
+      "n=1|theta=-0.2|se=0.29": true,
+      "n=1|theta=-0.2|se=0.3": true,
+      "n=1|theta=-0.2|se=0.31": true,
+      "n=1|theta=-0.2|se=0.4": true,
+      "n=1|theta=-0.2|se=0.5": true,
+      "n=1|theta=-0.2|se=1.2": true,
+      "n=1|theta=-1.5|se=0.1": true,
+      "n=1|theta=-1.5|se=0.29": true,
+      "n=1|theta=-1.5|se=0.3": true,
+      "n=1|theta=-1.5|se=0.31": true,
+      "n=1|theta=-1.5|se=0.4": true,
+      "n=1|theta=-1.5|se=0.5": true,
+      "n=1|theta=-1.5|se=1.2": true,
+      "n=1|theta=0.05|se=0.1": true,
+      "n=1|theta=0.05|se=0.29": true,
+      "n=1|theta=0.05|se=0.3": true,
+      "n=1|theta=0.05|se=0.31": true,
+      "n=1|theta=0.05|se=0.4": true,
+      "n=1|theta=0.05|se=0.5": true,
+      "n=1|theta=0.05|se=1.2": true,
+      "n=1|theta=0.9|se=0.1": true,
+      "n=1|theta=0.9|se=0.29": true,
+      "n=1|theta=0.9|se=0.3": true,
+      "n=1|theta=0.9|se=0.31": true,
+      "n=1|theta=0.9|se=0.4": true,
+      "n=1|theta=0.9|se=0.5": true,
+      "n=1|theta=0.9|se=1.2": true,
+      "n=1|theta=2.2|se=0.1": true,
+      "n=1|theta=2.2|se=0.29": true,
+      "n=1|theta=2.2|se=0.3": true,
+      "n=1|theta=2.2|se=0.31": true,
+      "n=1|theta=2.2|se=0.4": true,
+      "n=1|theta=2.2|se=0.5": true,
+      "n=1|theta=2.2|se=1.2": true,
+      "n=3|theta=-0.2|se=0.1": true,
+      "n=3|theta=-0.2|se=0.29": true,
+      "n=3|theta=-0.2|se=0.3": true,
+      "n=3|theta=-0.2|se=0.31": true,
+      "n=3|theta=-0.2|se=0.4": true,
+      "n=3|theta=-0.2|se=0.5": true,
+      "n=3|theta=-0.2|se=1.2": true,
+      "n=3|theta=-1.5|se=0.1": true,
+      "n=3|theta=-1.5|se=0.29": true,
+      "n=3|theta=-1.5|se=0.3": true,
+      "n=3|theta=-1.5|se=0.31": true,
+      "n=3|theta=-1.5|se=0.4": true,
+      "n=3|theta=-1.5|se=0.5": true,
+      "n=3|theta=-1.5|se=1.2": true,
+      "n=3|theta=0.05|se=0.1": true,
+      "n=3|theta=0.05|se=0.29": true,
+      "n=3|theta=0.05|se=0.3": true,
+      "n=3|theta=0.05|se=0.31": true,
+      "n=3|theta=0.05|se=0.4": true,
+      "n=3|theta=0.05|se=0.5": true,
+      "n=3|theta=0.05|se=1.2": true,
+      "n=3|theta=0.9|se=0.1": true,
+      "n=3|theta=0.9|se=0.29": true,
+      "n=3|theta=0.9|se=0.3": true,
+      "n=3|theta=0.9|se=0.31": true,
+      "n=3|theta=0.9|se=0.4": true,
+      "n=3|theta=0.9|se=0.5": true,
+      "n=3|theta=0.9|se=1.2": true,
+      "n=3|theta=2.2|se=0.1": true,
+      "n=3|theta=2.2|se=0.29": true,
+      "n=3|theta=2.2|se=0.3": true,
+      "n=3|theta=2.2|se=0.31": true,
+      "n=3|theta=2.2|se=0.4": true,
+      "n=3|theta=2.2|se=0.5": true,
+      "n=3|theta=2.2|se=1.2": true,
+      "n=5|theta=-0.2|se=0.1": true,
+      "n=5|theta=-0.2|se=0.29": true,
+      "n=5|theta=-0.2|se=0.3": true,
+      "n=5|theta=-0.2|se=0.31": true,
+      "n=5|theta=-0.2|se=0.4": true,
+      "n=5|theta=-0.2|se=0.5": true,
+      "n=5|theta=-0.2|se=1.2": true,
+      "n=5|theta=-1.5|se=0.1": true,
+      "n=5|theta=-1.5|se=0.29": true,
+      "n=5|theta=-1.5|se=0.3": true,
+      "n=5|theta=-1.5|se=0.31": true,
+      "n=5|theta=-1.5|se=0.4": true,
+      "n=5|theta=-1.5|se=0.5": true,
+      "n=5|theta=-1.5|se=1.2": true,
+      "n=5|theta=0.05|se=0.1": true,
+      "n=5|theta=0.05|se=0.29": true,
+      "n=5|theta=0.05|se=0.3": true,
+      "n=5|theta=0.05|se=0.31": true,
+      "n=5|theta=0.05|se=0.4": true,
+      "n=5|theta=0.05|se=0.5": true,
+      "n=5|theta=0.05|se=1.2": true,
+      "n=5|theta=0.9|se=0.1": true,
+      "n=5|theta=0.9|se=0.29": true,
+      "n=5|theta=0.9|se=0.3": true,
+      "n=5|theta=0.9|se=0.31": true,
+      "n=5|theta=0.9|se=0.4": true,
+      "n=5|theta=0.9|se=0.5": true,
+      "n=5|theta=0.9|se=1.2": true,
+      "n=5|theta=2.2|se=0.1": true,
+      "n=5|theta=2.2|se=0.29": true,
+      "n=5|theta=2.2|se=0.3": true,
+      "n=5|theta=2.2|se=0.31": true,
+      "n=5|theta=2.2|se=0.4": true,
+      "n=5|theta=2.2|se=0.5": true,
+      "n=5|theta=2.2|se=1.2": true,
+      "n=6|theta=-0.2|se=0.1": true,
+      "n=6|theta=-0.2|se=0.29": true,
+      "n=6|theta=-0.2|se=0.3": true,
+      "n=6|theta=-0.2|se=0.31": true,
+      "n=6|theta=-0.2|se=0.4": true,
+      "n=6|theta=-0.2|se=0.5": true,
+      "n=6|theta=-0.2|se=1.2": true,
+      "n=6|theta=-1.5|se=0.1": true,
+      "n=6|theta=-1.5|se=0.29": true,
+      "n=6|theta=-1.5|se=0.3": true,
+      "n=6|theta=-1.5|se=0.31": true,
+      "n=6|theta=-1.5|se=0.4": true,
+      "n=6|theta=-1.5|se=0.5": true,
+      "n=6|theta=-1.5|se=1.2": true,
+      "n=6|theta=0.05|se=0.1": true,
+      "n=6|theta=0.05|se=0.29": true,
+      "n=6|theta=0.05|se=0.3": true,
+      "n=6|theta=0.05|se=0.31": true,
+      "n=6|theta=0.05|se=0.4": true,
+      "n=6|theta=0.05|se=0.5": true,
+      "n=6|theta=0.05|se=1.2": true,
+      "n=6|theta=0.9|se=0.1": true,
+      "n=6|theta=0.9|se=0.29": true,
+      "n=6|theta=0.9|se=0.3": true,
+      "n=6|theta=0.9|se=0.31": true,
+      "n=6|theta=0.9|se=0.4": true,
+      "n=6|theta=0.9|se=0.5": true,
+      "n=6|theta=0.9|se=1.2": true,
+      "n=6|theta=2.2|se=0.1": true,
+      "n=6|theta=2.2|se=0.29": true,
+      "n=6|theta=2.2|se=0.3": true,
+      "n=6|theta=2.2|se=0.31": true,
+      "n=6|theta=2.2|se=0.4": true,
+      "n=6|theta=2.2|se=0.5": true,
+      "n=6|theta=2.2|se=1.2": true,
+      "n=8|theta=-0.2|se=0.1": true,
+      "n=8|theta=-0.2|se=0.29": true,
+      "n=8|theta=-0.2|se=0.3": true,
+      "n=8|theta=-0.2|se=0.31": true,
+      "n=8|theta=-0.2|se=0.4": true,
+      "n=8|theta=-0.2|se=0.5": true,
+      "n=8|theta=-0.2|se=1.2": true,
+      "n=8|theta=-1.5|se=0.1": true,
+      "n=8|theta=-1.5|se=0.29": true,
+      "n=8|theta=-1.5|se=0.3": true,
+      "n=8|theta=-1.5|se=0.31": true,
+      "n=8|theta=-1.5|se=0.4": true,
+      "n=8|theta=-1.5|se=0.5": true,
+      "n=8|theta=-1.5|se=1.2": true,
+      "n=8|theta=0.05|se=0.1": true,
+      "n=8|theta=0.05|se=0.29": true,
+      "n=8|theta=0.05|se=0.3": true,
+      "n=8|theta=0.05|se=0.31": true,
+      "n=8|theta=0.05|se=0.4": true,
+      "n=8|theta=0.05|se=0.5": true,
+      "n=8|theta=0.05|se=1.2": true,
+      "n=8|theta=0.9|se=0.1": true,
+      "n=8|theta=0.9|se=0.29": true,
+      "n=8|theta=0.9|se=0.3": true,
+      "n=8|theta=0.9|se=0.31": true,
+      "n=8|theta=0.9|se=0.4": true,
+      "n=8|theta=0.9|se=0.5": true,
+      "n=8|theta=0.9|se=1.2": true,
+      "n=8|theta=2.2|se=0.1": true,
+      "n=8|theta=2.2|se=0.29": true,
+      "n=8|theta=2.2|se=0.3": true,
+      "n=8|theta=2.2|se=0.31": true,
+      "n=8|theta=2.2|se=0.4": true,
+      "n=8|theta=2.2|se=0.5": true,
+      "n=8|theta=2.2|se=1.2": true
+    },
+    "MaxLengthStopper(5)": {
+      "n=0|theta=-0.2|se=inf": false,
+      "n=0|theta=-1.5|se=inf": false,
+      "n=0|theta=0.05|se=inf": false,
+      "n=0|theta=0.9|se=inf": false,
+      "n=0|theta=2.2|se=inf": false,
+      "n=1|theta=-0.2|se=0.1": false,
+      "n=1|theta=-0.2|se=0.29": false,
+      "n=1|theta=-0.2|se=0.3": false,
+      "n=1|theta=-0.2|se=0.31": false,
+      "n=1|theta=-0.2|se=0.4": false,
+      "n=1|theta=-0.2|se=0.5": false,
+      "n=1|theta=-0.2|se=1.2": false,
+      "n=1|theta=-1.5|se=0.1": false,
+      "n=1|theta=-1.5|se=0.29": false,
+      "n=1|theta=-1.5|se=0.3": false,
+      "n=1|theta=-1.5|se=0.31": false,
+      "n=1|theta=-1.5|se=0.4": false,
+      "n=1|theta=-1.5|se=0.5": false,
+      "n=1|theta=-1.5|se=1.2": false,
+      "n=1|theta=0.05|se=0.1": false,
+      "n=1|theta=0.05|se=0.29": false,
+      "n=1|theta=0.05|se=0.3": false,
+      "n=1|theta=0.05|se=0.31": false,
+      "n=1|theta=0.05|se=0.4": false,
+      "n=1|theta=0.05|se=0.5": false,
+      "n=1|theta=0.05|se=1.2": false,
+      "n=1|theta=0.9|se=0.1": false,
+      "n=1|theta=0.9|se=0.29": false,
+      "n=1|theta=0.9|se=0.3": false,
+      "n=1|theta=0.9|se=0.31": false,
+      "n=1|theta=0.9|se=0.4": false,
+      "n=1|theta=0.9|se=0.5": false,
+      "n=1|theta=0.9|se=1.2": false,
+      "n=1|theta=2.2|se=0.1": false,
+      "n=1|theta=2.2|se=0.29": false,
+      "n=1|theta=2.2|se=0.3": false,
+      "n=1|theta=2.2|se=0.31": false,
+      "n=1|theta=2.2|se=0.4": false,
+      "n=1|theta=2.2|se=0.5": false,
+      "n=1|theta=2.2|se=1.2": false,
+      "n=3|theta=-0.2|se=0.1": false,
+      "n=3|theta=-0.2|se=0.29": false,
+      "n=3|theta=-0.2|se=0.3": false,
+      "n=3|theta=-0.2|se=0.31": false,
+      "n=3|theta=-0.2|se=0.4": false,
+      "n=3|theta=-0.2|se=0.5": false,
+      "n=3|theta=-0.2|se=1.2": false,
+      "n=3|theta=-1.5|se=0.1": false,
+      "n=3|theta=-1.5|se=0.29": false,
+      "n=3|theta=-1.5|se=0.3": false,
+      "n=3|theta=-1.5|se=0.31": false,
+      "n=3|theta=-1.5|se=0.4": false,
+      "n=3|theta=-1.5|se=0.5": false,
+      "n=3|theta=-1.5|se=1.2": false,
+      "n=3|theta=0.05|se=0.1": false,
+      "n=3|theta=0.05|se=0.29": false,
+      "n=3|theta=0.05|se=0.3": false,
+      "n=3|theta=0.05|se=0.31": false,
+      "n=3|theta=0.05|se=0.4": false,
+      "n=3|theta=0.05|se=0.5": false,
+      "n=3|theta=0.05|se=1.2": false,
+      "n=3|theta=0.9|se=0.1": false,
+      "n=3|theta=0.9|se=0.29": false,
+      "n=3|theta=0.9|se=0.3": false,
+      "n=3|theta=0.9|se=0.31": false,
+      "n=3|theta=0.9|se=0.4": false,
+      "n=3|theta=0.9|se=0.5": false,
+      "n=3|theta=0.9|se=1.2": false,
+      "n=3|theta=2.2|se=0.1": false,
+      "n=3|theta=2.2|se=0.29": false,
+      "n=3|theta=2.2|se=0.3": false,
+      "n=3|theta=2.2|se=0.31": false,
+      "n=3|theta=2.2|se=0.4": false,
+      "n=3|theta=2.2|se=0.5": false,
+      "n=3|theta=2.2|se=1.2": false,
+      "n=5|theta=-0.2|se=0.1": true,
+      "n=5|theta=-0.2|se=0.29": true,
+      "n=5|theta=-0.2|se=0.3": true,
+      "n=5|theta=-0.2|se=0.31": true,
+      "n=5|theta=-0.2|se=0.4": true,
+      "n=5|theta=-0.2|se=0.5": true,
+      "n=5|theta=-0.2|se=1.2": true,
+      "n=5|theta=-1.5|se=0.1": true,
+      "n=5|theta=-1.5|se=0.29": true,
+      "n=5|theta=-1.5|se=0.3": true,
+      "n=5|theta=-1.5|se=0.31": true,
+      "n=5|theta=-1.5|se=0.4": true,
+      "n=5|theta=-1.5|se=0.5": true,
+      "n=5|theta=-1.5|se=1.2": true,
+      "n=5|theta=0.05|se=0.1": true,
+      "n=5|theta=0.05|se=0.29": true,
+      "n=5|theta=0.05|se=0.3": true,
+      "n=5|theta=0.05|se=0.31": true,
+      "n=5|theta=0.05|se=0.4": true,
+      "n=5|theta=0.05|se=0.5": true,
+      "n=5|theta=0.05|se=1.2": true,
+      "n=5|theta=0.9|se=0.1": true,
+      "n=5|theta=0.9|se=0.29": true,
+      "n=5|theta=0.9|se=0.3": true,
+      "n=5|theta=0.9|se=0.31": true,
+      "n=5|theta=0.9|se=0.4": true,
+      "n=5|theta=0.9|se=0.5": true,
+      "n=5|theta=0.9|se=1.2": true,
+      "n=5|theta=2.2|se=0.1": true,
+      "n=5|theta=2.2|se=0.29": true,
+      "n=5|theta=2.2|se=0.3": true,
+      "n=5|theta=2.2|se=0.31": true,
+      "n=5|theta=2.2|se=0.4": true,
+      "n=5|theta=2.2|se=0.5": true,
+      "n=5|theta=2.2|se=1.2": true,
+      "n=6|theta=-0.2|se=0.1": true,
+      "n=6|theta=-0.2|se=0.29": true,
+      "n=6|theta=-0.2|se=0.3": true,
+      "n=6|theta=-0.2|se=0.31": true,
+      "n=6|theta=-0.2|se=0.4": true,
+      "n=6|theta=-0.2|se=0.5": true,
+      "n=6|theta=-0.2|se=1.2": true,
+      "n=6|theta=-1.5|se=0.1": true,
+      "n=6|theta=-1.5|se=0.29": true,
+      "n=6|theta=-1.5|se=0.3": true,
+      "n=6|theta=-1.5|se=0.31": true,
+      "n=6|theta=-1.5|se=0.4": true,
+      "n=6|theta=-1.5|se=0.5": true,
+      "n=6|theta=-1.5|se=1.2": true,
+      "n=6|theta=0.05|se=0.1": true,
+      "n=6|theta=0.05|se=0.29": true,
+      "n=6|theta=0.05|se=0.3": true,
+      "n=6|theta=0.05|se=0.31": true,
+      "n=6|theta=0.05|se=0.4": true,
+      "n=6|theta=0.05|se=0.5": true,
+      "n=6|theta=0.05|se=1.2": true,
+      "n=6|theta=0.9|se=0.1": true,
+      "n=6|theta=0.9|se=0.29": true,
+      "n=6|theta=0.9|se=0.3": true,
+      "n=6|theta=0.9|se=0.31": true,
+      "n=6|theta=0.9|se=0.4": true,
+      "n=6|theta=0.9|se=0.5": true,
+      "n=6|theta=0.9|se=1.2": true,
+      "n=6|theta=2.2|se=0.1": true,
+      "n=6|theta=2.2|se=0.29": true,
+      "n=6|theta=2.2|se=0.3": true,
+      "n=6|theta=2.2|se=0.31": true,
+      "n=6|theta=2.2|se=0.4": true,
+      "n=6|theta=2.2|se=0.5": true,
+      "n=6|theta=2.2|se=1.2": true,
+      "n=8|theta=-0.2|se=0.1": true,
+      "n=8|theta=-0.2|se=0.29": true,
+      "n=8|theta=-0.2|se=0.3": true,
+      "n=8|theta=-0.2|se=0.31": true,
+      "n=8|theta=-0.2|se=0.4": true,
+      "n=8|theta=-0.2|se=0.5": true,
+      "n=8|theta=-0.2|se=1.2": true,
+      "n=8|theta=-1.5|se=0.1": true,
+      "n=8|theta=-1.5|se=0.29": true,
+      "n=8|theta=-1.5|se=0.3": true,
+      "n=8|theta=-1.5|se=0.31": true,
+      "n=8|theta=-1.5|se=0.4": true,
+      "n=8|theta=-1.5|se=0.5": true,
+      "n=8|theta=-1.5|se=1.2": true,
+      "n=8|theta=0.05|se=0.1": true,
+      "n=8|theta=0.05|se=0.29": true,
+      "n=8|theta=0.05|se=0.3": true,
+      "n=8|theta=0.05|se=0.31": true,
+      "n=8|theta=0.05|se=0.4": true,
+      "n=8|theta=0.05|se=0.5": true,
+      "n=8|theta=0.05|se=1.2": true,
+      "n=8|theta=0.9|se=0.1": true,
+      "n=8|theta=0.9|se=0.29": true,
+      "n=8|theta=0.9|se=0.3": true,
+      "n=8|theta=0.9|se=0.31": true,
+      "n=8|theta=0.9|se=0.4": true,
+      "n=8|theta=0.9|se=0.5": true,
+      "n=8|theta=0.9|se=1.2": true,
+      "n=8|theta=2.2|se=0.1": true,
+      "n=8|theta=2.2|se=0.29": true,
+      "n=8|theta=2.2|se=0.3": true,
+      "n=8|theta=2.2|se=0.31": true,
+      "n=8|theta=2.2|se=0.4": true,
+      "n=8|theta=2.2|se=0.5": true,
+      "n=8|theta=2.2|se=1.2": true
+    },
+    "StandardErrorStopper(0.3)": {
+      "n=0|theta=-0.2|se=inf": false,
+      "n=0|theta=-1.5|se=inf": false,
+      "n=0|theta=0.05|se=inf": false,
+      "n=0|theta=0.9|se=inf": false,
+      "n=0|theta=2.2|se=inf": false,
+      "n=1|theta=-0.2|se=0.1": true,
+      "n=1|theta=-0.2|se=0.29": true,
+      "n=1|theta=-0.2|se=0.3": true,
+      "n=1|theta=-0.2|se=0.31": false,
+      "n=1|theta=-0.2|se=0.4": false,
+      "n=1|theta=-0.2|se=0.5": false,
+      "n=1|theta=-0.2|se=1.2": false,
+      "n=1|theta=-1.5|se=0.1": true,
+      "n=1|theta=-1.5|se=0.29": true,
+      "n=1|theta=-1.5|se=0.3": true,
+      "n=1|theta=-1.5|se=0.31": false,
+      "n=1|theta=-1.5|se=0.4": false,
+      "n=1|theta=-1.5|se=0.5": false,
+      "n=1|theta=-1.5|se=1.2": false,
+      "n=1|theta=0.05|se=0.1": true,
+      "n=1|theta=0.05|se=0.29": true,
+      "n=1|theta=0.05|se=0.3": true,
+      "n=1|theta=0.05|se=0.31": false,
+      "n=1|theta=0.05|se=0.4": false,
+      "n=1|theta=0.05|se=0.5": false,
+      "n=1|theta=0.05|se=1.2": false,
+      "n=1|theta=0.9|se=0.1": true,
+      "n=1|theta=0.9|se=0.29": true,
+      "n=1|theta=0.9|se=0.3": true,
+      "n=1|theta=0.9|se=0.31": false,
+      "n=1|theta=0.9|se=0.4": false,
+      "n=1|theta=0.9|se=0.5": false,
+      "n=1|theta=0.9|se=1.2": false,
+      "n=1|theta=2.2|se=0.1": true,
+      "n=1|theta=2.2|se=0.29": true,
+      "n=1|theta=2.2|se=0.3": true,
+      "n=1|theta=2.2|se=0.31": false,
+      "n=1|theta=2.2|se=0.4": false,
+      "n=1|theta=2.2|se=0.5": false,
+      "n=1|theta=2.2|se=1.2": false,
+      "n=3|theta=-0.2|se=0.1": true,
+      "n=3|theta=-0.2|se=0.29": true,
+      "n=3|theta=-0.2|se=0.3": true,
+      "n=3|theta=-0.2|se=0.31": false,
+      "n=3|theta=-0.2|se=0.4": false,
+      "n=3|theta=-0.2|se=0.5": false,
+      "n=3|theta=-0.2|se=1.2": false,
+      "n=3|theta=-1.5|se=0.1": true,
+      "n=3|theta=-1.5|se=0.29": true,
+      "n=3|theta=-1.5|se=0.3": true,
+      "n=3|theta=-1.5|se=0.31": false,
+      "n=3|theta=-1.5|se=0.4": false,
+      "n=3|theta=-1.5|se=0.5": false,
+      "n=3|theta=-1.5|se=1.2": false,
+      "n=3|theta=0.05|se=0.1": true,
+      "n=3|theta=0.05|se=0.29": true,
+      "n=3|theta=0.05|se=0.3": true,
+      "n=3|theta=0.05|se=0.31": false,
+      "n=3|theta=0.05|se=0.4": false,
+      "n=3|theta=0.05|se=0.5": false,
+      "n=3|theta=0.05|se=1.2": false,
+      "n=3|theta=0.9|se=0.1": true,
+      "n=3|theta=0.9|se=0.29": true,
+      "n=3|theta=0.9|se=0.3": true,
+      "n=3|theta=0.9|se=0.31": false,
+      "n=3|theta=0.9|se=0.4": false,
+      "n=3|theta=0.9|se=0.5": false,
+      "n=3|theta=0.9|se=1.2": false,
+      "n=3|theta=2.2|se=0.1": true,
+      "n=3|theta=2.2|se=0.29": true,
+      "n=3|theta=2.2|se=0.3": true,
+      "n=3|theta=2.2|se=0.31": false,
+      "n=3|theta=2.2|se=0.4": false,
+      "n=3|theta=2.2|se=0.5": false,
+      "n=3|theta=2.2|se=1.2": false,
+      "n=5|theta=-0.2|se=0.1": true,
+      "n=5|theta=-0.2|se=0.29": true,
+      "n=5|theta=-0.2|se=0.3": true,
+      "n=5|theta=-0.2|se=0.31": false,
+      "n=5|theta=-0.2|se=0.4": false,
+      "n=5|theta=-0.2|se=0.5": false,
+      "n=5|theta=-0.2|se=1.2": false,
+      "n=5|theta=-1.5|se=0.1": true,
+      "n=5|theta=-1.5|se=0.29": true,
+      "n=5|theta=-1.5|se=0.3": true,
+      "n=5|theta=-1.5|se=0.31": false,
+      "n=5|theta=-1.5|se=0.4": false,
+      "n=5|theta=-1.5|se=0.5": false,
+      "n=5|theta=-1.5|se=1.2": false,
+      "n=5|theta=0.05|se=0.1": true,
+      "n=5|theta=0.05|se=0.29": true,
+      "n=5|theta=0.05|se=0.3": true,
+      "n=5|theta=0.05|se=0.31": false,
+      "n=5|theta=0.05|se=0.4": false,
+      "n=5|theta=0.05|se=0.5": false,
+      "n=5|theta=0.05|se=1.2": false,
+      "n=5|theta=0.9|se=0.1": true,
+      "n=5|theta=0.9|se=0.29": true,
+      "n=5|theta=0.9|se=0.3": true,
+      "n=5|theta=0.9|se=0.31": false,
+      "n=5|theta=0.9|se=0.4": false,
+      "n=5|theta=0.9|se=0.5": false,
+      "n=5|theta=0.9|se=1.2": false,
+      "n=5|theta=2.2|se=0.1": true,
+      "n=5|theta=2.2|se=0.29": true,
+      "n=5|theta=2.2|se=0.3": true,
+      "n=5|theta=2.2|se=0.31": false,
+      "n=5|theta=2.2|se=0.4": false,
+      "n=5|theta=2.2|se=0.5": false,
+      "n=5|theta=2.2|se=1.2": false,
+      "n=6|theta=-0.2|se=0.1": true,
+      "n=6|theta=-0.2|se=0.29": true,
+      "n=6|theta=-0.2|se=0.3": true,
+      "n=6|theta=-0.2|se=0.31": false,
+      "n=6|theta=-0.2|se=0.4": false,
+      "n=6|theta=-0.2|se=0.5": false,
+      "n=6|theta=-0.2|se=1.2": false,
+      "n=6|theta=-1.5|se=0.1": true,
+      "n=6|theta=-1.5|se=0.29": true,
+      "n=6|theta=-1.5|se=0.3": true,
+      "n=6|theta=-1.5|se=0.31": false,
+      "n=6|theta=-1.5|se=0.4": false,
+      "n=6|theta=-1.5|se=0.5": false,
+      "n=6|theta=-1.5|se=1.2": false,
+      "n=6|theta=0.05|se=0.1": true,
+      "n=6|theta=0.05|se=0.29": true,
+      "n=6|theta=0.05|se=0.3": true,
+      "n=6|theta=0.05|se=0.31": false,
+      "n=6|theta=0.05|se=0.4": false,
+      "n=6|theta=0.05|se=0.5": false,
+      "n=6|theta=0.05|se=1.2": false,
+      "n=6|theta=0.9|se=0.1": true,
+      "n=6|theta=0.9|se=0.29": true,
+      "n=6|theta=0.9|se=0.3": true,
+      "n=6|theta=0.9|se=0.31": false,
+      "n=6|theta=0.9|se=0.4": false,
+      "n=6|theta=0.9|se=0.5": false,
+      "n=6|theta=0.9|se=1.2": false,
+      "n=6|theta=2.2|se=0.1": true,
+      "n=6|theta=2.2|se=0.29": true,
+      "n=6|theta=2.2|se=0.3": true,
+      "n=6|theta=2.2|se=0.31": false,
+      "n=6|theta=2.2|se=0.4": false,
+      "n=6|theta=2.2|se=0.5": false,
+      "n=6|theta=2.2|se=1.2": false,
+      "n=8|theta=-0.2|se=0.1": true,
+      "n=8|theta=-0.2|se=0.29": true,
+      "n=8|theta=-0.2|se=0.3": true,
+      "n=8|theta=-0.2|se=0.31": false,
+      "n=8|theta=-0.2|se=0.4": false,
+      "n=8|theta=-0.2|se=0.5": false,
+      "n=8|theta=-0.2|se=1.2": false,
+      "n=8|theta=-1.5|se=0.1": true,
+      "n=8|theta=-1.5|se=0.29": true,
+      "n=8|theta=-1.5|se=0.3": true,
+      "n=8|theta=-1.5|se=0.31": false,
+      "n=8|theta=-1.5|se=0.4": false,
+      "n=8|theta=-1.5|se=0.5": false,
+      "n=8|theta=-1.5|se=1.2": false,
+      "n=8|theta=0.05|se=0.1": true,
+      "n=8|theta=0.05|se=0.29": true,
+      "n=8|theta=0.05|se=0.3": true,
+      "n=8|theta=0.05|se=0.31": false,
+      "n=8|theta=0.05|se=0.4": false,
+      "n=8|theta=0.05|se=0.5": false,
+      "n=8|theta=0.05|se=1.2": false,
+      "n=8|theta=0.9|se=0.1": true,
+      "n=8|theta=0.9|se=0.29": true,
+      "n=8|theta=0.9|se=0.3": true,
+      "n=8|theta=0.9|se=0.31": false,
+      "n=8|theta=0.9|se=0.4": false,
+      "n=8|theta=0.9|se=0.5": false,
+      "n=8|theta=0.9|se=1.2": false,
+      "n=8|theta=2.2|se=0.1": true,
+      "n=8|theta=2.2|se=0.29": true,
+      "n=8|theta=2.2|se=0.3": true,
+      "n=8|theta=2.2|se=0.31": false,
+      "n=8|theta=2.2|se=0.4": false,
+      "n=8|theta=2.2|se=0.5": false,
+      "n=8|theta=2.2|se=1.2": false
+    },
+    "StandardErrorStopper(0.5)": {
+      "n=0|theta=-0.2|se=inf": false,
+      "n=0|theta=-1.5|se=inf": false,
+      "n=0|theta=0.05|se=inf": false,
+      "n=0|theta=0.9|se=inf": false,
+      "n=0|theta=2.2|se=inf": false,
+      "n=1|theta=-0.2|se=0.1": true,
+      "n=1|theta=-0.2|se=0.29": true,
+      "n=1|theta=-0.2|se=0.3": true,
+      "n=1|theta=-0.2|se=0.31": true,
+      "n=1|theta=-0.2|se=0.4": true,
+      "n=1|theta=-0.2|se=0.5": true,
+      "n=1|theta=-0.2|se=1.2": false,
+      "n=1|theta=-1.5|se=0.1": true,
+      "n=1|theta=-1.5|se=0.29": true,
+      "n=1|theta=-1.5|se=0.3": true,
+      "n=1|theta=-1.5|se=0.31": true,
+      "n=1|theta=-1.5|se=0.4": true,
+      "n=1|theta=-1.5|se=0.5": true,
+      "n=1|theta=-1.5|se=1.2": false,
+      "n=1|theta=0.05|se=0.1": true,
+      "n=1|theta=0.05|se=0.29": true,
+      "n=1|theta=0.05|se=0.3": true,
+      "n=1|theta=0.05|se=0.31": true,
+      "n=1|theta=0.05|se=0.4": true,
+      "n=1|theta=0.05|se=0.5": true,
+      "n=1|theta=0.05|se=1.2": false,
+      "n=1|theta=0.9|se=0.1": true,
+      "n=1|theta=0.9|se=0.29": true,
+      "n=1|theta=0.9|se=0.3": true,
+      "n=1|theta=0.9|se=0.31": true,
+      "n=1|theta=0.9|se=0.4": true,
+      "n=1|theta=0.9|se=0.5": true,
+      "n=1|theta=0.9|se=1.2": false,
+      "n=1|theta=2.2|se=0.1": true,
+      "n=1|theta=2.2|se=0.29": true,
+      "n=1|theta=2.2|se=0.3": true,
+      "n=1|theta=2.2|se=0.31": true,
+      "n=1|theta=2.2|se=0.4": true,
+      "n=1|theta=2.2|se=0.5": true,
+      "n=1|theta=2.2|se=1.2": false,
+      "n=3|theta=-0.2|se=0.1": true,
+      "n=3|theta=-0.2|se=0.29": true,
+      "n=3|theta=-0.2|se=0.3": true,
+      "n=3|theta=-0.2|se=0.31": true,
+      "n=3|theta=-0.2|se=0.4": true,
+      "n=3|theta=-0.2|se=0.5": true,
+      "n=3|theta=-0.2|se=1.2": false,
+      "n=3|theta=-1.5|se=0.1": true,
+      "n=3|theta=-1.5|se=0.29": true,
+      "n=3|theta=-1.5|se=0.3": true,
+      "n=3|theta=-1.5|se=0.31": true,
+      "n=3|theta=-1.5|se=0.4": true,
+      "n=3|theta=-1.5|se=0.5": true,
+      "n=3|theta=-1.5|se=1.2": false,
+      "n=3|theta=0.05|se=0.1": true,
+      "n=3|theta=0.05|se=0.29": true,
+      "n=3|theta=0.05|se=0.3": true,
+      "n=3|theta=0.05|se=0.31": true,
+      "n=3|theta=0.05|se=0.4": true,
+      "n=3|theta=0.05|se=0.5": true,
+      "n=3|theta=0.05|se=1.2": false,
+      "n=3|theta=0.9|se=0.1": true,
+      "n=3|theta=0.9|se=0.29": true,
+      "n=3|theta=0.9|se=0.3": true,
+      "n=3|theta=0.9|se=0.31": true,
+      "n=3|theta=0.9|se=0.4": true,
+      "n=3|theta=0.9|se=0.5": true,
+      "n=3|theta=0.9|se=1.2": false,
+      "n=3|theta=2.2|se=0.1": true,
+      "n=3|theta=2.2|se=0.29": true,
+      "n=3|theta=2.2|se=0.3": true,
+      "n=3|theta=2.2|se=0.31": true,
+      "n=3|theta=2.2|se=0.4": true,
+      "n=3|theta=2.2|se=0.5": true,
+      "n=3|theta=2.2|se=1.2": false,
+      "n=5|theta=-0.2|se=0.1": true,
+      "n=5|theta=-0.2|se=0.29": true,
+      "n=5|theta=-0.2|se=0.3": true,
+      "n=5|theta=-0.2|se=0.31": true,
+      "n=5|theta=-0.2|se=0.4": true,
+      "n=5|theta=-0.2|se=0.5": true,
+      "n=5|theta=-0.2|se=1.2": false,
+      "n=5|theta=-1.5|se=0.1": true,
+      "n=5|theta=-1.5|se=0.29": true,
+      "n=5|theta=-1.5|se=0.3": true,
+      "n=5|theta=-1.5|se=0.31": true,
+      "n=5|theta=-1.5|se=0.4": true,
+      "n=5|theta=-1.5|se=0.5": true,
+      "n=5|theta=-1.5|se=1.2": false,
+      "n=5|theta=0.05|se=0.1": true,
+      "n=5|theta=0.05|se=0.29": true,
+      "n=5|theta=0.05|se=0.3": true,
+      "n=5|theta=0.05|se=0.31": true,
+      "n=5|theta=0.05|se=0.4": true,
+      "n=5|theta=0.05|se=0.5": true,
+      "n=5|theta=0.05|se=1.2": false,
+      "n=5|theta=0.9|se=0.1": true,
+      "n=5|theta=0.9|se=0.29": true,
+      "n=5|theta=0.9|se=0.3": true,
+      "n=5|theta=0.9|se=0.31": true,
+      "n=5|theta=0.9|se=0.4": true,
+      "n=5|theta=0.9|se=0.5": true,
+      "n=5|theta=0.9|se=1.2": false,
+      "n=5|theta=2.2|se=0.1": true,
+      "n=5|theta=2.2|se=0.29": true,
+      "n=5|theta=2.2|se=0.3": true,
+      "n=5|theta=2.2|se=0.31": true,
+      "n=5|theta=2.2|se=0.4": true,
+      "n=5|theta=2.2|se=0.5": true,
+      "n=5|theta=2.2|se=1.2": false,
+      "n=6|theta=-0.2|se=0.1": true,
+      "n=6|theta=-0.2|se=0.29": true,
+      "n=6|theta=-0.2|se=0.3": true,
+      "n=6|theta=-0.2|se=0.31": true,
+      "n=6|theta=-0.2|se=0.4": true,
+      "n=6|theta=-0.2|se=0.5": true,
+      "n=6|theta=-0.2|se=1.2": false,
+      "n=6|theta=-1.5|se=0.1": true,
+      "n=6|theta=-1.5|se=0.29": true,
+      "n=6|theta=-1.5|se=0.3": true,
+      "n=6|theta=-1.5|se=0.31": true,
+      "n=6|theta=-1.5|se=0.4": true,
+      "n=6|theta=-1.5|se=0.5": true,
+      "n=6|theta=-1.5|se=1.2": false,
+      "n=6|theta=0.05|se=0.1": true,
+      "n=6|theta=0.05|se=0.29": true,
+      "n=6|theta=0.05|se=0.3": true,
+      "n=6|theta=0.05|se=0.31": true,
+      "n=6|theta=0.05|se=0.4": true,
+      "n=6|theta=0.05|se=0.5": true,
+      "n=6|theta=0.05|se=1.2": false,
+      "n=6|theta=0.9|se=0.1": true,
+      "n=6|theta=0.9|se=0.29": true,
+      "n=6|theta=0.9|se=0.3": true,
+      "n=6|theta=0.9|se=0.31": true,
+      "n=6|theta=0.9|se=0.4": true,
+      "n=6|theta=0.9|se=0.5": true,
+      "n=6|theta=0.9|se=1.2": false,
+      "n=6|theta=2.2|se=0.1": true,
+      "n=6|theta=2.2|se=0.29": true,
+      "n=6|theta=2.2|se=0.3": true,
+      "n=6|theta=2.2|se=0.31": true,
+      "n=6|theta=2.2|se=0.4": true,
+      "n=6|theta=2.2|se=0.5": true,
+      "n=6|theta=2.2|se=1.2": false,
+      "n=8|theta=-0.2|se=0.1": true,
+      "n=8|theta=-0.2|se=0.29": true,
+      "n=8|theta=-0.2|se=0.3": true,
+      "n=8|theta=-0.2|se=0.31": true,
+      "n=8|theta=-0.2|se=0.4": true,
+      "n=8|theta=-0.2|se=0.5": true,
+      "n=8|theta=-0.2|se=1.2": false,
+      "n=8|theta=-1.5|se=0.1": true,
+      "n=8|theta=-1.5|se=0.29": true,
+      "n=8|theta=-1.5|se=0.3": true,
+      "n=8|theta=-1.5|se=0.31": true,
+      "n=8|theta=-1.5|se=0.4": true,
+      "n=8|theta=-1.5|se=0.5": true,
+      "n=8|theta=-1.5|se=1.2": false,
+      "n=8|theta=0.05|se=0.1": true,
+      "n=8|theta=0.05|se=0.29": true,
+      "n=8|theta=0.05|se=0.3": true,
+      "n=8|theta=0.05|se=0.31": true,
+      "n=8|theta=0.05|se=0.4": true,
+      "n=8|theta=0.05|se=0.5": true,
+      "n=8|theta=0.05|se=1.2": false,
+      "n=8|theta=0.9|se=0.1": true,
+      "n=8|theta=0.9|se=0.29": true,
+      "n=8|theta=0.9|se=0.3": true,
+      "n=8|theta=0.9|se=0.31": true,
+      "n=8|theta=0.9|se=0.4": true,
+      "n=8|theta=0.9|se=0.5": true,
+      "n=8|theta=0.9|se=1.2": false,
+      "n=8|theta=2.2|se=0.1": true,
+      "n=8|theta=2.2|se=0.29": true,
+      "n=8|theta=2.2|se=0.3": true,
+      "n=8|theta=2.2|se=0.31": true,
+      "n=8|theta=2.2|se=0.4": true,
+      "n=8|theta=2.2|se=0.5": true,
+      "n=8|theta=2.2|se=1.2": false
+    },
+    "StopRule(CI((-1, 1)), SE(0.3))": {
+      "n=0|theta=-0.2|se=inf": [
+        false,
+        []
+      ],
+      "n=0|theta=-1.5|se=inf": [
+        false,
+        []
+      ],
+      "n=0|theta=0.05|se=inf": [
+        false,
+        []
+      ],
+      "n=0|theta=0.9|se=inf": [
+        false,
+        []
+      ],
+      "n=0|theta=2.2|se=inf": [
+        false,
+        []
+      ],
+      "n=1|theta=-0.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=1|theta=-0.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=1|theta=-1.5|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=-1.5|se=0.29": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=1|theta=-1.5|se=0.3": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=1|theta=-1.5|se=0.31": [
+        false,
+        []
+      ],
+      "n=1|theta=-1.5|se=0.4": [
+        false,
+        []
+      ],
+      "n=1|theta=-1.5|se=0.5": [
+        false,
+        []
+      ],
+      "n=1|theta=-1.5|se=1.2": [
+        false,
+        []
+      ],
+      "n=1|theta=0.05|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=0.05|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=0.05|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=0.05|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.05|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.05|se=0.5": [
+        false,
+        []
+      ],
+      "n=1|theta=0.05|se=1.2": [
+        false,
+        []
+      ],
+      "n=1|theta=0.9|se=0.1": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=1|theta=0.9|se=0.29": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=1|theta=0.9|se=0.3": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=1|theta=0.9|se=0.31": [
+        false,
+        []
+      ],
+      "n=1|theta=0.9|se=0.4": [
+        false,
+        []
+      ],
+      "n=1|theta=0.9|se=0.5": [
+        false,
+        []
+      ],
+      "n=1|theta=0.9|se=1.2": [
+        false,
+        []
+      ],
+      "n=1|theta=2.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=2.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=2.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=2.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=2.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=2.2|se=0.5": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=2.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=-0.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=3|theta=-0.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=-1.5|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=-1.5|se=0.29": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=3|theta=-1.5|se=0.3": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=3|theta=-1.5|se=0.31": [
+        false,
+        []
+      ],
+      "n=3|theta=-1.5|se=0.4": [
+        false,
+        []
+      ],
+      "n=3|theta=-1.5|se=0.5": [
+        false,
+        []
+      ],
+      "n=3|theta=-1.5|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=0.05|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=0.05|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=0.05|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=0.05|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.05|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.05|se=0.5": [
+        false,
+        []
+      ],
+      "n=3|theta=0.05|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=0.9|se=0.1": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=3|theta=0.9|se=0.29": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=3|theta=0.9|se=0.3": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=3|theta=0.9|se=0.31": [
+        false,
+        []
+      ],
+      "n=3|theta=0.9|se=0.4": [
+        false,
+        []
+      ],
+      "n=3|theta=0.9|se=0.5": [
+        false,
+        []
+      ],
+      "n=3|theta=0.9|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=2.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=2.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=2.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=2.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=2.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=2.2|se=0.5": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=2.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=-0.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=5|theta=-0.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=-1.5|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=-1.5|se=0.29": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=5|theta=-1.5|se=0.3": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=5|theta=-1.5|se=0.31": [
+        false,
+        []
+      ],
+      "n=5|theta=-1.5|se=0.4": [
+        false,
+        []
+      ],
+      "n=5|theta=-1.5|se=0.5": [
+        false,
+        []
+      ],
+      "n=5|theta=-1.5|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=0.05|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=0.05|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=0.05|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=0.05|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.05|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.05|se=0.5": [
+        false,
+        []
+      ],
+      "n=5|theta=0.05|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=0.9|se=0.1": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=5|theta=0.9|se=0.29": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=5|theta=0.9|se=0.3": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=5|theta=0.9|se=0.31": [
+        false,
+        []
+      ],
+      "n=5|theta=0.9|se=0.4": [
+        false,
+        []
+      ],
+      "n=5|theta=0.9|se=0.5": [
+        false,
+        []
+      ],
+      "n=5|theta=0.9|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=2.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=2.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=2.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=2.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=2.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=2.2|se=0.5": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=2.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=6|theta=-0.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=6|theta=-0.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=6|theta=-1.5|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.29": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.3": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.31": [
+        false,
+        []
+      ],
+      "n=6|theta=-1.5|se=0.4": [
+        false,
+        []
+      ],
+      "n=6|theta=-1.5|se=0.5": [
+        false,
+        []
+      ],
+      "n=6|theta=-1.5|se=1.2": [
+        false,
+        []
+      ],
+      "n=6|theta=0.05|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.05|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.05|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.05|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=6|theta=0.05|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=6|theta=0.05|se=0.5": [
+        false,
+        []
+      ],
+      "n=6|theta=0.05|se=1.2": [
+        false,
+        []
+      ],
+      "n=6|theta=0.9|se=0.1": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.29": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.3": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.31": [
+        false,
+        []
+      ],
+      "n=6|theta=0.9|se=0.4": [
+        false,
+        []
+      ],
+      "n=6|theta=0.9|se=0.5": [
+        false,
+        []
+      ],
+      "n=6|theta=0.9|se=1.2": [
+        false,
+        []
+      ],
+      "n=6|theta=2.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=6|theta=2.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=6|theta=2.2|se=0.5": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=6|theta=2.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=8|theta=-0.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=8|theta=-0.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=8|theta=-1.5|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.29": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.3": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.31": [
+        false,
+        []
+      ],
+      "n=8|theta=-1.5|se=0.4": [
+        false,
+        []
+      ],
+      "n=8|theta=-1.5|se=0.5": [
+        false,
+        []
+      ],
+      "n=8|theta=-1.5|se=1.2": [
+        false,
+        []
+      ],
+      "n=8|theta=0.05|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.05|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.05|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.05|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=0.05|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=0.05|se=0.5": [
+        false,
+        []
+      ],
+      "n=8|theta=0.05|se=1.2": [
+        false,
+        []
+      ],
+      "n=8|theta=0.9|se=0.1": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.29": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.3": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.31": [
+        false,
+        []
+      ],
+      "n=8|theta=0.9|se=0.4": [
+        false,
+        []
+      ],
+      "n=8|theta=0.9|se=0.5": [
+        false,
+        []
+      ],
+      "n=8|theta=0.9|se=1.2": [
+        false,
+        []
+      ],
+      "n=8|theta=2.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=2.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=2.2|se=0.5": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=2.2|se=1.2": [
+        false,
+        []
+      ]
+    },
+    "StopRule(SE(0.4), MaxLength(6))": {
+      "n=0|theta=-0.2|se=inf": [
+        false,
+        []
+      ],
+      "n=0|theta=-1.5|se=inf": [
+        false,
+        []
+      ],
+      "n=0|theta=0.05|se=inf": [
+        false,
+        []
+      ],
+      "n=0|theta=0.9|se=inf": [
+        false,
+        []
+      ],
+      "n=0|theta=2.2|se=inf": [
+        false,
+        []
+      ],
+      "n=1|theta=-0.2|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=1|theta=-0.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=1|theta=-1.5|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-1.5|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-1.5|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-1.5|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-1.5|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-1.5|se=0.5": [
+        false,
+        []
+      ],
+      "n=1|theta=-1.5|se=1.2": [
+        false,
+        []
+      ],
+      "n=1|theta=0.05|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.05|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.05|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.05|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.05|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.05|se=0.5": [
+        false,
+        []
+      ],
+      "n=1|theta=0.05|se=1.2": [
+        false,
+        []
+      ],
+      "n=1|theta=0.9|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.9|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.9|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.9|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.9|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.9|se=0.5": [
+        false,
+        []
+      ],
+      "n=1|theta=0.9|se=1.2": [
+        false,
+        []
+      ],
+      "n=1|theta=2.2|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=2.2|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=2.2|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=2.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=2.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=2.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=1|theta=2.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=-0.2|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=3|theta=-0.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=-1.5|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-1.5|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-1.5|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-1.5|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-1.5|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-1.5|se=0.5": [
+        false,
+        []
+      ],
+      "n=3|theta=-1.5|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=0.05|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.05|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.05|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.05|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.05|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.05|se=0.5": [
+        false,
+        []
+      ],
+      "n=3|theta=0.05|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=0.9|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.9|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.9|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.9|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.9|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.9|se=0.5": [
+        false,
+        []
+      ],
+      "n=3|theta=0.9|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=2.2|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=2.2|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=2.2|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=2.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=2.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=2.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=3|theta=2.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=-0.2|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=5|theta=-0.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=-1.5|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-1.5|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-1.5|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-1.5|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-1.5|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-1.5|se=0.5": [
+        false,
+        []
+      ],
+      "n=5|theta=-1.5|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=0.05|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.05|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.05|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.05|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.05|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.05|se=0.5": [
+        false,
+        []
+      ],
+      "n=5|theta=0.05|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=0.9|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.9|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.9|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.9|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.9|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.9|se=0.5": [
+        false,
+        []
+      ],
+      "n=5|theta=0.9|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=2.2|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=2.2|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=2.2|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=2.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=2.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=2.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=5|theta=2.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=6|theta=-0.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=-0.2|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=0.05|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.05|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.05|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.05|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.05|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.05|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=0.05|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=-0.2|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=0.05|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.05|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.05|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.05|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.05|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.05|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=0.05|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ]
+    },
+    "StopRule(SE(0.4), MaxLength(6), min_items=3)": {
+      "n=0|theta=-0.2|se=inf": [
+        false,
+        []
+      ],
+      "n=0|theta=-1.5|se=inf": [
+        false,
+        []
+      ],
+      "n=0|theta=0.05|se=inf": [
+        false,
+        []
+      ],
+      "n=0|theta=0.9|se=inf": [
+        false,
+        []
+      ],
+      "n=0|theta=2.2|se=inf": [
+        false,
+        []
+      ],
+      "n=1|theta=-0.2|se=0.1": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.29": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.3": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.31": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.4": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=1|theta=-0.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=1|theta=-1.5|se=0.1": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-1.5|se=0.29": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-1.5|se=0.3": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-1.5|se=0.31": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-1.5|se=0.4": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-1.5|se=0.5": [
+        false,
+        []
+      ],
+      "n=1|theta=-1.5|se=1.2": [
+        false,
+        []
+      ],
+      "n=1|theta=0.05|se=0.1": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.05|se=0.29": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.05|se=0.3": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.05|se=0.31": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.05|se=0.4": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.05|se=0.5": [
+        false,
+        []
+      ],
+      "n=1|theta=0.05|se=1.2": [
+        false,
+        []
+      ],
+      "n=1|theta=0.9|se=0.1": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.9|se=0.29": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.9|se=0.3": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.9|se=0.31": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.9|se=0.4": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.9|se=0.5": [
+        false,
+        []
+      ],
+      "n=1|theta=0.9|se=1.2": [
+        false,
+        []
+      ],
+      "n=1|theta=2.2|se=0.1": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=2.2|se=0.29": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=2.2|se=0.3": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=2.2|se=0.31": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=2.2|se=0.4": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=2.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=1|theta=2.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=-0.2|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=3|theta=-0.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=-1.5|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-1.5|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-1.5|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-1.5|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-1.5|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-1.5|se=0.5": [
+        false,
+        []
+      ],
+      "n=3|theta=-1.5|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=0.05|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.05|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.05|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.05|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.05|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.05|se=0.5": [
+        false,
+        []
+      ],
+      "n=3|theta=0.05|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=0.9|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.9|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.9|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.9|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.9|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.9|se=0.5": [
+        false,
+        []
+      ],
+      "n=3|theta=0.9|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=2.2|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=2.2|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=2.2|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=2.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=2.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=2.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=3|theta=2.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=-0.2|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=5|theta=-0.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=-1.5|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-1.5|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-1.5|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-1.5|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-1.5|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-1.5|se=0.5": [
+        false,
+        []
+      ],
+      "n=5|theta=-1.5|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=0.05|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.05|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.05|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.05|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.05|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.05|se=0.5": [
+        false,
+        []
+      ],
+      "n=5|theta=0.05|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=0.9|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.9|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.9|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.9|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.9|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.9|se=0.5": [
+        false,
+        []
+      ],
+      "n=5|theta=0.9|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=2.2|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=2.2|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=2.2|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=2.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=2.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=2.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=5|theta=2.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=6|theta=-0.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=-0.2|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=0.05|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.05|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.05|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.05|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.05|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.05|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=0.05|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=-0.2|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=0.05|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.05|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.05|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.05|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.05|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.05|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=0.05|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=1.2": [
+        true,
+        [
+          1
+        ]
+      ]
+    },
+    "StopRule(StopRule(SE(0.35), MaxLength(8)), CI((0,)), min_items=2)": {
+      "n=0|theta=-0.2|se=inf": [
+        false,
+        []
+      ],
+      "n=0|theta=-1.5|se=inf": [
+        false,
+        []
+      ],
+      "n=0|theta=0.05|se=inf": [
+        false,
+        []
+      ],
+      "n=0|theta=0.9|se=inf": [
+        false,
+        []
+      ],
+      "n=0|theta=2.2|se=inf": [
+        false,
+        []
+      ],
+      "n=1|theta=-0.2|se=0.1": [
+        false,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.29": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.3": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.31": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=-0.2|se=0.4": [
+        false,
+        []
+      ],
+      "n=1|theta=-0.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=1|theta=-0.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=1|theta=-1.5|se=0.1": [
+        false,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=-1.5|se=0.29": [
+        false,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=-1.5|se=0.3": [
+        false,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=-1.5|se=0.31": [
+        false,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=-1.5|se=0.4": [
+        false,
+        [
+          1
+        ]
+      ],
+      "n=1|theta=-1.5|se=0.5": [
+        false,
+        [
+          1
+        ]
+      ],
+      "n=1|theta=-1.5|se=1.2": [
+        false,
+        []
+      ],
+      "n=1|theta=0.05|se=0.1": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.05|se=0.29": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.05|se=0.3": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.05|se=0.31": [
+        false,
+        [
+          0
+        ]
+      ],
+      "n=1|theta=0.05|se=0.4": [
+        false,
+        []
+      ],
+      "n=1|theta=0.05|se=0.5": [
+        false,
+        []
+      ],
+      "n=1|theta=0.05|se=1.2": [
+        false,
+        []
+      ],
+      "n=1|theta=0.9|se=0.1": [
+        false,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=0.9|se=0.29": [
+        false,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=0.9|se=0.3": [
+        false,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=0.9|se=0.31": [
+        false,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=0.9|se=0.4": [
+        false,
+        [
+          1
+        ]
+      ],
+      "n=1|theta=0.9|se=0.5": [
+        false,
+        []
+      ],
+      "n=1|theta=0.9|se=1.2": [
+        false,
+        []
+      ],
+      "n=1|theta=2.2|se=0.1": [
+        false,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=2.2|se=0.29": [
+        false,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=2.2|se=0.3": [
+        false,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=2.2|se=0.31": [
+        false,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=1|theta=2.2|se=0.4": [
+        false,
+        [
+          1
+        ]
+      ],
+      "n=1|theta=2.2|se=0.5": [
+        false,
+        [
+          1
+        ]
+      ],
+      "n=1|theta=2.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=-0.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=-0.2|se=0.4": [
+        false,
+        []
+      ],
+      "n=3|theta=-0.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=3|theta=-0.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=-1.5|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=-1.5|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=-1.5|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=-1.5|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=-1.5|se=0.4": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=3|theta=-1.5|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=3|theta=-1.5|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=0.05|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.05|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.05|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.05|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=3|theta=0.05|se=0.4": [
+        false,
+        []
+      ],
+      "n=3|theta=0.05|se=0.5": [
+        false,
+        []
+      ],
+      "n=3|theta=0.05|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=0.9|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=0.9|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=0.9|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=0.9|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=0.9|se=0.4": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=3|theta=0.9|se=0.5": [
+        false,
+        []
+      ],
+      "n=3|theta=0.9|se=1.2": [
+        false,
+        []
+      ],
+      "n=3|theta=2.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=2.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=2.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=2.2|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=3|theta=2.2|se=0.4": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=3|theta=2.2|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=3|theta=2.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=-0.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=-0.2|se=0.4": [
+        false,
+        []
+      ],
+      "n=5|theta=-0.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=5|theta=-0.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=-1.5|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=-1.5|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=-1.5|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=-1.5|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=-1.5|se=0.4": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=5|theta=-1.5|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=5|theta=-1.5|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=0.05|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.05|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.05|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.05|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=5|theta=0.05|se=0.4": [
+        false,
+        []
+      ],
+      "n=5|theta=0.05|se=0.5": [
+        false,
+        []
+      ],
+      "n=5|theta=0.05|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=0.9|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=0.9|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=0.9|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=0.9|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=0.9|se=0.4": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=5|theta=0.9|se=0.5": [
+        false,
+        []
+      ],
+      "n=5|theta=0.9|se=1.2": [
+        false,
+        []
+      ],
+      "n=5|theta=2.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=2.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=2.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=2.2|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=5|theta=2.2|se=0.4": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=5|theta=2.2|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=5|theta=2.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=6|theta=-0.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=6|theta=-0.2|se=0.4": [
+        false,
+        []
+      ],
+      "n=6|theta=-0.2|se=0.5": [
+        false,
+        []
+      ],
+      "n=6|theta=-0.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=6|theta=-1.5|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.4": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=-1.5|se=1.2": [
+        false,
+        []
+      ],
+      "n=6|theta=0.05|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=6|theta=0.05|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=6|theta=0.05|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=6|theta=0.05|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=6|theta=0.05|se=0.4": [
+        false,
+        []
+      ],
+      "n=6|theta=0.05|se=0.5": [
+        false,
+        []
+      ],
+      "n=6|theta=0.05|se=1.2": [
+        false,
+        []
+      ],
+      "n=6|theta=0.9|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.4": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=0.9|se=0.5": [
+        false,
+        []
+      ],
+      "n=6|theta=0.9|se=1.2": [
+        false,
+        []
+      ],
+      "n=6|theta=2.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.4": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=0.5": [
+        true,
+        [
+          1
+        ]
+      ],
+      "n=6|theta=2.2|se=1.2": [
+        false,
+        []
+      ],
+      "n=8|theta=-0.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=-0.2|se=0.5": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=-0.2|se=1.2": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=0.5": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=-1.5|se=1.2": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=0.05|se=0.1": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=0.05|se=0.29": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=0.05|se=0.3": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=0.05|se=0.31": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=0.05|se=0.4": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=0.05|se=0.5": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=0.05|se=1.2": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=0.9|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=0.9|se=0.5": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=0.9|se=1.2": [
+        true,
+        [
+          0
+        ]
+      ],
+      "n=8|theta=2.2|se=0.1": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.29": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.3": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.31": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.4": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=0.5": [
+        true,
+        [
+          0,
+          1
+        ]
+      ],
+      "n=8|theta=2.2|se=1.2": [
+        true,
+        [
+          0
+        ]
+      ]
+    }
+  }
+}

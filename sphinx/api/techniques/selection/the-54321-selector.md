@@ -26,7 +26,7 @@ review of exposure-control strategies.
 With `initial_bin_size` $s$, the item at 0-indexed test position $k$ is drawn
 from the $\max(1, s - k)$ most informative items that are neither administered
 nor excluded, plus any item tied in information with the last of them
-({doc}`/adr/0011-random-tie-breaking`).
+({doc}`/adr/0017-random-tie-breaking`).
 
 ## Parameters
 
@@ -52,14 +52,22 @@ matter most for precision, are chosen by maximum information.
 {cite:t}`Magis12{p. 12}` list the technique among the methods that choose at random among
 several near-optimal items, without defining it.
 
+:::{dropdown} Comparison with catR
+
+At each position, the selector's bin is the bin of catR's `nextItem` with
+`criterion = "MFI"` and `randomesque` set to $\max(1, s - k)$; with $s = 5$, the parity tests
+({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`) find that bin in four
+contexts. No simulation compares whole tests.
+:::
+
 ## Guarantees
 
 1. It never returns an item that was already administered or excluded.
-2. The item at position $k$ is drawn with the session's random generator from the
+2. The item at position $k$ is drawn with the generator of the call from the
    $\max(1, s - k)$ most informative remaining items.
 3. From position $s - 1$ on, it returns the most informative remaining item.
 4. When no item remains, it raises `NoItemsAvailableError`.
-5. It applies no exposure cap: the run's exposure rates do not change its choice.
+5. It applies no exposure cap: the exposure rates do not change its choice.
 
 ## References
 

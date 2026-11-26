@@ -16,7 +16,8 @@ class BaseEstimator(ABC):
 
   An estimator holds its configuration and caches derived from the item bank, never per-session
   state: one estimator serves every session of a run, which an application may interleave, and
-  look-ahead selectors such as MEI call it with hypothetical responses.
+  look-ahead selectors such as MEI call it with hypothetical responses. The :doc:`/extending` guide
+  lists what an estimator receives and returns.
   """
 
   @abstractmethod
@@ -24,19 +25,20 @@ class BaseEstimator(ABC):
     r"""Return the updated ability estimate given the responses so far, with its standard error.
 
     Once an item has been administered, the estimate is finite and lies within the estimator's
-    bounds, whatever the response pattern, all correct and all incorrect included.
+    bounds, whatever the responses, all correct and all incorrect included.
 
     Parameters
     ----------
     context : StepContext
         The session to estimate for, with the newest item and response, and with ``theta`` the
-        estimate before them.
+        estimate before them. When :meth:`CatEngine.answer <catsim.CatEngine.answer>` calls the
+        estimator, the context's generator is the one made from the ``rng`` given to ``answer``.
 
     Returns
     -------
     Estimate
-        The updated ability estimate :math:`\hat\theta`, its standard error (finite, or
-        ``math.inf``, never NaN) and the number of objective evaluations it took.
+        The updated ability estimate :math:`\hat\theta`, its standard error (positive, possibly
+        ``math.inf``) and the number of objective evaluations it took.
     """
 
   @staticmethod

@@ -60,13 +60,6 @@ the denominator as the progressive selector's page explains for Equation 12).
 
 ### Computation
 
-`catR` computes the power the same way in
-[`nextItem.R`](https://github.com/cran/catR/blob/master/R/nextItem.R), as `thr`
-times the progressive weight. catsim departs from both where the progressive
-selector does: the default is $s = 0$, where `catR`'s `AP` defaults to 1; past
-position $N$ the exponent stays at $N$, where `catR`'s keeps growing; and with
-$N = 1$ the exponent is 1, Segall's method, where Equation 13 and `catR` give 0.
-
 catsim divides the information by its maximum over the available items before
 raising it to the power, which leaves the probabilities unchanged and keeps a
 large exponent from underflowing every weight to zero.
@@ -99,6 +92,29 @@ At the last item of a 20-item test at $\theta = 0$, over 20 simulated 500-item
 3PL banks, the most informative item is drawn with probability 0.32 to 0.96
 (median 0.64).
 
+:::{dropdown} Comparison with catR
+
+`catR` computes the power the same way in
+[`nextItem.R`](https://github.com/cran/catR/blob/master/R/nextItem.R), as `thr`
+times the progressive weight
+({doc}`ADR-0019 </adr/0019-published-progressive-schedule>`). Within the planned
+length, the parity tests ({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`)
+find catR's selection probabilities at every position of the tests the
+{doc}`progressive selector's page <progressive-selector>` lists, and a
+simulation of 1,000 examinees taking 10-item tests with $s = 1$ gives catR's
+bias, RMSE, overlap rate and exposure rates within their Monte Carlo error.
+catsim departs from catR where the progressive selector does, the last two
+times from Equation 13 as well:
+
+- The default is $s = 0$, where catR's `AP` defaults to 1; `acceleration=1`
+  gives catR's exponent.
+- Past position $N$ the exponent stays at $N$, where catR's keeps growing.
+- With $N = 1$ the exponent is 1, Segall's method, where Equation 13 and catR
+  give 0, uniform selection.
+
+The parity tests keep the last two as expected failures.
+:::
+
 ## Guarantees
 
 1. It never returns an item that was already administered or excluded.
@@ -108,7 +124,7 @@ At the last item of a 20-item test at $\theta = 0$, over 20 simulated 500-item
    uniformly among them.
 4. When every remaining item is at or above the exposure cap, it samples from all
    the remaining items.
-5. It draws with the session's random generator, so a run with the same seed
+5. It draws with the generator of the call, so a run with the same seed
    administers the same items.
 
 ## References
@@ -118,7 +134,7 @@ At the last item of a 20-item test at $\theta = 0$, over 20 simulated 500-item
 ```
 
 :::{seealso}
-Companion spec: {doc}`/api/techniques/selection/progressive-selector`
+{doc}`/api/techniques/selection/progressive-selector`, which follows the same schedule
 :::
 
 ## API Reference

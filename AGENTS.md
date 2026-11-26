@@ -8,16 +8,17 @@ These instructions apply to the entire repository unless a deeper `AGENTS.md` ov
 
 ## Project Summary
 
-`catsim` is a computerized adaptive testing toolkit. The current architecture is centered on:
+`catsim` is a library for computing and evaluating computerized adaptive tests: the IRT quantities,
+the CAT strategies, and simulation studies that compare them (ADR-0001). A live testing application
+can use its computations as its core, but catsim does not run, store or serve live tests. The
+architecture is centered on:
 
-- `CatEngine` for stepwise CAT execution
-- `CatSessionState` for per-session runtime state
-- `SimulationRunner` for batch execution
-- `SimulationResult` for aggregate outputs
-
-This repository no longer uses the legacy simulator-centric execution model as its architectural
-center. Agents should preserve the current engine/session/result design and avoid reintroducing
-hidden runtime coupling.
+- `ItemBank`, the immutable calibrated items, with their names (ADR-0003, ADR-0004)
+- `CatEngine`, the immutable configuration of a test, whose step methods (`start`, `select`,
+  `answer`) take a `Session` and return a new one (ADR-0006)
+- `Session`, an immutable value that the caller keeps
+- `simulate`, which runs sessions over generated or recorded examinees, in parts on workers
+  (ADR-0014, ADR-0015), and returns a `SimulationResult` (ADR-0016)
 
 ## Repository Layout
 
@@ -29,20 +30,24 @@ hidden runtime coupling.
 
 ## Core Architecture Rules
 
-- Keep execution logic aligned with the explicit engine model:
-  - `CatEngine`
-  - `CatSessionState`
-  - `SimulationRunner`
-  - `SimulationResult`
-- Do not reintroduce legacy simulator-coupled interfaces or hidden simulator backreferences.
-- Keep runtime state outside domain objects when possible.
-  - `ItemBank` should remain focused on calibrated item data and related derived data.
-  - Run-level exposure and aggregate metrics belong in runtime/result objects.
-- Preserve explicit strategy contracts.
-  - Initializers, selectors, estimators, stoppers and exposure controls should use explicit
-    parameters rather than engine-facing `**kwargs` when the engine owns the call contract.
-- Preserve stable step semantics.
-  - `CatStepResult` should represent a durable step outcome, not a mutable live-session alias.
+- Compute each step from explicit inputs (ADR-0006). catsim keeps nothing between calls that a
+  caller must preserve: the session, the exposure counts and the generator are the caller's.
+  Serving concerns (storing sessions, the item on screen, concurrency, audits) belong to the
+  application, never to catsim.
+- Do not reintroduce mutable session objects, simulator-coupled interfaces or backreferences from a
+  strategy to its caller.
+- Cache only derived data, in the object it derives from; a cache that depends on a session's
+  history is an optional, explicit input (ADR-0008).
+- Check explicit inputs where they enter catsim, for everything that needs no recomputation
+  (ADR-0009).
+- Preserve the strategy contracts: every strategy takes one `StepContext` (ADR-0007), and
+  strategies hold configuration and derived data only, never anything about a session.
+- Every random draw comes from a generator the caller passes; simulations draw from one stream per
+  examinee (ADR-0013).
+- Keep every built-in strategy picklable, so runs can use workers (ADR-0015).
+- Runtime dependencies are NumPy and SciPy only (ADR-0021).
+- Performance is not a requirement. When a change makes catsim slower, say so to the maintainer
+  when it happens, with measurements.
 
 ## Source Code Guidelines
 
@@ -51,8 +56,9 @@ hidden runtime coupling.
 - Keep type annotations accurate; this repository uses `ty` as part of its quality gates.
 - Annotate NumPy arrays with the public aliases in `catsim.typing` (`FloatArray`, `IntArray`).
   Ruff bans `numpy.typing.NDArray` elsewhere; for another dtype, add an alias there.
-- A method that overrides a base-class method carries `@override` (from `typing_extensions`); ty's
-  `missing-override-decorator` enforces it in `src/` and `tests/`.
+- A method that overrides a base-class method carries `@override`, imported from `catsim.compat` in
+  `src/` and `tests/` (typing-extensions is installed only below Python 3.12); ty's
+  `missing-override-decorator` enforces it in both.
 - Closed option sets are `StrEnum`s, like `IrtModel`; code that branches on one uses `match`, with
   a final `case _`.
 - No backward-compatibility aliases or deprecation shims before 1.0: a renamed or removed name is
@@ -65,8 +71,8 @@ hidden runtime coupling.
 - Outside `src/catsim`, import each name from its public package path
   (`from catsim.selection import MaxInfoSelector`), not from the module file that defines it. Name
   things by the one-name-per-concept table (`theta`, `current_theta`, `administered_items`, `items`,
-  `responses`, `n_items`, `model`, `rng`). Both rules are in
-  `sphinx/adr/0006-public-import-paths-and-names.md`.
+  `responses`, `item`, `name`, `n_items`, `model`, `rng`). Both rules are in
+  `sphinx/adr/0023-public-import-paths-and-names.md`.
 - A new top-level module in `src/catsim/` must be placed in the import-linter `layers` contract in
   `pyproject.toml`. The contract is exhaustive, so `lint-imports` fails until the module is placed.
 
@@ -79,7 +85,7 @@ charter. Each kind of document has one job and audience:
   separate from the website's landing page (`sphinx/index.md`); every link in it is absolute.
 - `sphinx/introduction.md` and `sphinx/terms-and-notation.md`: the CAT and IRT primer and the
   glossary; readers new to CAT.
-- Guides: one task end to end; researchers and application developers.
+- Guides: one task end to end; researchers, method authors and, in "Embedding catsim", integrators.
 - Technique pages (`sphinx/api/techniques/`): a method's definition, behaviour and sources;
   researchers.
 - Docstrings: the call contract; anyone calling the object.
@@ -92,7 +98,7 @@ Hard rules:
 
 - A docstring is the call contract: no method math, design rationale or history.
 - History ("now", "no longer", "replaces", card IDs, PR numbers) goes only in the GitHub release
-  notes and the 1.0 notice. There is no CHANGELOG file.
+  notes, the 1.0 notice and the Context section of an ADR. There is no CHANGELOG file.
 - Use the terms and symbols of `sphinx/terms-and-notation.md`.
 - No internal names or design rationale in user pages: link the ADR.
 - One home per topic; other documents link to it.

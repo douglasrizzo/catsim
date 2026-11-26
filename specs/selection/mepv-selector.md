@@ -2,7 +2,7 @@
 **Module:** `catsim.selection.weighted_info.MEPVSelector` (planned)
 **Reference:** van der Linden (1998); Choi and Swartz (2009)
 **Last validated:** 2026-11-23, against van der Linden (1996, RR 96-01); Choi & Swartz (2009); Magis & Raîche (2012); catR 3.17 (`EPV.R`, `eapEst.R`, `eapSem.R`, `nextItem.R`).
-**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in) on 2026-11-24.
+**Implementation guidance:** written against the 1.0 strategy contract (`StepContext` in) on 2026-11-26.
 
 # Minimum Expected Posterior Variance Selector
 
@@ -115,7 +115,7 @@ Magis, D., & Raîche, G. (2012). Random generation of response patterns under co
 
 :::{note}
 This section is for contributors and agents implementing this technique.
-It is removed when the spec is promoted to "Implemented" status.
+It is removed when the spec is promoted to a technique page.
 :::
 
 **Proposed location:** `src/catsim/selection/weighted_info.py`, next to `MPWISelector`.
@@ -129,8 +129,10 @@ It is removed when the spec is promoted to "Implemented" status.
 import numpy
 
 from .. import irt
+from ..compat import override
 from ..context import StepContext
-from ..estimation.bayesian import LogPrior, QuadratureGrid, normal_log_prior, posterior
+from ..estimation import LogPrior, QuadratureGrid, normal_log_prior, posterior
+from ..item_bank import ItemBank
 from ..typing import FloatArray
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
@@ -153,7 +155,9 @@ def _expected_posterior_variance(post: FloatArray, nodes: FloatArray, probabilit
     mass = branch.sum(axis=0)
     # A response with no posterior-predictive mass, where P rounds to 0 or 1 at every node the
     # posterior weighs, adds nothing; dividing by its zero mass would give NaN, which pick_best rejects.
-    mean = numpy.divide(nodes @ branch, mass, out=numpy.zeros_like(mass), where=mass > 0)
+    # sums over the node axis, as in MPWI, so identical items tie exactly (ADR-0017)
+    moment = (nodes[:, numpy.newaxis] * branch).sum(axis=0)
+    mean = numpy.divide(moment, mass, out=numpy.zeros_like(mass), where=mass > 0)
     expected += ((nodes[:, numpy.newaxis] - mean) ** 2 * branch).sum(axis=0)
   return expected
 
@@ -189,7 +193,10 @@ class MEPVSelector(BaseSelector):
     self._grid = grid if grid is not None else QuadratureGrid.uniform()
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
     self._r_max = check_r_max(r_max)
+    # The last bank selected for and its response-probability table, as MPWISelector caches its own
+    self._table: tuple[ItemBank, FloatArray] | None = None
 
+  @override
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument, with None for a default."""
     return (
@@ -197,6 +204,7 @@ class MEPVSelector(BaseSelector):
       f"r_max={self._r_max!r})"
     )
 
+  @override
   def select(self, context: StepContext) -> int:
     """Return the available item with the smallest expected posterior variance after its response.
 
@@ -214,7 +222,10 @@ class MEPVSelector(BaseSelector):
     candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
     item_bank = context.item_bank
     post = posterior(context.responses, item_bank.get_items(context.administered_items), self._grid, self._log_prior)
-    probabilities = _table_at_nodes(item_bank, self._grid.nodes, irt.icc)[:, candidates]
+    table = self._table
+    if table is None or table[0] is not item_bank:
+      table = self._table = (item_bank, _table_at_nodes(item_bank, self._grid.nodes, irt.icc))
+    probabilities = table[1][:, candidates]
     expected = _expected_posterior_variance(post, self._grid.nodes, probabilities)
     # pick_best takes the highest score, and the smallest variance wins
     return pick_best(candidates, -expected, context.rng)
@@ -222,19 +233,19 @@ class MEPVSelector(BaseSelector):
 
 **Implementation notes:**
 
-- The response-probability table depends only on the item bank and the grid's nodes, so it is
-  cached in `ItemBank._selector_cache` through MPWI's `_table_at_nodes`, under a key of its own
-  (the function's name and the node values).
+- The response-probability table depends only on the item bank and the grid's nodes, so the
+  selector computes it once per bank through MPWI's `_table_at_nodes`, with `irt.icc`, and caches
+  it with that bank, as MPWI caches its information table.
 - The branch weights are the posterior-predictive probabilities, as the definition requires, so
   the selector does not read the context's `theta`. catR's weights, $P_i(\hat\theta)$ and
   $1 - P_i(\hat\theta)$ at the current estimate, would be
   `irt.icc(context.theta, item_bank.get_items(candidates))`; a comparison with catR needs that
   variant, and its rankings can differ.
 - The posterior comes from the context's responses at every call, as in MPWI; estimators keep no
-  per-session posterior ({doc}`ADR-0005 </adr/0005-explicit-strategy-contracts>`). Each call costs two
+  per-session posterior ({doc}`ADR-0007 </adr/0007-strategy-contracts>`). Each call costs two
   passes over a $Q \times$ candidates table, about twice MPWI's.
-- The import-linter exception MPWI's spec names (`catsim.selection.weighted_info ->
-  catsim.estimation.bayesian`) covers this selector too.
+- The import-linter exception that MPWI's spec relies on (`catsim.selection.weighted_info ->
+  catsim.estimation`) covers this selector too.
 - MPWI and MEPV share their arguments, constructor and repr; if Pylint's duplicate-code check
   flags them, share that code once rather than copying it.
 
@@ -252,3 +263,8 @@ class MEPVSelector(BaseSelector):
 - Identical items have equal expected variances, and the tie is broken with the context's `rng`.
 - Contract 5: a cap that leaves some candidates, and one that leaves none, falling back to all
   remaining items.
+- Parity with catR (ADR-0020): add `criterion = "MEPV"` cases to `tests/parity/catr/selection.R`.
+  catR weights the branches at the current estimate, so its rankings are a departure, a strict
+  expected failure in `_DEPARTURES` with this spec's reason, unless the selector offers catR's
+  weights as a setting; the branch variances, from catR's `eapSem` on a grid with trapezoid
+  weights, can be compared directly.

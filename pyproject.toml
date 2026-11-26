@@ -39,8 +39,8 @@ description = "Computerized adaptive testing toolkit"
 dependencies = [
     "numpy>=2.3.1",
     "scipy>=1.16",
-    "tqdm>=4.64",
-    "typing-extensions>=4.4",
+    # override, which typing has from Python 3.12 (ADR-0021); 4.4 is the first release with it.
+    "typing-extensions>=4.4; python_version < '3.12'",
 ]
 requires-python = ">=3.11"
 readme = "README.md"
@@ -140,6 +140,10 @@ unfixable = []
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
+# Ruff treats catsim.compat.override as typing.override, so an override is exempt from the unused-argument,
+# no-self-use and docstring rules, as the base method already answers to them.
+typing-modules = ["catsim.compat"]
+
 [tool.ruff.lint.mccabe]
 max-complexity = 10
 
@@ -180,7 +184,7 @@ ignore-one-line-docstrings = true
 # D102 and D103 stay on for tests, with no numpydoc sections, so the other pydocstyle rules are off.
 "tests/test_*.py" = ["D100", "D101", "D104", "D105", "D106", "D107", "D2", "D3", "D4"]
 # Fixtures, strategies and builders are not tests; a new helper module of tests/ joins this list.
-"tests/{__init__,banks,conftest,contexts,hypothesis_strategies}.py" = ["D"]
+"tests/{__init__,banks,conftest,contexts,generators,hypothesis_strategies}.py" = ["D"]
 
 [tool.ruff.format]
 # Like Black, use double quotes for strings.
@@ -218,6 +222,7 @@ docs = [
     "pydata-sphinx-theme>=0.16.0",
     "sphinxcontrib-mermaid>=2.1.1",
     "sphinx-reredirects>=1.1.0",
+    "sphinx-design>=0.6.1",
 ]
 
 [tool.pytest.ini_options]
@@ -258,10 +263,10 @@ min_confidence = 60
 ignore_decorators = ["@initialize", "@invariant", "@rule"]  # Hypothesis runs the state machines' rules
 ignore_names = [
   "WEIGHTED_INFO",  # ClusterMethod member, chosen by its value "weighted_info"
-  "_selector_cache",  # empty until the planned MPWI and MEPV selectors cache their tables in it
   "writeable",  # numpy's ndarray.flags.writeable, set to make arrays read-only
   "pytest_plugins",  # read by pytest
   "close_matplotlib_figures",  # autouse fixture
+  "reducer_override",  # called by pickle
 ]
 
 [tool.typos.files]
@@ -355,14 +360,16 @@ exhaustive = true  # every new top-level module must be placed in a layer
 layers = [
   "plot",  # draws items and sessions; nothing in catsim imports it
   "simulation",
+  "workers",  # the worker processes of a parallel run (ADR-0015)
   "engine",
   "selection | estimation | initialization | stopping | exposure",  # "|": siblings that never import each other
-  "state",
-  "context",  # StepContext: below state and the strategies, which read it, and above the domain
+  "session",  # Session: built by the engine, read by the runner and the plots, never by a strategy
+  "context",  # StepContext: below the session and the strategies, which read it, and above the domain
   "metrics",
   "item_bank",
   "irt",
-  "typing : exceptions",
+  "checks",  # the input checks of the explicit inputs (ADR-0009), which the domain makes too
+  "typing : exceptions : compat",
 ]
 ignore_imports = [
   # MEISelector runs one-step-ahead ability updates with an estimator.
@@ -386,7 +393,7 @@ source_modules = [
   "catsim.stopping",
   "catsim.exposure",
 ]
-forbidden_modules = ["catsim.state", "catsim.engine", "catsim.simulation", "catsim.plot"]
+forbidden_modules = ["catsim.session", "catsim.engine", "catsim.simulation", "catsim.plot"]
 
 [[tool.importlinter.contracts]]
 id = "plot-only-matplotlib"
@@ -395,13 +402,16 @@ type = "forbidden"
 source_modules = [
   "catsim.typing",
   "catsim.exceptions",
+  "catsim.compat",
   "catsim.irt",
   "catsim.item_bank",
   "catsim.metrics",
+  "catsim.checks",
   "catsim.context",
-  "catsim.state",
+  "catsim.session",
   "catsim.engine",
   "catsim.simulation",
+  "catsim.workers",
   "catsim.selection",
   "catsim.estimation",
   "catsim.initialization",

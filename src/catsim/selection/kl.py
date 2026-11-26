@@ -3,9 +3,9 @@
 import functools
 
 import numpy
-from typing_extensions import override
 
 from .. import irt
+from ..compat import override
 from ..context import StepContext
 from ..typing import FloatArray
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
@@ -32,7 +32,7 @@ def _gauss_legendre(n_nodes: int) -> tuple[FloatArray, FloatArray]:
 class KLSelector(BaseSelector):
   r"""Select the item with the most Kullback-Leibler information around the current estimate.
 
-  Each candidate's KL divergence between the response distributions at the estimate and at nearby
+  Each candidate item's KL divergence between the response distributions at the estimate and at nearby
   abilities is integrated over a window around the estimate, which narrows as items are
   administered, and the item with the largest integral is selected.
 
@@ -88,7 +88,7 @@ class KLSelector(BaseSelector):
     log_p, log_q = irt.log_response_probabilities(theta_hat + half_width * nodes, items)
     divergence = numpy.exp(log_p_hat) * (log_p_hat - log_p) + numpy.exp(log_q_hat) * (log_q_hat - log_q)
     # one rule for every item, and a sum over the node axis that adds each column in the same order,
-    # so identical items tie exactly (ADR-0011); a matrix product may round columns differently
+    # so identical items tie exactly (ADR-0017); a matrix product may round columns differently
     return half_width * (weights[:, None] * divergence).sum(axis=0)
 
   @override

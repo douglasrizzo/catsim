@@ -6,10 +6,9 @@ import numpy as np
 from hypothesis import assume, given, settings
 from hypothesis import strategies as st
 
-from catsim import irt
+from catsim import ItemBank, irt
 from catsim.estimation import NumericalSearchEstimator
 from catsim.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
-from catsim.item_bank import ItemBank
 from tests.contexts import make_context
 from tests.hypothesis_strategies import item_params_matrix
 

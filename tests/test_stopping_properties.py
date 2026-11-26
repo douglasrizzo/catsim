@@ -6,9 +6,9 @@ from dataclasses import dataclass
 
 from hypothesis import assume, example, given, settings
 from hypothesis import strategies as st
-from typing_extensions import override
 
-from catsim.item_bank import ItemBank
+from catsim import ItemBank
+from catsim.compat import override
 from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthStopper, StopRule
 from tests.contexts import make_context
 

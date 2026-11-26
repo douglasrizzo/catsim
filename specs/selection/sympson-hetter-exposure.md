@@ -2,7 +2,7 @@
 **Module:** `catsim.exposure.sympson_hetter.SympsonHetterControl` (planned)
 **Reference:** Sympson and Hetter (1985); Stocking and Lewis (1998)
 **Last validated:** 2026-11-23, against Barrada et al. (2008); Georgiadou et al. (2007); Stocking & Lewis (1995, ETS RR-95-24).
-**Implementation guidance:** written against the engine's exposure control (`BaseExposureControl.accept`, declined items kept in the session's `excluded_items`) on 2026-11-24.
+**Implementation guidance:** written against the engine's exposure control (`BaseExposureControl.accept(context, item)`, declined items kept in the session's `excluded_items`) and `simulate` on 2026-11-26.
 
 # Sympson-Hetter Exposure Control
 
@@ -89,6 +89,15 @@ p. 495).
      - Optional pre-calibrated SH acceptance table.
 ```
 
+## Behavior and Comparison
+
+catR's `simulateRespondents` caps exposure with `rmax` in two ways (`Mrmax`): before each
+examinee, `"restricted"` makes every item whose exposure rate is at or above the cap unavailable,
+and `"IE"`, the item-eligibility method, makes each item available with an eligibility probability
+that it updates from the exposure rates of the run so far. Neither needs a calibration before the
+run, and neither acts on the item a selector proposes, as this control does, so no parity case
+compares this control with catR (ADR-0020).
+
 ## Behavioral Contracts
 
 Any correct implementation must satisfy the following properties:
@@ -115,7 +124,7 @@ Georgiadou, E. G., Triantafillou, E., & Economides, A. A. (2007). A review of it
 
 :::{note}
 This section is for contributors and agents implementing this technique.
-It is removed when the spec is promoted to "Implemented" status.
+It is removed when the spec is promoted to a technique page.
 :::
 
 **Proposed location:** `src/catsim/exposure/sympson_hetter.py`, in the `catsim.exposure` package
@@ -131,8 +140,8 @@ from collections.abc import Callable
 
 import numpy
 import numpy.typing as npt
-from typing_extensions import override
 
+from ..compat import override
 from ..context import StepContext
 from ..typing import FloatArray
 from .base import BaseExposureControl
@@ -177,14 +186,14 @@ class SympsonHetterControl(BaseExposureControl):
     return self._k_values
 
   @override
-  def accept(self, context: StepContext, item_id: int) -> bool:
+  def accept(self, context: StepContext, item: int) -> bool:
     """Return whether the proposed item passes its acceptance draw.
 
     Parameters
     ----------
     context : StepContext
         The context the selector proposed the item from.
-    item_id : int
+    item : int
         Index of the proposed item.
 
     Returns
@@ -202,8 +211,8 @@ class SympsonHetterControl(BaseExposureControl):
       msg = "SympsonHetterControl needs one calibrated acceptance probability per item; see calibrate()"
       raise RuntimeError(msg)
     # An item with K = 1 draws no random number, so K = 1 everywhere reproduces the run without a
-    # control exactly, as pick_best does for untied scores (ADR-0011).
-    return bool(k_values[item_id] >= 1 or context.rng.random() < k_values[item_id])
+    # control exactly, as pick_best does for untied scores (ADR-0017).
+    return bool(k_values[item] >= 1 or context.rng.random() < k_values[item])
 
 
 def sympson_hetter_update(proposal_rates: FloatArray, r_max: float) -> FloatArray:
@@ -240,7 +249,7 @@ def calibrate(
   proposal_rates : Callable[[numpy.ndarray], numpy.ndarray]
       Simulates the test design with the control at the given acceptance probabilities, and returns
       each item's proposal rate: the proportion of simulated examinees to whom the selector proposed
-      it, a run's ``SimulationResult.proposal_rates``.
+      it, the value of a run's ``SimulationResult.proposal_rates()``.
   n_items : int
       Number of items in the bank.
   r_max : float
@@ -270,32 +279,33 @@ def calibrate(
 
 **Implementation notes:**
 
-- The engine does the rest of step 4 and Contract 3 (ADR-0008): it adds a declined item to the
+- The engine does the rest of step 4 and Contract 3 (ADR-0011): it adds a declined item to the
   session's `excluded_items`, which lasts for the rest of the test, and asks the selector again. A
   session whose remaining items are all declined ends with `StopReason.NO_ITEMS`. The control only
   decides, and keeps no per-session state.
-- Each item is proposed at most once per examinee, as it is administered or declined, and the
-  run's exposure tracker counts both, so `SimulationResult.proposal_rates` is the $s_i$ of
+- Each item is proposed at most once per examinee, as it is administered or declined, and
+  `simulate` counts both, so the value of `SimulationResult.proposal_rates()` is the $s_i$ of
   Equation 5. A `proposal_rates` callable for `calibrate` is one seeded run with the control:
 
   ```python
   def proposal_rates(k_values):
     engine = CatEngine(bank, initializer, MaxInfoSelector(), estimator, stopper,
                        exposure_control=SympsonHetterControl(k_values))
-    return SimulationRunner(engine).run(true_thetas, rng=seed).proposal_rates
+    return simulate(engine, true_thetas=true_thetas, rng=seed).proposal_rates().value
   ```
 
 - The calibration follows the first form of the update, from proposal rates, because the form
   with administration rates is undefined for an item that was proposed but never administered.
   The convergence check uses the expected exposure rate $K_i s_i$ of the same simulation.
-- The control imports only `catsim.context`, as the import-linter contract requires of the
-  `exposure` layer; `calibrate` takes the simulation as a callable, so the module needs no runtime
-  layer.
-- The acceptance draw uses the context's `rng`, the run's generator (ADR-0010), and an item with
-  $K_i = 1$ draws nothing.
+- The module imports only the layers below `exposure` (`catsim.context`, `catsim.typing` and
+  `catsim.compat`), as the import-linter layers contract requires; `calibrate` takes the
+  simulation as a callable, since the strategy layers may not import `catsim.simulation`.
+- The acceptance draw uses the context's `rng`, the generator of the `select` call, which
+  `simulate` gives each examinee's session (ADR-0013), and an item with $K_i = 1$ draws nothing.
 - One acceptance draw per proposal assumes that applications do not select again on a page reload:
-  a second `select_next` before the answer draws again, so the item on screen would pass with a
-  probability of about $K_i^2$.
+  a second `CatEngine.select` on the same session before the answer draws again, so the item on
+  screen would pass with a probability of about $K_i^2$. Keeping the item shown is the
+  application's (ADR-0006).
 - Conditional SH (Stocking & Lewis, 1995) and content-balanced variants are later work.
 - A trial implementation of this sketch (1,000 examinees, 20-item tests, `MaxInfoSelector`,
   `r_max = 0.2`) never met the 0.005 tolerance on $K_i$: after 30 iterations the largest change of a
@@ -310,9 +320,9 @@ def calibrate(
   `MaxInfoSelector` table, used with `MEISelector`, let one item reach a rate of 0.45. A selector
   that proposes a fixed sequence runs out of items as declines accumulate: with `LinearSelector`
   and a 60-item list, 298 of 300 sessions ended with `StopReason.NO_ITEMS`.
-- The control must pickle, so that a study can run its simulations in a process pool: it keeps its
-  table in a plain attribute and holds no closures. An application stores a calibrated table with
-  its engine configuration.
+- The control must pickle, so that `simulate(..., workers=n)` can send it to worker processes
+  (ADR-0015): it keeps its table in a plain attribute and holds no closures. An application stores
+  a calibrated table with its engine configuration.
 
 **Testing notes:**
 

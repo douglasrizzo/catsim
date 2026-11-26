@@ -16,7 +16,7 @@ EAP's posterior also yields the posterior variance at no extra cost, and that
 variance serves as the error variance of the estimate {cite:p}`Bock1982{p. 432}`;
 in their simulations the posterior standard deviation behaved like the
 standard error of measurement (p. 431). The estimator reports the posterior
-standard deviation as the estimate's standard error, as catR does
+standard deviation as the estimate's standard error
 {cite:p}`Magis12{p. 6, Equation 11}`, and the precision stoppers judge it.
 
 ## Definition
@@ -87,9 +87,35 @@ on $[-6, 6]$) is accurate while the posterior standard deviation is at least
 about 0.065; longer tests need a finer grid (see
 {doc}`/api/techniques/estimation/bayesian-infrastructure`).
 
+:::{dropdown} Comparison with catR
+
+The estimator is catR's `thetaEst` with `method = "EAP"`, and its standard error
+is that of catR's `semTheta`, the posterior standard deviation. catR integrates
+by the trapezoid rule on its `parInt` grid, by default 33 nodes on $[-4, 4]$,
+which halves the weights of the two end nodes; catsim's default grid has 121
+equally weighted nodes on $[-6, 6]$
+({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`). A grid with catR's nodes and
+weights reproduces catR's estimator:
+
+```python
+import numpy
+from catsim.estimation import EAPEstimator, QuadratureGrid
+
+weights = numpy.full(33, 8 / 32)
+weights[[0, -1]] /= 2
+catr_eap = EAPEstimator(grid=QuadratureGrid(nodes=numpy.linspace(-4, 4, 33), weights=weights))
+```
+
+On such grids the parity tests find catR's estimates and standard errors, to a
+relative $10^{-10}$, on fixed responses under normal and uniform priors,
+on catsim's 121 nodes as on catR's 33, and in whole tests on recorded responses.
+The simulations that check the randomized selectors against catR estimate with
+this estimator too. They find no departure.
+:::
+
 ## Guarantees
 
-1. The estimate is finite for extreme response patterns such as all-correct or all-incorrect strings.
+1. The estimate is finite for all-correct and all-incorrect responses.
 2. The standard error is the posterior standard deviation on the grid.
 3. Relative to a flatter prior, a centered normal prior produces stronger shrinkage of extreme short-test estimates toward the prior mean.
 

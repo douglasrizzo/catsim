@@ -7,10 +7,8 @@ from collections.abc import Callable
 import numpy as np
 import pytest
 
-from catsim import StepContext
+from catsim import ItemBank, NoItemsAvailableError, StepContext
 from catsim.estimation import NumericalSearchEstimator
-from catsim.exceptions import NoItemsAvailableError
-from catsim.item_bank import ItemBank
 from catsim.selection import (
   AStratBBlockSelector,
   AStratSelector,
@@ -142,10 +140,10 @@ def test_select_takes_a_minimal_context(make_selector: Callable[[int], BaseSelec
   """
   item_bank = ItemBank.generate(1, rng=3)
 
-  item_id = make_selector(1).select(StepContext(item_bank=item_bank, rng=np.random.default_rng(0)))
+  item = make_selector(1).select(StepContext(item_bank=item_bank, rng=np.random.default_rng(0)))
 
-  assert type(item_id) is int
-  assert item_id == 0
+  assert type(item) is int
+  assert item == 0
 
 
 @pytest.mark.parametrize("make_selector", SELECTOR_FACTORIES.values(), ids=SELECTOR_FACTORIES.keys())
@@ -174,7 +172,7 @@ SELECTOR_REPRS = {
   "RandomSelector": "RandomSelector()",
   "RandomesqueSelector": "RandomesqueSelector(bin_size=4)",
   "The54321Selector": "The54321Selector(initial_bin_size=3)",
-  "LinearSelector": "LinearSelector(items=[3, 1, 2])",
+  "LinearSelector": "LinearSelector(indices=[3, 1, 2])",
   "ProgressiveSelector": "ProgressiveSelector(test_size=12, acceleration=2.0, r_max=0.5)",
   "ProportionalSelector": "ProportionalSelector(test_size=12, acceleration=-1.0, r_max=0.5)",
   "ClusterSelector": (
