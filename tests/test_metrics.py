@@ -254,6 +254,18 @@ def test_overlap_rate_error_matches_its_spread_over_replications() -> None:
       id="one-test-flat",
     ),
     pytest.param(
+      lambda: metrics.exposure_rates([], n_sessions=4),
+      ValueError,
+      "counts is empty; there is one count per item of the bank",
+      id="no-counts",
+    ),
+    pytest.param(
+      lambda: metrics.overlap_rate([], n_items=3),
+      ValueError,
+      "the overlap rate needs at least one session of one item or more",
+      id="no-tests",
+    ),
+    pytest.param(
       lambda: metrics.overlap_rate(np.zeros((2, 0), dtype=int), n_items=3),
       ValueError,
       "the overlap rate needs at least one session of one item or more",

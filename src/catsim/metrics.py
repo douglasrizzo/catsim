@@ -344,7 +344,8 @@ def exposure_rates(counts: npt.ArrayLike, n_sessions: int) -> Metric[FloatArray]
   TypeError
       If ``counts`` is not a one-dimensional array of integers, or ``n_sessions`` is not an integer.
   ValueError
-      If ``n_sessions`` is not positive, or a count is negative or above ``n_sessions``.
+      If ``counts`` is empty, ``n_sessions`` is not positive, or a count is negative or above
+      ``n_sessions``.
 
   Examples
   --------
@@ -360,6 +361,10 @@ def exposure_rates(counts: npt.ArrayLike, n_sessions: int) -> Metric[FloatArray]
     msg = f"n_sessions is {n_sessions}; a run has at least one session"
     raise ValueError(msg)
   array = numpy.asarray(counts)
+  # Before the type check: an empty list has NumPy's float dtype, and a bank has at least one item.
+  if array.size == 0:
+    msg = "counts is empty; there is one count per item of the bank"
+    raise ValueError(msg)
   if array.ndim != 1 or array.dtype.kind not in "iu":
     msg = f"counts must be a one-dimensional array of integers, one per item, got {array.dtype} of shape {array.shape}"
     raise TypeError(msg)
@@ -418,15 +423,16 @@ def _test_matrix(administered_items: npt.ArrayLike, n_items: int) -> IntArray:
     msg = f"n_items is {n_items!r}; it must be an integer"
     raise TypeError(msg)
   tests = numpy.asarray(administered_items)
-  if tests.ndim != 2 or (tests.size and tests.dtype.kind not in "iu"):  # noqa: PLR2004 - a matrix
+  # Before the shape check: an empty list has one dimension and NumPy's float dtype, and is still no sessions.
+  if tests.size == 0:
+    msg = f"administered_items has shape {tests.shape}; the overlap rate needs at least one session of one item or more"
+    raise ValueError(msg)
+  if tests.ndim != 2 or tests.dtype.kind not in "iu":  # noqa: PLR2004 - a matrix
     msg = (
       "administered_items must be a two-dimensional array of item indices, one row per session and one column per "
       f"position of the fixed-length tests, got {tests.dtype} of shape {tests.shape}"
     )
     raise TypeError(msg)
-  if tests.size == 0:
-    msg = f"administered_items has shape {tests.shape}; the overlap rate needs at least one session of one item or more"
-    raise ValueError(msg)
   outside = (tests < 0) | (tests >= n_items)
   if outside.any():
     row, column = (int(index) for index in numpy.argwhere(outside)[0])
