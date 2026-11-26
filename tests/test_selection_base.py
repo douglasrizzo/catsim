@@ -174,7 +174,7 @@ SELECTOR_REPRS = {
   "RandomSelector": "RandomSelector()",
   "RandomesqueSelector": "RandomesqueSelector(bin_size=4)",
   "The54321Selector": "The54321Selector(initial_bin_size=3)",
-  "LinearSelector": "LinearSelector(items=[3, 1, 2])",
+  "LinearSelector": "LinearSelector(indices=[3, 1, 2])",
   "ProgressiveSelector": "ProgressiveSelector(test_size=12, acceleration=2.0, r_max=0.5)",
   "ProportionalSelector": "ProportionalSelector(test_size=12, acceleration=-1.0, r_max=0.5)",
   "ClusterSelector": (

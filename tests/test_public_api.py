@@ -5,6 +5,7 @@ import dataclasses
 import importlib
 import inspect
 import pkgutil
+import re
 from collections.abc import Callable, Iterator
 from pathlib import Path
 from types import ModuleType
@@ -171,6 +172,23 @@ def test_no_public_signature_takes_a_retired_name() -> None:
     for qualified, function in _callables(label, obj)
     for parameter in inspect.signature(function).parameters
     if parameter in RETIRED_NAMES
+  }
+
+  assert offenders == set()
+
+
+def test_a_parameter_named_items_is_an_item_matrix() -> None:
+  """A public parameter named ``items`` that takes item indices, as ``LinearSelector(items)`` did, fails here.
+
+  ADR-0023 gives ``items`` to an item parameter matrix, one row per item, and ``indices`` to a list of item indices, so
+  an ``items`` annotation never holds integers.
+  """
+  offenders = {
+    f"{qualified}(items: {parameter.annotation})"
+    for label, obj in _public_objects()
+    for qualified, function in _callables(label, obj)
+    if (parameter := inspect.signature(function).parameters.get("items")) is not None
+    and re.search(r"\bint\b|IntArray", str(parameter.annotation))
   }
 
   assert offenders == set()
