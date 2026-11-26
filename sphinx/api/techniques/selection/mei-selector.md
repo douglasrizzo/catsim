@@ -35,8 +35,8 @@ excluded, with the largest expected information value.
 
 {cite:author}`vanderLinden1996`'s {cite:year}`vanderLinden1996` report, which preceded the
 {cite:year}`vanderLinden1998` article, defines MEI
-with the observed information of the **whole response pattern**, the
-administered items plus the candidate's predicted response, each evaluated at
+with the observed information of **every response**, to the administered
+items and the candidate's predicted one, each evaluated at
 its updated estimate, and weights the two branches by the response
 probabilities at the current estimate (p. 11, Equation 13). He notes that the
 criterion therefore re-evaluates the information of the items already

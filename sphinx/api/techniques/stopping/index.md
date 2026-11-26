@@ -20,17 +20,17 @@ confidence-interval-stopper
 
 (combining-stopping-rules)=
 
-## Combining stopping rules
+## Combining stoppers
 
 A variable-length test usually needs more than one criterion: a precision or
 classification target that ends the test once it is met, a cap on the test length
 for the examinees who never meet it, and often a minimum length, so that no test
 ends after a handful of responses. {class}`~catsim.stopping.StopRule` holds such a
-combination. With $m$ administered items, a minimum length $m_{\min}$ and stoppers
+combination. With $n$ administered items, a minimum length $n_{\min}$ and stoppers
 $S_1, \dots, S_K$, it stops when
 
 $$
-m \ge m_{\min} \quad\text{and}\quad S_k \text{ holds for some } k.
+n \ge n_{\min} \quad\text{and}\quad S_k \text{ holds for some } k.
 $$
 
 ```python
@@ -43,7 +43,7 @@ rule = StopRule(StandardErrorStopper(0.3), MaxLengthStopper(40), min_items=5)
 `min_items` holds back every stopper in the rule, the length cap included. A rule
 is itself a stopper, so it goes wherever a stopper does, another rule included.
 
-catR caps its stopping rule the same way: its `maxItems` meta-argument "imposes a
+catR caps its stopping criteria the same way: its `maxItems` meta-argument "imposes a
 maximal test length and forces the test to stop if this length is reached, even
 though the stopping rule is not yet satisfied" {cite:p}`Magis12{p. 18}`. catR
 also stops as soon as any rule of its `stop` list holds, as a rule of the

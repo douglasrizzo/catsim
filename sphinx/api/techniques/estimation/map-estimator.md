@@ -116,7 +116,7 @@ The estimator is catR's Bayes modal estimator, `thetaEst` with `method = "BM"`,
 and its standard error is that of catR's `semTheta`. With `bounds=(-4, 4)`,
 catR's default range, and the matching prior, the parity tests
 ({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`) find the same estimates and
-standard errors on fixed response patterns, all-correct and all-incorrect ones
+standard errors on fixed responses, all-correct and all-incorrect ones
 included, under a standard normal prior, a normal prior of mean 0.5 and standard
 deviation 1.5 and a uniform prior on $[-3, 3]$, and in whole tests on recorded
 responses under MFI, bOpt and MLWI selection. They find no departure. catR's
@@ -125,7 +125,7 @@ administered items.
 
 ## Guarantees
 
-1. The estimate is finite on extreme response patterns because the prior keeps the objective bounded.
+1. The estimate is finite for all-correct and all-incorrect responses, because the prior keeps the objective bounded.
 2. Under the 1PL and 2PL models with a normal prior, the MAP estimate lies between the prior mean and the MLE, so it is closer to the prior mean than the MLE.
 3. Shifting the prior mean while holding the response data fixed shifts the MAP estimate in the same direction.
 4. The estimate lies inside the prior's support.

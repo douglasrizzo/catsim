@@ -3,8 +3,8 @@
 ```{py:module} catsim.estimation
 ```
 
-Ability estimation techniques compute the examinee's latent trait estimate
-$\hat{\theta}$ after each item response. The choice of estimator affects
+Ability estimation techniques compute the examinee's ability estimate
+$\hat{\theta}$ after each response. The choice of estimator affects
 accuracy, bias, and the availability of uncertainty quantification.
 
 Every estimator returns a {py:class}`~catsim.Estimate`: the estimate,

@@ -8,10 +8,10 @@
 Variable-length CATs are usually justified by precision: once the current test
 is informative enough, continuing to administer items yields diminishing returns.
 The standard-error stopper operationalizes that idea by terminating the test when
-the standard error of estimation falls to a target value.
+standard error of the ability estimate falls to a target value.
 
-This is one of the most common adaptive stopping rules because its threshold is
-easy to interpret on the theta scale and directly reflects the information
+This is one of the most common stopping criteria of adaptive tests because its
+threshold is easy to interpret on the ability scale and directly reflects the information
 accumulated by the current administered set. catR calls it the precision
 criterion {cite:p}`Magis12{p. 10}`.
 

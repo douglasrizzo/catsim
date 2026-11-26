@@ -57,7 +57,7 @@ re-derive it. Use the symbols of terms-and-notation.md.>
 
 ## Behavior and Comparison
 
-\<How the method behaves in practice: on short tests, with extreme response patterns, on exposure,
+\<How the method behaves in practice: on short tests, with all-correct or all-incorrect responses, on exposure,
 with the other strategies it is usually paired with. How it compares with its alternatives and with
 catR's implementation, with sources. Link the ADR for the reason behind a catsim choice.>
 
@@ -69,7 +69,7 @@ catR's implementation, with sources. Link the ADR for the reason behind a catsim
 1. \<A property a user can observe, e.g. "It never returns an item that was already administered.">
 2. \<E.g. "When every remaining item is over the exposure cap, it falls back to the most
    informative one.">
-3. \<E.g. "The estimate is finite for all-correct and all-incorrect response patterns.">
+3. \<E.g. "The estimate is finite for all-correct and all-incorrect responses.">
 
 ## References
 

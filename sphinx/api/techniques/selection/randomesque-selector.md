@@ -55,7 +55,7 @@ their Monte Carlo error. They find no departure.
 
 1. It never returns an item that was already administered or excluded.
 2. It returns one of the `bin_size` most informative remaining items at the current estimate, or an
-   item tied with the last of them, drawn with the session's random generator.
+   item tied with the last of them, drawn with the generator of the call.
 3. When no item remains, it raises `NoItemsAvailableError`.
 4. It applies no exposure cap: the exposure rates do not change its choice.
 

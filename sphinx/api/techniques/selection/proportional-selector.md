@@ -123,7 +123,7 @@ The parity tests keep the last two as expected failures.
    uniformly among them.
 4. When every remaining item is at or above the exposure cap, it samples from all
    the remaining items.
-5. It draws with the session's random generator, so a run with the same seed
+5. It draws with the generator of the call, so a run with the same seed
    administers the same items.
 
 ## References

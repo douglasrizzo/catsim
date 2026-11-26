@@ -60,7 +60,7 @@ you have read. Say where the implementation departs from its sources.>
 
 ## Behavior and Comparison
 
-\<How the method behaves in practice (short tests, extreme response patterns, exposure) and how it
+\<How the method behaves in practice (short tests, all-correct or all-incorrect responses, exposure) and how it
 compares with its alternatives and with catR's implementation, with sources.>
 
 ## Guarantees

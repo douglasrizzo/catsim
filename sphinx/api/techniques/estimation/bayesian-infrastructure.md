@@ -16,7 +16,7 @@ posterior-weighted selectors (MPWI, KLP, MEPV) would reuse its posterior.
 
 ## Definition
 
-For a response vector $\mathbf{u}$ on administered items with parameters
+For responses $\mathbf{u}$ to administered items with parameters
 $\boldsymbol{\xi}$, the posterior is
 
 $$
@@ -39,8 +39,8 @@ $$
 
 The log-likelihoods are summed at each node, as {cite:t}`Bock1982{p. 432}`
 recommend for adaptive testing, and the posterior is normalized after
-subtracting the largest log-posterior value, so long response vectors do not
-underflow. Downstream techniques reuse the same posterior moments:
+subtracting the largest log-posterior value, so the posterior after many
+responses does not underflow. Downstream techniques reuse the same posterior moments:
 
 $$
 \hat{\theta}_{\mathrm{EAP}}
@@ -126,7 +126,7 @@ weights gives catR's posterior on the same nodes; the
 ## Guarantees
 
 1. The posterior probabilities on the quadrature grid sum to 1.
-2. The posterior of a long response vector has no NaNs and no all-zero weights from exponentiation underflow.
+2. The posterior after many responses has no NaNs and no all-zero weights from exponentiation underflow.
 3. With no responses, the posterior is the prior times the grid weights, normalized.
 
 ## References

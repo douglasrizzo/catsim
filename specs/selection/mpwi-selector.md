@@ -93,7 +93,7 @@ change the ranking; the grid and its range change the approximation slightly.
 Any correct implementation must satisfy the following properties:
 
 1. Scores are posterior-weighted expected item information values, not likelihood-weighted values.
-2. With an empty response vector, the selector reduces to prior-weighted expected information.
+2. With no responses, the selector reduces to prior-weighted expected information.
 3. The scores depend on the context's responses, through the posterior, and not on its `theta`.
 4. Exposure filtering applies before the final argmax, with fallback to the unrestricted remaining pool if every constrained candidate is excluded.
 

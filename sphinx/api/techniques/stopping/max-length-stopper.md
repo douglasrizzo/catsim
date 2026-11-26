@@ -5,7 +5,7 @@
 
 ## Motivation
 
-Fixed-length stopping is the simplest CAT termination rule: the test ends after a
+Fixed-length stopping is the simplest stopping criterion of a CAT: the test ends after a
 predefined number of administered items. Variable-length tests need the same
 limit as a cap, because a precision or classification target can be out of reach
 for some examinees. In {mod}`catsim` the cap is this stopper, combined with the
@@ -14,10 +14,11 @@ other criterion in a {class}`~catsim.stopping.StopRule` (see
 
 ## Definition
 
-Let $m$ be the number of administered items. The stopper stops when
+Let $n$ be the number of administered items and $n_{\max}$ the length at which the
+test ends, `max_items`. The stopper stops when
 
 $$
-m \ge m_{\max}.
+n \ge n_{\max}.
 $$
 
 ## Parameters
@@ -38,7 +39,7 @@ $$
 ## Behavior and Comparison
 
 It does not look at the item bank or at the ability estimate. A session whose
-bank runs out before $m_{\max}$ items is ended by the engine, once the selector
+bank runs out before $n_{\max}$ items is ended by the engine, once the selector
 has no item left to give.
 
 ### Comparison with catR

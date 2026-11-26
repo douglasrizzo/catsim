@@ -122,7 +122,7 @@ and it needs an indifference region, which catR's rule does not have.
 
 Any correct implementation must satisfy the following properties:
 
-1. The stopper uses the response vector directly through a log-likelihood ratio; `theta` itself is not the primary decision statistic.
+1. The stopper uses the responses directly through a log-likelihood ratio; `theta` itself is not the primary decision statistic.
 2. Crossing the upper bound classifies above the cut and crossing the lower bound classifies below the cut.
 3. If neither bound is crossed, the stopper does not stop the test; another stopper of its `StopRule`, such as a `MaxLengthStopper`, can, and the classification then falls back to the sign of the statistic.
 4. The stopper reports the classification and the log-likelihood ratio of any session from that session's context, through pure methods; it keeps neither between calls.

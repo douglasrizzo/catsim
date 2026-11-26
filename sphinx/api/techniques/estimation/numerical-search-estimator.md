@@ -10,8 +10,8 @@ ability estimator. Given administered items and observed binary responses, it
 finds the ability value that maximizes the item-response-theory log-likelihood.
 
 It searches the ability scale with a single bounded one-dimensional optimizer
-and includes Dodd's heuristic to handle degenerate all-correct and all-incorrect
-response patterns, so every estimate is finite and inside the search bounds.
+and includes Dodd's heuristic to handle all-correct and all-incorrect
+responses, so every estimate is finite and inside the search bounds.
 
 ## Definition
 
@@ -47,7 +47,7 @@ $$
 clipped to $[\theta_{\min}, \theta_{\max}]$. {cite:t}`Dod90{p. 359}` introduced this
 "variable stepsize" for the rating scale model: after a response in the upper
 categories the estimate is incremented by half the distance to the highest scale
-value in the item pool, and after one in the lower categories it is decreased by
+value in the item bank, and after one in the lower categories it is decreased by
 half the distance to the lowest. The dichotomous form, with the bank's largest
 and smallest $b$, is the one {cite:t}`Barrada2008{p. 499}` use. Dodd's estimates
 start near the middle of the pool (p. 360), so the step always points the way
@@ -70,7 +70,7 @@ stepped estimate.
 
 ### Computation
 
-For mixed response patterns, the implementation minimizes $-\log L(\theta)$ with
+For mixed responses, the implementation minimizes $-\log L(\theta)$ with
 SciPy's bounded Brent method, {py:func}`scipy.optimize.minimize_scalar`
 {cite:p}`Brent2002`, which never evaluates outside the bounds and takes `tol` as its absolute
 tolerance on $\theta$ (SciPy's `xatol`).
@@ -106,7 +106,7 @@ still be rising at a bound, and the estimate is then within `tol` of that bound.
 The estimator is catR's `thetaEst` with `method = "ML"`, and its standard error
 is that of catR's `semTheta`. With `bounds=(-4, 4)`, catR's default range, the
 parity tests ({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`) find the same
-estimates and standard errors on fixed mixed response patterns and in whole
+estimates and standard errors on fixed mixed responses and in whole
 tests on recorded responses under MFI, bOpt and MLWI selection, except for the
 standard errors of constant patterns below. For all-correct and all-incorrect
 patterns, catR's `constantPatt = "var"`, with `bRange` set to the bank's range of
@@ -141,7 +141,7 @@ places, which the parity tests keep as expected failures:
 
 ## Guarantees
 
-1. For mixed response patterns, the estimate is a local maximum of the log-likelihood inside `bounds`, to within `tol`.
+1. For mixed responses, the estimate is a local maximum of the log-likelihood inside `bounds`, to within `tol`.
 2. For all-correct and all-incorrect patterns, the estimate is Dodd's step: finite, inside `bounds`, and never moved against the responses.
 3. The standard error is the asymptotic one above, at the returned estimate, and `math.inf` where the test information is 0.
 

@@ -107,14 +107,14 @@ catr_eap = EAPEstimator(grid=QuadratureGrid(nodes=numpy.linspace(-4, 4, 33), wei
 ```
 
 On such grids the parity tests find catR's estimates and standard errors, to a
-relative $10^{-10}$, on fixed response patterns under normal and uniform priors,
+relative $10^{-10}$, on fixed responses under normal and uniform priors,
 on catsim's 121 nodes as on catR's 33, and in whole tests on recorded responses.
 The simulations that check the randomized selectors against catR estimate with
 this estimator too. They find no departure.
 
 ## Guarantees
 
-1. The estimate is finite for extreme response patterns such as all-correct or all-incorrect strings.
+1. The estimate is finite for all-correct and all-incorrect responses.
 2. The standard error is the posterior standard deviation on the grid.
 3. Relative to a flatter prior, a centered normal prior produces stronger shrinkage of extreme short-test estimates toward the prior mean.
 

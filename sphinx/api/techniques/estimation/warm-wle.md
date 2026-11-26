@@ -65,7 +65,7 @@ NEWS](https://github.com/cran/catR/blob/master/NEWS), version 3.0), and its
 default `sem.type = "classic"` still does. Under the 1PL and 2PL models the
 corrected sum is the curvature of the weighted likelihood at its maximum, so it is
 positive; with guessing or slipping parameters it can be negative, which leaves no
-standard error: 13 of 3,920 response patterns (0.4% of their probability) on random
+standard error: 13 of 3,920 sets of responses (0.4% of their probability) on random
 3PL tests of 2 to 8 items, none of 4,560 on 2PL tests.
 
 ### Computation
@@ -105,8 +105,8 @@ roots.
 
 ## Behavior and Comparison
 
-Against the WLE's sampling spread at a known ability (every response pattern for 5
-and 10 items, 3,000 simulated ones for 20 and 40), the classic formula
+Against the WLE's sampling spread at a known ability (every possible set of
+responses to 5 and 10 items, 3,000 simulated ones for 20 and 40), the classic formula
 overestimates the error in short tests, by 10% under the 2PL and 28% under the 3PL
 at 5 items. That is conservative: a standard-error stopper runs a few items longer
 than needed. Equation 14 roughly halves that gap. The sandwich formula of
@@ -120,7 +120,7 @@ The estimator is catR's `thetaEst` with `method = "WL"`, and its standard error
 is that of catR's `semTheta` with its default `sem.type = "classic"`. With
 `bounds=(-4, 4)`, catR's default range, the parity tests
 ({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`) find the same estimates and
-standard errors on fixed response patterns, all-correct and all-incorrect ones
+standard errors on fixed responses, all-correct and all-incorrect ones
 included, and in whole tests on recorded responses under MFI, bOpt and MLWI
 selection, with one departure, which they keep as an expected failure.
 
@@ -138,10 +138,10 @@ response on.
 
 1. Every interior estimate is a root of the modified score equation, including for items with guessing.
 2. For items without guessing or slipping, the estimate maximizes the likelihood under a Jeffreys prior.
-3. The estimate is finite and inside the search interval for every response pattern, including
+3. The estimate is finite and inside the search interval for any responses, including
    all-correct and all-incorrect patterns where the MLE diverges.
 4. Relative to a finite MLE, the WLE is pulled toward the abilities at which the administered items are most informative.
-5. On a short test without guessing, the exact expected bias (by enumeration of all response patterns)
+5. On a short test without guessing, the exact expected bias (by enumeration of every possible set of responses)
    is small, and smaller than the MLE's first-order bias above wherever that bias is
    non-negligible. With guessing and few items, the WLE at low ability is pulled upward, toward
    the items, so no unconditional bias guarantee is made for that case.

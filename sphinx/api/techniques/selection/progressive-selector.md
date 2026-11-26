@@ -110,7 +110,7 @@ Equation 12 as well:
   test random.
 
 The parity tests keep the last two as expected failures. catR's other schedule,
-for its precision stopping rule, has no catsim counterpart.
+for its precision criterion, has no catsim counterpart.
 
 ## Guarantees
 
@@ -120,7 +120,7 @@ for its precision stopping rule, has no catsim counterpart.
 3. From the `test_size`-th item on, it returns the most informative available item.
 4. When every remaining item is at or above the exposure cap, it chooses among all
    the remaining items.
-5. It draws with the session's random generator, so a run with the same seed
+5. It draws with the generator of the call, so a run with the same seed
    administers the same items.
 
 ## References

@@ -55,7 +55,7 @@ After item $J$ the decision is forced by $C$. Finkelman (2008, 2010) used
 $\gamma = .95$ (Huebner & Finkelman, 2016, "SCSPRT").
 
 $p_k$ depends on the $J - k$ items still to come. Finkelman (2008) computes it
-exactly, by enumerating the $2^{J-k}$ response patterns to those items, or by a
+exactly, by enumerating the $2^{J-k}$ possible sets of responses to those items, or by a
 central-limit approximation from $\Lambda_k$, $\theta^*$ and the items'
 parameters (Huebner & Finkelman, 2016, "Computation of $P_{Exact}$ and
 $P_{CLT}$"). When items are selected adaptively, the items to come are not known

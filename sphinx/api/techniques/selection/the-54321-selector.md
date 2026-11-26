@@ -63,7 +63,7 @@ contexts. No simulation compares whole tests, since catR has no rule to simulate
 ## Guarantees
 
 1. It never returns an item that was already administered or excluded.
-2. The item at position $k$ is drawn with the session's random generator from the
+2. The item at position $k$ is drawn with the generator of the call from the
    $\max(1, s - k)$ most informative remaining items.
 3. From position $s - 1$ on, it returns the most informative remaining item.
 4. When no item remains, it raises `NoItemsAvailableError`.

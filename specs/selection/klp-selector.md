@@ -241,11 +241,11 @@ class KLPSelector(BaseSelector):
 **Testing notes:**
 
 - Compare one score with a brute-force reference: integrate $K_i(\theta \,\|\, \hat\theta)$ times the
-  normalized posterior density with `scipy.integrate.quad` for a short response pattern, and check
+  normalized posterior density with `scipy.integrate.quad` after a few responses, and check
   that the selected item is the one with the largest integral.
 - Contract 2: two contexts that differ only in `theta` select different items on a bank built for
   it.
-- Contract 4: with a narrow posterior centered at the context's `theta` (a long response pattern),
+- Contract 4: with a narrow posterior centered at the context's `theta` (after many responses),
   the selection approaches `MaxInfoSelector`'s, because the divergence near $\hat\theta$ is about
   $I_i(\hat\theta)(\theta - \hat\theta)^2/2$; with no responses it differs from it on a bank built
   for it.
