@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import enum
+import itertools
 import secrets
 import time
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 import numpy
 
 from . import metrics
 from .engine import CatEngine
+from .workers import _payload, _run_on_workers
 
 if TYPE_CHECKING:
   from collections.abc import Callable, Iterator
@@ -30,15 +32,17 @@ class _Stream(enum.IntEnum):
   SESSION = 1  # the generator of its session's steps
 
 
-def simulate(
+def simulate(  # noqa: PLR0913 - the engine, two ways to give examinees, the seed, the split and progress (ADR-0015)
   engine: CatEngine,
   *,
   true_thetas: npt.ArrayLike | None = None,
   responses: npt.ArrayLike | None = None,
   rng: int | numpy.random.Generator | None = None,
+  parts: int = 1,
+  workers: int = 1,
   progress: Callable[[int, int], object] | None = None,
 ) -> SimulationResult:
-  r"""Run one CAT session per examinee on an engine, one after another.
+  r"""Run one CAT session per examinee on an engine, in parts that can run on several processes.
 
   An examinee is a response pattern, one answer per item of the bank, and its session takes the
   answer to every item it is given from that pattern (ADR-0014). The examinees are given in one of
@@ -64,10 +68,23 @@ def simulate(
   whenever the item comes, so two engines run on the same seed and examinees are compared on common
   random numbers.
 
-  Each session's selections are capped against catR's exposure rates: each item's administrations
-  over the sessions before it (ADR-0012), so the first session sees no rates. This exposure feedback
-  is the only way one session depends on another: without an ``r_max`` cap, an examinee's session
-  does not depend on the other examinees.
+  The examinees are split, in order, into ``parts`` contiguous parts of near-equal size, and each
+  part runs its sessions one after another (ADR-0015). Each session's selections are capped
+  against catR's exposure rates: each item's administrations over the sessions before it in its
+  part (ADR-0012), so the first session of a part sees no rates. This exposure feedback is the only
+  way one session depends on another, and the parts are part of the run's configuration: with an
+  ``r_max`` cap, a session sees only the exposure of its own part, so ``parts`` changes the result,
+  and ``parts=1``, the default, is the sequential run. Without a cap, an examinee's session depends
+  on neither the other examinees nor ``parts``.
+
+  The parts run on up to ``workers`` processes, which never change the result: it depends only on
+  the engine, the examinees, the seed and ``parts``. With more than one part and more than one
+  worker, the parts run on processes of Python's standard library, spawned on every platform. Each
+  receives the engine pickled and imports every class and function it refers to by its module and
+  name, so a strategy defined in a notebook or a script's main module, a lambda (such as a custom
+  ``log_prior``) or a function defined inside another function raises before any part runs: define
+  it in a module and import it from there. A script that runs on workers calls ``simulate`` under
+  ``if __name__ == "__main__":``, as every process pool of Python requires.
 
   Parameters
   ----------
@@ -88,16 +105,31 @@ def simulate(
       result. From a generator, one 128-bit number is drawn as the entropy, which advances it, so
       passing the same generator to another run gives other results; a call whose inputs fail
       their checks draws nothing from it.
+  parts : int, optional
+      The number of parts the examinees are split into, from 1 to the number of examinees: each
+      part holds the next examinees in order, and the first ``n % parts`` of the parts of ``n``
+      examinees have one examinee more than the others, the sizes of ``numpy.array_split``. Default
+      is 1, the sequential run.
+  workers : int, optional
+      The most processes the parts run on at once, a positive integer. With 1, the default, or with
+      one part, the calling process runs the parts itself, one after another; otherwise
+      ``min(workers, parts)`` worker processes run them.
   progress : callable or None, optional
-      Called as ``progress(finished, total)`` after each session ends, with the number of sessions
-      finished and the number of examinees, such as ``lambda finished, total: bar.update(1)`` for a
-      progress bar ``bar``. Default is None.
+      Called in the calling process as ``progress(finished, total)`` after each session ends, with
+      the number of sessions finished and the number of examinees, such as
+      ``lambda finished, total: bar.update(1)`` for a progress bar ``bar``. On workers, the sessions
+      end in the order the processes run them, and each call still counts one more session.
+      Default is None.
 
   Returns
   -------
   SimulationResult
       The sessions, in examinee order, with the true abilities (None for recorded examinees whose
-      abilities are unknown), the run's exposure and proposal counts and its duration.
+      abilities are unknown), the run's exposure and proposal counts, summed over its parts, the
+      number of parts, and the run's duration: the wall-clock time in the calling process from the
+      start of the first part to the end of the last. On workers it includes starting them and
+      sending them the engine, so it depends on ``workers`` and on the machine, which the sessions
+      do not.
 
   Raises
   ------
@@ -105,12 +137,15 @@ def simulate(
       If ``engine`` is not a :class:`~catsim.CatEngine`; neither ``true_thetas`` nor ``responses``
       is given; ``true_thetas`` is a single number, holds values that are not real numbers or has
       more than one dimension; ``responses`` is not two-dimensional or holds values that are neither
-      Booleans nor real numbers; ``rng`` is neither None, an integer nor a generator; or ``progress``
-      is neither None nor callable.
+      Booleans nor real numbers; ``rng`` is neither None, an integer nor a generator; ``parts`` or
+      ``workers`` is not an integer; or ``progress`` is neither None nor callable.
   ValueError
       If ``true_thetas`` or ``responses`` is empty; a true ability is not finite; ``responses`` does
       not have one column per item of the bank, or holds a response other than 0, 1 and NaN; the two
-      inputs have different numbers of examinees; or ``rng`` is a negative integer.
+      inputs have different numbers of examinees; ``rng`` is a negative integer; ``parts`` or
+      ``workers`` is less than 1; ``parts`` exceeds the number of examinees; or, when the parts run
+      on workers, the engine refers to a class or function the workers cannot import, or cannot be
+      pickled.
 
   Examples
   --------
@@ -124,9 +159,17 @@ def simulate(
   >>> from catsim.stopping import MaxLengthStopper
   >>> bank = ItemBank.generate(50, rng=0)
   >>> engine = CatEngine(bank, FixedPointInitializer(0.0), MaxInfoSelector(), EAPEstimator(), MaxLengthStopper(10))
-  >>> result = simulate(engine, true_thetas=numpy.random.default_rng(1).normal(0, 1, 100), rng=0)
+  >>> thetas = numpy.random.default_rng(1).normal(0, 1, 100)
+  >>> result = simulate(engine, true_thetas=thetas, rng=0)
   >>> len(result.sessions), result.test_lengths.tolist() == [10] * 100
   (100, True)
+
+  Without an exposure cap, the run's four parts give the sequential run's sessions, and two
+  workers give the same sessions as one:
+
+  >>> in_parts = simulate(engine, true_thetas=thetas, rng=0, parts=4, workers=2)
+  >>> in_parts.parts, in_parts.sessions == result.sessions
+  (4, True)
 
   Two recorded examinees: the first answered every item correctly, the second only items 3, 8 and
   15, so the second runs out of answered items after three:
@@ -150,39 +193,68 @@ def simulate(
   if progress is not None and not callable(progress):
     msg = f"progress is {progress!r}; it must be None or a callable, called as progress(finished, total)"
     raise TypeError(msg)
+  parts = _positive("parts", parts)
+  workers = _positive("workers", workers)
   thetas, matrix, n_examinees = _examinees(true_thetas, responses, engine.item_bank.n_items)
+  if parts > n_examinees:
+    msg = f"parts is {parts} and the run has {n_examinees} examinees; every part needs at least one examinee"
+    raise ValueError(msg)
+  processes = min(workers, parts)
+  # The engine is checked, and pickled for the workers, before anything runs.
+  payload = _payload(engine) if processes > 1 else None
   # Last, so that a call that fails its checks does not advance a generator passed as rng.
   entropy = _entropy(rng)
 
-  exposure_counts = numpy.zeros(engine.item_bank.n_items, dtype=int)
-  proposal_counts = numpy.zeros(engine.item_bank.n_items, dtype=int)
-  sessions: list[Session] = []
+  split = _split(thetas, matrix, n_examinees, parts, entropy)
+  done = None if progress is None else _counter(progress, n_examinees)
   start = time.perf_counter()
-  for i, row in enumerate(_rows(engine.item_bank, thetas, matrix, entropy)):
-    # catR's rate: each item's administrations over the sessions started before this one, so the
-    # first session sees none (ADR-0012). Only this session changes the counts until it ends, and
-    # it is never offered an item again once given it, so its rates are fixed when it starts.
-    rates = exposure_counts / i if i else None
-    if rates is not None:
-      rates.flags.writeable = False
-    session, declined = _run_session(engine, row, _stream(entropy, i, _Stream.SESSION), rates)
-    for item in session.administered_items:
-      exposure_counts[item] += 1
-    for item in (*session.administered_items, *declined):
-      proposal_counts[item] += 1
-    sessions.append(session)
-    if progress is not None:
-      progress(i + 1, n_examinees)
+  if payload is None:
+    results = [_run_part(engine, part, done) for part in split]
+  else:
+    results = _run_on_workers(_run_part, payload, split, workers=processes, done=done)
   duration = time.perf_counter() - start
 
   return SimulationResult(
     item_bank=engine.item_bank,
-    sessions=sessions,
-    exposure_counts=exposure_counts,
+    sessions=[session for result in results for session in result.sessions],
+    exposure_counts=numpy.sum([result.exposure_counts for result in results], axis=0),
     duration=duration,
-    proposal_counts=proposal_counts,
+    proposal_counts=numpy.sum([result.proposal_counts for result in results], axis=0),
     true_thetas=thetas,
+    parts=parts,
   )
+
+
+def _positive(name: str, value: object) -> int:
+  """Return ``parts`` or ``workers`` as an int, checking that it is a positive integer.
+
+  Parameters
+  ----------
+  name : str
+      The argument's name, for the error messages.
+  value : object
+      The value passed to :func:`simulate`.
+
+  Returns
+  -------
+  int
+      The value.
+
+  Raises
+  ------
+  TypeError
+      If the value is not an integer, or is a Boolean.
+  ValueError
+      If the value is less than 1.
+  """
+  # A bool is an int, but parts=True is a flag passed by mistake.
+  if isinstance(value, (bool, numpy.bool_)) or not isinstance(value, (int, numpy.integer)):
+    msg = f"{name} is {value!r}; it must be a positive integer"
+    raise TypeError(msg)
+  if value < 1:
+    msg = f"{name} is {value}; it must be a positive integer"
+    raise ValueError(msg)
+  return int(value)
 
 
 def _examinees(
@@ -391,25 +463,135 @@ def _stream(entropy: int, examinee: int, stream: _Stream) -> numpy.random.Genera
   return numpy.random.default_rng(numpy.random.SeedSequence(entropy, spawn_key=(examinee, stream)))
 
 
-def _rows(
-  item_bank: ItemBank, true_thetas: FloatArray | None, responses: FloatArray | None, entropy: int
-) -> Iterator[FloatArray]:
-  """Yield each examinee's answers to every item, in examinee order: the recorded row, or one drawn before the test.
+class _Part(NamedTuple):
+  """A contiguous part of a run's examinees, with all a worker needs, besides the engine, to run its sessions."""
 
-  A generated examinee draws one uniform number per item from its pattern stream, and its answer to
-  an item is correct when the number falls below the item's probability at its true ability
-  (ADR-0014).
+  first: int  # the position in the run of the part's first examinee, which keys the streams (ADR-0013)
+  true_thetas: FloatArray | None  # the part's true abilities, or None
+  responses: FloatArray | None  # the part's recorded rows, or None
+  entropy: int  # the run's root entropy
+
+
+class _PartResult(NamedTuple):
+  """The sessions of a part, in examinee order, and the part's exposure and proposal counts."""
+
+  sessions: list[Session]
+  exposure_counts: IntArray
+  proposal_counts: IntArray
+
+
+def _split(
+  true_thetas: FloatArray | None, responses: FloatArray | None, n_examinees: int, parts: int, entropy: int
+) -> list[_Part]:
+  """Split a run's examinees, in order, into contiguous parts with the sizes of ``numpy.array_split``.
+
+  Parameters
+  ----------
+  true_thetas : numpy.ndarray or None
+      The examinees' true abilities, or None.
+  responses : numpy.ndarray or None
+      The recorded responses, or None.
+  n_examinees : int
+      The number of examinees.
+  parts : int
+      The number of parts, at most the number of examinees.
+  entropy : int
+      The run's root entropy.
+
+  Returns
+  -------
+  list of _Part
+      The parts, in examinee order.
+  """
+  split = []
+  for positions in numpy.array_split(numpy.arange(n_examinees), parts):
+    first, end = int(positions[0]), int(positions[-1]) + 1
+    split.append(
+      _Part(
+        first=first,
+        true_thetas=None if true_thetas is None else true_thetas[first:end],
+        responses=None if responses is None else responses[first:end],
+        entropy=entropy,
+      )
+    )
+  return split
+
+
+def _counter(progress: Callable[[int, int], object], total: int) -> Callable[[], None]:
+  """Return a function that tells ``progress`` that one more of ``total`` sessions has finished.
+
+  Parameters
+  ----------
+  progress : callable
+      The ``progress`` passed to :func:`simulate`.
+  total : int
+      The number of examinees.
+
+  Returns
+  -------
+  callable
+      A function of no arguments, called once after each session ends.
+  """
+  finished = itertools.count(1)
+
+  def done() -> None:
+    progress(next(finished), total)
+
+  return done
+
+
+def _run_part(engine: CatEngine, part: _Part, done: Callable[[], object] | None) -> _PartResult:
+  """Run a part's sessions one after another, with exposure counts of the part's own (ADR-0015).
+
+  Parameters
+  ----------
+  engine : CatEngine
+      The engine.
+  part : _Part
+      The part.
+  done : callable or None
+      Called after each session ends, or None.
+
+  Returns
+  -------
+  _PartResult
+      The part's sessions, in examinee order, and its exposure and proposal counts.
+  """
+  exposure_counts = numpy.zeros(engine.item_bank.n_items, dtype=int)
+  proposal_counts = numpy.zeros(engine.item_bank.n_items, dtype=int)
+  sessions: list[Session] = []
+  for before, row in enumerate(_rows(engine.item_bank, part)):
+    # catR's rate: each item's administrations over the sessions of the part started before this one,
+    # so the part's first session sees none (ADR-0012). Only this session changes the counts until
+    # it ends, and it is never offered an item again once given it, so its rates are fixed when it
+    # starts.
+    rates = exposure_counts / before if before else None
+    if rates is not None:
+      rates.flags.writeable = False
+    session, declined = _run_session(engine, row, _stream(part.entropy, part.first + before, _Stream.SESSION), rates)
+    for item in session.administered_items:
+      exposure_counts[item] += 1
+    for item in (*session.administered_items, *declined):
+      proposal_counts[item] += 1
+    sessions.append(session)
+    if done is not None:
+      done()
+  return _PartResult(sessions, exposure_counts, proposal_counts)
+
+
+def _rows(item_bank: ItemBank, part: _Part) -> Iterator[FloatArray]:
+  """Yield each examinee's answers to every item, in the part's order: the recorded row, or one drawn before the test.
+
+  A generated examinee draws one uniform number per item from its pattern stream, keyed by its
+  position in the run, and its answer to an item is correct when the number falls below the item's
+  probability at its true ability (ADR-0014).
 
   Parameters
   ----------
   item_bank : ItemBank
       The engine's item bank.
-  true_thetas : numpy.ndarray or None
-      The examinees' true abilities, or None for recorded examinees whose abilities are unknown.
-  responses : numpy.ndarray or None
-      The recorded responses, or None for generated examinees.
-  entropy : int
-      The run's root entropy.
+  part : _Part
+      The part.
 
   Yields
   ------
@@ -417,11 +599,11 @@ def _rows(
       The examinee's row: 1.0 for a correct answer, 0.0 for an incorrect one and NaN for a missing
       one.
   """
-  if responses is not None:
-    yield from responses
-  elif true_thetas is not None:
-    for i, true_theta in enumerate(true_thetas.tolist()):
-      draws = _stream(entropy, i, _Stream.PATTERN).random(item_bank.n_items)
+  if part.responses is not None:
+    yield from part.responses
+  elif part.true_thetas is not None:
+    for i, true_theta in enumerate(part.true_thetas.tolist(), start=part.first):
+      draws = _stream(part.entropy, i, _Stream.PATTERN).random(item_bank.n_items)
       yield (draws < item_bank.icc(true_theta)).astype(float)
 
 
@@ -485,6 +667,9 @@ class SimulationResult:
       Each session's true ability, a finite number, in session order, or None when the true
       abilities are unknown, as for recorded examinees. A session does not hold its examinee's true
       ability, so the result does. Default is None.
+  parts : int, optional
+      The number of parts the run's examinees were split into (ADR-0015); 1, the default, for a
+      sequential run.
 
   Raises
   ------
@@ -498,6 +683,7 @@ class SimulationResult:
   duration: float
   proposal_counts: IntArray | None = None
   true_thetas: FloatArray | None = None
+  parts: int = 1
 
   def __post_init__(self) -> None:
     """Store the true abilities as a float array, checking that there is one finite number per session."""
