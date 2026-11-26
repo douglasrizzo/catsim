@@ -28,10 +28,9 @@ also set a grid and an 18-point title of their own, over whatever style the call
 
 - Every plot function draws on the axes the caller passes as `ax`, or on the axes of a new figure,
   and returns the axes it drew on. None takes a figure size.
-- A plot takes the matplotlib style in effect when its function is called: the style sets the
-  fonts, colours, title size and grid, and the functions set none of their own. A colour a function
-  takes from the style's cycle is fixed when it is called. A second y scale, on the right, draws its
-  spine and no grid.
+- A plot follows the caller's matplotlib style: the style sets the fonts, colours, title size and
+  grid, and the functions set none of their own. A colour a function takes from the style's cycle
+  is fixed when it is called. A second y scale, on the right, draws its spine and no grid.
 - Plots label items by name (ADR-0004).
 
 ## Consequences

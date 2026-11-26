@@ -10,9 +10,10 @@ name does not start mathtext. An x axis with one tick per item names each item w
 30, the most names that stay apart at matplotlib's default figure width; a longer one ticks whole
 numbers, as each function's description says.
 
-A plot takes the matplotlib style in effect when its function is called, set with ``plt.style.use``
-or ``plt.style.context``: its fonts, colours, title size and grid. A second y axis, on the right,
-draws its spine and no grid.
+Plots follow the matplotlib style, set with ``plt.style.use`` or ``plt.style.context``: its fonts,
+colours, title size and grid. matplotlib fixes most of an axes' look when the axes are made, so
+make ``ax`` under the style the plot should take. A second y axis, on the right, draws its spine
+and no grid.
 """
 
 from collections.abc import Sequence

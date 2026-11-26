@@ -162,9 +162,10 @@ class TestItemCurve:
     """With both curves, the characteristic curve and its axis take the style's first colour, information the second.
 
     Fails if the information takes another colour of the cycle, such as the fourth, which is grey in matplotlib's ggplot
-    and Petroff cycles, if an axis label's colour differs from its curve's, or if a colour is kept as a reference such
-    as "C1", which matplotlib looks up when the figure is drawn: a figure drawn after its ``plt.style.context`` block,
-    as a notebook draws it at the end of the cell, would then take the default style's colours.
+    and Petroff cycles, if an axis's label or tick labels differ from its curve's colour, or if a colour is kept as a
+    reference such as "C1", which matplotlib looks up when the figure is drawn: a figure drawn after its
+    ``plt.style.context`` block, as a notebook draws it at the end of the cell, would then take the default style's
+    colours.
     """
     with plt.style.context({"axes.prop_cycle": plt.cycler(color=["#112233", "#445566", "#778899", "#aabbcc"])}):
       ax = plot.item_curve(1, self.ITEM_BANK, kind=PlotType.BOTH)
@@ -178,6 +179,8 @@ class TestItemCurve:
       (information, "#445566"),
       (dot, "#445566"),
       (second.yaxis.label, "#445566"),
+      *[(label, "#112233") for label in ax.get_yticklabels()],
+      *[(label, "#445566") for label in second.get_yticklabels()],
     ]:
       assert same_color(artist.get_color(), colour), artist
 
