@@ -11,21 +11,22 @@ examinee
 
 ability $\theta$
 : The latent trait a test measures, on a continuous scale. Also called *proficiency*, *latent
-  trait* or *person parameter*. A simulation knows each examinee's true ability: the
-  `true_thetas` it is run with.
+  trait* or *person parameter*. A simulation knows each examinee's true ability when it is run
+  with `true_thetas`.
 
 ability estimate $\hat{\theta}$
 : The estimate of an examinee's ability from the responses so far: *provisional* while the test
-  runs, *final* when it ends. In the API: `theta` in a strategy's context, `current_theta` on a
-  session, `final_thetas` in a simulation result.
+  runs, *final* when it ends. In the API: `theta` in an `Estimate` and in a strategy's context,
+  `current_theta` on a session, the `theta` column of a simulation result's tables.
 
 item
 : One question of a test, scored correct or incorrect. In the API an item is its row in the item
-  bank, counted from 0.
+  bank, its *index*, counted from 0 (`item`). Each item also has a *name*, unique in its bank
+  (`name`), which results, plots and error messages show.
 
 item bank
 : The calibrated items a test draws from. Also called *item pool*. In the API: `ItemBank`, which
-  holds $M$ items, `n_items`.
+  holds $M$ items, `n_items`, and their `names`.
 
 logistic models
 : The item response models catsim supports: the one-, two-, three- and four-parameter logistic
@@ -65,8 +66,8 @@ test information $I(\theta)$
 ## The adaptive test
 
 response $u_i$
-: The examinee's answer to item $i$, scored correct ($u_i = 1$, `True` in the API) or incorrect
-  ($u_i = 0$, `False`).
+: The examinee's answer to item $i$, scored correct ($u_i = 1$, `True` or 1 in the API) or
+  incorrect ($u_i = 0$, `False` or 0).
 
 responses $\mathbf{u}$
 : The responses to the administered items, in the order they were given. Also called a *response
@@ -80,16 +81,13 @@ excluded items
   control declined. They do not count toward the test length. In the API: `excluded_items`.
 
 test length $n$
-: The number of administered items. In the API: `test_lengths` in a simulation result. A
-  `MaxLengthStopper` ends the test at `max_items`; a selector that plans its schedule for a test of
-  known length takes it as `test_size`.
+: The number of administered items. In the API: the `test_length` column and metric of a simulation
+  result. A `MaxLengthStopper` ends the test at `max_items`; a selector that plans its schedule for a
+  test of known length takes it as `test_size`.
 
 session
-: One examinee's test, from the first item to the stop. Its state is a `CatSessionState`.
-
-simulation
-: A batch of sessions, one for each true ability, run by a `SimulationRunner`, which returns a
-  `SimulationResult`.
+: One examinee's test, from the initial estimate to the stop. In the API: `Session`, the record of
+  the test so far, which each step of `CatEngine` returns anew.
 
 initializer
 : The strategy that sets the ability estimate before the first response, the *starting point*
@@ -124,50 +122,88 @@ standard error $SE(\hat{\theta})$
 : The uncertainty of an ability estimate, on the scale of $\theta$. Also called the *standard
   error of estimation* (SEE) or *standard error of measurement* (SEM). Each estimator computes it
   by its own formula; for maximum likelihood it is $1/\sqrt{I(\hat{\theta})}$. In the API: `se` in
-  an `Estimate` and in a strategy's context, `current_se` on a session, `final_ses` in a
-  simulation result.
+  an `Estimate` and in a strategy's context, `current_se` on a session, the `se` column of a
+  simulation result's tables.
 
-## Simulation results
+## Simulations
+
+simulation
+: A run of one session per examinee, by `simulate`, which returns a `SimulationResult`. A run is
+  one *condition*; a study compares several.
+
+generated examinee
+: A simulated examinee given by a true ability, who answers each item correctly with probability
+  $P_i(\theta)$. In the API: an entry of `true_thetas`.
+
+recorded examinee
+: A simulated examinee whose answers come from data, as in a *post-hoc* study of a test given
+  linearly. In the API: a row of the *response matrix* `responses`, one column per item of the bank,
+  with NaN where an answer is missing.
+
+replication
+: One of several runs of the same condition with other seeds, which together show how much its
+  metrics vary.
+
+common random numbers
+: Running the conditions a study compares on the same random draws, so that their difference
+  carries less Monte Carlo error. Run on the same seed, catsim's simulated examinees give every
+  engine the same answer to each item.
+
+part, worker
+: A *part* is a contiguous share of a simulation's examinees, whose sessions run in order with
+  exposure counts of their own (`parts`). A *worker* is a process that runs parts (`workers`).
 
 exposure rate $r_i$
-: The share of examinees who were given item $i$. In the API: `exposure_rates` in a simulation
-  result. Exposure-control selectors limit it with a cap, `r_max`. While a run is in progress the
-  rates are counted over the examinees tested so far; `ExposureTracker` says how.
+: The share of examinees who were given item $i$. In the API: `exposure_rates()` of a simulation
+  result, and the `exposure_rates` a selector is given at each step. Exposure-control selectors
+  limit it with a cap, `r_max`. `simulate` gives the rule for the rates each session sees.
+
+exposure feedback
+: The dependence of a session on the sessions before it through the exposure rates it sees, under a
+  selector's `r_max` cap.
 
 proposal rate
 : The share of examinees for whom the selector proposed item $i$: the item was given or the
-  exposure control declined it. In the API: `proposal_rates` in a simulation result. Without an
+  exposure control declined it. In the API: `proposal_rates()` of a simulation result. Without an
   exposure control it equals the exposure rate.
 
 overlap rate
-: The expected share of items that two examinees have in common. In the API: `overlap_rate` in a
+: The expected share of items that two examinees have in common. In the API: `overlap_rate()` of a
   simulation result, `None` unless every session has the same test length.
 
 bias, MSE, RMSE
 : How far the final estimates are from the true abilities, over the examinees: the mean of
   $\hat{\theta} - \theta$, the mean of $(\hat{\theta} - \theta)^2$, and its square root. A positive
-  bias means abilities are overestimated. In the API: `bias`, `mse` and `rmse` in a simulation
-  result.
+  bias means abilities are overestimated. In the API: `bias()`, `mse()` and `rmse()` of a
+  simulation result.
+
+Monte Carlo standard error
+: How much a metric would vary over replications: the uncertainty that the finite number of
+  simulated examinees leaves in it. Each metric of a simulation result comes with it, as `mc_se`.
+
+decile
+: One tenth of a simulation's examinees by true ability, from decile 0, the lowest abilities, to 9.
+  In the API: `deciles()` of a simulation result, and the `decile` argument of its metrics.
 
 ## Notation
 
 | Symbol | Meaning | In the API |
 |---|---|---|
 | $\theta$ | ability; in a simulation, the true ability | `true_thetas` |
-| $\hat{\theta}$ | ability estimate | `theta`, `current_theta`, `final_thetas` |
-| $i$ | item index | an item's row in the `ItemBank` |
+| $\hat{\theta}$ | ability estimate | `theta`, `current_theta` |
+| $i$ | item index | `item`, an item's row in the `ItemBank` |
 | $a_i$, $b_i$, $c_i$, $d_i$ | discrimination, difficulty, guessing parameter and upper asymptote of item $i$ | `discrimination`, `difficulty`, `pseudo_guessing`, `upper_asymptote` |
 | $P_i(\theta)$ | probability of a correct response to item $i$ | `ItemBank.icc` |
 | $Q_i(\theta)$ | $1 - P_i(\theta)$, probability of an incorrect response | |
 | $I_i(\theta)$ | information of item $i$ | `ItemBank.information` |
 | $I(\theta)$ | test information, $\sum_i I_i(\theta)$ over the administered items | |
-| $SE(\hat{\theta})$ | standard error of the estimate | `se`, `current_se`, `final_ses` |
+| $SE(\hat{\theta})$ | standard error of the estimate | `se`, `current_se` |
 | $u_i$ | response to item $i$: 1 if correct, 0 if not | an entry of `responses` |
 | $\mathbf{u}$ | responses $(u_1, \dots, u_n)$ | `responses` |
 | $L(\theta)$ | likelihood of the responses at ability $\theta$ | |
-| $n$ | test length, the number of administered items | `test_lengths` |
-| $N$ | number of examinees | `len(true_thetas)` |
-| $j$ | examinee index | a session's position in a simulation result |
+| $n$ | test length, the number of administered items | `test_length` |
+| $N$ | number of examinees | `len(result.sessions)` |
+| $j$ | examinee index | the `session` column of a simulation result's tables |
 | $M$ | bank size, the number of items in the item bank | `ItemBank.n_items` |
 | $r_i$ | exposure rate of item $i$ | `exposure_rates` |
 | $r_{\max}$ | exposure cap | `r_max` |
