@@ -269,6 +269,6 @@ numpydoc_validation_exclude = {
   # Autodoc reads the docstrings of the names a module imports before it leaves them off the page.
   r"^catsim\.irt\.overload$",
   r"^catsim\.metrics\.NamedTuple$",
-  r"^catsim\.plot\.(Axes|MaxNLocator|StrEnum|assert_never)$",
+  r"^catsim\.plot\.(Axes|FuncFormatter|MaxNLocator|StrEnum|assert_never)$",
   r"^catsim\.typing\.Any$",
 }

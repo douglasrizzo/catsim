@@ -1,4 +1,4 @@
-"""Plots of items, exposure rates and CAT sessions, drawn with matplotlib.
+"""Plots of items, item banks, CAT sessions and simulation results, drawn with matplotlib.
 
 The module needs matplotlib, which the plot extra installs: ``pip install 'catsim[plot]'``. Each
 function takes its data first, as plain catsim objects, and its options as keyword-only arguments,
@@ -14,6 +14,11 @@ Plots follow the matplotlib style, set with ``plt.style.use`` or ``plt.style.con
 colours, title size and grid. matplotlib fixes most of an axes' look when the axes are made, so
 make ``ax`` under the style the plot should take. A second y axis, on the right, draws its spine
 and no grid.
+
+A plot that takes a ``label`` draws one run, item set or session in the next colour of the axes:
+drawing several on the same axes, each with its ``label``, and calling ``ax.legend()`` compares
+them. A plot that compares estimates with true abilities raises ValueError for a result without
+them, before any figure is created.
 """
 
 from collections.abc import Sequence
@@ -21,25 +26,31 @@ from enum import StrEnum
 from typing import assert_never
 
 import numpy
+import numpy.typing as npt
 
 try:
   import matplotlib.pyplot as plt
   from matplotlib.axes import Axes
   from matplotlib.colors import to_rgba
-  from matplotlib.ticker import MaxNLocator
+  from matplotlib.ticker import FuncFormatter, MaxNLocator
   from matplotlib.typing import ColorType
 except ImportError as error:
   _missing = "catsim.plot needs matplotlib; install it with: pip install 'catsim[plot]'"
   raise ImportError(_missing) from error
 
-from . import irt
-from .checks import _check_in_bank, _item
+from . import irt, metrics
+from .checks import _check_in_bank, _item, _item_indices
 from .item_bank import ItemBank
 from .session import Session
+from .simulation import SimulationResult
 from .typing import FloatArray, IntArray
 
 # The most items an x axis names, one tick each: at matplotlib's default figure width, more names overlap.
 _MAX_NAMED_TICKS = 30
+# The abilities the curves of an item bank span.
+_BANK_THETAS = numpy.linspace(-4, 4, 161)
+# The abilities a session's likelihood spans: the range catsim's estimators keep their estimates in (ADR-0018).
+_LIKELIHOOD_THETAS = numpy.linspace(-6, 6, 481)
 
 
 class PlotType(StrEnum):
@@ -225,6 +236,235 @@ def _annotate_item(ax: Axes, name: str, parameters: FloatArray) -> None:
   )
 
 
+def bank_information(
+  item_bank: ItemBank,
+  *,
+  items: npt.ArrayLike | None = None,
+  se: bool = True,
+  ax: Axes | None = None,
+  title: str | None = None,
+  label: str | None = None,
+) -> Axes:
+  r"""Plot the information of an item bank, or of some of its items, against ability, with its standard error.
+
+  The information :math:`I(\theta)` is the sum of the items' information, from -4 to 4. For a whole
+  bank it bounds what a test drawn from it can measure; with ``items`` it is the information of that
+  fixed set of items. With ``se``, the standard error :math:`1/\sqrt{I(\theta)}` goes on a second y
+  axis, on the right, and each axis takes its curve's colour. To compare sets of items on one axes,
+  pass ``se=False`` and a ``label`` with each.
+
+  .. plot::
+      :caption: The information of a 100-item bank, with its standard error.
+
+      import matplotlib.pyplot as plt
+      from catsim import ItemBank
+      from catsim import plot
+
+      plot.bank_information(ItemBank.generate(100, "3PL", rng=0))
+      plt.show()
+
+  Parameters
+  ----------
+  item_bank : ItemBank
+      The item bank.
+  items : array-like or None, optional
+      The positions of the items to sum, distinct integers of ``item_bank``. Default is None, which
+      sums every item of the bank.
+  se : bool, optional
+      Whether to draw the standard error on a second y axis. Default is True.
+  ax : matplotlib.axes.Axes or None, optional
+      The axes to draw on. Default is None, which draws on the axes of a new figure.
+  title : str or None, optional
+      The plot title. Default is None, which sets none.
+  label : str or None, optional
+      The information curve's label, for a legend. Default is None, which sets none.
+
+  Returns
+  -------
+  matplotlib.axes.Axes
+      The axes of the information. The standard error is drawn on their twin, which shares the x axis.
+
+  Raises
+  ------
+  TypeError
+      If an entry of ``items`` is not an integer, before any figure is created.
+  ValueError
+      If ``items`` is empty, repeats an item or names one outside the bank, before any figure is created.
+  """
+  information = irt.total_information(_BANK_THETAS, _bank_items(item_bank, items))
+  ax = _prepare_axes(ax, title)
+  ax.set_xlabel(r"$\theta$")
+  ax.set_ylabel(r"Information $I(\theta)$")
+  if not se:
+    ax.plot(_BANK_THETAS, information, label=label)
+    return ax
+  information_color, se_color = _cycle_color(0), _cycle_color(1)
+  ax.plot(_BANK_THETAS, information, color=information_color, label=label)
+  se_axes = _right_hand_axes(ax)
+  # Where the information underflows to 0 the standard error is infinite, and the curve leaves those abilities out.
+  standard_errors = numpy.full_like(information, numpy.nan)
+  numpy.divide(1, numpy.sqrt(information), out=standard_errors, where=information > 0)
+  se_axes.plot(_BANK_THETAS, standard_errors, color=se_color, label="Standard error")
+  se_axes.set_ylabel(r"Standard error $1/\sqrt{I(\theta)}$")
+  for axes, color in ((ax, information_color), (se_axes, se_color)):
+    axes.yaxis.label.set_color(color)
+    axes.tick_params(axis="y", colors=color)
+  return ax
+
+
+def expected_score(
+  item_bank: ItemBank,
+  *,
+  items: npt.ArrayLike | None = None,
+  ax: Axes | None = None,
+  title: str | None = None,
+  label: str | None = None,
+) -> Axes:
+  r"""Plot the expected proportion of correct responses to an item bank, or to some of its items, against ability.
+
+  The proportion is the mean of the items' characteristic curves, from -4 to 4: the test
+  characteristic curve divided by the number of items, so that sets of any size share one scale,
+  from 0 to 1.
+
+  .. plot::
+      :caption: The expected proportion correct of a 100-item bank and of its first 20 items.
+
+      import matplotlib.pyplot as plt
+      from catsim import ItemBank
+      from catsim import plot
+
+      item_bank = ItemBank.generate(100, "3PL", rng=0)
+      ax = plot.expected_score(item_bank, label="All 100 items")
+      plot.expected_score(item_bank, items=range(20), ax=ax, label="The first 20 items")
+      ax.legend()
+      plt.show()
+
+  Parameters
+  ----------
+  item_bank : ItemBank
+      The item bank.
+  items : array-like or None, optional
+      The positions of the items to average, distinct integers of ``item_bank``. Default is None,
+      which averages every item of the bank.
+  ax : matplotlib.axes.Axes or None, optional
+      The axes to draw on. Default is None, which draws on the axes of a new figure.
+  title : str or None, optional
+      The plot title. Default is None, which sets none.
+  label : str or None, optional
+      The curve's label, for a legend. Default is None, which sets none.
+
+  Returns
+  -------
+  matplotlib.axes.Axes
+      The axes the plot is on.
+
+  Raises
+  ------
+  TypeError
+      If an entry of ``items`` is not an integer, before any figure is created.
+  ValueError
+      If ``items`` is empty, repeats an item or names one outside the bank, before any figure is created.
+  """
+  expected = irt.icc(_BANK_THETAS, _bank_items(item_bank, items)).mean(axis=1)
+  ax = _prepare_axes(ax, title)
+  ax.plot(_BANK_THETAS, expected, label=label)
+  ax.set_ylim(0, 1)
+  ax.set_xlabel(r"$\theta$")
+  ax.set_ylabel("Expected proportion correct")
+  return ax
+
+
+def item_person_map(
+  item_bank: ItemBank, thetas: npt.ArrayLike, *, ax: Axes | None = None, title: str | None = None
+) -> Axes:
+  r"""Plot examinees' abilities above the axis and, below it, the abilities where the bank's items inform most.
+
+  Both histograms share one :math:`\theta` scale and its bins, and each shows shares, so a bank and a
+  population of any sizes compare: the examinees' bars sum to 1 above the axis and the items' bars
+  to 1 below it. An item sits at :attr:`~catsim.ItemBank.max_info_thetas`, which is its difficulty
+  for one- and two-parameter items.
+
+  .. plot::
+      :caption: A 100-item bank against a population of 500 examinees.
+
+      import matplotlib.pyplot as plt
+      import numpy
+      from catsim import ItemBank
+      from catsim import plot
+
+      thetas = numpy.random.default_rng(1).normal(0, 1, 500)
+      plot.item_person_map(ItemBank.generate(100, "3PL", rng=0), thetas)
+      plt.show()
+
+  Parameters
+  ----------
+  item_bank : ItemBank
+      The item bank.
+  thetas : array-like
+      The examinees' abilities, true or estimated, as finite numbers.
+  ax : matplotlib.axes.Axes or None, optional
+      The axes to draw on. Default is None, which draws on the axes of a new figure.
+  title : str or None, optional
+      The plot title. Default is None, which sets none.
+
+  Returns
+  -------
+  matplotlib.axes.Axes
+      The axes the plot is on.
+
+  Raises
+  ------
+  ValueError
+      If ``thetas`` is not a non-empty one-dimensional array of finite numbers, before any figure is
+      created.
+  """
+  abilities = _abilities(thetas)
+  locations = item_bank.max_info_thetas
+  edges = numpy.histogram_bin_edges(numpy.concatenate([abilities, locations]), bins="auto")
+  examinees, _ = numpy.histogram(abilities, edges)
+  items, _ = numpy.histogram(locations, edges)
+  widths = numpy.diff(edges)
+  ax = _prepare_axes(ax, title)
+  ax.bar(edges[:-1], examinees / abilities.size, widths, align="edge", label=f"Examinees ({abilities.size})")
+  ax.bar(edges[:-1], -items / locations.size, widths, align="edge", label=f"Items ({locations.size})")
+  ax.axhline(0, color="black", linewidth=0.8)
+  # The items' shares are drawn downwards, as negative heights, and labelled as the positive shares they are.
+  ax.yaxis.set_major_formatter(FuncFormatter(lambda share, _: f"{abs(share):g}"))
+  ax.set_xlabel(r"$\theta$")
+  ax.set_ylabel("Share of examinees (up) and items (down)")
+  ax.legend(loc="upper right")
+  return ax
+
+
+def _bank_items(item_bank: ItemBank, items: npt.ArrayLike | None) -> FloatArray:
+  """Return the parameters of the items at positions ``items`` of ``item_bank``, or of every item when it is None."""
+  if items is None:
+    return item_bank.items
+  # An object array keeps each entry as given, so a check blames the bad entry, not a good one coerced to its type.
+  values = numpy.asarray(items, dtype=object)
+  if values.ndim != 1:
+    msg = f"items has shape {values.shape}; it must be a sequence of item positions"
+    raise ValueError(msg)
+  indices = _item_indices("items", values.tolist(), item_bank.names)
+  if not indices:
+    msg = "items is empty; pass the positions of at least one item, or None for the whole bank"
+    raise ValueError(msg)
+  return item_bank.items[list(indices)]
+
+
+def _abilities(thetas: npt.ArrayLike) -> FloatArray:
+  """Return the abilities as a float array, checking that they are a non-empty 1-D array of finite numbers."""
+  abilities = numpy.asarray(thetas, dtype=float)
+  if abilities.ndim != 1 or abilities.size == 0:
+    msg = f"thetas has shape {abilities.shape}; it must hold one ability per examinee, at least one"
+    raise ValueError(msg)
+  if not numpy.isfinite(abilities).all():
+    position = int(numpy.flatnonzero(~numpy.isfinite(abilities))[0])
+    msg = f"thetas[{position}] is {abilities[position]}; abilities must be finite numbers"
+    raise ValueError(msg)
+  return abilities
+
+
 # The item parameter each value of item_exposure's ``par`` reads: its column in the item matrix and the axis label.
 _ITEM_PARAMETERS = {
   "a": (0, "Item discrimination"),
@@ -234,7 +474,7 @@ _ITEM_PARAMETERS = {
 }
 
 
-def item_exposure(
+def item_exposure(  # noqa: PLR0913 - the rates and their bank, two views (par, hist), and every plot's ax, title, label
   exposure_rates: FloatArray,
   item_bank: ItemBank,
   *,
@@ -242,39 +482,39 @@ def item_exposure(
   hist: bool = False,
   ax: Axes | None = None,
   title: str | None = None,
+  label: str | None = None,
 ) -> Axes:
-  """Plot the exposure rate of each item: in item order, against an item parameter, or as a histogram.
+  """Plot the items' exposure rates: from the most to the least exposed, against an item parameter, or as a histogram.
 
-  In item order, the x axis names each item, or ticks item indices in a bank of more than 30 items.
-  With ``par``, the items are sorted by that parameter and each item's exposure rate is drawn at its
-  value, which shows which items a selector favours; items of close parameters crowd together there,
-  so their names are left out. With ``hist=True``, the plot counts the items in each range of
-  exposure rates.
+  By default the items are sorted from the most to the least exposed, which shows how evenly a run
+  uses its bank and where an exposure cap holds the rates; the x axis names each item, or counts them
+  in a bank of more than 30 items. With ``par``, each item is a point at its value of that
+  parameter, which shows which items a selector favours. With ``hist=True``, the plot counts the
+  items in each range of exposure rates.
 
   .. plot::
-      :caption: The exposure rates of a simulation, as a histogram and against the item difficulty.
+      :caption: The exposure rates of a simulation, sorted and against the item difficulty.
 
       import matplotlib.pyplot as plt
       import numpy
       from catsim import CatEngine, ItemBank, simulate
       from catsim import plot
-      from catsim.estimation import NumericalSearchEstimator
-      from catsim.initialization import UniformInitializer
+      from catsim.estimation import EAPEstimator
+      from catsim.initialization import FixedPointInitializer
       from catsim.selection import MaxInfoSelector
       from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
 
       engine = CatEngine(
           ItemBank.generate(100, rng=0),
-          UniformInitializer(),
+          FixedPointInitializer(0.0),
           MaxInfoSelector(),
-          NumericalSearchEstimator(),
+          EAPEstimator(),
           StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),
       )
-      true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)
-      result = simulate(engine, true_thetas=true_thetas, rng=0)
-      fig, axes = plt.subplots(2, 1, figsize=(7, 12))
+      result = simulate(engine, true_thetas=numpy.random.default_rng(1).normal(0, 1, 200), rng=0)
+      fig, axes = plt.subplots(2, 1, figsize=(7, 10))
       rates = result.exposure_rates().value
-      plot.item_exposure(rates, result.item_bank, hist=True, ax=axes[0], title="Exposure rates")
+      plot.item_exposure(rates, result.item_bank, ax=axes[0])
       plot.item_exposure(rates, result.item_bank, par="b", ax=axes[1])
       plt.tight_layout()
       plt.show()
@@ -288,13 +528,15 @@ def item_exposure(
       The item bank the rates belong to, which holds the items' names and parameters.
   par : str or None, optional
       The item parameter to plot the rates against: ``"a"``, ``"b"``, ``"c"`` or ``"d"``. Default is
-      None, which plots the rates in item bank order.
+      None, which sorts the items from the most to the least exposed.
   hist : bool, optional
       Whether to draw a histogram of the rates. Default is False.
   ax : matplotlib.axes.Axes or None, optional
       The axes to draw on. Default is None, which draws on the axes of a new figure.
   title : str or None, optional
       The plot title. Default is None, which sets none.
+  label : str or None, optional
+      The rates' label, for a legend. Default is None, which sets none.
 
   Returns
   -------
@@ -313,21 +555,20 @@ def item_exposure(
   ax = _prepare_axes(ax, title)
 
   if hist:
-    ax.hist(exposure_rates, max(len(exposure_rates) // 10, 3))
+    ax.hist(exposure_rates, max(len(exposure_rates) // 10, 3), label=label)
     ax.set_xlabel("Exposure rate")
     ax.set_ylabel("Items")
     return ax
 
   if par is None:
-    indices = numpy.arange(item_bank.n_items)
-    ax.plot(indices, exposure_rates, marker="o")
-    _label_items(ax, indices, item_bank.names)
-    ax.set_xlabel("Items")
+    order = numpy.argsort(-exposure_rates, kind="stable")
+    ranks = numpy.arange(1, item_bank.n_items + 1)
+    ax.plot(ranks, exposure_rates[order], drawstyle="steps-mid", label=label)
+    _label_items(ax, ranks, [item_bank.names[item] for item in order])
+    ax.set_xlabel("Items, from the most to the least exposed")
   else:
     column, xlabel = _ITEM_PARAMETERS[par]
-    values = item_bank.items[:, column]
-    order = values.argsort(kind="stable")
-    ax.plot(values[order], exposure_rates[order], marker="o")
+    ax.plot(item_bank.items[:, column], exposure_rates, "o", label=label)
     ax.set_xlabel(xlabel)
   ax.set_ylabel("Exposure rate")
   return ax
@@ -363,11 +604,11 @@ def session_progress(
 
   The x axis counts the items administered. While the session has at most 30 items, its ticks name
   the item given at each step instead, and the initial estimate, at 0, has none, so a session with
-  no items has no ticks. The left y axis shows the ability estimate after each response, with a
-  band of one standard error on each side, the difficulty of each administered item and, when it is
-  given, the true ability. The right y axis shows the standard error each estimate was recorded
-  with, the one precision-based stoppers judge. Infinite standard errors, such as the initial
-  estimate's, are left out.
+  no items has no ticks. The y axis shows the ability estimate after each response, with a band of
+  one standard error on each side: the error each estimate was recorded with, the one
+  precision-based stoppers judge. An infinite standard error, such as the initial estimate's, leaves
+  the band out. The difficulty of each administered item and, when it is given, the true ability
+  share the axis.
 
   .. plot::
       :caption: One simulated session: the ability estimate after each item, with its standard error.
@@ -411,8 +652,7 @@ def session_progress(
   Returns
   -------
   matplotlib.axes.Axes
-      The axes of the ability scale. The standard error is drawn on their twin, which shares the x
-      axis.
+      The axes the plot is on.
 
   Raises
   ------
@@ -428,12 +668,8 @@ def session_progress(
   xs = numpy.arange(len(thetas))
   finite = numpy.isfinite(ses)
   ax = _prepare_axes(ax, title)
-  se_axes = _right_hand_axes(ax)
-  # The legend is on ``ax``, which must be drawn over the twin's line to stay readable.
-  ax.set_zorder(se_axes.get_zorder() + 1)
-  ax.patch.set_visible(False)
 
-  estimate_color, difficulty_color, se_color = (_cycle_color(index) for index in range(3))
+  estimate_color, difficulty_color = _cycle_color(0), _cycle_color(1)
   ax.plot(xs, thetas, marker=".", color=estimate_color, label=r"Ability estimate $\hat{\theta}$")
   ax.fill_between(
     xs[finite],
@@ -446,14 +682,412 @@ def session_progress(
   ax.plot(xs[1:], difficulties, "o", color=difficulty_color, label="Item difficulty")
   if true_theta is not None:
     ax.axhline(true_theta, color="black", linestyle="--", label=r"True ability $\theta$")
-  se_axes.plot(xs[finite], ses[finite], color=se_color, label="Standard error")
 
   ax.set_xlabel("Items administered")
   _label_items(ax, xs[1:], [item_bank.names[item] for item in session.administered_items])
   ax.set_ylabel(r"$\theta$")
-  se_axes.set_ylabel("Standard error", color=se_color)
-  se_axes.tick_params(axis="y", colors=se_color)
-  handles, labels = ax.get_legend_handles_labels()
-  se_handles, se_labels = se_axes.get_legend_handles_labels()
-  ax.legend(handles + se_handles, labels + se_labels, loc="best")
+  ax.legend(loc="best")
+  return ax
+
+
+def likelihood(
+  session: Session,
+  item_bank: ItemBank,
+  *,
+  true_theta: float | None = None,
+  ax: Axes | None = None,
+  title: str | None = None,
+  label: str | None = None,
+) -> Axes:
+  r"""Plot the likelihood of a session's responses across abilities, relative to its maximum, with its final estimate.
+
+  The curve is the likelihood of the responses to the administered items, divided by its maximum,
+  from -6 to 6, the range catsim's estimators keep their estimates in. A dashed line in the curve's
+  colour marks the session's final estimate and, when it is given, a dotted black line the true
+  ability. Responses that are all correct, or all incorrect, have no maximum inside the range, so
+  their curve rises to its edge.
+
+  .. plot::
+      :caption: The likelihood of one simulated session's responses.
+
+      import matplotlib.pyplot as plt
+      import numpy
+      from catsim import CatEngine, ItemBank, simulate
+      from catsim import plot
+      from catsim.estimation import EAPEstimator
+      from catsim.initialization import FixedPointInitializer
+      from catsim.selection import MaxInfoSelector
+      from catsim.stopping import MaxLengthStopper
+
+      engine = CatEngine(
+          ItemBank.generate(100, rng=0),
+          FixedPointInitializer(0.0),
+          MaxInfoSelector(),
+          EAPEstimator(),
+          MaxLengthStopper(10),
+      )
+      result = simulate(engine, true_thetas=[0.7], rng=0)
+      plot.likelihood(result.sessions[0], result.item_bank, true_theta=0.7)
+      plt.show()
+
+  Parameters
+  ----------
+  session : Session
+      The session whose responses to plot, such as an entry of ``SimulationResult.sessions``.
+  item_bank : ItemBank
+      The item bank the session's items come from.
+  true_theta : float or None, optional
+      The examinee's true ability, marked by a dotted line. Default is None, which marks none.
+  ax : matplotlib.axes.Axes or None, optional
+      The axes to draw on. Default is None, which draws on the axes of a new figure.
+  title : str or None, optional
+      The plot title. Default is None, which sets none.
+  label : str or None, optional
+      The curve's label, for a legend. Default is None, which sets none.
+
+  Returns
+  -------
+  matplotlib.axes.Axes
+      The axes the plot is on.
+
+  Raises
+  ------
+  ValueError
+      If an administered item is not an item of ``item_bank``, before any figure is created.
+  """
+  # The session checked its indices when it was built, but it does not know the bank.
+  _check_in_bank("administered_items", session.administered_items, item_bank.n_items)
+  items = item_bank.items[list(session.administered_items)]
+  log_likelihood = irt.log_likelihood(_LIKELIHOOD_THETAS, session.responses, items)
+  ax = _prepare_axes(ax, title)
+  (line,) = ax.plot(_LIKELIHOOD_THETAS, numpy.exp(log_likelihood - numpy.max(log_likelihood)), label=label)
+  ax.axvline(session.current_theta, color=line.get_color(), linestyle="--", linewidth=1)
+  if true_theta is not None:
+    ax.axvline(true_theta, color="black", linestyle=":", linewidth=1)
+  ax.set_xlabel(r"$\theta$")
+  ax.set_ylabel("Likelihood relative to its maximum")
+  return ax
+
+
+# The metrics of a simulation run that metric_by_ability can plot, each with its axis label. metric_by_length plots the
+# first four.
+_METRICS = {
+  "bias": r"Bias of $\hat{\theta}$",
+  "mse": r"MSE of $\hat{\theta}$",
+  "rmse": r"RMSE of $\hat{\theta}$",
+  "se": r"Mean standard error of $\hat{\theta}$",
+  "test_length": "Mean test length",
+  "overlap_rate": "Test overlap rate",
+}
+_METRICS_BY_LENGTH = ("bias", "mse", "rmse", "se")
+
+
+def _check_metric(metric: str, supported: Sequence[str]) -> None:
+  """Raise ValueError unless ``metric`` is one of ``supported``."""
+  if metric not in supported:
+    msg = f"Unsupported metric {metric!r}. Supported metrics are: {', '.join(supported)}."
+    raise ValueError(msg)
+
+
+def metric_by_ability(
+  result: SimulationResult,
+  metric: str = "rmse",
+  *,
+  levels: bool = False,
+  ax: Axes | None = None,
+  title: str | None = None,
+  label: str | None = None,
+) -> Axes:
+  r"""Plot a run's metric in each decile of the true ability, or at each distinct true ability, with its error bars.
+
+  Each point is a group's metric at its mean true ability, from the result's
+  :meth:`~catsim.SimulationResult.deciles`, or with ``levels=True`` from its
+  :meth:`~catsim.SimulationResult.ability_levels`, which suits designs of a few fixed abilities. The
+  bars span one Monte Carlo standard error on each side, and the bias gets a line at 0.
+
+  .. plot::
+      :caption: The RMSE in each decile of the true ability, for two selectors.
+
+      import matplotlib.pyplot as plt
+      import numpy
+      from catsim import CatEngine, ItemBank, simulate
+      from catsim import plot
+      from catsim.estimation import EAPEstimator
+      from catsim.initialization import FixedPointInitializer
+      from catsim.selection import MaxInfoSelector, RandomesqueSelector
+      from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
+
+      item_bank = ItemBank.generate(100, rng=0)
+      true_thetas = numpy.random.default_rng(1).normal(0, 1, 300)
+      stopper = StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20))
+      fig, ax = plt.subplots()
+      for name, selector in [("Maximum information", MaxInfoSelector()), ("Randomesque", RandomesqueSelector(5))]:
+          engine = CatEngine(item_bank, FixedPointInitializer(0.0), selector, EAPEstimator(), stopper)
+          result = simulate(engine, true_thetas=true_thetas, rng=2)
+          plot.metric_by_ability(result, "rmse", ax=ax, label=name)
+      ax.legend()
+      plt.show()
+
+  Parameters
+  ----------
+  result : SimulationResult
+      The run, with its examinees' true abilities.
+  metric : str, optional
+      The metric: ``"bias"``, ``"mse"``, ``"rmse"``, ``"se"`` (the mean standard error),
+      ``"test_length"`` or ``"overlap_rate"``. Default is ``"rmse"``.
+  levels : bool, optional
+      Whether to group the sessions by distinct true ability rather than by decile. Default is False.
+  ax : matplotlib.axes.Axes or None, optional
+      The axes to draw on. Default is None, which draws on the axes of a new figure.
+  title : str or None, optional
+      The plot title. Default is None, which sets none.
+  label : str or None, optional
+      The run's label, for a legend. Default is None, which sets none.
+
+  Returns
+  -------
+  matplotlib.axes.Axes
+      The axes the plot is on.
+
+  Raises
+  ------
+  ValueError
+      If ``metric`` is not one of the metrics above, or the result has no true abilities, before any
+      figure is created.
+  """
+  _check_metric(metric, tuple(_METRICS))
+  table = result.ability_levels() if levels else result.deciles()
+  ax = _prepare_axes(ax, title)
+  ax.errorbar(table["true_theta"], table[metric], yerr=table[f"{metric}_mc_se"], marker="o", capsize=2, label=label)
+  if metric == "bias":
+    ax.axhline(0, color="black", linewidth=0.8)
+  ax.set_xlabel(r"True ability $\theta$")
+  ax.set_ylabel(_METRICS[metric])
+  return ax
+
+
+def metric_by_length(
+  result: SimulationResult,
+  metric: str = "rmse",
+  *,
+  ax: Axes | None = None,
+  title: str | None = None,
+  label: str | None = None,
+) -> Axes:
+  r"""Plot a run's metric after each number of items administered, with a band of one Monte Carlo standard error.
+
+  Every session counts after every number of items: one that stopped earlier counts at its final
+  estimate, so a variable-length run is not judged on its longest tests alone. The metric is the
+  bias, MSE or RMSE of the estimates, which need the true abilities, or their mean standard error.
+
+  .. plot::
+      :caption: The RMSE and the mean standard error after each item.
+
+      import matplotlib.pyplot as plt
+      import numpy
+      from catsim import CatEngine, ItemBank, simulate
+      from catsim import plot
+      from catsim.estimation import EAPEstimator
+      from catsim.initialization import FixedPointInitializer
+      from catsim.selection import MaxInfoSelector
+      from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
+
+      engine = CatEngine(
+          ItemBank.generate(100, rng=0),
+          FixedPointInitializer(0.0),
+          MaxInfoSelector(),
+          EAPEstimator(),
+          StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),
+      )
+      result = simulate(engine, true_thetas=numpy.random.default_rng(1).normal(0, 1, 300), rng=2)
+      ax = plot.metric_by_length(result, "rmse", label="RMSE")
+      plot.metric_by_length(result, "se", ax=ax, label="Mean standard error")
+      ax.set_ylabel(r"Error of $\hat{\theta}$")
+      ax.legend()
+      plt.show()
+
+  Parameters
+  ----------
+  result : SimulationResult
+      The run.
+  metric : str, optional
+      The metric: ``"bias"``, ``"mse"``, ``"rmse"`` or ``"se"`` (the mean standard error). Default
+      is ``"rmse"``.
+  ax : matplotlib.axes.Axes or None, optional
+      The axes to draw on. Default is None, which draws on the axes of a new figure.
+  title : str or None, optional
+      The plot title. Default is None, which sets none.
+  label : str or None, optional
+      The run's label, for a legend. Default is None, which sets none.
+
+  Returns
+  -------
+  matplotlib.axes.Axes
+      The axes the plot is on.
+
+  Raises
+  ------
+  ValueError
+      If ``metric`` is not one of the metrics above, or is the bias, MSE or RMSE of a result without
+      true abilities, before any figure is created.
+  """
+  _check_metric(metric, _METRICS_BY_LENGTH)
+  thetas, ses = _estimates_by_length(result)
+  if metric == "se":
+    values = [metrics.mean(column) for column in ses.T]
+  else:
+    true_thetas = result.true_thetas
+    if true_thetas is None:
+      msg = f"the {metric} needs the examinees' true abilities, and this result has none"
+      raise ValueError(msg)
+    function = {"bias": metrics.bias, "mse": metrics.mse, "rmse": metrics.rmse}[metric]
+    values = [function(true_thetas, column) for column in thetas.T]
+  lengths = numpy.arange(1, thetas.shape[1] + 1)
+  value = numpy.array([metric_.value for metric_ in values], dtype=float)
+  mc_se = numpy.array([metric_.mc_se for metric_ in values], dtype=float)
+  ax = _prepare_axes(ax, title)
+  (line,) = ax.plot(lengths, value, label=label)
+  ax.fill_between(lengths, value - mc_se, value + mc_se, color=line.get_color(), alpha=0.2, linewidth=0)
+  ax.xaxis.set_major_locator(MaxNLocator(integer=True, min_n_ticks=1))
+  ax.set_xlabel("Items administered")
+  ax.set_ylabel(_METRICS[metric])
+  return ax
+
+
+def _estimates_by_length(result: SimulationResult) -> tuple[FloatArray, FloatArray]:
+  """Return each session's estimate and standard error after 1, 2, ... items: a row per session, a column per length."""
+  # The columns run to the longest test, and a session that stopped keeps its final estimate in the later ones.
+  lengths = [len(session.administered_items) for session in result.sessions]
+  steps = numpy.arange(1, max(lengths) + 1)
+  thetas = numpy.empty((len(lengths), steps.size))
+  ses = numpy.empty((len(lengths), steps.size))
+  for row, (session, length) in enumerate(zip(result.sessions, lengths, strict=True)):
+    estimates = [session.estimates[step] for step in numpy.minimum(steps, length)]
+    thetas[row] = [estimate.theta for estimate in estimates]
+    ses[row] = [estimate.se for estimate in estimates]
+  return thetas, ses
+
+
+def recovery(result: SimulationResult, *, ax: Axes | None = None, title: str | None = None) -> Axes:
+  r"""Plot each examinee's final ability estimate against their true ability, with the run's RMSE and bias.
+
+  The dashed line marks estimates equal to the true ability, so points above it are overestimates. A
+  box in the upper left corner gives the RMSE and the bias, each with its Monte Carlo standard error.
+
+  .. plot::
+      :caption: The final estimates of 300 simulated examinees against their true abilities.
+
+      import matplotlib.pyplot as plt
+      import numpy
+      from catsim import CatEngine, ItemBank, simulate
+      from catsim import plot
+      from catsim.estimation import EAPEstimator
+      from catsim.initialization import FixedPointInitializer
+      from catsim.selection import MaxInfoSelector
+      from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
+
+      engine = CatEngine(
+          ItemBank.generate(100, rng=0),
+          FixedPointInitializer(0.0),
+          MaxInfoSelector(),
+          EAPEstimator(),
+          StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),
+      )
+      result = simulate(engine, true_thetas=numpy.random.default_rng(1).normal(0, 1, 300), rng=2)
+      plot.recovery(result)
+      plt.show()
+
+  Parameters
+  ----------
+  result : SimulationResult
+      The run, with its examinees' true abilities.
+  ax : matplotlib.axes.Axes or None, optional
+      The axes to draw on. Default is None, which draws on the axes of a new figure.
+  title : str or None, optional
+      The plot title. Default is None, which sets none.
+
+  Returns
+  -------
+  matplotlib.axes.Axes
+      The axes the plot is on.
+
+  Raises
+  ------
+  ValueError
+      If the result has no true abilities, before any figure is created.
+  """
+  rmse, bias = result.rmse(), result.bias()
+  table = result.examinees()
+  ax = _prepare_axes(ax, title)
+  ax.plot(table["true_theta"], table["theta"], "o", markersize=3, alpha=0.5)
+  ax.axline((0, 0), slope=1, color="black", linestyle="--", linewidth=0.8)
+  ax.set_xlabel(r"True ability $\theta$")
+  ax.set_ylabel(r"Final estimate $\hat{\theta}$")
+  ax.annotate(
+    f"RMSE = {rmse.value:.3f} ± {rmse.mc_se:.3f}\nbias = {bias.value:.3f} ± {bias.mc_se:.3f}",
+    bbox={"facecolor": "white", "alpha": 1},
+    xy=(0.02, 0.97),
+    xycoords="axes fraction",
+    ha="left",
+    va="top",
+  )
+  return ax
+
+
+def length_distribution(
+  result: SimulationResult, *, ax: Axes | None = None, title: str | None = None, label: str | None = None
+) -> Axes:
+  """Plot how many of a run's sessions administered each number of items.
+
+  Each test length has its own bin, drawn as an outline, so several runs drawn on the same axes stay
+  readable over each other. In a variable-length run, the bin at the length cap counts the tests
+  that reached the cap.
+
+  .. plot::
+      :caption: The test lengths of a variable-length run capped at 30 items.
+
+      import matplotlib.pyplot as plt
+      import numpy
+      from catsim import CatEngine, ItemBank, simulate
+      from catsim import plot
+      from catsim.estimation import EAPEstimator
+      from catsim.initialization import FixedPointInitializer
+      from catsim.selection import MaxInfoSelector
+      from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
+
+      engine = CatEngine(
+          ItemBank.generate(100, rng=0),
+          FixedPointInitializer(0.0),
+          MaxInfoSelector(),
+          EAPEstimator(),
+          StopRule(StandardErrorStopper(0.5), MaxLengthStopper(30)),
+      )
+      result = simulate(engine, true_thetas=numpy.random.default_rng(1).normal(0, 1, 300), rng=2)
+      plot.length_distribution(result)
+      plt.show()
+
+  Parameters
+  ----------
+  result : SimulationResult
+      The run.
+  ax : matplotlib.axes.Axes or None, optional
+      The axes to draw on. Default is None, which draws on the axes of a new figure.
+  title : str or None, optional
+      The plot title. Default is None, which sets none.
+  label : str or None, optional
+      The run's label, for a legend. Default is None, which sets none.
+
+  Returns
+  -------
+  matplotlib.axes.Axes
+      The axes the plot is on.
+  """
+  lengths = result.examinees()["test_length"]
+  edges = numpy.arange(lengths.min(), lengths.max() + 2) - 0.5
+  ax = _prepare_axes(ax, title)
+  ax.hist(lengths, edges, histtype="step", linewidth=plt.rcParams["lines.linewidth"], label=label)
+  # One whole number in view is enough: the default of two makes a run of one length fall back to fractional ticks.
+  ax.xaxis.set_major_locator(MaxNLocator(integer=True, min_n_ticks=1))
+  ax.set_xlabel("Test length (items)")
+  ax.set_ylabel("Sessions")
   return ax

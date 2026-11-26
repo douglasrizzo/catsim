@@ -1052,6 +1052,7 @@ class TestResultMetrics:
       pytest.param(lambda result: result.mse(), "mse", id="mse"),
       pytest.param(lambda result: result.rmse(), "rmse", id="rmse"),
       pytest.param(lambda result: result.deciles(), "deciles", id="deciles"),
+      pytest.param(lambda result: result.ability_levels(), "ability_levels", id="ability-levels"),
       pytest.param(lambda result: result.test_length(decile=0), "a metric by decile", id="length-by-decile"),
       pytest.param(lambda result: result.se(decile=0), "a metric by decile", id="se-by-decile"),
       pytest.param(lambda result: result.exposure_rates(decile=0), "a metric by decile", id="exposure-by-decile"),
@@ -1061,7 +1062,7 @@ class TestResultMetrics:
   def test_metrics_that_need_true_abilities_raise_without_them(
     self, metric: Callable[[SimulationResult], object], needed_by: str
   ) -> None:
-    """Recorded examinees' abilities are unknown, so the accuracy metrics and every metric by decile raise (ADR-0014).
+    """Recorded examinees' abilities are unknown, so the accuracy metrics and every metric by ability raise (ADR-0014).
 
     Fails if a metric compares the estimates with zeros or NaN, or groups the sessions by their estimates instead.
     """
@@ -1070,6 +1071,42 @@ class TestResultMetrics:
       match=f"{needed_by} needs the examinees' true abilities, and this result has none; pass true_thetas to simulate",
     ):
       metric(result_of(TWO_SESSIONS))
+
+
+class TestAbilityLevels:
+  """Tests for the metrics at each distinct true ability (ADR-0016)."""
+
+  def test_the_ability_levels_table_of_a_hand_worked_run(self) -> None:
+    """Five examinees at abilities 1, -1, 1, 0 and -1, in that order, give three rows, from -1 to 1.
+
+    At -1, errors 0.1 and 0.3 give a bias of 0.2 with an error of 0.1, an MSE of 0.05 with an error of 0.04 (squared
+    errors 0.01 and 0.09), and lengths 1 and 3 a mean of 2 with an error of 1. At 0, one examinee gives an error of -0.2
+    and NaN Monte Carlo errors, which need two sessions. At 1, both take two items, (0, 1) and (0, 2), of a 4-item
+    bank: rates 1, 0.5, 0.5 and 0 give an overlap of (1 + 0.25 + 0.25) / 2 = 0.75. Fails if rows follow the session
+    order rather than the ability, if a row mixes two abilities' sessions, or if a single session's errors are 0.
+    """
+    sessions = [
+      finished((0, 1), theta=1.5, se=0.4),
+      finished((2,), theta=-0.9, se=0.5),
+      finished((0, 2), theta=0.5, se=0.6),
+      finished((3,), theta=-0.2, se=0.8),
+      finished((1, 2, 3), theta=-0.7, se=0.7),
+    ]
+
+    table = result_of(sessions, n_items=4, true_thetas=[1.0, -1.0, 1.0, 0.0, -1.0]).ability_levels()
+
+    assert table["true_theta"].tolist() == [-1.0, 0.0, 1.0]
+    assert table["n_sessions"].tolist() == [2, 1, 2]
+    assert table["bias"] == pytest.approx([0.2, -0.2, 0.0])
+    assert table["bias_mc_se"][[0, 2]] == pytest.approx([0.1, 0.5])
+    assert table["mse"][0] == pytest.approx(0.05)
+    assert table["mse_mc_se"][0] == pytest.approx(0.04)
+    assert table["test_length"] == pytest.approx([2.0, 1.0, 2.0])
+    assert table["test_length_mc_se"][0] == pytest.approx(1.0)
+    assert table["se"] == pytest.approx([0.6, 0.8, 0.5])
+    assert all(np.isnan(table[name][1]) for name in ("bias_mc_se", "mse_mc_se", "rmse_mc_se", "se_mc_se"))
+    assert np.isnan(table["overlap_rate"][0])
+    assert table["overlap_rate"][2] == pytest.approx(0.75)
 
 
 def ranks(values: FloatArray) -> np.ndarray:
