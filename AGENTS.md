@@ -165,8 +165,9 @@ Hard rules:
 ## Commit And Git Hygiene
 
 - Pull requests into `dev` are squash-merged: each becomes one commit on `dev`, with the pull
-  request's title and description as its message. A ruleset on `dev` allows no other merge method.
-  Merge a stack with `gh stack merge --squash`.
+  request's title and description as its message. The "Protect dev" ruleset allows no other merge
+  method, and like "Protect main" it requires a pull request and the CI checks, and blocks deleting
+  and force-pushing the branch, for administrators too. Merge a stack with `gh stack merge --squash`.
 - Commit once for the whole pull request, or at checkpoints that pass the gate (the pre-commit hook
   runs on every commit), with a message that says what the commit changes. Do not split a change
   into one commit per logical part, and do not amend, rebase, reorder or squash commits to tidy a
