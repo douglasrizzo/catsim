@@ -14,8 +14,8 @@ A spec has the sections of an implemented technique page (motivation, definition
 behavior and comparison, guarantees, references) plus sections for contributors: "Tests", the
 properties only an implementation sees, each checked by a test; "Implementation Guidance", which
 sketches the code for whoever implements it; and, when design choices are still open, "Open
-Questions", which lists them with their options and the option the spec assumes for now. New specs
-start from [`_template.md`](_template.md).
+Questions", which lists them with their options and the option the spec assumes until they are
+answered. New specs start from [`_template.md`](_template.md).
 
 The specs are MyST Markdown, like the documentation. GitHub does not render MyST roles and
 directives (`{doc}`, `{eval-rst}`, `:::{note}`); they render once a spec is promoted into the
@@ -29,7 +29,7 @@ against their sources in November 2026 (checklist steps 1-4 and 6 below); each s
 say when and against which sources. Their implementation sketches follow the catsim 1.0 strategy
 contract and the revalidated definitions (step 5), and the Sympson-Hetter sketch is an exposure
 control of the engine. The sketches are illustrative and no test runs them; the specs with open
-questions show the option each spec assumes for now. Every sketch was last run on 2026-11-26: each
+questions show the option each spec assumes. Every sketch was last run on 2026-11-26: each
 was added at its proposed location to a copy of `src/catsim`, imported, and run on a small bank, on
 hand-built contexts and under `CatEngine` and `simulate`.
 

@@ -97,7 +97,7 @@ checked by a test:
    hand-worked case, a published value or catR's output, with its source.>
 
 % OPEN QUESTIONS: optional. List the design choices that are still open, each with its options, its
-% trade-off and the option the spec assumes for now. Answer them before implementing.
+% trade-off and the option the spec assumes until it is answered. Answer them before implementing.
 
 ## Open Questions
 
