@@ -41,12 +41,23 @@ b-matching remains a simple and interpretable heuristic.
 maximum information under the 1PL model, slightly different under other models.
 They attribute it to Urry (1970), an earlier work than the article cited below.
 
+### Comparison with catR
+
+The selector is catR's `nextItem` with `criterion = "bOpt"`, and, as in catR,
+items tie only when their distances to the estimate are exactly equal
+({doc}`/adr/0017-random-tie-breaking`). The parity tests
+({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`) find catR's ranking of every
+remaining item in four contexts, from before the first response to an
+all-correct pattern, and catR's items in whole tests on recorded responses with
+the maximum likelihood, Bayes modal, EAP and weighted likelihood estimators.
+They find no departure.
+
 ## Guarantees
 
 1. It returns the remaining item whose difficulty is closest to the current
    estimate.
 2. It never returns an item that was already administered or excluded.
-3. It applies no exposure cap: the run's exposure rates do not change its choice.
+3. It applies no exposure cap: the exposure rates do not change its choice.
 4. Under the 1PL, the chosen item coincides with a maximum-information choice,
    because information is maximized near $b_i = \hat{\theta}$.
 5. When no item remains, it raises `NoItemsAvailableError`.

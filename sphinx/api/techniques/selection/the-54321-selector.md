@@ -52,6 +52,14 @@ matter most for precision, are chosen by maximum information.
 {cite:t}`Magis12{p. 12}` list the technique among the methods that choose at random among
 several near-optimal items, without defining it.
 
+### Comparison with catR
+
+catR has no 5-4-3-2-1 rule. At each position, the selector's bin is the bin of
+catR's `nextItem` with `criterion = "MFI"` and `randomesque` set to
+$\max(1, s - k)$; with $s = 5$, the parity tests
+({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`) find that bin in four
+contexts. No simulation compares whole tests, since catR has no rule to simulate.
+
 ## Guarantees
 
 1. It never returns an item that was already administered or excluded.
@@ -59,7 +67,7 @@ several near-optimal items, without defining it.
    $\max(1, s - k)$ most informative remaining items.
 3. From position $s - 1$ on, it returns the most informative remaining item.
 4. When no item remains, it raises `NoItemsAvailableError`.
-5. It applies no exposure cap: the run's exposure rates do not change its choice.
+5. It applies no exposure cap: the exposure rates do not change its choice.
 
 ## References
 

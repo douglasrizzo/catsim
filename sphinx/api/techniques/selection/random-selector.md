@@ -18,6 +18,13 @@ administered nor excluded.
 
 `RandomSelector` takes no parameters.
 
+## Behavior and Comparison
+
+The selector is catR's `nextItem` with `criterion = "random"`, which also draws
+uniformly among the available items. R and NumPy draw different numbers, so only
+a simulation could compare the two, and the parity tests have none for random
+selection ({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`).
+
 ## Guarantees
 
 1. It never returns an item that was already administered or excluded.

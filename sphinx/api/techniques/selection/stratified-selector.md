@@ -186,6 +186,12 @@ MIS improved precision over the a-stratified method in
 skewness of the exposure rates both with and without correlation between $a$
 and $b$, and recommended MIS-B whenever a stratified method is used.
 
+catR has no selector that gives the strata in stages. Its `aStratified` function
+assigns the items to strata of increasing discrimination, the last stratum taking
+the items left over, as groups for its content balancing, which spreads the test
+over all the strata from its first item. No parity test covers these
+selectors ({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`).
+
 ## Guarantees
 
 1. The strata, which `strata(item_bank)` returns, partition the bank and ascend
@@ -207,7 +213,7 @@ and $b$, and recommended MIS-B whenever a stratified method is used.
    raises `ValueError` naming both numbers, so a stopper that allows longer tests
    than `test_size` fails loudly rather than end sessions as if the bank were
    exhausted.
-7. It applies no exposure cap: the run's exposure rates do not change its choice.
+7. It applies no exposure cap: the exposure rates do not change its choice.
    The strata are its exposure control.
 
 ## References

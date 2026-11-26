@@ -80,12 +80,6 @@ selection.
 
 ## Behavior and Comparison
 
-`catR` departs from van der Linden's definition: its
-[`MEI.R`](https://github.com/cran/catR/blob/master/R/MEI.R) uses only the
-**candidate item's** information at each updated estimate
-{cite:p}`Magis12{p. 9, Table 1}`, observed information by default (p. 17). The two forms
-can rank items differently.
-
 With the default estimator (maximum likelihood with Dodd's heuristic), while the
 responses so far are all correct, the hypothetical correct branch is still an
 all-correct pattern, so Dodd's heuristic returns the same updated estimate for
@@ -93,6 +87,23 @@ every candidate; the same happens on the incorrect branch while all responses
 are incorrect. On that branch the look-ahead is a fixed jump rather than an
 estimate. Bayesian estimators and WLE give a genuine updated estimate on both
 branches from the first item.
+
+### Comparison with catR
+
+`catR` departs from van der Linden's definition: its
+[`MEI.R`](https://github.com/cran/catR/blob/master/R/MEI.R) uses only the
+**candidate item's** information at each updated estimate
+{cite:p}`Magis12{p. 9, Table 1}`, observed information by default (p. 17). The two forms
+can rank items differently. catsim keeps the whole-pattern measure of the
+definition it follows, and no `MEISelector` setting scores the candidate alone.
+
+The parity tests ({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`) run catR's
+MEI with `infoType = "Fisher"` and its Bayes modal estimator on $[-4, 4]$, which
+`MEISelector(estimator=MAPEstimator(bounds=(-4, 4)))` matches. Before the first
+response, where the administered test adds no information, catR's values and
+ranking are catsim's. After two responses the values differ, a departure the
+tests keep as an expected failure, although in that context the two rank the
+items alike. No whole test compares the two.
 
 ## Guarantees
 
@@ -110,7 +121,7 @@ branches from the first item.
 ```
 
 :::{seealso}
-Sister spec: {doc}`/api/techniques/selection/mlwi-selector`
+{doc}`/api/techniques/selection/mlwi-selector`, the likelihood-weighted information criterion
 :::
 
 ## API Reference
