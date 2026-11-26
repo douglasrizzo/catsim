@@ -54,11 +54,10 @@ result = simulate(engine, true_thetas=true_thetas, rng=3)
 
 {py:func}`~catsim.simulate` gives one test to each true ability, in the order of `true_thetas`. It
 never draws the abilities itself: draw them with a generator of your own, as above, so that the
-same population can be passed to every engine you compare. Before its test, each examinee draws an
-answer to every item of the bank, correct with the probability that the item's characteristic curve
-gives at the true ability, $P_i(\theta)$ ({py:func}`catsim.irt.icc`). The test then reads the
-answer to each item it gives, so on the same seed an examinee answers an item the same way
-whichever engine gives it, and whenever.
+same population can be passed to every engine you compare. Each examinee answers an item correctly
+with the probability that the item's characteristic curve gives at their true ability,
+$P_i(\theta)$ ({py:func}`catsim.irt.icc`), and on the same seed answers it the same way whichever
+engine gives it, and whenever.
 
 `rng` seeds every random draw of the run, so the same seed and the same true abilities give the
 same result; {doc}`reproducibility` explains how a study is seeded. `progress` takes a function that
@@ -92,9 +91,9 @@ overlap rate: None
 
 Each metric is a {py:class}`~catsim.metrics.Metric`, the value and its *Monte Carlo standard error*:
 how much the value would vary over reruns with other seeds. A difference between two designs that is
-small next to their errors cannot be told from noise. Under an exposure cap each session depends on
-the sessions before it, so the errors, which treat the sessions as independent, are approximations;
-replications give the exact spread. {py:mod}`catsim.metrics` gives the formulas.
+small next to their errors cannot be told from noise. Under an exposure cap the errors are
+approximations, and replications give the exact spread. {py:mod}`catsim.metrics` gives the
+formulas.
 
 | Method | What it measures |
 |---|---|
@@ -168,8 +167,8 @@ mean test length 27.8
 rmse needs the examinees' true abilities, and this result has none; pass true_thetas to simulate with the responses when they are known
 ```
 
-Each test excludes from its start the items whose answer is missing, so an examinee is given only
-items they answered, and one who runs out of them ends with `StopReason.NO_ITEMS`. With half the bank
+An examinee is given only the items they answered, and one who runs out of them ends with
+`StopReason.NO_ITEMS`. With half the bank
 to choose from, the tests take 27.8 items on average, against 25.1, to reach the same precision.
 Recorded examinees have no known abilities, so the metrics that compare estimates with true
 abilities raise, and so does `deciles()`. Passing `true_thetas` with `responses` gives them, as for a
@@ -229,8 +228,8 @@ every item (*common random numbers*, {doc}`reproducibility`), so much of the noi
 difference. The selection page compares the
 {doc}`exposure-control methods </api/techniques/selection/index>`.
 
-A cap is checked against the exposure rates of the examinees tested before the current one, so it
-applies from the second examinee on; {py:func}`~catsim.simulate` gives the rule.
+A cap counts the exposure of the examinees tested before the current one, so it applies from the
+second examinee on.
 
 ## Run on Several Processes
 

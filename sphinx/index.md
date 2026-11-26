@@ -21,8 +21,8 @@ it and reads its metrics, and {doc}`reproducibility` seeds a study so that it re
 
 ## Write a strategy
 
-Method authors add a method catsim lacks: {doc}`extending` lists what each strategy receives and
-returns.
+Method authors add a method of their own: {doc}`extending` writes one strategy of each kind and
+says what each must do.
 
 ## Embed catsim in an application
 

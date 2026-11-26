@@ -1,7 +1,7 @@
 # Reproducibility
 
 A simulation study is reproducible when running its code again gives the same numbers. This guide
-seeds one run, says what each examinee's random streams mean for a study, seeds a study of many
+seeds one run, says how the examinees of a run depend on each other, seeds a study of many
 replications and runs a study on several processes. {doc}`running-simulations` shows how to build
 and run the test itself.
 
@@ -57,12 +57,10 @@ input. To simulate a population, draw the abilities with a generator of your own
 you compare, so that every strategy meets the same examinees. Seeding the population apart from the
 run also lets a study hold the examinees fixed while it varies the run's seed, or the reverse.
 
-## Each Examinee Has Streams of Its Own
+## Each Examinee Draws on Its Own
 
-From the run's seed and an examinee's position in the run, each examinee gets two random streams of
-its own: one for its answers to every item of the bank, drawn before its test, and one for its
-test's draws. So an examinee's test depends on the seed and its position, and not on the tests of
-the examinees before it:
+An examinee's answers and test depend on the run's seed and the examinee's position in the run, not
+on the tests of the examinees before it:
 
 ```pycon
 >>> first.sessions[:4] == simulate(engine, true_thetas=true_thetas[:4], rng=42).sessions
@@ -71,9 +69,9 @@ True
 False
 ```
 
-The first four examinees take the same tests in a run of their own. The streams follow positions,
+The first four examinees take the same tests in a run of their own. What counts is the position,
 though: in a run without the first four, every later examinee has another position, and so other
-streams. Reordering, adding or removing examinees changes the tests of those after them, so keep the
+draws. Reordering, adding or removing examinees changes the tests of those after them, so keep the
 population array identical to compare one examinee across runs.
 
 Two engines run on the same seed and examinees give every examinee the same answer to every item,
@@ -176,12 +174,11 @@ r_max=1.0: parts change the tests: False, workers change them: False, highest ex
 r_max=0.2: parts change the tests: True, workers change them: False, highest exposure rate 0.20
 ```
 
-Each worker receives the engine and imports every class and function it uses by its module and
-name. The built-in strategies run on workers from anywhere, notebooks included. A strategy class
-defined in a notebook or in the script being run, a lambda, such as a custom prior, and a function
-defined inside another function cannot be imported, so `simulate` raises before any part runs,
-naming what to move: define it in a `.py` module beside the notebook or script, and import it from
-there ({doc}`extending`). For the same reason, a script read from standard input, such as
+The built-in strategies run on workers from anywhere, notebooks included. A custom strategy class, a
+lambda such as a custom prior, or a function defined inside another function must come from a `.py`
+module that the notebook or script imports: one defined in the notebook or script itself cannot
+reach the workers, and `simulate` raises before any part runs, naming what to move
+({doc}`extending`). For the same reason, a script read from standard input, such as
 `python - <<EOF`, cannot run on workers.
 
 A result's `duration` is wall-clock time, which depends on `workers` and on the machine; its tests

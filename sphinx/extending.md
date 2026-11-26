@@ -61,11 +61,10 @@ This initializer also keeps the three rules that every strategy keeps:
   the item bank, nothing else: one strategy object serves every session of a run, and an
   application may interleave the sessions of many examinees on one engine. Whatever a strategy needs
   about the session, it computes at each call.
-- **It pickles,** so that `simulate(..., workers=4)` can send it to other processes. Those processes
-  import each strategy's class by its module and name, so define the class in a module, not in a
-  notebook or in the script being run, and keep its attributes picklable: no lambdas and no
-  functions defined inside other functions. Otherwise `simulate` raises before it runs anything, and
-  names what to move. With one worker, the default, any strategy runs.
+- **It can run on workers,** so that `simulate(..., workers=4)` can send it to other processes:
+  define the class in a module, not in a notebook or in the script being run, and give it no lambdas
+  or functions defined inside other functions as attributes. Otherwise `simulate` raises before it
+  runs anything, and names what to move. With one worker, the default, any strategy runs.
 
 {doc}`/adr/0007-strategy-contracts` explains why strategies are shaped this way.
 

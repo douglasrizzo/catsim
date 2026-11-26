@@ -131,9 +131,8 @@ The standard error reached its target before the test reached 25 items.
 ## What catsim Checks
 
 The application passes catsim its own data at every call: a session it stored, an item, a
-response, exposure rates. catsim checks each input where it enters, when a `Session` is built and
-when `start`, `select` or `answer` is called, for everything it can check without recomputing
-anything ({doc}`/adr/0009-checking-explicit-inputs`):
+response, exposure rates. catsim checks them when a `Session` is built and when `start`, `select`
+or `answer` is called:
 
 - item indices are integers, in the bank, with no repeats, and no item is both administered and
   excluded;
@@ -161,14 +160,14 @@ item is 51 ('item_051'); the session has already been given that item
 response is 'yes'; responses must be bools or the integers 0 and 1
 ```
 
-catsim cannot check what only recomputation would reveal: whether a stored estimate is the one the
-responses give, or whether the exposure rates are the application's real ones. Those are the
-application's.
+catsim does not check whether a stored estimate is the one the responses give, or whether the
+exposure rates are the application's real ones: those are the application's
+({doc}`/adr/0009-checking-explicit-inputs` says why).
 
 ## What the Application Owns
 
 **Sessions and their storage.** A {py:class}`~catsim.Session` is plain data: its items, its
-responses, the estimate of every state from the initial one, its excluded items and its stop reason.
+responses, every estimate from the initial one, its excluded items and its stop reason.
 It holds no identifier, no examinee and no engine, which the application keeps beside it. How and
 where to store sessions is the application's; catsim defines no format for them. A session built
 from stored fields with `Session(...)` is checked like any other.
