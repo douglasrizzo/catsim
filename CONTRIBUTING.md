@@ -2,7 +2,7 @@
 
 **catsim** is built in an object-oriented paradigm (or as object-oriented as Python allows) so it is rather simple to extend it. You can write new [initializers](https://douglasrizzo.com.br/catsim/api/techniques/initialization/index.html), [selectors](https://douglasrizzo.com.br/catsim/api/techniques/selection/index.html), [estimators](https://douglasrizzo.com.br/catsim/api/techniques/estimation/index.html) or [stopping criteria](https://douglasrizzo.com.br/catsim/api/techniques/stopping/index.html) by extending the base classes that are present in each of the corresponding modules. You can also write new [IRT-related functions](https://douglasrizzo.com.br/catsim/api/irt.html), as long as you have the right academic papers to prove they are relevant.
 
-If you think the [CAT engine](https://douglasrizzo.com.br/catsim/api/engine.html) or the [simulation runner](https://douglasrizzo.com.br/catsim/api/simulation.html) could be doing something it is currently not doing, feel free to study it and make a contribution.
+If you think the [CAT engine](https://douglasrizzo.com.br/catsim/api/engine.html) or [`simulate`](https://douglasrizzo.com.br/catsim/api/simulation.html) could be doing something it is not doing, feel free to study it and make a contribution.
 
 If you know a better way to present all the data collected during simulation, feel free to contribute with your own [plots](https://douglasrizzo.com.br/catsim/api/plot.html).
 
@@ -66,7 +66,7 @@ Each implemented technique has a page under `sphinx/api/techniques/` with its de
 
 ## Parity with catR
 
-The R package [catR](https://cran.r-project.org/package=catR) is catsim's reference implementation ([ADR-0020](sphinx/adr/0020-catr-as-the-reference.md)). `tests/test_parity_catr.py` compares catsim with catR's outputs on fixed cases, at ADR-0020's three levels:
+The R package [catR](https://cran.r-project.org/package=catR) is catsim's reference implementation ([ADR-0020](https://douglasrizzo.com.br/catsim/adr/0020-catr-as-the-reference.html)). `tests/test_parity_catr.py` compares catsim with catR's outputs on fixed cases, at ADR-0020's three levels:
 
 1. **Single computations** (`irt.R`, `estimation.R`, `selection.R`, `stopping.R`): response probabilities and information, each estimator on fixed response patterns, the selection rules and the randomesque and 5-4-3-2-1 bins in fixed contexts, the progressive and proportional schedules, and the stopping rules.
 1. **Whole tests on recorded responses** (`whole_tests.R`): catR's `randomCAT` with `responses`, for MFI, bOpt and MLWI selection with each estimator and the precision and length rules, against `catsim.simulate` with the same response patterns. The items must be the same, in the same order, and every estimate and standard error must agree as at level 1, except for the departures in `_DEPARTURES` and the infinite standard errors catR reports for ML while the response pattern is constant.
