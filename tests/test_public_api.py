@@ -26,6 +26,8 @@ PACKAGES = [
 # Top-level modules that are import paths of their own; catsim's other modules are internal.
 PUBLIC_MODULES = ["catsim.irt", "catsim.metrics", "catsim.plot", "catsim.typing"]
 # Names that ADR-0023's list retired, each for the one its concept keeps; item_id is one of its rejected alternatives.
+# The rescoping retired the last four: a step result's selected_item_id (item), the metrics' actual and predicted
+# (true_thetas and thetas) and the engine's state (session).
 RETIRED_NAMES = {
   "administered_item_ids",
   "est_theta",
@@ -37,6 +39,10 @@ RETIRED_NAMES = {
   "response_vectors",
   "seed",
   "updated_theta",
+  "selected_item_id",
+  "actual",
+  "predicted",
+  "state",
 }
 
 
@@ -52,7 +58,24 @@ RETIRED_EXPORTS = {
   "SimulatedResponseProvider",
   "SimulationRunner",
 }
-RETIRED_ENGINE_METHODS = {"apply_response", "run_session", "select_next", "should_stop", "start_session", "step"}
+# The members that the classes catsim keeps lost: the engine's methods that changed a session in place (ADR-0006); the
+# session's identifier and true ability, which the caller keeps beside it (ADR-0006), and its flags and counts, which
+# stop_reason and its fields already give (ADR-0010); and the result's lists and aggregates of the sessions, which its
+# tables and its metric methods replace (ADR-0016).
+RETIRED_MEMBERS = {
+  catsim.CatEngine: {"apply_response", "run_session", "select_next", "should_stop", "start_session", "step"},
+  catsim.Session: {"administered_count", "is_stopped", "session_id", "snapshot", "true_theta"},
+  catsim.SimulationResult: {
+    "administered_items",
+    "evaluations",
+    "final_ses",
+    "final_thetas",
+    "mean_evaluations",
+    "responses",
+    "test_lengths",
+    "theta_histories",
+  },
+}
 
 
 def _internal_modules(package: ModuleType) -> Iterator[ModuleType]:
@@ -233,9 +256,10 @@ def test_no_public_attribute_uses_a_retired_name() -> None:
 def test_the_mutable_runtime_is_gone() -> None:
   """A retired session type, run context, exposure tracker, runner or response provider, or an engine method that
   changed a session in place, left reachable gives a second way to run a test, with the state that outlived a run
-  (ADR-0006) or the responses drawn as items are given (ADR-0014).
+  (ADR-0006) or the responses drawn as items are given (ADR-0014). A session that held its true ability again, or a
+  result's final_thetas beside its examinees table, is a second record of one fact.
   """
   exported = RETIRED_EXPORTS & {name for name in dir(catsim) if not name.startswith("_")}
-  methods = {name for name in RETIRED_ENGINE_METHODS if hasattr(catsim.CatEngine, name)}
+  members = {f"{cls.__name__}.{name}" for cls, names in RETIRED_MEMBERS.items() for name in names if hasattr(cls, name)}
 
-  assert (exported, methods) == (set(), set())
+  assert (exported, members) == (set(), set())
