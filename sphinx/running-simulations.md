@@ -12,18 +12,23 @@ A test is an item bank and four strategies: an *initializer* gives the first abi
 *selector* chooses each item, an *estimator* updates the estimate after each response and a
 *stopper* ends the test. A {py:class}`~catsim.CatEngine` holds them.
 
-```python
-import numpy
+```{eval-rst}
+.. plot::
+    :context: reset
+    :nofigs:
+    :include-source: true
 
-from catsim import CatEngine, ItemBank, simulate
-from catsim.estimation import EAPEstimator
-from catsim.initialization import FixedPointInitializer
-from catsim.selection import MaxInfoSelector
-from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
+    import numpy
 
-item_bank = ItemBank.generate(300, "3PL", rng=1)
-stopper = StopRule(StandardErrorStopper(0.35), MaxLengthStopper(30))
-engine = CatEngine(item_bank, FixedPointInitializer(0.0), MaxInfoSelector(), EAPEstimator(), stopper)
+    from catsim import CatEngine, ItemBank, simulate
+    from catsim.estimation import EAPEstimator
+    from catsim.initialization import FixedPointInitializer
+    from catsim.selection import MaxInfoSelector
+    from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
+
+    item_bank = ItemBank.generate(300, "3PL", rng=1)
+    stopper = StopRule(StandardErrorStopper(0.35), MaxLengthStopper(30))
+    engine = CatEngine(item_bank, FixedPointInitializer(0.0), MaxInfoSelector(), EAPEstimator(), stopper)
 ```
 
 {py:meth}`ItemBank.generate <catsim.ItemBank.generate>` draws 300 items of the three-parameter
@@ -47,9 +52,14 @@ otherwise give them every item in the bank.
 
 ## Run It on a Population
 
-```python
-true_thetas = numpy.random.default_rng(2).normal(0, 1, 500)
-result = simulate(engine, true_thetas=true_thetas, rng=3)
+```{eval-rst}
+.. plot::
+    :context:
+    :nofigs:
+    :include-source: true
+
+    true_thetas = numpy.random.default_rng(2).normal(0, 1, 500)
+    result = simulate(engine, true_thetas=true_thetas, rng=3)
 ```
 
 {py:func}`~catsim.simulate` gives one test to each true ability, in the order of `true_thetas`. It
@@ -243,14 +253,18 @@ strategies must be defined in a module; {doc}`reproducibility` shows both.
 
 The plots need matplotlib, which the plot extra installs: `pip install 'catsim[plot]'`.
 
-```python
-import matplotlib.pyplot as plt
+```{eval-rst}
+.. plot::
+    :context: close-figs
+    :include-source: true
 
-from catsim import plot
+    import matplotlib.pyplot as plt
 
-plot.session_progress(result.sessions[0], item_bank, true_theta=true_thetas[0])
-plot.item_exposure(result.exposure_rates().value, item_bank, par="b")
-plt.show()
+    from catsim import plot
+
+    plot.session_progress(result.sessions[0], item_bank, true_theta=true_thetas[0])
+    plot.item_exposure(result.exposure_rates().value, item_bank, par="b")
+    plt.show()
 ```
 
 The first figure follows one examinee: the ability estimate after each item, with a band of one
@@ -259,3 +273,10 @@ narrows as items are given, and the test ends when the standard error reaches th
 second figure draws each item's exposure rate at its difficulty. In this run, the items given most
 are among the most discriminating, with difficulties near the middle of the population, and more
 than half of the bank is never given. {py:mod}`catsim.plot` lists the other plots.
+
+The figures in this documentation use its own style, {download}`figures.mplstyle <_static/figures.mplstyle>`:
+STIX text and math, ticks inside a closed box and matplotlib's Petroff 10 colours. catsim's plots
+take whichever matplotlib style is in effect, so `plt.style.use("figures.mplstyle")`, with the path
+to the saved file, draws yours the same way. `plt.style.context("figures.mplstyle")` applies it to
+the figures made inside a `with` block, and `plt.style.use("default")` returns to matplotlib's own
+style.
