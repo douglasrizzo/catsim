@@ -14,8 +14,7 @@ validated that way.
 Multidimensional IRT (MIRT) would replace the ability with a vector and each discrimination with
 one per dimension, which reaches `catsim.irt`, the item bank, the session and every strategy.
 Polytomous items, such as partial-credit or graded-response items, would replace the Boolean
-responses and the item parameters. catR covers the polytomous models GRM, MGRM, PCM, GPCM, RSM and
-NRM beside the dichotomous ones; mirtCAT covers MIRT.
+responses and the item parameters.
 
 ## Decision
 
@@ -33,7 +32,7 @@ for models catsim does not implement.
   for other shapes.
 - Techniques within the scope, such as the classification stoppers and the exposure controls, can
   be added without breaking the contracts.
-- Researchers who need polytomous items or MIRT use catR or mirtCAT.
+- Researchers who need polytomous items or MIRT use other software.
 
 ## Alternatives Considered
 

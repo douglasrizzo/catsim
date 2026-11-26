@@ -16,7 +16,7 @@ since that prior was a local function.
 Exposure feedback makes a session depend on the sessions before it (ADR-0012), so a run with it
 cannot give its sequential result in parallel. Parts with their own feedback were checked: with
 `r_max = 0.2` and 8 parts, runs on 4 and on 2 processes were identical, and the cap held, with a
-largest exposure rate of 0.200, as in the sequential run. catR runs sequentially.
+largest exposure rate of 0.200, as in the sequential run.
 
 ## Decision
 

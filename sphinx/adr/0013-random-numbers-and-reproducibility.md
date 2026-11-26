@@ -13,9 +13,8 @@ answers depended on how many numbers examinees 0 to 6 had drawn, two engines com
 gave the same examinee different answers to the same item, and a run could not be split across
 processes without changing its results.
 
-catR seeds `randomCAT` and `simulateRespondents` through `genSeed` and draws each response as its
-item is given. mirtCAT draws each examinee's whole response pattern first, so designs compared on the
-same patterns see the same answers: common random numbers, which reduce the Monte Carlo error of a
+When each examinee's whole response pattern is drawn before the test, designs compared on the same
+patterns see the same answers: common random numbers, which reduce the Monte Carlo error of a
 comparison.
 
 ## Decision

@@ -20,8 +20,7 @@ items in length, and item indices out of range. Fed eleven bad inputs, it accept
 - a standard error of -1;
 - exposure counts passed as rates, which turned the exposure cap off.
 
-Exposure rates of the wrong length failed later, deep in NumPy. catR's `nextItem` checks only the
-names of its criterion and model, and `thetaEst` silently drops missing responses.
+Exposure rates of the wrong length failed later, deep in NumPy.
 
 ## Decision
 
@@ -54,7 +53,7 @@ names of its criterion and model, and `thetaEst` silently drops missing response
 
 ## Alternatives Considered
 
-- Checking nothing, as catR: the five silent cases above stay silent.
+- Checking nothing: the five silent cases above stay silent.
 - Checking consistency by recomputing the estimate from the responses: it doubles the cost of a step,
   and an application may pass an estimate from another estimator on purpose.
 - Converting what can be converted, as `bool("0")`: `bool` of any non-empty string is `True`.

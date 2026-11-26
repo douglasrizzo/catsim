@@ -15,8 +15,7 @@ share the tracker between sessions running side by side. Each of those was a way
 outlive a run and silently change a result.
 
 The strategies already computed each step from an immutable `StepContext` that the engine built
-from the session. catR's `nextItem`, `thetaEst` and `checkStopRule` are functions of explicit
-arguments (the bank, the items given, the responses, the estimate), and Concerto keeps the session.
+from the session.
 
 ## Decision
 
@@ -57,7 +56,7 @@ arguments (the bank, the items given, the responses, the estimate), and Concerto
 
 - A mutable session that the engine changes: its state outlives each call, and every result built
   from it needs a copy to stay right.
-- Free functions taking the bank and every strategy at each call, as catR's: every call repeats the
+- Free functions taking the bank and every strategy at each call: every call repeats the
   configuration that the engine holds once.
 - A mutable convenience wrapper beside the immutable session: a second way to run a test, which
   brings back the state this decision removes.

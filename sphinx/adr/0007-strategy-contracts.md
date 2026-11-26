@@ -7,14 +7,13 @@ Accepted 2026-11-25
 ## Context
 
 catsim's users include method authors who write their own selectors, estimators and stoppers, and
-who need to do it without changing catsim. catR has fixed rule names (`criterion = "MFI"`,
-`method = "BM"`), so a new criterion needs a change to catR itself.
+who need to do it without changing catsim.
 
 The strategy interfaces once took the session's inputs as explicit parameters, named and ordered
 differently in each contract, so every added input broke every custom strategy. The estimator
 returned a bare `float`, so the precision stoppers computed the Fisher standard error whatever the
 estimator; for EAP that is not its own error, the posterior standard deviation, and the difference
-changes stopping decisions in short tests. catR uses each estimator's own standard error. Some
+changes stopping decisions in short tests. Some
 strategies kept per-session state on the object, which the next session on the same engine
 overwrote.
 
@@ -67,7 +66,7 @@ class BaseInitializer(ABC):
 
 ## Alternatives Considered
 
-- Rule names resolved inside catsim, as catR's: a new technique needs a change to catsim.
+- Rule names resolved inside catsim: a new technique needs a change to catsim.
 - Explicit per-strategy parameters: every added input changes every signature.
 - A registry of strategies by name: configuration by strings, with a second way to name a class.
 - An optional `standard_error(context)` method: EAP would compute its posterior twice per step.

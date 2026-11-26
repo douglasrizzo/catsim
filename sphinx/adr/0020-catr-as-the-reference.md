@@ -1,4 +1,4 @@
-# ADR-0020: catR Is the Reference Implementation, Checked by Parity Tests
+# ADR-0020: Parity Tests Check catsim Against catR
 
 ## Status
 
@@ -6,19 +6,16 @@ Accepted 2026-11-25
 
 ## Context
 
-catsim implements many techniques that catR implements: the logistic models, the ML, Bayes modal,
-EAP and weighted likelihood estimators, the MFI, bOpt, MLWI, MEI, KL, progressive, proportional and
-randomesque selection rules, and its length, precision and classification stopping rules. The
-technique pages and several decisions claimed agreement with catR, but no test compared the two, so
-a claim could drift from the code unnoticed. catsim also departs from catR on purpose in places,
-such as the default acceleration of the progressive schedule (ADR-0019) and the default EAP grid,
-121 nodes over $[-6, 6]$ against catR's 33 over $[-4, 4]$. Neither catR nor mirtCAT compares itself
-with another package.
+An independent implementation of the same technique is a strong check that catsim computes it
+correctly. catR, a published and widely used R package, implements many of catsim's techniques. The
+technique pages claimed agreement with it, but no test compared the two, so a claim could drift from
+the code unnoticed. catsim also departs from catR on purpose in places, such as the default
+acceleration of the progressive schedule (ADR-0019).
 
 ## Decision
 
-- catR is catsim's reference implementation. Every catsim technique with a catR counterpart agrees
-  with it, as tested by parity tests in three parts:
+- catR is catsim's reference implementation: every catsim technique with a catR counterpart is
+  checked against it by parity tests in three parts:
   - R scripts in the repository run catR on fixed cases and write their outputs, with the R and catR
     versions, to files in the repository;
   - a pytest module compares catsim's outputs with those files, in every test run, with no R
@@ -49,7 +46,6 @@ with another package.
 - A new technique with a catR counterpart comes with its parity cases.
 - The parity tests follow one catR version; moving to another is a deliberate change of the fixed
   outputs.
-- mirtCAT is consulted when a technique has no catR counterpart, not tested against.
 
 ## Alternatives Considered
 
@@ -57,5 +53,4 @@ with another package.
 - Comparisons made by hand or by an agent when a page is written: nothing durable, so claims drift.
 - catR's defaults everywhere: catsim's choices, such as its wider ability scale (ADR-0018), have
   reasons of their own.
-- mirtCAT as a second reference: two references can disagree, and mirtCAT's estimation comes from
-  mirt.
+- A second reference package: two references can disagree.

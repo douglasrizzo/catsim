@@ -16,7 +16,7 @@ Other savings depend on a session's history. The EAP posterior, about 40% of a s
 simulation, is rebuilt from every answered item at each step, where adding the newest item's
 log-likelihood to the previous one would do. The legacy design reached such state through a
 reference from each strategy back to the simulator that called it, so a strategy's result depended
-on who called it. catR caches nothing: every call recomputes from its arguments.
+on who called it.
 
 ## Decision
 
@@ -49,7 +49,7 @@ A computation never looks for a cache in the object that called it.
 
 ## Alternatives Considered
 
-- No caches at all, as catR: derived data such as strata would be rebuilt at every step.
+- No caches at all: derived data such as strata would be rebuilt at every step.
 - Caches found by looking up the caller, the simulator or engine: the legacy backreference, which
   makes a strategy's result depend on who called it.
 - History caches kept on the strategy, keyed by session: per-session state on an object that serves

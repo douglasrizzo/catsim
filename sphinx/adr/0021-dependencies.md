@@ -11,7 +11,7 @@ simulation, which few runs show, and typing-extensions provided `override`, whic
 library has from Python 3.12. matplotlib was already an optional extra (ADR-0022). An application
 that embeds catsim's computations installs whatever catsim requires, and must reconcile each
 required package's version range with its own; the tests cover each range at both ends, with the
-newest versions and with the lowest ones allowed. catR depends on base R only.
+newest versions and with the lowest ones allowed.
 
 ## Decision
 

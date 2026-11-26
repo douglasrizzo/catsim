@@ -21,13 +21,12 @@ difficulties sit symmetrically around the ability estimate. Duplicates and repea
 tie bit for bit, so the choice among them is a real behaviour, not a rounding accident. A fixed
 order also hands all the exposure of a set of duplicates to one copy until it is administered.
 
-catR breaks every tie the same way: it keeps the items whose score equals the best score exactly
-and draws one of them with `sample()`. For randomesque bins, every item scoring at least the
-cutoff joins the pool.
+catR, the parity reference (ADR-0020), breaks every tie the same way: it keeps the items whose score
+equals the best score exactly and draws one of them at random.
 
 ## Decision
 
-Every selector that picks the best item by a score uses one rule, catR's: the candidate items whose
+Every selector that picks the best item by a score uses one rule: the candidate items whose
 score equals the best score exactly are tied, and one of them is drawn uniformly with the generator of
 the call. Randomesque and 5-4-3-2-1 bins hold every candidate tied with the bin's least
 informative item. `pick_best` and `best_pool`, exported from `catsim.selection`, implement the
@@ -39,12 +38,12 @@ When there is no tie, no random number is drawn. The generator is the call's, wh
 context carries (ADR-0007), so a selector called directly breaks ties the same way as under
 `CatEngine`.
 
-Ties are exact equality of each selector's own score, as in catR, so they depend on how the score
+Ties are exact equality of each selector's own score, so they depend on how the score
 rounds. Two items whose difficulties sit symmetrically around the estimate tie in information, but
 not always in distance: in floating point, |0.3 - 0.1| is 0.19999999999999998 and |-0.1 - 0.1| is
 0.2. `UrrySelector` and the stratified selectors, which score by distance, then pick the nearer
-item, as catR's `bOpt` does. On 1PL banks, `MaxInfoSelector` and the bins rank by information, as
-catR's `MFI` does, not by distance to the estimate. Information is flat near its peak, so items
+item. On 1PL banks, `MaxInfoSelector` and the bins rank by information, not by distance to the
+estimate. Information is flat near its peak, so items
 whose distances differ only by rounding tie there.
 
 `ClusterSelector` applies the rule twice: to its choice of cluster, among clusters whose scores tie
@@ -61,9 +60,8 @@ information on every bank, 1PL included, as `MaxInfoSelector` does.
 
 ## Alternatives Considered
 
-- The lowest index: deterministic, but it gives all of a set of duplicates' exposure to one copy
-  and departs from catR.
+- The lowest index: deterministic, but it gives all of a set of duplicates' exposure to one copy.
 - A tolerance, so that scores differing only by rounding tie: no tolerance suits every score's
-  scale, and catR uses exact equality, so results would not match it.
+  scale.
 - A setting to choose the tie-breaking rule: every selector and test would have to cover each
   rule, for no use the fixed rule does not serve.

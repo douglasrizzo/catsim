@@ -8,8 +8,7 @@ Accepted 2026-11-25
 
 An item bank could only be built from a NumPy matrix, so every study began by parsing its bank
 file by hand, and a generated bank could not be saved to repeat or share a study. Researchers asked
-to load a bank from a CSV file. catR has no reader: its users call `read.csv` and pass the matrix,
-whose row names become the item names, and save a bank with `write.csv`.
+to load a bank from a CSV file.
 
 ## Decision
 
