@@ -24,15 +24,14 @@ that syntax and breaks the `$$` math.
 
 ## Status
 
-The specs here were written together in April 2026. Their citations, cited locations, definitions
-and catR comparisons were revalidated against their sources in November 2026 (checklist steps 1-4
-and 6 below); each spec's status lines say when and against which sources. Their implementation
-sketches were then rewritten to the catsim 1.0 strategy contract and to the revalidated
-definitions (step 5), and the Sympson-Hetter sketch to the engine's exposure control. The
-sketches are illustrative and no test runs them; the specs with open questions show the option
-each spec assumes for now. Every sketch was last run on 2026-11-26: each was added at its proposed
-location to a copy of `src/catsim`, imported, and run on a small bank, on hand-built contexts and
-under `CatEngine` and `simulate`.
+The specs' citations, cited locations, definitions and catR comparisons were last revalidated
+against their sources in November 2026 (checklist steps 1-4 and 6 below); each spec's status lines
+say when and against which sources. Their implementation sketches follow the catsim 1.0 strategy
+contract and the revalidated definitions (step 5), and the Sympson-Hetter sketch is an exposure
+control of the engine. The sketches are illustrative and no test runs them; the specs with open
+questions show the option each spec assumes for now. Every sketch was last run on 2026-11-26: each
+was added at its proposed location to a copy of `src/catsim`, imported, and run on a small bank, on
+hand-built contexts and under `CatEngine` and `simulate`.
 
 ## Workflow
 
@@ -103,8 +102,7 @@ Check each spec against its sources before it is implemented or its references a
      `typing_extensions`, which catsim installs only below Python 3.12 (ADR-0021);
    - strategy objects hold configuration and caches derived from the item bank, never per-session
      state, because one engine serves many sessions: the SPRT and GLR stoppers classify with a pure
-     `classify(context)` instead of keeping `_last_classification`, and Owen's estimator replays
-     the responses instead of keeping `self._state`;
+     `classify(context)`, and Owen's estimator replays the responses at every call;
    - each stopper is a single criterion, combined with others by `StopRule`;
    - no `[:, :4]` slices of the item matrix;
    - the MPWI and MEPV per-node tables are cached by the selector, keyed by the item bank, as the
