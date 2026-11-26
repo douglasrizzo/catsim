@@ -40,9 +40,9 @@ and may not know software design; integrators know Python and may not know IRT.
 - The GitHub release notes are the only place for "what changed". Each release gets a hand-written
   summary (highlights, breaking changes, results that change for the same seed), followed by
   GitHub's generated list of pull requests. There is no CHANGELOG file and no migration page.
-- The 1.0 notice, in the README and on the landing page, tells 0.x users that the API changed and
-  points them to the 1.0.0 release notes, the guides and `catsim<1`. It is written with the 1.0.0
-  release notes and holds no details: those are in the release notes.
+- The 1.0 notice, in the README and on the landing page, is a warning: 0.x code needs changes and
+  seeded results differ. It points to `catsim<1` and the 1.0.0 release notes, and lists no changes:
+  those are in the release notes.
 
 ### Where a formula lives
 
@@ -330,10 +330,11 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
 
 ### The 1.0 notice (README and landing page)
 
-- **Job:** tell 0.x users that the API changed, and point them to the 1.0.0 release notes, the guides
-  and `catsim<1`.
+- **Job:** warn 0.x users that their code needs changes and their seeded results differ, and point
+  them to `catsim<1` and the 1.0.0 release notes. A warning box on the landing page, a blockquote in
+  the README.
 - **Audience and level:** 0.x users; introductory.
-- **Not here:** details (the release notes).
+- **Not here:** any list of changes, including the API's new shape (the release notes).
 - **Length:** two or three sentences.
 
 ## Terms and notation

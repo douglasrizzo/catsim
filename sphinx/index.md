@@ -5,18 +5,13 @@ chooses each examinee's next item from an item bank, estimates the examinee's ab
 response and decides when the test ends, and it runs simulation studies that compare the methods
 for each of these steps.
 
-:::{admonition} Coming from catsim 0.x?
-:class: note
+:::{admonition} catsim 1.0 breaks 0.x code
+:class: warning
 
-catsim 1.0 changes the API that 0.x code uses. Sessions are immutable values that the engine's
-`start`, `select` and `answer` steps return; `simulate` runs studies, in parts on several processes
-if asked, and its results give tables and metrics with Monte Carlo errors; several names and
-arguments change, tqdm is no longer installed, and seeded simulations of generated examinees give
-other numbers than 0.21 did. The
-[1.0.0 release notes](https://github.com/douglasrizzo/catsim/releases/tag/1.0.0) list every change
-and what to do, the {doc}`guides <getting-started>` teach the 1.0 API, and `pip install "catsim<1"`
-keeps 0.x code running, with its documentation at the
-[0.21.0 tag](https://github.com/douglasrizzo/catsim/tree/0.21.0).
+Code written for catsim 0.x needs changes to run on 1.0, and seeded simulations give different
+numbers. To keep using 0.x, install `catsim<1`, documented at the
+[0.21.0 tag](https://github.com/douglasrizzo/catsim/tree/0.21.0). The
+[1.0.0 release notes](https://github.com/douglasrizzo/catsim/releases/tag/1.0.0) list every change.
 :::
 
 ## Run a simulation study
