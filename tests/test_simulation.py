@@ -804,6 +804,19 @@ class TestResultValue:
         "proposal_counts holds float64 values; counts must be integers",
         id="rates-for-counts",
       ),
+      pytest.param(
+        {"item_bank": ItemBank.generate(5, rng=0).items},
+        TypeError,
+        "item_bank is a ndarray; it must be an ItemBank",
+        id="item-matrix-for-bank",
+      ),
+      pytest.param(
+        {"duration": math.nan},
+        ValueError,
+        "duration is nan; a run's wall-clock time is a finite, non-negative number of seconds",
+        id="nan-duration",
+      ),
+      pytest.param({"duration": "1.5"}, TypeError, "duration is '1.5'; it must be a number of seconds", id="text"),
       pytest.param({"parts": 0}, ValueError, "parts is 0; a run has at least one part", id="no-parts"),
       pytest.param({"parts": True}, TypeError, "parts is True; it must be an integer", id="boolean-parts"),
     ],
@@ -813,9 +826,10 @@ class TestResultValue:
   ) -> None:
     """Each inconsistent input raises, naming it, the position and value where there is one, and the rule.
 
-    Fails if a result is built from no session (every metric would average nothing), from a session still running,
-    with an item the bank cannot name, with true abilities of another run or NaN for unknown ones, with proposal counts
-    that cannot be its own, or with no part.
+    Fails if a result is built on an item matrix instead of a bank (an AttributeError later), with a duration that is
+    not a number of seconds, from no session (every metric would average nothing), from a session still running, with
+    an item the bank cannot name, with true abilities of another run or NaN for unknown ones, with proposal counts that
+    cannot be its own, or with no part.
     """
     arguments: dict[str, object] = {
       "item_bank": ItemBank.generate(5, rng=0),

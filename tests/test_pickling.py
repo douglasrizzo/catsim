@@ -1,5 +1,6 @@
-"""Tests that every built-in strategy, and an engine built from them, survives pickling (ADR-0015)."""
+"""Tests that every built-in strategy, an engine built from them, and a run's result survive pickling (ADR-0015)."""
 
+import copy
 import importlib
 import inspect
 import pickle
@@ -231,3 +232,37 @@ def test_engine_copy_runs_like_the_original() -> None:
   )
 
   assert _run(_round_trip(engine)) == _run(engine)
+
+
+@pytest.mark.parametrize("duplicate", [_round_trip, copy.deepcopy], ids=["pickle", "deepcopy"])
+def test_a_copied_result_is_as_immutable_as_the_original(duplicate) -> None:
+  """NumPy pickles an array without its read-only flag, so a restored result's arrays became writeable.
+
+  A pickled or deep-copied result must hold the same sessions, abilities and counts, still read-only. Fails if the
+  copy restores the fields as they are, without making its arrays read-only, which lets its exposure counts be
+  changed so that they disagree with its sessions.
+  """
+  result = simulate(
+    CatEngine(
+      ItemBank.generate(N_ITEMS, rng=3),
+      FixedPointInitializer(0.0),
+      MaxInfoSelector(),
+      EAPEstimator(),
+      MaxLengthStopper(4),
+    ),
+    true_thetas=[-1.0, 0.5],
+    rng=2,
+  )
+
+  copied = duplicate(result)
+
+  assert copied.sessions == result.sessions
+  assert copied.true_thetas is not None
+  assert (copied.true_thetas.tolist(), copied.exposure_counts.tolist(), copied.proposal_counts.tolist()) == (
+    [-1.0, 0.5],
+    result.exposure_counts.tolist(),
+    result.proposal_counts.tolist(),
+  )
+  assert (copied.duration, copied.parts) == (result.duration, 1)
+  arrays = (copied.true_thetas, copied.exposure_counts, copied.proposal_counts)
+  assert not any(array.flags.writeable for array in arrays)

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import enum
+import functools
 import itertools
 import math
 import secrets
@@ -13,7 +14,9 @@ from typing import TYPE_CHECKING, TypeVar, cast
 import numpy
 
 from . import metrics
+from .compat import override
 from .engine import CatEngine
+from .item_bank import ItemBank
 from .metrics import Metric
 from .session import Session
 
@@ -22,7 +25,6 @@ if TYPE_CHECKING:
 
   import numpy.typing as npt
 
-  from .item_bank import ItemBank
   from .typing import FloatArray, IntArray
 
 _Array = TypeVar("_Array", bound=numpy.ndarray)
@@ -716,13 +718,14 @@ class SimulationResult:
   Raises
   ------
   TypeError
-      If a session is not a :class:`~catsim.Session`, the proposal counts are not integers, or
-      ``parts`` is not an integer.
+      If ``item_bank`` is not an :class:`~catsim.ItemBank`, ``duration`` is not a number, a session
+      is not a :class:`~catsim.Session`, the proposal counts are not integers, or ``parts`` is not
+      an integer.
   ValueError
-      If there is no session, a session has not ended or administered an index the bank does not
-      have, ``true_thetas`` does not hold one finite number per session, the proposal counts are
-      not one per item between its administrations and the number of sessions, or ``parts`` is not
-      positive.
+      If ``duration`` is negative or not finite, there is no session, a session has not ended or
+      administered an index the bank does not have, ``true_thetas`` does not hold one finite number
+      per session, the proposal counts are not one per item between its administrations and the
+      number of sessions, or ``parts`` is not positive.
 
   Examples
   --------
@@ -767,6 +770,16 @@ class SimulationResult:
 
   def __post_init__(self) -> None:
     """Store the sessions as a tuple and the arrays read-only, after checking that they belong together."""
+    if not isinstance(self.item_bank, ItemBank):
+      msg = f"item_bank is a {type(self.item_bank).__name__}; it must be an ItemBank"
+      raise TypeError(msg)
+    # A bool is an int, and True passed as a duration is a flag passed by mistake.
+    if isinstance(self.duration, (bool, numpy.bool_)) or not isinstance(self.duration, (int, float, numpy.number)):
+      msg = f"duration is {self.duration!r}; it must be a number of seconds"
+      raise TypeError(msg)
+    if not (math.isfinite(self.duration) and self.duration >= 0):
+      msg = f"duration is {self.duration!r}; a run's wall-clock time is a finite, non-negative number of seconds"
+      raise ValueError(msg)
     sessions = _finished_sessions(self.sessions)
     n_items = self.item_bank.n_items
     _check_items(sessions, n_items)
@@ -782,6 +795,28 @@ class SimulationResult:
     if self.parts < 1:
       msg = f"parts is {self.parts}; a run has at least one part"
       raise ValueError(msg)
+
+  @override
+  def __reduce__(self) -> tuple[functools.partial[SimulationResult], tuple[()]]:
+    """Return how to rebuild the result through its constructor, which makes the copy's arrays read-only.
+
+    NumPy pickles an array without its read-only flag, so a pickled or deep-copied result is built
+    anew from its fields rather than restored from them.
+
+    Returns
+    -------
+    tuple
+        A call that builds an equal result, and its empty positional arguments.
+    """
+    return functools.partial(
+      SimulationResult,
+      item_bank=self.item_bank,
+      sessions=self.sessions,
+      proposal_counts=self.proposal_counts,
+      duration=self.duration,
+      true_thetas=self.true_thetas,
+      parts=self.parts,
+    ), ()
 
   def steps(self) -> dict[str, numpy.ndarray]:
     """Return the table of the run's steps: one row per session and administered item.
