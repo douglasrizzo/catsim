@@ -64,11 +64,12 @@ on this rule. See {doc}`/adr/0017-random-tie-breaking`.
 
 ## Exposure cap
 
-Most selectors take an exposure cap, `r_max`. They prefer the remaining items whose exposure rate
+Several selectors take an exposure cap, `r_max`. They prefer the remaining items whose exposure rate
 is below it, and when every remaining item is at or above it they choose among all the remaining
-items, so the cap never ends a test. The default of 1 applies no cap. The rates are those of the
-context: {py:func}`~catsim.simulate` gives each session catR's rates, each item's administrations
-over the sessions before it ({doc}`/adr/0012-exposure-rates`), and an application passes its own to
+items, so the cap never ends a test; the cluster selector applies its cap inside the cluster it
+chooses, as its page says. The default of 1 applies no cap. The rates are those of the context:
+{py:func}`~catsim.simulate` gives each session catR's rates, each item's administrations over the
+sessions before it ({doc}`/adr/0012-exposure-rates`), and an application passes its own to
 {py:meth}`CatEngine.select <catsim.CatEngine.select>`. A selector that takes no cap says so on its
 page.
 

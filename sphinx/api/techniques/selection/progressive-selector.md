@@ -96,7 +96,8 @@ find catR's weight and, given catR's random draws, its choice at every position
 of 5-item tests with $t = -0.5$, 0, 1 and 2.5 and of an 8-item test with
 $t = 1$; and a simulation of 1,000 examinees taking 10-item tests with $t = 1$
 gives catR's bias, RMSE, overlap rate and exposure rates within their Monte
-Carlo error. catsim departs from catR, and from Equation 12, in three places:
+Carlo error. catsim departs from catR in three places, the last two from
+Equation 12 as well:
 
 - The default is $t = 0$, the linear schedule, where catR's `nextItem` defaults
   to `AP = 1`; `acceleration=1` gives catR's schedule.

@@ -103,8 +103,8 @@ find catR's selection probabilities at every position of the tests the
 {doc}`progressive selector's page <progressive-selector>` lists, and a
 simulation of 1,000 examinees taking 10-item tests with $s = 1$ gives catR's
 bias, RMSE, overlap rate and exposure rates within their Monte Carlo error.
-catsim departs from catR, and from Equation 13, where the progressive selector
-does:
+catsim departs from catR where the progressive selector does, the last two
+times from Equation 13 as well:
 
 - The default is $s = 0$, where catR's `AP` defaults to 1; `acceleration=1`
   gives catR's exponent.
