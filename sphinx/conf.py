@@ -209,7 +209,7 @@ redirects = {
 # Hosts that answer automated clients with 403 Forbidden, although their pages open in a browser.
 # A DOI or handle link to one of them is still checked: doi.org or hdl.handle.net must redirect to
 # it, which a DOI or handle that does not exist does not, and linkcheck reports the redirect as
-# ignored instead of following it.
+# ignored instead of following it. A direct link to one of these hosts is not checked.
 _REFUSE_AUTOMATED_CLIENTS = [
   r"https?://journals\.sagepub\.com/",
   r"https?://(bpspsychub\.)?onlinelibrary\.wiley\.com/",
