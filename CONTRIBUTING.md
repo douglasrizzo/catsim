@@ -88,7 +88,7 @@ The script needs R and takes about two minutes. It installs the pinned catR into
 
 ## How to contribute
 
-**Contributing code:** create a fork on GitHub, make your changes on your own repo and then send a pull request to our **dev** branch so that we can check your contributions. Make sure your changes pass the quality gate above.
+**Contributing code:** create a fork on GitHub, make your changes on your own repo and then send a pull request to our **dev** branch so that we can check your contributions. Make sure your changes pass the quality gate above. Pull requests are squash-merged into **dev**, with the pull request's title and description as the commit message, so your branch's commits need no tidying.
 
 **Contributing ideas:** file an [issue on GitHub](https://github.com/douglasrizzo/catsim/issues), label it as an **enhancement** and describe as thoroughly as possible what could be done.
 

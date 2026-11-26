@@ -164,9 +164,19 @@ Hard rules:
 
 ## Commit And Git Hygiene
 
-- Prefer atomic commits that group one logical change each.
-- Do not mix architecture refactors, docs rewrites, workflow changes, and unrelated cleanup in one
-  commit unless the changes are inseparable.
+- Pull requests into `dev` are squash-merged: each becomes one commit on `dev`, with the pull
+  request's title and description as its message. The "Protect dev" ruleset allows no other merge
+  method, and like "Protect main" it requires a pull request and the CI checks, and blocks deleting
+  and force-pushing the branch, for administrators too. Merge a stack with `gh stack merge --squash`.
+- Commit once for the whole pull request, or at checkpoints that pass the gate (the pre-commit hook
+  runs on every commit), with a message that says what the commit changes. Do not split a change
+  into one commit per logical part, and do not amend, rebase, reorder or squash commits to tidy a
+  branch's history: the squash merge discards it.
+- Keep each pull request to one concern: architecture refactors, docs rewrites, workflow changes and
+  unrelated cleanup go in separate pull requests unless they are inseparable.
+- Merges from `dev` into `main` keep a merge commit, the only method the `main` ruleset allows. A
+  long-lived integration branch merged into `dev` needs the `dev` ruleset relaxed by the
+  maintainer for that merge.
 - Never commit local-only directories such as:
   - `.claude/`
   - `.pre-commit-cache/`
