@@ -101,6 +101,44 @@ With guessing, the likelihood can have several local maxima {cite:p}`Chang1996{p
 guessing or slipping parameters, the likelihood of a mixed pattern can also
 still be rising at a bound, and the estimate is then within `tol` of that bound.
 
+### Comparison with catR
+
+The estimator is catR's `thetaEst` with `method = "ML"`, and its standard error
+is that of catR's `semTheta`. With `bounds=(-4, 4)`, catR's default range, the
+parity tests ({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`) find the same
+estimates and standard errors on fixed mixed response patterns and in whole
+tests on recorded responses under MFI, bOpt and MLWI selection, except for the
+standard errors of constant patterns below. For all-correct and all-incorrect
+patterns, catR's `constantPatt = "var"`, with `bRange` set to the bank's range of
+difficulties, takes the same step as catsim. catsim departs from catR in four
+places, which the parity tests keep as expected failures:
+
+- **catR's default for constant patterns.** Without `constantPatt`, catR returns
+  the bound of its range, where the likelihood of an all-correct or all-incorrect
+  pattern is largest. catsim always takes Dodd's step, which moves the estimate
+  the way the responses point without jumping to the end of the scale
+  ({doc}`ADR-0018 </adr/0018-ability-scale-and-extreme-patterns>`).
+  `MAPEstimator(log_prior=uniform_log_prior(-4, 4), bounds=(-4, 4))` gives
+  catR's bound and its standard error.
+- **Dodd's step beyond the bank's hardest item.** After another correct answer,
+  catR moves an estimate that already lies above the hardest item halfway back
+  to that item's difficulty, from 2.5 to 2.2 in the parity case; catsim keeps it
+  where it is, so that the step never moves against the responses (ADR-0018).
+  Below the easiest item the same holds after incorrect answers.
+- **The standard error after Dodd's step.** catR's `semTheta` reports an
+  infinite standard error while the pattern is constant; catsim reports the
+  Fisher standard error at the stepped estimate, by the formula above. A
+  standard-error stopper can therefore end a test whose responses are still all
+  correct or all incorrect, which catR's infinite error does not allow; the
+  `min_items` of a {class}`~catsim.stopping.StopRule` holds it back for the first
+  items.
+- **A likelihood with a minimum inside the range.** With guessing, a mixed
+  pattern's likelihood can fall to a local minimum between the bounds. catR
+  solves the likelihood equation with `uniroot`, which can converge to that
+  minimum, while catsim maximizes the likelihood. In the two parity cases catR
+  returns minima at −0.53 and −0.01, and catsim a maximum at 1.79 and the upper
+  bound, 4, where the likelihood still rises.
+
 ## Guarantees
 
 1. For mixed response patterns, the estimate is a local maximum of the log-likelihood inside `bounds`, to within `tol`.

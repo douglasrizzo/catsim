@@ -114,6 +114,26 @@ than needed. Equation 14 roughly halves that gap. The sandwich formula of
 error under the 2PL (by 8% at 5 items), which would stop tests too early. From 20
 items on, the three agree within about 3%.
 
+### Comparison with catR
+
+The estimator is catR's `thetaEst` with `method = "WL"`, and its standard error
+is that of catR's `semTheta` with its default `sem.type = "classic"`. With
+`bounds=(-4, 4)`, catR's default range, the parity tests
+({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`) find the same estimates and
+standard errors on fixed response patterns, all-correct and all-incorrect ones
+included, and in whole tests on recorded responses under MFI, bOpt and MLWI
+selection, with one departure, which they keep as an expected failure.
+
+When the modified score has several roots in the range, catR's `uniroot` returns
+whichever root its search converges to, and catsim the one of largest weighted
+likelihood (see Computation); no setting makes catsim follow catR. Two items
+with guessing, one answered correctly and the other incorrectly, can give three
+roots, two maxima and a minimum: on one such pattern catR returns −0.59 and
+catsim 0.66. In a whole test with MLWI selection, the roots after the first two
+items are −0.44, 0.63 and 0.84, and catR returns 0.84 and catsim −0.44; the test's
+items are the same in both, and the estimates agree again from the third
+response on.
+
 ## Guarantees
 
 1. Every interior estimate is a root of the modified score equation, including for items with guessing.

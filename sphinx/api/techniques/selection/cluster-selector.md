@@ -125,6 +125,9 @@ and 50, the second with k = 25.
   `weighted_info` under both `r_control` values, with peak rates from 0.28 to
   0.90. `MaxInfoSelector(r_max=0.2)` left no item above it.
 
+catR has no cluster-based selector, so no parity test covers this one
+({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`).
+
 ## Guarantees
 
 1. It returns an item of the best-scoring cluster that still has a remaining item,

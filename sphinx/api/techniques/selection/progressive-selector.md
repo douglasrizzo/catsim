@@ -56,23 +56,6 @@ to $k$, and Equations 12 and 13 both use the exponent $s$; the text under them,
 which names $t$ and $s$ as the two acceleration parameters and gives a weight of
 1 at the last item, puts $K$ in the denominator and $t$ in Equation 12.
 
-### Computation
-
-`catR` computes the schedule that way in
-[`nextItem.R`](https://github.com/cran/catR/blob/master/R/nextItem.R), with its
-argument `AP` as $t$ and `thr` as $N$ when `rule = "length"`. catsim departs
-from both in three places:
-
-- The default is $t = 0$, the linear schedule; `catR`'s `nextItem` defaults to
-  `AP = 1`.
-- Past position $N$, which a session reaches when its stopper allows more items
-  than planned, the weight stays 1. In `catR` the sums keep growing, and the
-  weight passes 1 and gives the random component a negative coefficient.
-- With $N = 1$ the only position is the last, and the weight is 1. Equation 12
-  and `catR` give 0 at the first position whatever $N$ is.
-
-`catR`'s other schedule, for its precision stopping rule, is not implemented.
-
 ## Parameters
 
 ```{eval-rst}
@@ -102,6 +85,33 @@ at the last item {cite:p}`Barrada2008{p. 496, Equation 7}`; Barrada et al. did
 not test it separately, since it differs little from Equation 12 with $t = 0$
 (p. 500).
 
+### Comparison with catR
+
+`catR` computes the schedule as above in
+[`nextItem.R`](https://github.com/cran/catR/blob/master/R/nextItem.R), with its
+argument `AP` as $t$ and `thr` as $N$ when `rule = "length"`
+({doc}`ADR-0019 </adr/0019-published-progressive-schedule>`). Within the planned
+length, the parity tests ({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`)
+find catR's weight and, given catR's random draws, its choice at every position
+of 5-item tests with $t = -0.5$, 0, 1 and 2.5 and of an 8-item test with
+$t = 1$; and a simulation of 1,000 examinees taking 10-item tests with $t = 1$
+gives catR's bias, RMSE, overlap rate and exposure rates within their Monte
+Carlo error. catsim departs from catR in three places, the last two from
+Equation 12 as well:
+
+- The default is $t = 0$, the linear schedule, where catR's `nextItem` defaults
+  to `AP = 1`; `acceleration=1` gives catR's schedule.
+- Past position $N$, which a session reaches when its stopper allows more items
+  than planned, the weight stays 1, so the selector keeps choosing by
+  information. In catR the sums keep growing, and the weight passes 1, which
+  gives the random component a negative coefficient.
+- With $N = 1$ the only position is the last, and the weight is 1. Equation 12
+  and catR give 0 at the first position whatever $N$ is, which makes a one-item
+  test random.
+
+The parity tests keep the last two as expected failures. catR's other schedule,
+for its precision stopping rule, has no catsim counterpart.
+
 ## Guarantees
 
 1. It never returns an item that was already administered or excluded.
@@ -120,7 +130,7 @@ not test it separately, since it differs little from Equation 12 with $t = 0$
 ```
 
 :::{seealso}
-Companion spec: {doc}`/api/techniques/selection/proportional-selector`
+{doc}`/api/techniques/selection/proportional-selector`, which follows the same schedule
 :::
 
 ## API Reference

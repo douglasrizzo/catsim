@@ -74,6 +74,21 @@ In Veerkamp and Berger's simulations MLWI did better than maximum information at
 the ML estimate (pp. 17–18). On long tests, where the likelihood is sharply
 peaked, its choices approach maximum-information selection near the ML estimate.
 
+### Comparison with catR
+
+The selector is catR's `nextItem` with `criterion = "MLWI"`, whose default grid,
+33 nodes on $[-4, 4]$, is `MLWISelector(n_nodes=33, bounds=(-4, 4))`. catR
+integrates by the trapezoid rule, which halves the weights of the two end nodes,
+where catsim weights every node equally, as Veerkamp and Berger's sum does; no
+`MLWISelector` setting gives trapezoid weights. Before the first response, where
+the likelihood is 1 at the end nodes, the scores of the two then differ by up to
+2%, a departure the parity tests ({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`)
+keep as an expected failure. Summed with equal weights, catR's integrand is in
+proportion to catsim's scores, and the tests find catR's ranking of every
+remaining item in four contexts and catR's items in whole tests on recorded
+responses with the maximum likelihood, Bayes modal, EAP and weighted likelihood
+estimators.
+
 ## Guarantees
 
 1. Before any response, it selects the item with the most information integrated
@@ -90,7 +105,7 @@ peaked, its choices approach maximum-information selection near the ML estimate.
 ```
 
 :::{seealso}
-Sister spec: {doc}`/api/techniques/selection/mei-selector`
+{doc}`/api/techniques/selection/mei-selector`, which looks one response ahead
 :::
 
 ## API Reference

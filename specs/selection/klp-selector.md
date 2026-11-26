@@ -2,7 +2,7 @@
 **Module:** `catsim.selection.kl.KLPSelector` (planned)
 **Reference:** Chang and Ying (1996)
 **Last validated:** 2026-11-23, against Chang & Ying (1996); Magis & Barrada (2017); catR 3.17 (`KL.R`, `nextItem.R`).
-**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in) on 2026-11-24.
+**Implementation guidance:** written against the 1.0 strategy contract (`StepContext` in) on 2026-11-26.
 
 # Posterior Kullback-Leibler Selector
 
@@ -121,7 +121,7 @@ Magis, D., & Barrada, J. R. (2017). Computerized adaptive testing with R: Recent
 
 :::{note}
 This section is for contributors and agents implementing this technique.
-It is removed when the spec is promoted to "Implemented" status.
+It is removed when the spec is promoted to a technique page.
 :::
 
 **Proposed location:** `src/catsim/selection/kl.py`, next to `KLSelector`.
@@ -134,6 +134,7 @@ It is removed when the spec is promoted to "Implemented" status.
 import numpy
 
 from .. import irt
+from ..compat import override
 from ..context import StepContext
 from ..estimation import LogPrior, QuadratureGrid, normal_log_prior, posterior
 from ..typing import FloatArray
@@ -184,6 +185,7 @@ class KLPSelector(BaseSelector):
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
     self._r_max = check_r_max(r_max)
 
+  @override
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument, with None for a default."""
     return (
@@ -191,6 +193,7 @@ class KLPSelector(BaseSelector):
       f"r_max={self._r_max!r})"
     )
 
+  @override
   def select(self, context: StepContext) -> int:
     """Return the available item with the largest posterior-weighted KL divergence from the current estimate.
 
@@ -248,3 +251,6 @@ class KLPSelector(BaseSelector):
   for it.
 - Contract 5: a cap that leaves some candidates, and one that leaves none, falling back to all
   remaining items.
+- Parity with catR (ADR-0020): add `criterion = "KLP"` cases to `tests/parity/catr/selection.R`,
+  in the contexts the KL cases use, and compare the rankings and catR's `KL(type = "KLP")` values
+  on a grid with trapezoid weights, up to the posterior's normalizing constant.

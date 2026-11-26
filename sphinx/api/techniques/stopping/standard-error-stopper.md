@@ -74,6 +74,18 @@ going until the bank runs out, so the stopper is usually combined with a
 {class}`~catsim.stopping.MaxLengthStopper` cap, and often with a minimum length,
 in a {class}`~catsim.stopping.StopRule` (see {ref}`combining-stopping-rules`).
 
+### Comparison with catR
+
+The stopper is catR's `precision` rule. The parity tests
+({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`) find catR's decisions with
+the standard error just above, at and just below the threshold and before any
+response, alone and with a length rule, and catR's test lengths in whole tests
+on recorded responses with each estimator. They find no departure in the
+stopper; the standard error it judges is the estimator's, and the
+{doc}`maximum likelihood estimator's page </api/techniques/estimation/numerical-search-estimator>`
+states how its error after all-correct or all-incorrect responses departs from
+catR's.
+
 ## Guarantees
 
 1. The stopper stops the test exactly when the standard error the estimator reported is at most `max_se`.

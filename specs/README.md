@@ -29,8 +29,10 @@ and catR comparisons were revalidated against their sources in November 2026 (ch
 and 6 below); each spec's status lines say when and against which sources. Their implementation
 sketches were then rewritten to the catsim 1.0 strategy contract and to the revalidated
 definitions (step 5), and the Sympson-Hetter sketch to the engine's exposure control. The
-sketches are illustrative: they run against the current API but are not tested, and the specs
-with open questions show the option each spec assumes for now.
+sketches are illustrative and no test runs them; the specs with open questions show the option
+each spec assumes for now. Every sketch was last run on 2026-11-26: each was added at its proposed
+location to a copy of `src/catsim`, imported, and run on a small bank, on hand-built contexts and
+under `CatEngine` and `simulate`.
 
 ## Workflow
 
@@ -85,13 +87,20 @@ Check each spec against its sources before it is implemented or its references a
    location not read is not cited. Pages are the printed ones, which can differ from the PDF's.
 3. **Definitions and formulas** match the cited equations. Every departure from the source, or from
    catR, is stated explicitly.
-4. **catR** is the reference implementation where it implements the method (KLP, MPWI, MEPV,
-   Sympson-Hetter-style exposure control, classification stopping): the spec says where it agrees
-   and where it departs.
+4. **catR** is the reference implementation where it implements the method (KLP, MPWI, MEPV and
+   the minimum-information stopping rule; catR 3.17 has no Sympson-Hetter control, SPRT, GLR or
+   stochastic curtailment): the spec says where it agrees and where it departs, and its testing
+   notes name the parity cases the implementation adds (ADR-0020).
 5. **Implementation guidance** follows the 1.0 strategy contract:
-   - per-step strategies take a `StepContext`, and estimators return an `Estimate`;
-   - Sympson-Hetter is an exposure control (`BaseExposureControl.accept`), whose declines the
-     engine keeps in the session's `excluded_items`;
+   - per-step strategies take a `StepContext`, and estimators return an `Estimate`, whose
+     standard error is positive or `math.inf`;
+   - Sympson-Hetter is an exposure control (`BaseExposureControl.accept(context, item)`), whose
+     declines the engine keeps in the session's `excluded_items`;
+   - selectors break exact ties with `pick_best` or `best_pool` (ADR-0017), and sum scores over a
+     grid's node axis rather than with a matrix product, which can round identical items'
+     columns differently;
+   - code inside the package imports `override` from `catsim.compat`, never from
+     `typing_extensions`, which catsim installs only below Python 3.12 (ADR-0021);
    - strategy objects hold configuration and caches derived from the item bank, never per-session
      state, because one engine serves many sessions: the SPRT and GLR stoppers classify with a pure
      `classify(context)` instead of keeping `_last_classification`, and Owen's estimator replays

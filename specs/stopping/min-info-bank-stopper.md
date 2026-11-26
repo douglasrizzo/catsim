@@ -2,7 +2,7 @@
 **Module:** `catsim.stopping.bank.MinInfoInBankStopper` (planned)
 **Reference:** Dodd, Koch, and De Ayala (1989); Choi, Grady, and Dodd (2011)
 **Last validated:** 2026-11-23, against Dodd, Koch & De Ayala (1989), Choi, Grady & Dodd (2011, PubMed Central author manuscript) and catR 3.17.
-**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in, a single criterion for `StopRule`) on 2026-11-24.
+**Implementation guidance:** written against the 1.0 strategy contract (`StepContext` in, a single criterion for `StopRule`) on 2026-11-26.
 
 # Minimum Information in Bank Stopper
 
@@ -81,7 +81,7 @@ Dodd, B. G., Koch, W. R., & De Ayala, R. J. (1989). Operational characteristics 
 
 :::{note}
 This section is for contributors and agents implementing this technique.
-It is removed when the spec is promoted to "Implemented" status.
+It is removed when the spec is promoted to a technique page.
 :::
 
 **Proposed location:** `src/catsim/stopping/bank.py`, a new module for the stoppers that judge
@@ -101,6 +101,7 @@ from typing import TYPE_CHECKING
 import numpy
 
 from .. import irt
+from ..compat import override
 from .base import BaseStopper
 
 if TYPE_CHECKING:
@@ -150,6 +151,7 @@ class MinInfoInBankStopper(BaseStopper):
       msg = f"min_info must not be negative, got {self.min_info}"
       raise ValueError(msg)
 
+  @override
   def stop(self, context: StepContext) -> bool:
     """Return whether no remaining item has more than `min_info` information at the current estimate.
 
@@ -168,7 +170,7 @@ class MinInfoInBankStopper(BaseStopper):
     if candidates.size == 0:
       return True
     information = irt.information(context.theta, context.item_bank.get_items(candidates))
-    return float(information.max()) <= self.min_info
+    return float(numpy.max(information)) <= self.min_info
 ```
 
 **Implementation notes:**
@@ -196,3 +198,6 @@ class MinInfoInBankStopper(BaseStopper):
 - Contract 3: with every item administered, it stops.
 - Contract 4: negative and NaN thresholds are rejected; 0 is accepted.
 - Contract 5: inside `StopRule(..., min_items=k)` it does not stop before $k$ items.
+- Parity with catR (ADR-0020): add `rule = "minInfo"` cases to `tests/parity/catr/stopping.R`,
+  with the most informative remaining item just above, at and just below the threshold, and
+  whole tests that stop by it to `whole_tests.R`.

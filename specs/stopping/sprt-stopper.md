@@ -2,7 +2,7 @@
 **Module:** `catsim.stopping.classification.SPRTStopper` (planned)
 **Reference:** Reckase (1983); Wald (1947)
 **Last validated:** 2026-11-23, against Reckase (1981), Bartroff, Finkelman & Lai (2008, arXiv copy), Magis & Raîche (2012) and catR 3.17.
-**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in, a pure `classify(context)`, a single criterion for `StopRule`) on 2026-11-24.
+**Implementation guidance:** written against the 1.0 strategy contract (`StepContext` in, a pure `classify(context)`, a single criterion for `StopRule`) on 2026-11-26.
 
 # Sequential Probability Ratio Test Stopper
 
@@ -146,7 +146,7 @@ Weissman, A. (2007). Mutual information item selection in adaptive classificatio
 
 :::{note}
 This section is for contributors and agents implementing this technique.
-It is removed when the spec is promoted to "Implemented" status.
+It is removed when the spec is promoted to a technique page.
 :::
 
 **Proposed location:** `src/catsim/stopping/classification.py`, a new module for the
@@ -168,6 +168,7 @@ from typing import TYPE_CHECKING
 import numpy
 
 from .. import irt
+from ..compat import override
 from .base import BaseStopper
 
 if TYPE_CHECKING:
@@ -246,6 +247,7 @@ class SPRTStopper(BaseStopper):
     at_lower, at_upper = irt.log_likelihood(points, context.responses, items)
     return float(at_upper - at_lower)
 
+  @override
   def stop(self, context: StepContext) -> bool:
     """Return whether the statistic has reached either bound.
 
@@ -287,13 +289,12 @@ class SPRTStopper(BaseStopper):
 
 - No per-session state: one stopper serves every session of a run, so `stop` and `classify`
   compute the statistic from the context each time instead of storing the last classification
-  or statistic. An application classifies a finished session by building its context, the kind
-  `StopRule.satisfied` takes: `StepContext(item_bank=bank, rng=rng,
-  administered_items=tuple(session.administered_items), responses=tuple(session.responses),
-  theta=session.current_theta, se=session.current_se)`. The SPRT reads only the items and
-  responses, but the other stoppers of a rule, and the GLR and curtailment stoppers, read the
-  estimate and its error, which default to 0 and infinity. `classify` is the decision whether the
-  SPRT or the cap ended the test; `StopRule.satisfied` on the same context tells which.
+  or statistic. An application classifies a finished session from its context,
+  `stopper.classify(engine.context(session))`, the context `StopRule.satisfied` takes too. The
+  SPRT reads only the items and responses; the other stoppers of a rule, and the GLR and
+  curtailment stoppers, also read the estimate and its error, which `CatEngine.context` takes
+  from the session. `classify` is the decision whether the SPRT or the cap ended the test;
+  `StopRule.satisfied` on the same context tells which.
 - The stopper is one criterion. A minimum length and the cap at which the fallback applies come
   from the rule: `StopRule(SPRTStopper(cut_score=0.0), MaxLengthStopper(20), min_items=5)`.
 - The statistic needs no ability estimate, so the stopper works with any estimator.

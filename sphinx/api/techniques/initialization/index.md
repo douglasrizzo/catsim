@@ -25,7 +25,8 @@ Fixed-point initialization is useful for deterministic baselines, controlled
 simulation studies, and workflows that should not introduce randomness before
 the first item is selected. Random initialization is useful when simulations
 should vary the starting point across examinees while remaining reproducible
-through the engine or runner random number generator.
+through the generator that {py:meth}`CatEngine.start <catsim.CatEngine.start>`
+takes, which {py:func}`~catsim.simulate` gives each examinee.
 
 ## Definition
 
@@ -82,13 +83,25 @@ estimate from it for examinees simulated from $\mathcal{N}(0, 1)$. The normal
 default, $\mathcal{N}(0, 1)$, is not taken from a source; it matches the
 ability distribution those studies simulate.
 
+## Behavior and Comparison
+
+catR starts a test differently: before the first estimate, its `startItems`
+gives one or more early items, chosen at given abilities, by default one item at
+ability 0, and it draws no starting ability. A
+{py:class}`~catsim.initialization.FixedPointInitializer` at 0, followed by the
+test's selector, gives catR's start with no early item (`nrItems = 0`), which the
+whole-test parity tests use ({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`);
+the script that records them also checks that catR's default start gives the
+same tests under MFI and bOpt selection. The random initializers have no catR
+counterpart, and no parity test covers them.
+
 ## Guarantees
 
 1. A fixed-point initializer starts every examinee at `start`, as a `float`,
    whatever the seed.
 2. A uniform initializer's draws lie between `low` and `high`.
-3. The random initializers draw from the run's random generator, so the same
-   seed gives the same initial estimates.
+3. The random initializers draw from the generator given to `CatEngine.start`,
+   so the same seed gives the same initial estimates.
 
 ## References
 

@@ -2,7 +2,7 @@
 **Module:** `catsim.stopping.bank.PredictedSEMStopper` (planned)
 **Reference:** Choi, Grady, and Dodd (2011)
 **Last validated:** 2026-11-23, against Choi, Grady & Dodd (2011, PubMed Central author manuscript).
-**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in, a single criterion for `StopRule`) on 2026-11-24.
+**Implementation guidance:** written against the 1.0 strategy contract (`StepContext` in, a single criterion for `StopRule`) on 2026-11-26.
 
 # Predicted-SEM Stopper
 
@@ -140,7 +140,7 @@ To be answered before the stopper is implemented, and removed from the spec when
 
 :::{note}
 This section is for contributors and agents implementing this technique.
-It is removed when the spec is promoted to "Implemented" status.
+It is removed when the spec is promoted to a technique page.
 :::
 
 **Proposed location:** `src/catsim/stopping/bank.py`, next to `MinInfoInBankStopper` and the
@@ -193,6 +193,7 @@ class PredictedSEMStopper(BaseStopper):
       msg = f"hyper and hypo must not be negative, got {self.hyper} and {self.hypo}"
       raise ValueError(msg)
 
+  @override
   def stop(self, context: StepContext) -> bool:
     """Return whether the largest predicted reduction of the standard error is below its threshold.
 
@@ -221,7 +222,7 @@ class PredictedSEMStopper(BaseStopper):
     # would replace `predicted` with MEPV's expected posterior variance.
     information = irt.total_information(theta, item_bank.get_items(context.administered_items))
     current = 1 / math.sqrt(information) if information > 0 else math.inf
-    best = float(irt.information(theta, item_bank.get_items(candidates)).max())
+    best = float(numpy.max(irt.information(theta, item_bank.get_items(candidates))))
     predicted = 1 / math.sqrt(information + best) if information + best > 0 else math.inf
     # Where no remaining item has information at the estimate, none can reduce the error.
     reduction = current - predicted if math.isfinite(predicted) else 0.0
