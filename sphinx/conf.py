@@ -5,6 +5,8 @@ import pathlib
 import sys
 from importlib.metadata import version as get_version
 
+from matplotlib import rc_params_from_file
+
 # Sphinx runs this file from the sphinx/ directory.
 sys.path.insert(0, str(pathlib.Path("../src").resolve()))
 sys.path.insert(0, str(pathlib.Path("_ext").resolve()))
@@ -50,10 +52,15 @@ mermaid_init_config = {
 }
 
 # The plot directive embeds the first format in the page, so plots are vector SVG, sharp on any
-# screen. The tight bounding box keeps labels that sit outside the axes, such as a twin y axis
-# label, inside the image. The links to other formats and to the plot's source are left out.
+# screen. Every figure takes the documentation's style, _static/figures.mplstyle, which the
+# "Running simulations" guide offers to readers. The tight bounding box keeps labels that sit
+# outside the axes, such as a twin y axis label, inside the image. The links to other formats and
+# to the plot's source are left out.
 plot_formats = [("svg", 100)]
-plot_rcparams = {"savefig.bbox": "tight"}
+plot_rcparams = {
+  **rc_params_from_file("_static/figures.mplstyle", use_default_template=False),
+  "savefig.bbox": "tight",
+}
 plot_html_show_formats = False
 plot_html_show_source_link = False
 

@@ -31,6 +31,8 @@ also set a grid and an 18-point title of their own, over whatever style the call
 - A plot follows the caller's matplotlib style: the style sets the fonts, colours, title size and
   grid, and the functions set none of their own. A colour a function takes from the style's cycle
   is fixed when it is called. A second y scale, on the right, draws its spine and no grid.
+- catsim ships no style. The documentation's figures use its own, `sphinx/_static/figures.mplstyle`,
+  with fonts that ship with matplotlib.
 - Plots label items by name (ADR-0004).
 
 ## Consequences
@@ -41,8 +43,7 @@ also set a grid and an 18-point title of their own, over whatever style the call
   since the function reads the session.
 - Figures with several panels are laid out by the caller with matplotlib's tools, and each plot
   function fills one axes.
-- A caller changes how plots look with matplotlib's styles alone. Without one, plots have
-  matplotlib's default look, which has no grid.
+- A caller sets how plots look with matplotlib's styles alone; without one, plots have no grid.
 - The test suite, the documentation build and the notebooks need matplotlib, so the development and
   documentation dependency groups include it.
 
@@ -56,3 +57,7 @@ also set a grid and an 18-point title of their own, over whatever style the call
 - A `figsize` argument: it does nothing when the caller passes `ax`, and `plt.subplots` provides it.
 - Functions that set their own grid and title size: they override the caller's style, and
   `ax.grid()` without arguments toggles the grid, so it removes the grid of a style that has one.
+- A style in the package, or SciencePlots as a dependency, for a look only the documentation needs.
+  SciencePlots also calls matplotlib functions that 3.13 removes.
+- Book typefaces: catsim would ship their files and licenses, and matplotlib sets their math from
+  text italics, with misplaced accents.

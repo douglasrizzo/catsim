@@ -74,6 +74,12 @@ citation, not a mention: cite it like any other source.
 - No formula appears twice on one rendered page. A technique page renders its class's docstring
   under "API Reference", so a class docstring that repeats the Definition shows the math twice.
 
+### Figures
+
+Figures in the Sphinx pages and docstrings come from the plot directive, which draws them as SVG in
+the documentation's style, `_static/figures.mplstyle`, applied in `conf.py`. Examples set no style of
+their own. The notebooks draw in matplotlib's default style.
+
 ### Implementation detail in user pages
 
 Mention an implementation detail only where it changes what users observe: estimates kept within
