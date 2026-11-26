@@ -78,7 +78,9 @@ citation, not a mention: cite it like any other source.
 
 Figures in the Sphinx pages and docstrings come from the plot directive, which draws them as SVG in
 the documentation's style, `_static/figures.mplstyle`, applied in `conf.py`. Examples set no style of
-their own. The notebooks draw in matplotlib's default style.
+their own. The notebooks draw in matplotlib's default style. MyST parses each `{eval-rst}` block on
+its own, and the plot directive numbers its figures per block, so on a page with more than one
+figure each directive takes a unique `:filename-prefix:`; two directives of one name show one image.
 
 ### Implementation detail in user pages
 

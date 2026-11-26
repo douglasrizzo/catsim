@@ -53,6 +53,44 @@ infinite, and each estimator handles them its own way:
   Warm's modified score, which is finite for these responses, or the bound it
   points to.
 
+The figure draws the likelihood of five responses to the same five items. Mixed
+responses peak inside the scale, and their EAP estimate lies near the peak. Five
+correct responses rise to the edge of the scale, with no peak, yet every
+estimator puts that examinee at a finite ability.
+
+```{eval-rst}
+.. plot::
+    :filename-prefix: estimation-likelihood
+    :caption: The likelihood of two patterns of five responses, relative to its maximum. The dashed line in each curve's colour marks its EAP estimate; the black lines mark the other estimators' estimates after the five correct responses.
+
+    import matplotlib.pyplot as plt
+    from catsim import CatEngine, ItemBank, simulate
+    from catsim.estimation import EAPEstimator, MAPEstimator, NumericalSearchEstimator, WarmLikelihoodEstimator
+    from catsim.initialization import FixedPointInitializer
+    from catsim.plot import likelihood
+    from catsim.selection import LinearSelector
+    from catsim.stopping import MaxLengthStopper
+
+    item_bank = ItemBank.generate(5, "2PL", rng=4)
+
+    def session(responses, estimator):
+        engine = CatEngine(item_bank, FixedPointInitializer(0.0), LinearSelector(range(5)), estimator, MaxLengthStopper(5))
+        return simulate(engine, responses=[responses], rng=0).sessions[0]
+
+    fig, ax = plt.subplots()
+    likelihood(session([1, 0, 1, 1, 0], EAPEstimator()), item_bank, ax=ax, label="Mixed responses")
+    likelihood(session([1] * 5, EAPEstimator()), item_bank, ax=ax, label="All correct")
+    others = [
+        ("MAP", MAPEstimator(), "-."),
+        ("WLE", WarmLikelihoodEstimator(), ":"),
+        ("Numerical search", NumericalSearchEstimator(), (0, (5, 2, 1, 2, 1, 2))),
+    ]
+    for name, estimator, style in others:
+        ax.axvline(session([1] * 5, estimator).current_theta, color="black", linestyle=style, linewidth=1, label=name)
+    ax.legend(loc="upper left")
+    plt.show()
+```
+
 ## Implemented
 
 ```{toctree}
