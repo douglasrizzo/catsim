@@ -91,7 +91,7 @@ Since the window narrows as $1/\sqrt{n}$, the criterion comes to be governed by
 the curvature of the divergence as the test goes on, and its choices approach
 those of the {doc}`maximum-information selector <max-info-selector>`.
 
-### Comparison with catR
+:::{dropdown} Comparison with catR
 
 catR's `nextItem` with `criterion = "KL"` departs from this definition: it weights
 the divergence by the likelihood of the responses so far and integrates it over
@@ -105,6 +105,7 @@ likelihood set to 1 gives catsim's values and ranking in five contexts, one of
 which picks another item under the windows of one item more or one item fewer.
 catR's own KL ranking, in a context after two responses, differs, and the tests
 keep it as an expected failure.
+:::
 
 ## Guarantees
 

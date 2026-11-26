@@ -74,7 +74,7 @@ In Veerkamp and Berger's simulations MLWI did better than maximum information at
 the ML estimate (pp. 17–18). On long tests, where the likelihood is sharply
 peaked, its choices approach maximum-information selection near the ML estimate.
 
-### Comparison with catR
+:::{dropdown} Comparison with catR
 
 The selector is catR's `nextItem` with `criterion = "MLWI"`, whose default grid,
 33 nodes on $[-4, 4]$, is `MLWISelector(n_nodes=33, bounds=(-4, 4))`. catR
@@ -88,6 +88,7 @@ proportion to catsim's scores, and the tests find catR's ranking of every
 remaining item in four contexts and catR's items in whole tests on recorded
 responses with the maximum likelihood, Bayes modal, EAP and weighted likelihood
 estimators.
+:::
 
 ## Guarantees
 

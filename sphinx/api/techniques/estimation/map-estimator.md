@@ -44,9 +44,8 @@ $$
 
 the test information plus the prior's negative curvature at the mode. The
 curvature is a central difference, so any prior works. For a normal prior with
-variance $\sigma^2$ the curvature is $-1/\sigma^2$, and this is the standard
-error catR gives the Bayes modal estimator,
-$1/\sqrt{I(\hat{\theta}) + 1/\sigma^2}$ {cite:p}`Magis12{p. 5, Equation 6}`.
+variance $\sigma^2$ the curvature is $-1/\sigma^2$, which gives the Bayes modal
+standard error $1/\sqrt{I(\hat{\theta}) + 1/\sigma^2}$ {cite:p}`Magis12{p. 5, Equation 6}`.
 Inside a uniform prior's support the curvature is 0; at the support's edge
 the difference is not finite and the prior adds nothing. Both give the Fisher
 standard error, $1/\sqrt{I(\hat{\theta})}$. Where the sum is not positive, as
@@ -110,7 +109,7 @@ MAP coincides with the MLE {cite:p}`Magis12{p. 5}`.
 On long, information-rich tests, MAP and EAP converge toward similar values
 because the posterior becomes sharply concentrated.
 
-### Comparison with catR
+:::{dropdown} Comparison with catR
 
 The estimator is catR's Bayes modal estimator, `thetaEst` with `method = "BM"`,
 and its standard error is that of catR's `semTheta`. With `bounds=(-4, 4)`,
@@ -122,6 +121,7 @@ deviation 1.5 and a uniform prior on $[-3, 3]$, and in whole tests on recorded
 responses under MFI, bOpt and MLWI selection. They find no departure. catR's
 Jeffreys prior has no `log_prior` counterpart, since it depends on the
 administered items.
+:::
 
 ## Guarantees
 
@@ -129,7 +129,7 @@ administered items.
 2. Under the 1PL and 2PL models with a normal prior, the MAP estimate lies between the prior mean and the MLE, so it is closer to the prior mean than the MLE.
 3. Shifting the prior mean while holding the response data fixed shifts the MAP estimate in the same direction.
 4. The estimate lies inside the prior's support.
-5. The standard error is catR's Bayes modal standard error with a normal prior, the Fisher standard error with a uniform prior, and `math.inf` where the information plus the prior's negative curvature is not positive.
+5. The standard error is $1/\sqrt{I(\hat{\theta}) + 1/\sigma^2}$ with a normal prior of variance $\sigma^2$, the Fisher standard error with a uniform prior, and `math.inf` where the information plus the prior's negative curvature is not positive.
 6. With no administered items, the estimate is the mode of the prior over the search range, to within `tol`.
 
 ## References

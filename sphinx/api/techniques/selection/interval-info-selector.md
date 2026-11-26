@@ -106,9 +106,7 @@ the integral over the whole scale is $a_i$ (Equation 28).
 With the default interval, the selector judges the estimate by the standard error
 its estimator reports, so the same responses usually give a narrower interval, and
 more local choices, under EAP or MAP than under maximum likelihood (see the
-{doc}`estimation index </api/techniques/estimation/index>`). catR has no interval
-information criterion, so no parity test covers this selector
-({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`).
+{doc}`estimation index </api/techniques/estimation/index>`).
 
 ## Guarantees
 

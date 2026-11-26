@@ -38,7 +38,7 @@ re-derive it. Use the symbols of terms-and-notation.md.>
 
 ### Computation
 
-\<How catsim computes the definition, and where it departs from its sources or from catR.>
+\<How catsim computes the definition, and where it departs from its sources.>
 
 ## Parameters
 
@@ -58,8 +58,18 @@ re-derive it. Use the symbols of terms-and-notation.md.>
 ## Behavior and Comparison
 
 \<How the method behaves in practice: on short tests, with all-correct or all-incorrect responses, on exposure,
-with the other strategies it is usually paired with. How it compares with its alternatives and with
-catR's implementation, with sources. Link the ADR for the reason behind a catsim choice.>
+with the other strategies it is usually paired with. How it compares with its alternatives, with
+sources. Link the ADR for the reason behind a catsim choice.>
+
+% Optional: a closed dropdown, the page's only mention of catR. Which catR function and settings
+% the method matches, what the parity tests check, and each departure they keep as an expected
+% failure. Delete it when catR has no counterpart: do not say that catR lacks the method.
+
+:::{dropdown} Comparison with catR
+
+\<The catR function and settings that match, what the parity tests (ADR-0020) find, and each
+departure.>
+:::
 
 ## Guarantees
 

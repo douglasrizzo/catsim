@@ -85,7 +85,7 @@ at the last item {cite:p}`Barrada2008{p. 496, Equation 7}`; Barrada et al. did
 not test it separately, since it differs little from Equation 12 with $t = 0$
 (p. 500).
 
-### Comparison with catR
+:::{dropdown} Comparison with catR
 
 `catR` computes the schedule as above in
 [`nextItem.R`](https://github.com/cran/catR/blob/master/R/nextItem.R), with its
@@ -111,6 +111,7 @@ Equation 12 as well:
 
 The parity tests keep the last two as expected failures. catR's other schedule,
 for its precision criterion, has no catsim counterpart.
+:::
 
 ## Guarantees
 

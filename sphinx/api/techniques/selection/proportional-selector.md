@@ -92,7 +92,7 @@ At the last item of a 20-item test at $\theta = 0$, over 20 simulated 500-item
 3PL banks, the most informative item is drawn with probability 0.32 to 0.96
 (median 0.64).
 
-### Comparison with catR
+:::{dropdown} Comparison with catR
 
 `catR` computes the power the same way in
 [`nextItem.R`](https://github.com/cran/catR/blob/master/R/nextItem.R), as `thr`
@@ -113,6 +113,7 @@ times from Equation 13 as well:
   give 0, uniform selection.
 
 The parity tests keep the last two as expected failures.
+:::
 
 ## Guarantees
 

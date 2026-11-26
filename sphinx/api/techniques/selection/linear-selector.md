@@ -34,9 +34,7 @@ step it returns the first item of the list that is neither administered nor excl
 
 With an exposure control, each declined item is lost for the rest of the test,
 so the list can run out before the test is complete, and the session then ends
-with `StopReason.NO_ITEMS`. catR has no fixed-form selector: it fixes only a test's
-first items, through the `fixItems` argument of its `startItems` function. No
-parity test covers this selector ({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`).
+with `StopReason.NO_ITEMS`.
 
 ## Guarantees
 

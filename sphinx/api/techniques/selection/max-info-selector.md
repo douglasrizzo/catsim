@@ -56,7 +56,7 @@ items and produce skewed exposure patterns. The selector remains valuable becaus
 many other criteria in the literature are best understood as relaxations or
 extensions of this rule.
 
-### Comparison with catR
+:::{dropdown} Comparison with catR
 
 The selector is catR's `nextItem` with `criterion = "MFI"`, and it breaks ties as
 catR does ({ref}`selection-ties`). The parity tests
@@ -66,6 +66,7 @@ response to an all-correct pattern, and catR's items in whole tests on recorded
 responses with the maximum likelihood, Bayes modal, EAP and weighted likelihood
 estimators. They find no departure. The exposure cap differs from catR's `rmax`
 ({ref}`selection-exposure-cap`).
+:::
 
 ## Guarantees
 

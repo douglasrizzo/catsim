@@ -41,7 +41,7 @@ b-matching remains a simple and interpretable heuristic.
 maximum information under the 1PL model, slightly different under other models.
 They attribute it to Urry (1970), an earlier work than the article cited below.
 
-### Comparison with catR
+:::{dropdown} Comparison with catR
 
 The selector is catR's `nextItem` with `criterion = "bOpt"`, and, as in catR,
 items tie only when their distances to the estimate are exactly equal
@@ -51,6 +51,7 @@ remaining item in four contexts, from before the first response to an
 all-correct pattern, and catR's items in whole tests on recorded responses with
 the maximum likelihood, Bayes modal, EAP and weighted likelihood estimators.
 They find no departure.
+:::
 
 ## Guarantees
 

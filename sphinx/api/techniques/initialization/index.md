@@ -85,6 +85,12 @@ ability distribution those studies simulate.
 
 ## Behavior and Comparison
 
+With a fixed start and a selector that draws nothing at random, every examinee gets
+the same first item. The random initializers spread the first items over the
+bank, at the cost of starting some examinees further from their ability.
+
+:::{dropdown} Comparison with catR
+
 catR starts a test differently: before the first estimate, its `startItems`
 gives one or more early items, chosen at given abilities, by default one item at
 ability 0, and it draws no starting ability. A
@@ -92,8 +98,9 @@ ability 0, and it draws no starting ability. A
 test's selector, gives catR's start with no early item (`nrItems = 0`), which the
 whole-test parity tests use ({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`);
 the script that records them also checks that catR's default start gives the
-same tests under MFI and bOpt selection. The random initializers have no catR
-counterpart, and no parity test covers them.
+same tests under MFI and bOpt selection. No parity test covers the random
+initializers.
+:::
 
 ## Guarantees
 

@@ -42,12 +42,13 @@ It does not look at the item bank or at the ability estimate. A session whose
 bank runs out before $n_{\max}$ items is ended by the engine, once the selector
 has no item left to give.
 
-### Comparison with catR
+:::{dropdown} Comparison with catR
 
 The stopper is catR's `length` rule. The parity tests
 ({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`) find catR's decisions one
 item below, at and above the length, alone and with a precision rule, and catR's
 test lengths in whole tests on recorded responses. They find no departure.
+:::
 
 ## Guarantees
 

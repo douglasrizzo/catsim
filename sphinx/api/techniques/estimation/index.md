@@ -17,7 +17,7 @@ per step.
 | {py:class}`~catsim.estimation.NumericalSearchEstimator` | $1/\sqrt{I(\hat\theta)}$, the Fisher standard error {cite:p}`Magis12{Eq. 3, p. 4}` |
 | {py:class}`~catsim.estimation.EAPEstimator` | the posterior standard deviation {cite:p}`Magis12{Eq. 11, p. 6}` |
 | {py:class}`~catsim.estimation.MAPEstimator` | $1/\sqrt{I(\hat\theta) - (\log p)''(\hat\theta)}$, where $\log p$ is the prior's log-density; $1/\sqrt{I(\hat\theta) + 1/\sigma^2}$ for a normal prior of variance $\sigma^2$ {cite:p}`Magis12{Eq. 6, p. 5}` |
-| {py:class}`~catsim.estimation.WarmLikelihoodEstimator` | $1/\sqrt{I(\hat\theta)}$, catR's default |
+| {py:class}`~catsim.estimation.WarmLikelihoodEstimator` | $1/\sqrt{I(\hat\theta)}$, the Fisher standard error at the estimate |
 
 The two Bayesian standard errors are usually below the Fisher one at the same
 estimate, and with a normal prior MAP's always is, so a precision stopper ends
@@ -52,10 +52,6 @@ infinite, and each estimator handles them its own way:
 - {py:class}`~catsim.estimation.WarmLikelihoodEstimator` returns the root of
   Warm's modified score, which is finite for these responses, or the bound it
   points to.
-
-catR's estimators search $[-4, 4]$ by default, and its EAP integrates over 33
-nodes on that range. Each estimator's page says which settings give catR's
-results and where catsim departs from catR.
 
 ## Implemented
 

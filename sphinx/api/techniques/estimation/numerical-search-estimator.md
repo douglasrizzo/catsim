@@ -101,7 +101,7 @@ With guessing, the likelihood can have several local maxima {cite:p}`Chang1996{p
 guessing or slipping parameters, the likelihood of a mixed pattern can also
 still be rising at a bound, and the estimate is then within `tol` of that bound.
 
-### Comparison with catR
+:::{dropdown} Comparison with catR
 
 The estimator is catR's `thetaEst` with `method = "ML"`, and its standard error
 is that of catR's `semTheta`. With `bounds=(-4, 4)`, catR's default range, the
@@ -138,6 +138,7 @@ places, which the parity tests keep as expected failures:
   minimum, while catsim maximizes the likelihood. In the two parity cases catR
   returns minima at −0.53 and −0.01, and catsim a maximum at 1.79 and the upper
   bound, 4, where the likelihood still rises.
+:::
 
 ## Guarantees
 

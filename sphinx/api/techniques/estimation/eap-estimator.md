@@ -16,7 +16,7 @@ EAP's posterior also yields the posterior variance at no extra cost, and that
 variance serves as the error variance of the estimate {cite:p}`Bock1982{p. 432}`;
 in their simulations the posterior standard deviation behaved like the
 standard error of measurement (p. 431). The estimator reports the posterior
-standard deviation as the estimate's standard error, as catR does
+standard deviation as the estimate's standard error
 {cite:p}`Magis12{p. 6, Equation 11}`, and the precision stoppers judge it.
 
 ## Definition
@@ -87,7 +87,7 @@ on $[-6, 6]$) is accurate while the posterior standard deviation is at least
 about 0.065; longer tests need a finer grid (see
 {doc}`/api/techniques/estimation/bayesian-infrastructure`).
 
-### Comparison with catR
+:::{dropdown} Comparison with catR
 
 The estimator is catR's `thetaEst` with `method = "EAP"`, and its standard error
 is that of catR's `semTheta`, the posterior standard deviation. catR integrates
@@ -111,6 +111,7 @@ relative $10^{-10}$, on fixed responses under normal and uniform priors,
 on catsim's 121 nodes as on catR's 33, and in whole tests on recorded responses.
 The simulations that check the randomized selectors against catR estimate with
 this estimator too. They find no departure.
+:::
 
 ## Guarantees
 

@@ -58,11 +58,7 @@ can sit on the search bound, where $I \approx 0$ makes the correction explode.
 The estimator returns a {py:class}`~catsim.Estimate`. Its standard error
 is the Fisher one at the estimate, $1/\sqrt{I(\hat{\theta})}$, infinite where
 the information is 0. This departs from {cite:t}`Magis12{p. 6, Equation 14}`,
-who add $(I'J - IJ')/(2I^2)$ to the information, and follows catR: since
-version 3.0 its `semTheta` gives the WLE the maximum likelihood formula, because
-the corrected one sometimes led to mathematical problems ([catR's
-NEWS](https://github.com/cran/catR/blob/master/NEWS), version 3.0), and its
-default `sem.type = "classic"` still does. Under the 1PL and 2PL models the
+who add $(I'J - IJ')/(2I^2)$ to the information. Under the 1PL and 2PL models the
 corrected sum is the curvature of the weighted likelihood at its maximum, so it is
 positive; with guessing or slipping parameters it can be negative, which leaves no
 standard error: 13 of 3,920 sets of responses (0.4% of their probability) on random
@@ -79,11 +75,7 @@ of the weighted likelihood and is refined with Brent's method. If several maxima
 exist, which can happen with guessing, the one with the largest weighted
 likelihood is returned; the maxima are ranked by integrating the modified score,
 the derivative of the weighted log-likelihood. If the modified score never changes
-sign, the estimate is the bound it points to. This mirrors `catR`
-{cite:p}`Magis12`, whose
-[`thetaEst.R`](https://github.com/cran/catR/blob/master/R/thetaEst.R) solves the
-same equation with `uniroot`; catsim adds the explicit handling of multiple
-roots.
+sign, the estimate is the bound it points to.
 
 ## Parameters
 
@@ -110,14 +102,18 @@ responses to 5 and 10 items, 3,000 simulated ones for 20 and 40), the classic fo
 overestimates the error in short tests, by 10% under the 2PL and 28% under the 3PL
 at 5 items. That is conservative: a standard-error stopper runs a few items longer
 than needed. Equation 14 roughly halves that gap. The sandwich formula of
-{cite:t}`Magis2016`, catR's `sem.type = "new"`, is closest under the 3PL but underestimates the
+{cite:t}`Magis2016` is closest under the 3PL but underestimates the
 error under the 2PL (by 8% at 5 items), which would stop tests too early. From 20
 items on, the three agree within about 3%.
 
-### Comparison with catR
+:::{dropdown} Comparison with catR
 
 The estimator is catR's `thetaEst` with `method = "WL"`, and its standard error
-is that of catR's `semTheta` with its default `sem.type = "classic"`. With
+is that of catR's `semTheta` with its default `sem.type = "classic"`, which
+catR has given the WLE since version 3.0, because the corrected formula sometimes
+led to mathematical problems ([catR's
+NEWS](https://github.com/cran/catR/blob/master/NEWS)); its `sem.type = "new"` is
+the sandwich formula of {cite:t}`Magis2016`. With
 `bounds=(-4, 4)`, catR's default range, the parity tests
 ({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`) find the same estimates and
 standard errors on fixed responses, all-correct and all-incorrect ones
@@ -133,6 +129,7 @@ catsim 0.66. In a whole test with MLWI selection, the roots after the first two
 items are −0.44, 0.63 and 0.84, and catR returns 0.84 and catsim −0.44; the test's
 items are the same in both, and the estimates agree again from the third
 response on.
+:::
 
 ## Guarantees
 

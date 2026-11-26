@@ -118,10 +118,15 @@ shrink the standard deviation by about 1% at a posterior standard deviation of
 As informative items accumulate, the posterior variance generally contracts
 rather than expands without bound.
 
-A grid's weights may be any positive numbers. catR integrates by the trapezoid
-rule, which halves the weights of the two end nodes, and a grid with those
-weights gives catR's posterior on the same nodes; the
+A grid's weights may be any positive numbers, such as those of the trapezoid
+rule, which halves the weights of the two end nodes.
+
+:::{dropdown} Comparison with catR
+
+catR integrates by the trapezoid rule, so a grid with its weights gives catR's
+posterior on the same nodes; the
 {doc}`EAP page </api/techniques/estimation/eap-estimator>` shows one.
+:::
 
 ## Guarantees
 

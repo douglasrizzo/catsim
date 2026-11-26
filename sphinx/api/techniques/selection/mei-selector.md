@@ -88,7 +88,7 @@ are incorrect. On that branch the look-ahead is a fixed jump rather than an
 estimate. Bayesian estimators and WLE give a genuine updated estimate on both
 branches from the first item.
 
-### Comparison with catR
+:::{dropdown} Comparison with catR
 
 `catR` departs from van der Linden's definition: its
 [`MEI.R`](https://github.com/cran/catR/blob/master/R/MEI.R) uses only the
@@ -104,6 +104,7 @@ response, where the administered test adds no information, catR's values and
 ranking are catsim's. After two responses the values differ, a departure the
 tests keep as an expected failure, although in that context the two rank the
 items alike. No whole test compares the two.
+:::
 
 ## Guarantees
 

@@ -23,6 +23,7 @@ extensions = [
   "sphinxcontrib.bibtex",
   "sphinxcontrib.mermaid",
   "sphinx_reredirects",
+  "sphinx_design",
   "class_tree",
 ]
 

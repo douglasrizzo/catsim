@@ -52,13 +52,13 @@ matter most for precision, are chosen by maximum information.
 {cite:t}`Magis12{p. 12}` list the technique among the methods that choose at random among
 several near-optimal items, without defining it.
 
-### Comparison with catR
+:::{dropdown} Comparison with catR
 
-catR has no 5-4-3-2-1 rule. At each position, the selector's bin is the bin of
-catR's `nextItem` with `criterion = "MFI"` and `randomesque` set to
-$\max(1, s - k)$; with $s = 5$, the parity tests
+At each position, the selector's bin is the bin of catR's `nextItem` with
+`criterion = "MFI"` and `randomesque` set to $\max(1, s - k)$; with $s = 5$, the parity tests
 ({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`) find that bin in four
-contexts. No simulation compares whole tests, since catR has no rule to simulate.
+contexts. No simulation compares whole tests.
+:::
 
 ## Guarantees
 

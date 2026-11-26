@@ -43,6 +43,8 @@ rule = StopRule(StandardErrorStopper(0.3), MaxLengthStopper(40), min_items=5)
 `min_items` holds back every stopper in the rule, the length cap included. A rule
 is itself a stopper, so it goes wherever a stopper does, another rule included.
 
+:::{dropdown} Comparison with catR
+
 catR caps its stopping criteria the same way: its `maxItems` meta-argument "imposes a
 maximal test length and forces the test to stop if this length is reached, even
 though the stopping rule is not yet satisfied" {cite:p}`Magis12{p. 18}`. catR
@@ -51,6 +53,7 @@ matching stoppers does; the parity tests
 ({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`) find catR's decisions for a
 length and a precision rule together and for two classification thresholds, and
 each stopper's page says which catR rule it is.
+:::
 
 Stoppers are pure, so a rule can be asked again after a run.
 {meth}`~catsim.stopping.StopRule.satisfied` returns the stoppers that hold for a
