@@ -84,15 +84,13 @@ cut scores, with an indifference region of one standard error of measurement on
 either side of each; Weissman (2007) also pairs the SPRT with a four-category
 test. The planned stopper takes a single cut score.
 
-catR has no SPRT. Its only classification rule (`checkStopRule.R`,
-`rule = "classification"`, catR 3.17) stops once the confidence interval
-$\hat{\theta} \pm z\,SE(\hat{\theta})$, with $z$ set by catR's `alpha`, no
-longer contains the cut score (Magis & Raîche, 2012, p. 11), the rule catsim
-implements as the confidence-interval stopper. The SPRT departs from it: it
-compares the likelihood at two points around the cut instead of using the
-estimate and its standard error, its $\alpha$ and $\beta$ are classification
-error rates at those points rather than the significance level of an interval,
-and it needs an indifference region, which catR's rule does not have.
+The SPRT differs from catsim's confidence-interval stopper, which stops once the
+confidence interval $\hat{\theta} \pm z\,SE(\hat{\theta})$ no longer contains
+the cut score (Magis & Raîche, 2012, p. 11): it compares the likelihood at two
+points around the cut instead of using the estimate and its standard error, its
+$\alpha$ and $\beta$ are classification error rates at those points rather than
+the significance level of an interval, and it needs an indifference region, which
+the interval rule does not have.
 
 ## Parameters
 

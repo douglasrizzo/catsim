@@ -41,7 +41,7 @@ you have read. Say where the implementation departs from its sources.>
 
 ### Computation
 
-\<Search range, grid, tolerance; where they depart from the sources or from catR.>
+\<Search range, grid, tolerance; where they depart from the sources.>
 
 ## Parameters
 
@@ -61,7 +61,11 @@ you have read. Say where the implementation departs from its sources.>
 ## Behavior and Comparison
 
 \<How the method behaves in practice (short tests, all-correct or all-incorrect responses, exposure) and how it
-compares with its alternatives and with catR's implementation, with sources.>
+compares with its alternatives, with sources.>
+
+\<Where catR implements the method, a last paragraph on which catR function and settings match and
+where catsim departs; the promoted page folds it into its "Comparison with catR" dropdown. Leave it
+out when catR has no counterpart.>
 
 ## Guarantees
 

@@ -69,9 +69,8 @@ The planned stopper departs from Bartroff et al. in four ways:
 - **Maximum length.** At `max_items`, the implementation guidance classifies by
   the side of $\theta_c$ on which $\hat{\theta}_n$ lies, instead of Equation 10.
 
-catR has no GLR rule; its only classification rule is the confidence-interval
-rule (`checkStopRule.R`, `rule = "classification"`, catR 3.17; Magis & Raîche,
-2012, p. 11), which the SPRT spec compares with the likelihood-ratio rules.
+The SPRT spec compares the likelihood-ratio rules with catsim's
+confidence-interval stopper.
 
 ## Parameters
 

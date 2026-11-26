@@ -89,10 +89,8 @@ variations from it that evaluate the probability at the current estimate or at
 an end point of its confidence interval. The planned stopper keeps the standard
 formulation.
 
-catR implements no curtailment. Its only classification rule is the
-confidence-interval rule (`checkStopRule.R`, `rule = "classification"`,
-catR 3.17), catsim's confidence-interval stopper; Sie et al. (2015) apply
-stochastic curtailment to that rule as well.
+Sie et al. (2015) apply stochastic curtailment to the confidence-interval rule,
+catsim's confidence-interval stopper, as well.
 
 ## Parameters
 

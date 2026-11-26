@@ -87,9 +87,9 @@ Check each spec against its sources before it is implemented or its references a
 3. **Definitions and formulas** match the cited equations. Every departure from the source, or from
    catR, is stated explicitly.
 4. **catR** is the reference implementation where it implements the method (KLP, MPWI, MEPV and
-   the minimum-information stopper; catR 3.17 has no Sympson-Hetter control, SPRT, GLR or
-   stochastic curtailment): the spec says where it agrees and where it departs, and its testing
-   notes name the parity cases the implementation adds (ADR-0020).
+   the minimum-information stopper): the spec says where it agrees and where it departs, which the
+   promoted page puts in its closed "Comparison with catR" dropdown, and its testing notes name the
+   parity cases the implementation adds (ADR-0020). A spec never says what catR lacks.
 5. **Implementation guidance** follows the 1.0 strategy contract:
    - per-step strategies take a `StepContext`, and estimators return an `Estimate`, whose
      standard error is positive or `math.inf`;

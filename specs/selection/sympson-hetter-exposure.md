@@ -91,12 +91,12 @@ p. 495).
 
 ## Behavior and Comparison
 
-catR 3.17 has no Sympson-Hetter control, so no parity case can compare this one with catR
-(ADR-0020). Its `simulateRespondents` caps exposure with `rmax` in two ways (`Mrmax`): before each
+catR's `simulateRespondents` caps exposure with `rmax` in two ways (`Mrmax`): before each
 examinee, `"restricted"` makes every item whose exposure rate is at or above the cap unavailable,
 and `"IE"`, the item-eligibility method, makes each item available with an eligibility probability
 that it updates from the exposure rates of the run so far. Neither needs a calibration before the
-run, and neither acts on the item a selector proposes, as this control does.
+run, and neither acts on the item a selector proposes, as this control does, so no parity case
+compares this control with catR (ADR-0020).
 
 ## Behavioral Contracts
 
