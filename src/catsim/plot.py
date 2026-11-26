@@ -9,6 +9,10 @@ Plots label items by their names in the item bank (ADR-0004), drawn as given: a 
 name does not start mathtext. An x axis with one tick per item names each item while it has at most
 30, the most names that stay apart at matplotlib's default figure width; a longer one ticks whole
 numbers, as each function's description says.
+
+A plot takes the matplotlib style in effect when its function is called, set with ``plt.style.use``
+or ``plt.style.context``: its fonts, colours, title size and grid. A second y axis, on the right,
+draws its spine and no grid.
 """
 
 from collections.abc import Sequence
@@ -20,7 +24,9 @@ import numpy
 try:
   import matplotlib.pyplot as plt
   from matplotlib.axes import Axes
+  from matplotlib.colors import to_rgba
   from matplotlib.ticker import MaxNLocator
+  from matplotlib.typing import ColorType
 except ImportError as error:
   _missing = "catsim.plot needs matplotlib; install it with: pip install 'catsim[plot]'"
   raise ImportError(_missing) from error
@@ -66,7 +72,8 @@ def item_curve(
 
   The curves span four units of ability on each side of the item's difficulty, and a box in the
   upper left corner gives the item's name and parameters. With ``PlotType.BOTH`` the information
-  curve has its own y axis, on the right, and the plot has no grid.
+  curve has its own y axis, on the right, and the two curves take the first two colours of the
+  style.
 
   .. plot::
       :caption: One item's characteristic and information curves, apart and together. The dot marks its peak.
@@ -122,19 +129,18 @@ def item_curve(
   match kind:
     case PlotType.ICC:
       _draw_icc(ax, thetas, parameters)
-      ax.grid()
       box_axes = ax
     case PlotType.IIC:
       _draw_information(ax, thetas, parameters, max_info=max_info)
-      ax.grid()
       box_axes = ax
     case PlotType.BOTH:
-      box_axes = ax.twinx()
-      for axes, color in ((ax, "C0"), (box_axes, "C3")):
+      box_axes = _right_hand_axes(ax)
+      icc_color, information_color = _cycle_color(0), _cycle_color(1)
+      for axes, color in ((ax, icc_color), (box_axes, information_color)):
         axes.yaxis.label.set_color(color)
         axes.tick_params(axis="y", colors=color)
-      _draw_icc(ax, thetas, parameters, color="C0")
-      _draw_information(box_axes, thetas, parameters, max_info=max_info, color="C3")
+      _draw_icc(ax, thetas, parameters, color=icc_color)
+      _draw_information(box_axes, thetas, parameters, max_info=max_info, color=information_color)
     case _:
       assert_never(kind)
 
@@ -148,8 +154,25 @@ def _prepare_axes(ax: Axes | None, title: str | None) -> Axes:
   if ax is None:
     _, ax = plt.subplots()
   if title is not None:
-    ax.set_title(title, size=18)
+    ax.set_title(title)
   return ax
+
+
+def _right_hand_axes(ax: Axes) -> Axes:
+  """Return twin axes that share ``ax``'s x axis and draw a second y scale on the right, with its spine and no grid."""
+  twin = ax.twinx()
+  # The twin's grid lines would follow the right-hand scale and cross ax's, and a style that hides the right spine would
+  # leave the scale's ticks floating.
+  twin.grid(visible=False)
+  twin.spines.right.set_visible(True)
+  return twin
+
+
+def _cycle_color(index: int) -> tuple[float, float, float, float]:
+  """Return the ``index``-th colour of the current style's cycle, as RGBA."""
+  # matplotlib looks a reference such as "C1" up when the figure is drawn, so a figure drawn after its style ended would
+  # take another style's colour.
+  return to_rgba(f"C{index}")
 
 
 def _label_items(ax: Axes, positions: IntArray, names: Sequence[str]) -> None:
@@ -164,14 +187,14 @@ def _label_items(ax: Axes, positions: IntArray, names: Sequence[str]) -> None:
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
 
-def _draw_icc(ax: Axes, thetas: FloatArray, parameters: FloatArray, *, color: str | None = None) -> None:
+def _draw_icc(ax: Axes, thetas: FloatArray, parameters: FloatArray, *, color: ColorType | None = None) -> None:
   """Draw the item's characteristic curve, in ``color`` or the next colour of the axes' cycle."""
   ax.plot(thetas, irt.icc(thetas, parameters), color=color, label=r"$P(\theta)$")
   ax.set_ylabel(r"$P(\theta)$")
 
 
 def _draw_information(
-  ax: Axes, thetas: FloatArray, parameters: FloatArray, *, max_info: bool, color: str | None = None
+  ax: Axes, thetas: FloatArray, parameters: FloatArray, *, max_info: bool, color: ColorType | None = None
 ) -> None:
   """Draw the item's information curve and, with ``max_info``, a dot of the curve's colour at its peak."""
   (line,) = ax.plot(thetas, irt.information(thetas, parameters), color=color, label=r"$I(\theta)$")
@@ -404,26 +427,31 @@ def session_progress(
   xs = numpy.arange(len(thetas))
   finite = numpy.isfinite(ses)
   ax = _prepare_axes(ax, title)
-  se_axes = ax.twinx()
+  se_axes = _right_hand_axes(ax)
   # The legend is on ``ax``, which must be drawn over the twin's line to stay readable.
   ax.set_zorder(se_axes.get_zorder() + 1)
   ax.patch.set_visible(False)
 
-  ax.plot(xs, thetas, marker=".", color="C0", label=r"Ability estimate $\hat{\theta}$")
+  estimate_color, difficulty_color, se_color = (_cycle_color(index) for index in range(3))
+  ax.plot(xs, thetas, marker=".", color=estimate_color, label=r"Ability estimate $\hat{\theta}$")
   ax.fill_between(
-    xs[finite], (thetas - ses)[finite], (thetas + ses)[finite], color="C0", alpha=0.2, label=r"$\hat{\theta} \pm SE$"
+    xs[finite],
+    (thetas - ses)[finite],
+    (thetas + ses)[finite],
+    color=estimate_color,
+    alpha=0.2,
+    label=r"$\hat{\theta} \pm SE$",
   )
-  ax.plot(xs[1:], difficulties, "o", color="C1", label="Item difficulty")
+  ax.plot(xs[1:], difficulties, "o", color=difficulty_color, label="Item difficulty")
   if true_theta is not None:
     ax.axhline(true_theta, color="black", linestyle="--", label=r"True ability $\theta$")
-  se_axes.plot(xs[finite], ses[finite], color="C2", label="Standard error")
+  se_axes.plot(xs[finite], ses[finite], color=se_color, label="Standard error")
 
   ax.set_xlabel("Items administered")
   _label_items(ax, xs[1:], [item_bank.names[item] for item in session.administered_items])
   ax.set_ylabel(r"$\theta$")
-  se_axes.set_ylabel("Standard error", color="C2")
-  se_axes.tick_params(axis="y", colors="C2")
-  ax.grid()
+  se_axes.set_ylabel("Standard error", color=se_color)
+  se_axes.tick_params(axis="y", colors=se_color)
   handles, labels = ax.get_legend_handles_labels()
   se_handles, se_labels = se_axes.get_legend_handles_labels()
   ax.legend(handles + se_handles, labels + se_labels, loc="best")
