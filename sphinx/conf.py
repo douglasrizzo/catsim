@@ -204,6 +204,33 @@ redirects = {
   "adr/0016-session-exclusions-and-exposure-control": "0011-exclusions-and-exposure-control.html",
 }
 
+# -- Options for the linkcheck builder ------------------------------------
+
+# Hosts that answer automated clients with 403 Forbidden, although their pages open in a browser.
+# A DOI or handle link to one of them is still checked: doi.org or hdl.handle.net must redirect to
+# it, which a DOI or handle that does not exist does not, and linkcheck reports the redirect as
+# ignored instead of following it.
+_REFUSE_AUTOMATED_CLIENTS = [
+  r"https?://journals\.sagepub\.com/",
+  r"https?://(bpspsychub\.)?onlinelibrary\.wiley\.com/",
+  r"https?://www\.tandfonline\.com/",
+  r"https?://conservancy\.umn\.edu/",
+  r"https?://research\.utwente\.nl/",
+  r"https?://www\.researchgate\.net/",
+  r"https?://pmc\.ncbi\.nlm\.nih\.gov/",
+]
+# Targets that the release built from these sources publishes, so they cannot resolve before it
+# deploys: its release notes, the notebooks on main, and the site's API pages, which the site serves
+# at other addresses until then. Drop each entry once its target is online.
+_PUBLISHED_BY_THE_RELEASE = [
+  r"https://github\.com/douglasrizzo/catsim/releases/tag/1\.0\.0$",
+  r"https://github\.com/douglasrizzo/catsim/(blob|tree)/main/notebooks(/|$)",
+  r"https://douglasrizzo\.com\.br/catsim/api/",
+]
+linkcheck_ignore = [*_REFUSE_AUTOMATED_CLIENTS, *_PUBLISHED_BY_THE_RELEASE]
+# GitHub draws its anchors, such as #readme, with JavaScript, which linkcheck does not run.
+linkcheck_anchors_ignore_for_url = [r"https://github\.com/"]
+
 numpydoc_show_class_members = False
 
 # Every cross-reference must resolve (sphinx-build -n). NumPy's array aliases evaluate to classes
