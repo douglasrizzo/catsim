@@ -852,9 +852,10 @@ class SimulationResult:
   identity.
 
   **Tables.** :meth:`steps` has one row per session and step, :meth:`examinees` one row per session,
-  and :meth:`deciles` one row per decile of the true ability. Each is a dict of equal-length NumPy
-  columns, which ``pandas.DataFrame(result.steps())`` and polars take as they are, and which
-  :class:`csv.DictWriter` writes row by row. Items appear by index and by name (ADR-0004).
+  :meth:`deciles` one row per decile of the true ability and :meth:`ability_levels` one row per
+  distinct true ability. Each is a dict of equal-length NumPy columns, which
+  ``pandas.DataFrame(result.steps())`` and polars take as they are, and which :class:`csv.DictWriter`
+  writes row by row. Items appear by index and by name (ADR-0004).
 
   **Metrics.** :meth:`bias`, :meth:`mse`, :meth:`rmse`, :meth:`test_length`, :meth:`se`,
   :meth:`exposure_rates` and :meth:`overlap_rate` each return a :class:`~catsim.metrics.Metric`,
@@ -1110,27 +1111,31 @@ class SimulationResult:
         If the result has no true abilities.
     """
     groups = _deciles(self._known_true_thetas("deciles"))
-    true_thetas = cast("FloatArray", self.true_thetas)
-    members = [groups == decile for decile in range(_N_DECILES)]
-    table = {
-      "decile": numpy.arange(_N_DECILES),
-      "n_sessions": numpy.bincount(groups, minlength=_N_DECILES),
-      "true_theta": numpy.array([true_thetas[member].mean() if member.any() else math.nan for member in members]),
-    }
-    columns: dict[str, Callable[..., Metric[float] | None]] = {
-      "bias": self.bias,
-      "mse": self.mse,
-      "rmse": self.rmse,
-      "test_length": self.test_length,
-      "se": self.se,
-      "overlap_rate": self.overlap_rate,
-    }
-    for name, method in columns.items():
-      results = [method(decile=decile) for decile in range(_N_DECILES)]
-      metrics_ = [Metric(math.nan, math.nan) if result is None else result for result in results]
-      table[name] = numpy.array([metric.value for metric in metrics_], dtype=float)
-      table[f"{name}_mc_se"] = numpy.array([metric.mc_se for metric in metrics_], dtype=float)
-    return table
+    members = [numpy.flatnonzero(groups == decile) for decile in range(_N_DECILES)]
+    return {"decile": numpy.arange(_N_DECILES), **self._group_table(members)}
+
+  def ability_levels(self) -> dict[str, numpy.ndarray]:
+    """Return the table of the run's metrics at each distinct true ability: one row per ability, from the lowest.
+
+    It suits designs that give many examinees each of a few true abilities, such as 100 at each of
+    13 abilities from -3 to 3, which :meth:`deciles` would group unevenly: 13 abilities do not fit
+    in 10 deciles. Equal abilities are those that compare equal.
+
+    Returns
+    -------
+    dict[str, numpy.ndarray]
+        One row per distinct true ability, with the columns of :meth:`deciles` but ``decile``:
+        ``n_sessions``, ``true_theta`` (the ability itself), and the metrics and their Monte Carlo
+        errors. An ability held by a single session has NaN Monte Carlo errors.
+
+    Raises
+    ------
+    ValueError
+        If the result has no true abilities.
+    """
+    true_thetas = self._known_true_thetas("ability_levels")
+    levels = numpy.unique(true_thetas)
+    return self._group_table([numpy.flatnonzero(true_thetas == level) for level in levels])
 
   def bias(self, *, decile: int | None = None) -> Metric[float]:
     """Return the mean of the final estimates minus the true abilities, with its Monte Carlo error.
@@ -1321,12 +1326,51 @@ class SimulationResult:
         to 9.
     """
     rows = self._rows(decile)
-    if not rows.size:
-      return Metric(math.nan, math.nan)
+    return self._overlap(rows) if rows.size else Metric(math.nan, math.nan)
+
+  def _overlap(self, rows: IntArray) -> Metric[float] | None:
+    """Return the overlap rate of the sessions at ``rows``, or None unless they all gave as many items, at least one."""
     tests = [self.sessions[row].administered_items for row in rows]
     if not tests[0] or any(len(test) != len(tests[0]) for test in tests):
       return None
     return metrics.overlap_rate(numpy.array(tests), self.item_bank.n_items)
+
+  def _group_table(self, groups: Sequence[IntArray]) -> dict[str, numpy.ndarray]:
+    """Return the size, mean true ability and metrics of each group of sessions, given by positions.
+
+    A group with no session has NaN for every float, and the overlap rate is NaN for a group whose
+    tests differ in length.
+
+    Parameters
+    ----------
+    groups : Sequence[numpy.ndarray]
+        The positions of each group's sessions.
+
+    Returns
+    -------
+    dict[str, numpy.ndarray]
+        ``n_sessions``, ``true_theta``, then each metric followed by its Monte Carlo error.
+    """
+    true_thetas = cast("FloatArray", self.true_thetas)
+    thetas, lengths, ses = self._final_thetas(), self._test_lengths(), self._final_ses()
+    columns: dict[str, Callable[[IntArray], Metric[float] | None]] = {
+      "bias": lambda rows: metrics.bias(true_thetas[rows], thetas[rows]),
+      "mse": lambda rows: metrics.mse(true_thetas[rows], thetas[rows]),
+      "rmse": lambda rows: metrics.rmse(true_thetas[rows], thetas[rows]),
+      "test_length": lambda rows: metrics.mean(lengths[rows]),
+      "se": lambda rows: metrics.mean(ses[rows]),
+      "overlap_rate": self._overlap,
+    }
+    table = {
+      "n_sessions": numpy.array([rows.size for rows in groups], dtype=int),
+      "true_theta": numpy.array([true_thetas[rows].mean() if rows.size else math.nan for rows in groups]),
+    }
+    for name, metric in columns.items():
+      results = [metric(rows) if rows.size else None for rows in groups]
+      values = [Metric(math.nan, math.nan) if result is None else result for result in results]
+      table[name] = numpy.array([value.value for value in values], dtype=float)
+      table[f"{name}_mc_se"] = numpy.array([value.mc_se for value in values], dtype=float)
+    return table
 
   def _test_lengths(self) -> IntArray:
     """Return how many items each session administered."""
