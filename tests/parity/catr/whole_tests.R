@@ -5,18 +5,20 @@
 # with the range and prior of estimation.R) and catR's precision and length rules, which stop the
 # test at whichever holds first. catR starts with no early item (nrItems = 0) at ability 0, so the
 # selection rule chooses the first item at that ability with no responses, as catsim's
-# FixedPointInitializer(0) and selector do. The cases whose configuration ends in "_start_items"
-# start as catR does by default instead, with one early item, which startItems chooses at ability 0
-# by the test's own criterion (startSelect = "MFI" or "bOpt"). ML takes constantPatt = "var",
-# Dodd's step from the previous estimate toward the bank's range of difficulties, which catsim's
-# NumericalSearchEstimator always takes (ADR-0018); the other estimators keep catR's default, their
-# own estimate for constant patterns.
+# FixedPointInitializer(0) and selector do. catR's default start, one early item that startItems
+# chooses at ability 0 by the test's own criterion (startSelect = "MFI" or "bOpt"), is checked to
+# give the same tests for the MFI and bOpt cases with ML and EAP on the small bank, so those cases
+# stand for it too. ML takes constantPatt = "var", Dodd's step from the previous estimate toward
+# the bank's range of difficulties, which catsim's NumericalSearchEstimator always takes
+# (ADR-0018); the other estimators keep catR's default, their own estimate for constant patterns.
 #
 # "thetas" are the estimates in order, the starting ability first, "ses" the standard error after
 # each response and "se_slopes" its derivative in the ability, as in estimation.R. Every choice and
 # stopping decision of a case is checked to be robust to the estimates' tolerance: the same item is
-# chosen at an estimate moved by WHOLE_TEST_TOLERANCE either way, and no standard error lies within
-# that tolerance, times its slope plus 1, of the precision threshold.
+# chosen at an estimate moved by WHOLE_TEST_TOLERANCE either way, and neither catR's standard error
+# nor catsim's lies within that tolerance, times its slope plus 1, of the precision threshold.
+# They differ only where catR's is infinite, for ML on a constant pattern: catsim then reports the
+# Fisher standard error at Dodd's estimate, which is semTheta's without constantPatt.
 
 # thetaEst's uniroot tolerance, 2^-13, plus catsim's, 1e-6: test_parity_catr.py's _ESTIMATE_ATOL
 WHOLE_TEST_TOLERANCE <- 2^-13 + 1e-6
@@ -72,16 +74,17 @@ whole_test_case <- function(bank_name, examinees, examinee, criterion_name, esti
   ses <- if (start_items) result$seProv else result$seProv[-1]
   stopifnot(length(thetas) == length(items) + 1L, length(ses) == length(items))
 
-  se_at <- function(k, theta) {
+  se_at <- function(k, theta, constant_pattern = estimator$constantPatt) {
     semTheta(theta, rbind(bank[items[seq_len(k)], ]), x[seq_len(k)],
       method = estimator$method, priorDist = estimator$priorDist, priorPar = estimator$priorPar,
-      parInt = GRID, constantPatt = estimator$constantPatt
+      parInt = GRID, constantPatt = constant_pattern
     )
   }
   step <- 1e-5
+  slope_at <- function(k, ...) (se_at(k, thetas[k + 1L] + step, ...) - se_at(k, thetas[k + 1L] - step, ...)) / (2 * step)
   slopes <- sapply(seq_along(items), function(k) {
     stopifnot(identical(se_at(k, thetas[k + 1L]), ses[k]))
-    if (is.finite(ses[k])) (se_at(k, thetas[k + 1L] + step) - se_at(k, thetas[k + 1L] - step)) / (2 * step) else 0
+    if (is.finite(ses[k])) slope_at(k) else 0
   })
 
   for (k in seq_along(items)) {
@@ -95,17 +98,20 @@ whole_test_case <- function(bank_name, examinees, examinee, criterion_name, esti
     }
   }
   precision <- recorded$stop$thr[recorded$stop$rule == "precision"]
-  finite <- is.finite(ses)
-  stopifnot(abs(ses[finite] - precision) > WHOLE_TEST_TOLERANCE * (abs(slopes[finite]) + 1))
+  catsim_ses <- ses
+  catsim_slopes <- slopes
+  for (k in which(!is.finite(ses))) {
+    catsim_ses[k] <- se_at(k, thetas[k + 1L], constant_pattern = NULL)
+    catsim_slopes[k] <- slope_at(k, constant_pattern = NULL)
+  }
+  stopifnot(abs(catsim_ses - precision) > WHOLE_TEST_TOLERANCE * (abs(catsim_slopes) + 1))
 
-  configuration <- paste0(criterion_name, "_", estimator_name, if (start_items) "_start_items" else "")
   case <- list(
-    id = paste(configuration, bank_name, examinees$labels[examinee], sep = "/"),
+    id = paste(paste0(criterion_name, "_", estimator_name), bank_name, examinees$labels[examinee], sep = "/"),
     bank = bank_name,
     examinee = examinee - 1L,
     criterion = criterion,
     method = estimator$method,
-    start_items = start_items,
     rules = as_array(recorded$stop$rule),
     thresholds = as_array(recorded$stop$thr),
     items = as_array(as.integer(items) - 1L),
@@ -133,11 +139,14 @@ whole_test_cases <- function() {
       }
     }
   }
-  # startItems has MFI and bOpt rules, not MLWI
+  # catR's default start gives the same tests as no early item; startItems has MFI and bOpt rules,
+  # not MLWI
+  by_id <- setNames(cases, vapply(cases, function(case) case$id, ""))
   for (criterion_name in c("mfi", "bopt")) {
     for (estimator_name in c("ml", "eap")) {
       for (examinee in seq_along(examinees$selection$labels)) {
-        add(whole_test_case("selection", examinees$selection, examinee, criterion_name, estimator_name, start_items = TRUE))
+        early <- whole_test_case("selection", examinees$selection, examinee, criterion_name, estimator_name, start_items = TRUE)
+        stopifnot(identical(early, by_id[[early$id]]))
       }
     }
   }

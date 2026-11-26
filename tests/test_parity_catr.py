@@ -581,9 +581,10 @@ class TestWholeTests:
 
   Each case is one recorded examinee's test with MFI, bOpt or MLWI selection, the ML, BM, EAP or WL estimator of
   TestEstimators and catR's precision and length rules. catR starts with no early item at ability 0, as catsim's
-  FixedPointInitializer(0) does, or, in the ``_start_items`` configurations, with one early item, as by default, which
-  startItems chooses at ability 0 by the test's own criterion. generate.R checks that every choice and stopping
-  decision survives a change of the estimate by the estimates' tolerance, so the cases do not hinge on the last digits.
+  FixedPointInitializer(0) does; generate.R checks that catR's default start, one early item that startItems chooses at
+  ability 0 by the test's own criterion, gives the same MFI and bOpt tests. It also checks that every choice and
+  stopping decision survives a change of the estimate by the estimates' tolerance, so the cases do not hinge on the
+  last digits.
   """
 
   @pytest.mark.parametrize("case", _cases(_WHOLE_TESTS, "whole_test_items"))
@@ -612,7 +613,8 @@ class TestWholeTests:
 
     They are compared as in TestEstimators, except where ML's pattern is still constant: there catR reports an infinite
     standard error and catsim the Fisher one at Dodd's estimate, the departure TestEstimators records for
-    ml_dodd/one_correct. The test checks that catR's is infinite exactly there.
+    ml_dodd/one_correct. The test checks that catR's is infinite exactly there, which is all it checks for the
+    all_correct examinee under ML, whose pattern stays constant.
     """
     standard_errors = np.array([estimate.se for estimate in _whole_test_session(case).estimates[1:]])
     expected = _floats(case["ses"])
@@ -707,6 +709,7 @@ class TestSimulations:
   catR's start at ability 0, EAP estimation on its grid and the same stopping rules, each with its own random numbers:
   catsim's from a fixed seed, catR's as simulations.R describes. A statistic agrees when the two differ by at most
   _SIMULATION_Z standard errors of their difference.
+
   """
 
   @pytest.mark.parametrize("case", _cases(_SIMULATIONS, "simulation_bias"))
