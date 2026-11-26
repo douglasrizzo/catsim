@@ -121,11 +121,12 @@ for fixed-length tests, such as those of a `MaxLengthStopper` alone.
 
 ## Read the Tables
 
-The result also gives three tables, each a dict of NumPy columns of equal length, which
+The result also gives four tables, each a dict of NumPy columns of equal length, which
 `pandas.DataFrame(result.steps())` and the CSV writers take as they are. `examinees()`, used above,
 has one row per examinee; `steps()` one row per examinee and item given, with the item's index and
-name, the response and the estimate after it; and `deciles()` the metrics by decile of the true
-ability:
+name, the response and the estimate after it; `deciles()` the metrics by decile of the true
+ability; and `ability_levels()` the same metrics at each distinct true ability, for a design that
+gives many examinees each of a few abilities, which deciles would group unevenly:
 
 ```python
 print(list(result.steps()))
@@ -272,7 +273,12 @@ standard error on each side, the difficulty of each item given and the true abil
 narrows as items are given, and the test ends when the standard error reaches the target. The
 second figure draws each item's exposure rate at its difficulty. In this run, the items given most
 are among the most discriminating, with difficulties near the middle of the population, and more
-than half of the bank is never given. {py:mod}`catsim.plot` lists the other plots.
+than half of the bank is never given.
+
+For a study, {py:func}`~catsim.plot.metric_by_ability` draws a column of `deciles()` with its Monte
+Carlo error bars, and {py:func}`~catsim.plot.recovery` the final estimates against the true
+abilities. Runs drawn on the same axes, each with its `label`, compare. {py:mod}`catsim.plot` lists
+the other plots.
 
 The figures in this documentation use its own style, {download}`figures.mplstyle <_static/figures.mplstyle>`:
 STIX text and math, ticks inside a closed box and matplotlib's Petroff 10 colours. catsim's plots

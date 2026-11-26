@@ -577,11 +577,12 @@ for fixed-length tests, such as those of a <code class="docutils literal notrans
 </section>
 <section id="read-the-tables">
 <h2>Read the Tables<a class="headerlink" href="#read-the-tables" title="Link to this heading">#</a></h2>
-<p>The result also gives three tables, each a dict of NumPy columns of equal length, which
+<p>The result also gives four tables, each a dict of NumPy columns of equal length, which
 <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame(result.steps())</span></code> and the CSV writers take as they are. <code class="docutils literal notranslate"><span class="pre">examinees()</span></code>, used above,
 has one row per examinee; <code class="docutils literal notranslate"><span class="pre">steps()</span></code> one row per examinee and item given, with the item’s index and
-name, the response and the estimate after it; and <code class="docutils literal notranslate"><span class="pre">deciles()</span></code> the metrics by decile of the true
-ability:</p>
+name, the response and the estimate after it; <code class="docutils literal notranslate"><span class="pre">deciles()</span></code> the metrics by decile of the true
+ability; and <code class="docutils literal notranslate"><span class="pre">ability_levels()</span></code> the same metrics at each distinct true ability, for a design that
+gives many examinees each of a few abilities, which deciles would group unevenly:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">steps</span><span class="p">()))</span>
 <span class="n">deciles</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">deciles</span><span class="p">()</span>
 <span class="k">for</span> <span class="n">decile</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">):</span>
@@ -717,7 +718,11 @@ standard error on each side, the difficulty of each item given and the true abil
 narrows as items are given, and the test ends when the standard error reaches the target. The
 second figure draws each item’s exposure rate at its difficulty. In this run, the items given most
 are among the most discriminating, with difficulties near the middle of the population, and more
-than half of the bank is never given. <a class="reference internal" href="api/plot.html#module-catsim.plot" title="catsim.plot"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a> lists the other plots.</p>
+than half of the bank is never given.</p>
+<p>For a study, <a class="reference internal" href="api/plot.html#catsim.plot.metric_by_ability" title="catsim.plot.metric_by_ability"><code class="xref py py-func docutils literal notranslate"><span class="pre">metric_by_ability()</span></code></a> draws a column of <code class="docutils literal notranslate"><span class="pre">deciles()</span></code> with its Monte
+Carlo error bars, and <a class="reference internal" href="api/plot.html#catsim.plot.recovery" title="catsim.plot.recovery"><code class="xref py py-func docutils literal notranslate"><span class="pre">recovery()</span></code></a> the final estimates against the true
+abilities. Runs drawn on the same axes, each with its <code class="docutils literal notranslate"><span class="pre">label</span></code>, compare. <a class="reference internal" href="api/plot.html#module-catsim.plot" title="catsim.plot"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a> lists
+the other plots.</p>
 <p>The figures in this documentation use its own style, <a class="reference download internal" download="" href="_downloads/12d9388a5fec835393de70069916c0cd/figures.mplstyle"><code class="xref download docutils literal notranslate"><span class="pre">figures.mplstyle</span></code></a>:
 STIX text and math, ticks inside a closed box and matplotlib’s Petroff 10 colours. catsim’s plots
 take whichever matplotlib style is in effect, so <code class="docutils literal notranslate"><span class="pre">plt.style.use(&quot;figures.mplstyle&quot;)</span></code>, with the path

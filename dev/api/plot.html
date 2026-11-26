@@ -44,6 +44,8 @@
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../_static/design-tabs.js?v=fcb327ea"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/plot';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/favicon.svg"/>
@@ -464,7 +466,7 @@
                   
   <section class="tex2jax_ignore mathjax_ignore" id="module-catsim.plot">
 <span id="plotting-functions-catsim-plot"></span><h1>Plotting Functions – <a class="reference internal" href="#module-catsim.plot" title="catsim.plot"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a><a class="headerlink" href="#module-catsim.plot" title="Link to this heading">#</a></h1>
-<p>Plots of items, exposure rates and CAT sessions, drawn with matplotlib.</p>
+<p>Plots of items, item banks, CAT sessions and simulation results, drawn with matplotlib.</p>
 <p>The module needs matplotlib, which the plot extra installs: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">'catsim[plot]'</span></code>. Each
 function takes its data first, as plain catsim objects, and its options as keyword-only arguments,
 draws on the <code class="docutils literal notranslate"><span class="pre">ax</span></code> it is given or on the axes of a new figure, and returns the axes it drew on
@@ -477,6 +479,10 @@ numbers, as each function’s description says.</p>
 colours, title size and grid. matplotlib fixes most of an axes’ look when the axes are made, so
 make <code class="docutils literal notranslate"><span class="pre">ax</span></code> under the style the plot should take. A second y axis, on the right, draws its spine
 and no grid.</p>
+<p>A plot that takes a <code class="docutils literal notranslate"><span class="pre">label</span></code> draws one run, item set or session in the next colour of the axes:
+drawing several on the same axes, each with its <code class="docutils literal notranslate"><span class="pre">label</span></code>, and calling <code class="docutils literal notranslate"><span class="pre">ax.legend()</span></code> compares
+them. A plot that compares estimates with true abilities raises ValueError for a result without
+them, before any figure is created.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.plot.PlotType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.plot.</span></span><span class="sig-name descname"><span class="pre">PlotType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/plot.html#PlotType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.plot.PlotType" title="Link to this definition">#</a></dt>
@@ -496,6 +502,102 @@ and no grid.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="catsim.plot.bank_information">
+<span class="sig-prename descclassname"><span class="pre">catsim.plot.</span></span><span class="sig-name descname"><span class="pre">bank_information</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.item_bank.ItemBank"><span class="pre">ItemBank</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">se</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a></span></span><a class="reference internal" href="../_modules/catsim/plot.html#bank_information"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.plot.bank_information" title="Link to this definition">#</a></dt>
+<dd><p>Plot the information of an item bank, or of some of its items, against ability, with its standard error.</p>
+<p>The information <span class="math notranslate nohighlight">\(I(\theta)\)</span> is the sum of the items’ information, from -4 to 4. For a whole
+bank it bounds what a test drawn from it can measure; with <code class="docutils literal notranslate"><span class="pre">items</span></code> it is the information of that
+fixed set of items. With <code class="docutils literal notranslate"><span class="pre">se</span></code>, the standard error <span class="math notranslate nohighlight">\(1/\sqrt{I(\theta)}\)</span> goes on a second y
+axis, on the right, and each axis takes its curve’s colour. To compare sets of items on one axes,
+pass <code class="docutils literal notranslate"><span class="pre">se=False</span></code> and a <code class="docutils literal notranslate"><span class="pre">label</span></code> with each.</p>
+<figure class="align-default" id="id1">
+<img alt="../_images/plot-1.svg" class="plot-directive" src="../_images/plot-1.svg" />
+<figcaption>
+<p><span class="caption-number">Fig. 9 </span><span class="caption-text">The information of a 100-item bank, with its standard error.</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>The item bank.</p>
+</dd>
+<dt><strong>items</strong><span class="classifier">array-like or None, optional</span></dt><dd><p>The positions of the items to sum, distinct integers of <code class="docutils literal notranslate"><span class="pre">item_bank</span></code>. Default is None, which
+sums every item of the bank.</p>
+</dd>
+<dt><strong>se</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether to draw the standard error on a second y axis. Default is True.</p>
+</dd>
+<dt><strong>ax</strong><span class="classifier">matplotlib.axes.Axes or None, optional</span></dt><dd><p>The axes to draw on. Default is None, which draws on the axes of a new figure.</p>
+</dd>
+<dt><strong>title</strong><span class="classifier">str or None, optional</span></dt><dd><p>The plot title. Default is None, which sets none.</p>
+</dd>
+<dt><strong>label</strong><span class="classifier">str or None, optional</span></dt><dd><p>The information curve’s label, for a legend. Default is None, which sets none.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>matplotlib.axes.Axes</dt><dd><p>The axes of the information. The standard error is drawn on their twin, which shares the x axis.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>TypeError</dt><dd><p>If an entry of <code class="docutils literal notranslate"><span class="pre">items</span></code> is not an integer, before any figure is created.</p>
+</dd>
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">items</span></code> is empty, repeats an item or names one outside the bank, before any figure is created.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.plot.expected_score">
+<span class="sig-prename descclassname"><span class="pre">catsim.plot.</span></span><span class="sig-name descname"><span class="pre">expected_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.item_bank.ItemBank"><span class="pre">ItemBank</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a></span></span><a class="reference internal" href="../_modules/catsim/plot.html#expected_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.plot.expected_score" title="Link to this definition">#</a></dt>
+<dd><p>Plot the expected proportion of correct responses to an item bank, or to some of its items, against ability.</p>
+<p>The proportion is the mean of the items’ characteristic curves, from -4 to 4: the test
+characteristic curve divided by the number of items, so that sets of any size share one scale,
+from 0 to 1.</p>
+<figure class="align-default" id="id3">
+<img alt="../_images/plot-2.svg" class="plot-directive" src="../_images/plot-2.svg" />
+<figcaption>
+<p><span class="caption-number">Fig. 11 </span><span class="caption-text">The expected proportion correct of a 100-item bank and of its first 20 items.</span><a class="headerlink" href="#id3" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>The item bank.</p>
+</dd>
+<dt><strong>items</strong><span class="classifier">array-like or None, optional</span></dt><dd><p>The positions of the items to average, distinct integers of <code class="docutils literal notranslate"><span class="pre">item_bank</span></code>. Default is None,
+which averages every item of the bank.</p>
+</dd>
+<dt><strong>ax</strong><span class="classifier">matplotlib.axes.Axes or None, optional</span></dt><dd><p>The axes to draw on. Default is None, which draws on the axes of a new figure.</p>
+</dd>
+<dt><strong>title</strong><span class="classifier">str or None, optional</span></dt><dd><p>The plot title. Default is None, which sets none.</p>
+</dd>
+<dt><strong>label</strong><span class="classifier">str or None, optional</span></dt><dd><p>The curve’s label, for a legend. Default is None, which sets none.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>matplotlib.axes.Axes</dt><dd><p>The axes the plot is on.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>TypeError</dt><dd><p>If an entry of <code class="docutils literal notranslate"><span class="pre">items</span></code> is not an integer, before any figure is created.</p>
+</dd>
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">items</span></code> is empty, repeats an item or names one outside the bank, before any figure is created.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="catsim.plot.item_curve">
 <span class="sig-prename descclassname"><span class="pre">catsim.plot.</span></span><span class="sig-name descname"><span class="pre">item_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.item_bank.ItemBank"><span class="pre">ItemBank</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#catsim.plot.PlotType" title="catsim.plot.PlotType"><span class="pre">PlotType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PlotType.ICC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a></span></span><a class="reference internal" href="../_modules/catsim/plot.html#item_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.plot.item_curve" title="Link to this definition">#</a></dt>
 <dd><p>Plot an item’s characteristic curve, its information curve, or both.</p>
@@ -503,10 +605,10 @@ and no grid.</p>
 upper left corner gives the item’s name and parameters. With <code class="docutils literal notranslate"><span class="pre">PlotType.BOTH</span></code> the information
 curve has its own y axis, on the right, and the two curves take the first two colours of the
 style.</p>
-<figure class="align-default" id="id1">
-<img alt="../_images/plot-1.svg" class="plot-directive" src="../_images/plot-1.svg" />
+<figure class="align-default" id="id5">
+<img alt="../_images/plot-3.svg" class="plot-directive" src="../_images/plot-3.svg" />
 <figcaption>
-<p><span class="caption-number">Fig. 9 </span><span class="caption-text">One item’s characteristic and information curves, apart and together. The dot marks its peak.</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 13 </span><span class="caption-text">One item’s characteristic and information curves, apart and together. The dot marks its peak.</span><a class="headerlink" href="#id5" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <dl class="field-list simple">
@@ -549,17 +651,17 @@ one of its values, before any figure is created.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.plot.item_exposure">
-<span class="sig-prename descclassname"><span class="pre">catsim.plot.</span></span><span class="sig-name descname"><span class="pre">item_exposure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exposure_rates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.item_bank.ItemBank"><span class="pre">ItemBank</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a></span></span><a class="reference internal" href="../_modules/catsim/plot.html#item_exposure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.plot.item_exposure" title="Link to this definition">#</a></dt>
-<dd><p>Plot the exposure rate of each item: in item order, against an item parameter, or as a histogram.</p>
-<p>In item order, the x axis names each item, or ticks item indices in a bank of more than 30 items.
-With <code class="docutils literal notranslate"><span class="pre">par</span></code>, the items are sorted by that parameter and each item’s exposure rate is drawn at its
-value, which shows which items a selector favours; items of close parameters crowd together there,
-so their names are left out. With <code class="docutils literal notranslate"><span class="pre">hist=True</span></code>, the plot counts the items in each range of
-exposure rates.</p>
-<figure class="align-default" id="id3">
-<img alt="../_images/plot-2.svg" class="plot-directive" src="../_images/plot-2.svg" />
+<span class="sig-prename descclassname"><span class="pre">catsim.plot.</span></span><span class="sig-name descname"><span class="pre">item_exposure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exposure_rates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.item_bank.ItemBank"><span class="pre">ItemBank</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a></span></span><a class="reference internal" href="../_modules/catsim/plot.html#item_exposure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.plot.item_exposure" title="Link to this definition">#</a></dt>
+<dd><p>Plot the items’ exposure rates: from the most to the least exposed, against an item parameter, or as a histogram.</p>
+<p>By default the items are sorted from the most to the least exposed, which shows how evenly a run
+uses its bank and where an exposure cap holds the rates; the x axis names each item, or counts them
+in a bank of more than 30 items. With <code class="docutils literal notranslate"><span class="pre">par</span></code>, each item is a point at its value of that
+parameter, which shows which items a selector favours. With <code class="docutils literal notranslate"><span class="pre">hist=True</span></code>, the plot counts the
+items in each range of exposure rates.</p>
+<figure class="align-default" id="id7">
+<img alt="../_images/plot-4.svg" class="plot-directive" src="../_images/plot-4.svg" />
 <figcaption>
-<p><span class="caption-number">Fig. 11 </span><span class="caption-text">The exposure rates of a simulation, as a histogram and against the item difficulty.</span><a class="headerlink" href="#id3" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 15 </span><span class="caption-text">The exposure rates of a simulation, sorted and against the item difficulty.</span><a class="headerlink" href="#id7" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <dl class="field-list simple">
@@ -571,13 +673,15 @@ exposure rates.</p>
 <dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>The item bank the rates belong to, which holds the items’ names and parameters.</p>
 </dd>
 <dt><strong>par</strong><span class="classifier">str or None, optional</span></dt><dd><p>The item parameter to plot the rates against: <code class="docutils literal notranslate"><span class="pre">&quot;a&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;b&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;c&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;d&quot;</span></code>. Default is
-None, which plots the rates in item bank order.</p>
+None, which sorts the items from the most to the least exposed.</p>
 </dd>
 <dt><strong>hist</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether to draw a histogram of the rates. Default is False.</p>
 </dd>
 <dt><strong>ax</strong><span class="classifier">matplotlib.axes.Axes or None, optional</span></dt><dd><p>The axes to draw on. Default is None, which draws on the axes of a new figure.</p>
 </dd>
 <dt><strong>title</strong><span class="classifier">str or None, optional</span></dt><dd><p>The plot title. Default is None, which sets none.</p>
+</dd>
+<dt><strong>label</strong><span class="classifier">str or None, optional</span></dt><dd><p>The rates’ label, for a legend. Default is None, which sets none.</p>
 </dd>
 </dl>
 </dd>
@@ -599,20 +703,276 @@ any figure is created.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="catsim.plot.item_person_map">
+<span class="sig-prename descclassname"><span class="pre">catsim.plot.</span></span><span class="sig-name descname"><span class="pre">item_person_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.item_bank.ItemBank"><span class="pre">ItemBank</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">thetas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a></span></span><a class="reference internal" href="../_modules/catsim/plot.html#item_person_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.plot.item_person_map" title="Link to this definition">#</a></dt>
+<dd><p>Plot examinees’ abilities above the axis and, below it, the abilities where the bank’s items inform most.</p>
+<p>Both histograms share one <span class="math notranslate nohighlight">\(\theta\)</span> scale and its bins, and each shows shares, so a bank and a
+population of any sizes compare: the examinees’ bars sum to 1 above the axis and the items’ bars
+to 1 below it. An item sits at <a class="reference internal" href="item_bank.html#catsim.ItemBank.max_info_thetas" title="catsim.ItemBank.max_info_thetas"><code class="xref py py-attr docutils literal notranslate"><span class="pre">max_info_thetas</span></code></a>, which is its difficulty
+for one- and two-parameter items.</p>
+<figure class="align-default" id="id9">
+<img alt="../_images/plot-5.svg" class="plot-directive" src="../_images/plot-5.svg" />
+<figcaption>
+<p><span class="caption-number">Fig. 17 </span><span class="caption-text">A 100-item bank against a population of 500 examinees.</span><a class="headerlink" href="#id9" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>The item bank.</p>
+</dd>
+<dt><strong>thetas</strong><span class="classifier">array-like</span></dt><dd><p>The examinees’ abilities, true or estimated, as finite numbers.</p>
+</dd>
+<dt><strong>ax</strong><span class="classifier">matplotlib.axes.Axes or None, optional</span></dt><dd><p>The axes to draw on. Default is None, which draws on the axes of a new figure.</p>
+</dd>
+<dt><strong>title</strong><span class="classifier">str or None, optional</span></dt><dd><p>The plot title. Default is None, which sets none.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>matplotlib.axes.Axes</dt><dd><p>The axes the plot is on.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">thetas</span></code> is not a non-empty one-dimensional array of finite numbers, before any figure is
+created.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.plot.length_distribution">
+<span class="sig-prename descclassname"><span class="pre">catsim.plot.</span></span><span class="sig-name descname"><span class="pre">length_distribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="simulation.html#catsim.SimulationResult" title="catsim.simulation.SimulationResult"><span class="pre">SimulationResult</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a></span></span><a class="reference internal" href="../_modules/catsim/plot.html#length_distribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.plot.length_distribution" title="Link to this definition">#</a></dt>
+<dd><p>Plot how many of a run’s sessions administered each number of items.</p>
+<p>Each test length has its own bin, drawn as an outline, so several runs drawn on the same axes stay
+readable over each other. In a variable-length run, the bin at the length cap counts the tests
+that reached the cap.</p>
+<figure class="align-default" id="id11">
+<img alt="../_images/plot-6.svg" class="plot-directive" src="../_images/plot-6.svg" />
+<figcaption>
+<p><span class="caption-number">Fig. 19 </span><span class="caption-text">The test lengths of a variable-length run capped at 30 items.</span><a class="headerlink" href="#id11" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>result</strong><span class="classifier">SimulationResult</span></dt><dd><p>The run.</p>
+</dd>
+<dt><strong>ax</strong><span class="classifier">matplotlib.axes.Axes or None, optional</span></dt><dd><p>The axes to draw on. Default is None, which draws on the axes of a new figure.</p>
+</dd>
+<dt><strong>title</strong><span class="classifier">str or None, optional</span></dt><dd><p>The plot title. Default is None, which sets none.</p>
+</dd>
+<dt><strong>label</strong><span class="classifier">str or None, optional</span></dt><dd><p>The run’s label, for a legend. Default is None, which sets none.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>matplotlib.axes.Axes</dt><dd><p>The axes the plot is on.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.plot.likelihood">
+<span class="sig-prename descclassname"><span class="pre">catsim.plot.</span></span><span class="sig-name descname"><span class="pre">likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="session.html#catsim.Session" title="catsim.session.Session"><span class="pre">Session</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.item_bank.ItemBank"><span class="pre">ItemBank</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a></span></span><a class="reference internal" href="../_modules/catsim/plot.html#likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.plot.likelihood" title="Link to this definition">#</a></dt>
+<dd><p>Plot the likelihood of a session’s responses across abilities, relative to its maximum, with its final estimate.</p>
+<p>The curve is the likelihood of the responses to the administered items, divided by its maximum,
+from -6 to 6, the range catsim’s estimators keep their estimates in. A dashed line in the curve’s
+colour marks the session’s final estimate and, when it is given, a dotted black line the true
+ability. Responses that are all correct, or all incorrect, have no maximum inside the range, so
+their curve rises to its edge.</p>
+<figure class="align-default" id="id13">
+<img alt="../_images/plot-7.svg" class="plot-directive" src="../_images/plot-7.svg" />
+<figcaption>
+<p><span class="caption-number">Fig. 21 </span><span class="caption-text">The likelihood of one simulated session’s responses.</span><a class="headerlink" href="#id13" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>session</strong><span class="classifier">Session</span></dt><dd><p>The session whose responses to plot, such as an entry of <code class="docutils literal notranslate"><span class="pre">SimulationResult.sessions</span></code>.</p>
+</dd>
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>The item bank the session’s items come from.</p>
+</dd>
+<dt><strong>true_theta</strong><span class="classifier">float or None, optional</span></dt><dd><p>The examinee’s true ability, marked by a dotted line. Default is None, which marks none.</p>
+</dd>
+<dt><strong>ax</strong><span class="classifier">matplotlib.axes.Axes or None, optional</span></dt><dd><p>The axes to draw on. Default is None, which draws on the axes of a new figure.</p>
+</dd>
+<dt><strong>title</strong><span class="classifier">str or None, optional</span></dt><dd><p>The plot title. Default is None, which sets none.</p>
+</dd>
+<dt><strong>label</strong><span class="classifier">str or None, optional</span></dt><dd><p>The curve’s label, for a legend. Default is None, which sets none.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>matplotlib.axes.Axes</dt><dd><p>The axes the plot is on.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If an administered item is not an item of <code class="docutils literal notranslate"><span class="pre">item_bank</span></code>, before any figure is created.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.plot.metric_by_ability">
+<span class="sig-prename descclassname"><span class="pre">catsim.plot.</span></span><span class="sig-name descname"><span class="pre">metric_by_ability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="simulation.html#catsim.SimulationResult" title="catsim.simulation.SimulationResult"><span class="pre">SimulationResult</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'rmse'</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a></span></span><a class="reference internal" href="../_modules/catsim/plot.html#metric_by_ability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.plot.metric_by_ability" title="Link to this definition">#</a></dt>
+<dd><p>Plot a run’s metric in each decile of the true ability, or at each distinct true ability, with its error bars.</p>
+<p>Each point is a group’s metric at its mean true ability, from the result’s
+<a class="reference internal" href="simulation.html#catsim.SimulationResult.deciles" title="catsim.SimulationResult.deciles"><code class="xref py py-meth docutils literal notranslate"><span class="pre">deciles()</span></code></a>, or with <code class="docutils literal notranslate"><span class="pre">levels=True</span></code> from its
+<a class="reference internal" href="simulation.html#catsim.SimulationResult.ability_levels" title="catsim.SimulationResult.ability_levels"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ability_levels()</span></code></a>, which suits designs of a few fixed abilities. The
+bars span one Monte Carlo standard error on each side, and the bias gets a line at 0.</p>
+<figure class="align-default" id="id15">
+<img alt="../_images/plot-8.svg" class="plot-directive" src="../_images/plot-8.svg" />
+<figcaption>
+<p><span class="caption-number">Fig. 23 </span><span class="caption-text">The RMSE in each decile of the true ability, for two selectors.</span><a class="headerlink" href="#id15" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>result</strong><span class="classifier">SimulationResult</span></dt><dd><p>The run, with its examinees’ true abilities.</p>
+</dd>
+<dt><strong>metric</strong><span class="classifier">str, optional</span></dt><dd><p>The metric: <code class="docutils literal notranslate"><span class="pre">&quot;bias&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;mse&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;rmse&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;se&quot;</span></code> (the mean standard error),
+<code class="docutils literal notranslate"><span class="pre">&quot;test_length&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;overlap_rate&quot;</span></code>. Default is <code class="docutils literal notranslate"><span class="pre">&quot;rmse&quot;</span></code>.</p>
+</dd>
+<dt><strong>levels</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether to group the sessions by distinct true ability rather than by decile. Default is False.</p>
+</dd>
+<dt><strong>ax</strong><span class="classifier">matplotlib.axes.Axes or None, optional</span></dt><dd><p>The axes to draw on. Default is None, which draws on the axes of a new figure.</p>
+</dd>
+<dt><strong>title</strong><span class="classifier">str or None, optional</span></dt><dd><p>The plot title. Default is None, which sets none.</p>
+</dd>
+<dt><strong>label</strong><span class="classifier">str or None, optional</span></dt><dd><p>The run’s label, for a legend. Default is None, which sets none.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>matplotlib.axes.Axes</dt><dd><p>The axes the plot is on.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">metric</span></code> is not one of the metrics above, or the result has no true abilities, before any
+figure is created.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.plot.metric_by_length">
+<span class="sig-prename descclassname"><span class="pre">catsim.plot.</span></span><span class="sig-name descname"><span class="pre">metric_by_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="simulation.html#catsim.SimulationResult" title="catsim.simulation.SimulationResult"><span class="pre">SimulationResult</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'rmse'</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a></span></span><a class="reference internal" href="../_modules/catsim/plot.html#metric_by_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.plot.metric_by_length" title="Link to this definition">#</a></dt>
+<dd><p>Plot a run’s metric after each number of items administered, with a band of one Monte Carlo standard error.</p>
+<p>Every session counts after every number of items: one that stopped earlier counts at its final
+estimate, so a variable-length run is not judged on its longest tests alone. The metric is the
+bias, MSE or RMSE of the estimates, which need the true abilities, or their mean standard error.</p>
+<figure class="align-default" id="id17">
+<img alt="../_images/plot-9.svg" class="plot-directive" src="../_images/plot-9.svg" />
+<figcaption>
+<p><span class="caption-number">Fig. 25 </span><span class="caption-text">The RMSE and the mean standard error after each item.</span><a class="headerlink" href="#id17" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>result</strong><span class="classifier">SimulationResult</span></dt><dd><p>The run.</p>
+</dd>
+<dt><strong>metric</strong><span class="classifier">str, optional</span></dt><dd><p>The metric: <code class="docutils literal notranslate"><span class="pre">&quot;bias&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;mse&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;rmse&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;se&quot;</span></code> (the mean standard error). Default
+is <code class="docutils literal notranslate"><span class="pre">&quot;rmse&quot;</span></code>.</p>
+</dd>
+<dt><strong>ax</strong><span class="classifier">matplotlib.axes.Axes or None, optional</span></dt><dd><p>The axes to draw on. Default is None, which draws on the axes of a new figure.</p>
+</dd>
+<dt><strong>title</strong><span class="classifier">str or None, optional</span></dt><dd><p>The plot title. Default is None, which sets none.</p>
+</dd>
+<dt><strong>label</strong><span class="classifier">str or None, optional</span></dt><dd><p>The run’s label, for a legend. Default is None, which sets none.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>matplotlib.axes.Axes</dt><dd><p>The axes the plot is on.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">metric</span></code> is not one of the metrics above, or is the bias, MSE or RMSE of a result without
+true abilities, before any figure is created.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.plot.recovery">
+<span class="sig-prename descclassname"><span class="pre">catsim.plot.</span></span><span class="sig-name descname"><span class="pre">recovery</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="simulation.html#catsim.SimulationResult" title="catsim.simulation.SimulationResult"><span class="pre">SimulationResult</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a></span></span><a class="reference internal" href="../_modules/catsim/plot.html#recovery"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.plot.recovery" title="Link to this definition">#</a></dt>
+<dd><p>Plot each examinee’s final ability estimate against their true ability, with the run’s RMSE and bias.</p>
+<p>The dashed line marks estimates equal to the true ability, so points above it are overestimates. A
+box in the upper left corner gives the RMSE and the bias, each with its Monte Carlo standard error.</p>
+<figure class="align-default" id="id19">
+<img alt="../_images/plot-10.svg" class="plot-directive" src="../_images/plot-10.svg" />
+<figcaption>
+<p><span class="caption-number">Fig. 27 </span><span class="caption-text">The final estimates of 300 simulated examinees against their true abilities.</span><a class="headerlink" href="#id19" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>result</strong><span class="classifier">SimulationResult</span></dt><dd><p>The run, with its examinees’ true abilities.</p>
+</dd>
+<dt><strong>ax</strong><span class="classifier">matplotlib.axes.Axes or None, optional</span></dt><dd><p>The axes to draw on. Default is None, which draws on the axes of a new figure.</p>
+</dd>
+<dt><strong>title</strong><span class="classifier">str or None, optional</span></dt><dd><p>The plot title. Default is None, which sets none.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>matplotlib.axes.Axes</dt><dd><p>The axes the plot is on.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If the result has no true abilities, before any figure is created.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="catsim.plot.session_progress">
 <span class="sig-prename descclassname"><span class="pre">catsim.plot.</span></span><span class="sig-name descname"><span class="pre">session_progress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="session.html#catsim.Session" title="catsim.session.Session"><span class="pre">Session</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.item_bank.ItemBank"><span class="pre">ItemBank</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">Axes</span></a></span></span><a class="reference internal" href="../_modules/catsim/plot.html#session_progress"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.plot.session_progress" title="Link to this definition">#</a></dt>
 <dd><p>Plot how a session’s ability estimate and its standard error change as items are administered.</p>
 <p>The x axis counts the items administered. While the session has at most 30 items, its ticks name
 the item given at each step instead, and the initial estimate, at 0, has none, so a session with
-no items has no ticks. The left y axis shows the ability estimate after each response, with a
-band of one standard error on each side, the difficulty of each administered item and, when it is
-given, the true ability. The right y axis shows the standard error each estimate was recorded
-with, the one precision-based stoppers judge. Infinite standard errors, such as the initial
-estimate’s, are left out.</p>
-<figure class="align-default" id="id5">
-<img alt="../_images/plot-3.svg" class="plot-directive" src="../_images/plot-3.svg" />
+no items has no ticks. The y axis shows the ability estimate after each response, with a band of
+one standard error on each side: the error each estimate was recorded with, the one
+precision-based stoppers judge. An infinite standard error, such as the initial estimate’s, leaves
+the band out. The difficulty of each administered item and, when it is given, the true ability
+share the axis.</p>
+<figure class="align-default" id="id21">
+<img alt="../_images/plot-11.svg" class="plot-directive" src="../_images/plot-11.svg" />
 <figcaption>
-<p><span class="caption-number">Fig. 13 </span><span class="caption-text">One simulated session: the ability estimate after each item, with its standard error.</span><a class="headerlink" href="#id5" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 29 </span><span class="caption-text">One simulated session: the ability estimate after each item, with its standard error.</span><a class="headerlink" href="#id21" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <dl class="field-list simple">
@@ -633,8 +993,7 @@ estimate’s, are left out.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>matplotlib.axes.Axes</dt><dd><p>The axes of the ability scale. The standard error is drawn on their twin, which shares the x
-axis.</p>
+<dt>matplotlib.axes.Axes</dt><dd><p>The axes the plot is on.</p>
 </dd>
 </dl>
 </dd>
@@ -697,8 +1056,16 @@ axis.</p>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.plot.PlotType"><code class="docutils literal notranslate"><span class="pre">PlotType</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.plot.bank_information"><code class="docutils literal notranslate"><span class="pre">bank_information()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.plot.expected_score"><code class="docutils literal notranslate"><span class="pre">expected_score()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.plot.item_curve"><code class="docutils literal notranslate"><span class="pre">item_curve()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.plot.item_exposure"><code class="docutils literal notranslate"><span class="pre">item_exposure()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.plot.item_person_map"><code class="docutils literal notranslate"><span class="pre">item_person_map()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.plot.length_distribution"><code class="docutils literal notranslate"><span class="pre">length_distribution()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.plot.likelihood"><code class="docutils literal notranslate"><span class="pre">likelihood()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.plot.metric_by_ability"><code class="docutils literal notranslate"><span class="pre">metric_by_ability()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.plot.metric_by_length"><code class="docutils literal notranslate"><span class="pre">metric_by_length()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.plot.recovery"><code class="docutils literal notranslate"><span class="pre">recovery()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.plot.session_progress"><code class="docutils literal notranslate"><span class="pre">session_progress()</span></code></a></li>
 </ul>
   </nav></div>

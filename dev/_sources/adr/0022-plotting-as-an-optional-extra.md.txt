@@ -20,7 +20,7 @@ also set a grid and an 18-point title of their own, over whatever style the call
   module, never loads it, and import-linter contracts in `pyproject.toml` check both rules.
 - Importing `catsim.plot` without matplotlib raises an `ImportError` that gives the install command.
 - A plot function takes its data first, as plain catsim objects (an item bank, a session, a
-  result's exposure rates), and its options as keyword-only arguments:
+  simulation result or its exposure rates), and its options as keyword-only arguments:
 
   ```python
   session_progress(session, item_bank, *, ax=None, title=None) -> Axes
@@ -28,6 +28,7 @@ also set a grid and an 18-point title of their own, over whatever style the call
 
 - Every plot function draws on the axes the caller passes as `ax`, or on the axes of a new figure,
   and returns the axes it drew on. None takes a figure size.
+- A plot of one run, item set or session takes a `label`, so that several drawn on one axes compare.
 - A plot follows the caller's matplotlib style: the style sets the fonts, colours, title size and
   grid, and the functions set none of their own. A colour a function takes from the style's cycle
   is fixed when it is called. A second y scale, on the right, draws its spine and no grid.
@@ -39,13 +40,12 @@ also set a grid and an 18-point title of their own, over whatever style the call
 
 - An installation without the extra fails at `import catsim.plot`, with the fix in the message.
 - A figure belongs in `catsim.plot`: no other module can grow a plotting helper.
-- A session plots the same way whether it comes from a simulation result or from an application,
-  since the function reads the session.
+- A session plots the same way whether it comes from a simulation result or from an application.
 - Figures with several panels are laid out by the caller with matplotlib's tools, and each plot
   function fills one axes.
 - A caller sets how plots look with matplotlib's styles alone; without one, plots have no grid.
-- The test suite, the documentation build and the notebooks need matplotlib, so the development and
-  documentation dependency groups include it.
+- The tests, the documentation and the notebooks need matplotlib, which the development and
+  documentation groups install.
 
 ## Alternatives Considered
 
@@ -57,7 +57,6 @@ also set a grid and an 18-point title of their own, over whatever style the call
 - A `figsize` argument: it does nothing when the caller passes `ax`, and `plt.subplots` provides it.
 - Functions that set their own grid and title size: they override the caller's style, and
   `ax.grid()` without arguments toggles the grid, so it removes the grid of a style that has one.
-- A style in the package, or SciencePlots as a dependency, for a look only the documentation needs.
-  SciencePlots also calls matplotlib functions that 3.13 removes.
-- Book typefaces: catsim would ship their files and licenses, and matplotlib sets their math from
-  text italics, with misplaced accents.
+- A style in the package, SciencePlots as a dependency, or book typefaces, for a look only the
+  documentation needs. SciencePlots calls matplotlib functions that 3.13 removes, and catsim would
+  ship the typefaces' files and licenses.

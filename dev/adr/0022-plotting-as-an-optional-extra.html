@@ -497,13 +497,14 @@ also set a grid and an 18-point title of their own, over whatever style the call
 module, never loads it, and import-linter contracts in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> check both rules.</p></li>
 <li><p>Importing <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code> without matplotlib raises an <code class="docutils literal notranslate"><span class="pre">ImportError</span></code> that gives the install command.</p></li>
 <li><p>A plot function takes its data first, as plain catsim objects (an item bank, a session, a
-result’s exposure rates), and its options as keyword-only arguments:</p>
+simulation result or its exposure rates), and its options as keyword-only arguments:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">session_progress</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span>
 </pre></div>
 </div>
 </li>
 <li><p>Every plot function draws on the axes the caller passes as <code class="docutils literal notranslate"><span class="pre">ax</span></code>, or on the axes of a new figure,
 and returns the axes it drew on. None takes a figure size.</p></li>
+<li><p>A plot of one run, item set or session takes a <code class="docutils literal notranslate"><span class="pre">label</span></code>, so that several drawn on one axes compare.</p></li>
 <li><p>A plot follows the caller’s matplotlib style: the style sets the fonts, colours, title size and
 grid, and the functions set none of their own. A colour a function takes from the style’s cycle
 is fixed when it is called. A second y scale, on the right, draws its spine and no grid.</p></li>
@@ -517,13 +518,12 @@ with fonts that ship with matplotlib.</p></li>
 <ul class="simple">
 <li><p>An installation without the extra fails at <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">catsim.plot</span></code>, with the fix in the message.</p></li>
 <li><p>A figure belongs in <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code>: no other module can grow a plotting helper.</p></li>
-<li><p>A session plots the same way whether it comes from a simulation result or from an application,
-since the function reads the session.</p></li>
+<li><p>A session plots the same way whether it comes from a simulation result or from an application.</p></li>
 <li><p>Figures with several panels are laid out by the caller with matplotlib’s tools, and each plot
 function fills one axes.</p></li>
 <li><p>A caller sets how plots look with matplotlib’s styles alone; without one, plots have no grid.</p></li>
-<li><p>The test suite, the documentation build and the notebooks need matplotlib, so the development and
-documentation dependency groups include it.</p></li>
+<li><p>The tests, the documentation and the notebooks need matplotlib, which the development and
+documentation groups install.</p></li>
 </ul>
 </section>
 <section id="alternatives-considered">
@@ -537,10 +537,9 @@ missing installation.</p></li>
 <li><p>A <code class="docutils literal notranslate"><span class="pre">figsize</span></code> argument: it does nothing when the caller passes <code class="docutils literal notranslate"><span class="pre">ax</span></code>, and <code class="docutils literal notranslate"><span class="pre">plt.subplots</span></code> provides it.</p></li>
 <li><p>Functions that set their own grid and title size: they override the caller’s style, and
 <code class="docutils literal notranslate"><span class="pre">ax.grid()</span></code> without arguments toggles the grid, so it removes the grid of a style that has one.</p></li>
-<li><p>A style in the package, or SciencePlots as a dependency, for a look only the documentation needs.
-SciencePlots also calls matplotlib functions that 3.13 removes.</p></li>
-<li><p>Book typefaces: catsim would ship their files and licenses, and matplotlib sets their math from
-text italics, with misplaced accents.</p></li>
+<li><p>A style in the package, SciencePlots as a dependency, or book typefaces, for a look only the
+documentation needs. SciencePlots calls matplotlib functions that 3.13 removes, and catsim would
+ship the typefaces’ files and licenses.</p></li>
 </ul>
 </section>
 </section>
