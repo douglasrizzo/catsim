@@ -5,8 +5,9 @@ position, the value and the rule, such as "administered_items[1] is 3.7; item in
 integers". Nothing is converted silently: an accepted value is only stored in catsim's own types,
 such as a ``numpy.int64`` index as an ``int`` and a response of 1 as ``True``.
 
-The functions are internal: :class:`~catsim.Session`, :class:`~catsim.StepContext` and
-:class:`~catsim.CatEngine` call them on the inputs they receive.
+The functions are internal: :class:`~catsim.Session`, :class:`~catsim.StepContext`,
+:class:`~catsim.CatEngine` and the functions of :mod:`catsim.irt` that take responses call them
+on the inputs they receive.
 """
 
 from __future__ import annotations

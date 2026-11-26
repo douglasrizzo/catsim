@@ -558,7 +558,7 @@ class TestBayesianHelpers:
     """Responses without matching items should raise, not silently return the prior."""
     grid = QuadratureGrid.uniform()
 
-    with pytest.raises(ValueError, match="same length"):
+    with pytest.raises(ValueError, match="there must be one response per item"):
       posterior([True, False], np.empty((0, 4)), grid, normal_log_prior())
 
   def test_posterior_shifts_positive_after_correct_response(self) -> None:

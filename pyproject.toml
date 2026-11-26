@@ -364,10 +364,10 @@ layers = [
   "selection | estimation | initialization | stopping | exposure",  # "|": siblings that never import each other
   "session",  # Session: built by the engine, read by the runner and the plots, never by a strategy
   "context",  # StepContext: below the session and the strategies, which read it, and above the domain
-  "checks",  # the input checks of Session, StepContext and the engine's steps (ADR-0009)
   "metrics",
   "item_bank",
   "irt",
+  "checks",  # the input checks of the explicit inputs (ADR-0009), which the domain makes too
   "typing : exceptions : compat",
 ]
 ignore_imports = [
