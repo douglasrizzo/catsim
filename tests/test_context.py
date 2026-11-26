@@ -99,10 +99,15 @@ def test_rejects_item_indices_outside_the_bank(field: str, index: int) -> None:
 
 
 def test_rejects_a_repeated_item() -> None:
-  """A repeated item was accepted, and its response counted twice in the estimate (D29: the first silent case)."""
+  """A repeated item was accepted, and its response counted twice in the estimate (D29: the first silent case).
+
+  The message names the item by its index and its name (ADR-0004); without the name it gave the index only.
+  """
   with pytest.raises(
     ValueError,
-    match=re.escape("administered_items[2] is 1; item indices must not repeat, and administered_items[0] is 1 too"),
+    match=re.escape(
+      "administered_items[2] is 1 ('item_1'); item indices must not repeat, and administered_items[0] is 1 too"
+    ),
   ):
     _context(administered_items=(1, 0, 1), responses=(True, False, True))
 
@@ -126,11 +131,15 @@ def test_rejects_a_bool_as_an_item_index() -> None:
 
 
 def test_rejects_an_item_both_administered_and_excluded() -> None:
-  """An item is given or withheld, never both; a selector told both would skip it, and the record is corrupt."""
+  """An item is given or withheld, never both; a selector told both would skip it, and the record is corrupt.
+
+  The message names the item by its index and its name (ADR-0004); without the name it gave the index only.
+  """
   with pytest.raises(
     ValueError,
     match=re.escape(
-      "excluded_items[1] is 0; an item cannot be both administered and excluded, and administered_items[1] is 0 too"
+      "excluded_items[1] is 0 ('item_0'); an item cannot be both administered and excluded, and administered_items[1] "
+      "is 0 too"
     ),
   ):
     _context(administered_items=(2, 0), responses=(True, True), excluded_items=(1, 0))

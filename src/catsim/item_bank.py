@@ -18,6 +18,7 @@ import numpy.typing as npt
 from numpy.random import Generator
 
 from . import irt
+from .checks import _named
 from .compat import override
 from .typing import FloatArray, IntArray
 
@@ -35,6 +36,9 @@ _CSV_NUMBER = re.compile(r"[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9
 
 _CSV_NAME_HEADERS = ("name", "")
 """The headers of the name column of a bank's CSV file; R's write.csv heads its row names with ""."""
+
+_NAMED_IN_ERRORS = 5
+"""The most items a parameter error names; it counts the others."""
 
 
 class IrtModel(StrEnum):
@@ -131,14 +135,15 @@ class ItemBank:  # noqa: PLR0904 - the core type: parameters, names, derived val
         msg += " Pass items[:, :4] to keep the first four."
       raise ValueError(msg)
 
-    _validate(self._items)
-    # Read-only, together with the column views below, so the cached values derived from the
-    # parameters cannot go stale
-    self._items.flags.writeable = False
-
     self._index_by_name = _index_names(_generated_names(self.n_items) if names is None else names, self.n_items)
     # dicts keep their insertion order, which is the row order
     self._names = tuple(self._index_by_name)
+
+    # after the names, which its messages give
+    _validate(self._items, self._names)
+    # Read-only, together with the column views below, so the cached values derived from the
+    # parameters cannot go stale
+    self._items.flags.writeable = False
 
     # Lazy-loaded cached values (computed on first access)
     self._max_info_thetas: FloatArray | None = None
@@ -783,7 +788,7 @@ def _read_parameters(row: list[str], positions: dict[str, int], where: str) -> l
   return [parameters[column] for column in _CSV_PARAMETERS]
 
 
-def _validate(items: FloatArray) -> None:
+def _validate(items: FloatArray, names: tuple[str, ...]) -> None:
   r"""Check that an item matrix is :math:`n \times 4` with at least one item and valid parameters.
 
   Every parameter must be finite, with :math:`a > 0` and :math:`0 \leq c < d \leq 1`.
@@ -792,13 +797,15 @@ def _validate(items: FloatArray) -> None:
   ----------
   items : numpy.ndarray
       The item matrix to validate.
+  names : tuple[str, ...]
+      The items' names, which the message gives with their indices (ADR-0004).
 
   Raises
   ------
   ValueError
       If the item matrix is not :math:`n \times 4`, has no items, or has a parameter that is NaN,
-      infinite or out of its range. The message lists every parameter violation found, separated by
-      ``"; "``.
+      infinite or out of its range. The message gives every rule broken, separated by ``"; "``, each
+      with the first items that break it.
   """
   if items.shape[1:] != (_N_PARAMS,):
     msg = f"Item matrix has shape {items.shape}; it must be 2-D with exactly 4 columns: a, b, c and d"
@@ -809,17 +816,27 @@ def _validate(items: FloatArray) -> None:
 
   a, c, d = items[:, 0], items[:, 2], items[:, 3]
   violations = (
-    (~numpy.isfinite(items), "There are items with NaN or infinite parameters"),
-    (a <= 0, "There are items with discrimination <= 0"),
-    (c < 0, "There are items with pseudo-guessing < 0"),
-    (c > 1, "There are items with pseudo-guessing > 1"),
-    (d > 1, "There are items with upper asymptote > 1"),
-    (d < 0, "There are items with upper asymptote < 0"),
-    (c >= d, "There are items with pseudo-guessing >= upper asymptote"),
+    (~numpy.isfinite(items).all(axis=1), "NaN or infinite parameters"),
+    (a <= 0, "discrimination <= 0"),
+    (c < 0, "pseudo-guessing < 0"),
+    (c > 1, "pseudo-guessing > 1"),
+    (d > 1, "upper asymptote > 1"),
+    (d < 0, "upper asymptote < 0"),
+    (c >= d, "pseudo-guessing >= upper asymptote"),
   )
-  errors = [message for violated, message in violations if violated.any()]
+  errors = [
+    f"There are items with {rule}: {_listed(numpy.flatnonzero(violated), names)}"
+    for violated, rule in violations
+    if violated.any()
+  ]
   if errors:
     raise ValueError("; ".join(errors))
+
+
+def _listed(items: IntArray, names: tuple[str, ...]) -> str:
+  """Return the first items of a list by index and name, such as ``3 ('q7'), 8 ('q2') and 4 more``."""
+  shown = ", ".join(_named(int(item), names) for item in items[:_NAMED_IN_ERRORS])
+  return shown if items.size <= _NAMED_IN_ERRORS else f"{shown} and {items.size - _NAMED_IN_ERRORS} more"
 
 
 def _detect_model(items: FloatArray) -> IrtModel:

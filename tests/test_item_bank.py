@@ -318,7 +318,7 @@ class TestItemBankValidation:
     other dimensions and completes 1 to 3 columns before it, so the check is called directly.
     """
     with pytest.raises(ValueError, match=re.escape(f"shape {shape}; it must be 2-D with exactly 4 columns")):
-      item_bank_module._validate(np.ones(shape))  # noqa: SLF001 - ItemBank fixes the shape before this check
+      item_bank_module._validate(np.ones(shape), ())  # noqa: SLF001 - ItemBank fixes the shape before this check
 
   def test_rejects_a_matrix_without_items(self) -> None:
     """A 0 x 4 matrix raises ValueError: with no rows, every parameter check passes vacuously."""
@@ -375,10 +375,26 @@ class TestItemBankValidation:
   def test_reports_every_violation_on_one_line(self) -> None:
     """All violations are listed, separated by "; "; starting with and joining by newlines would not match."""
     items = np.array([[-1.0, 0.0, -0.1, 1.0]])
-    expected = "There are items with discrimination <= 0; There are items with pseudo-guessing < 0"
+    expected = (
+      "There are items with discrimination <= 0: 0 ('item_0'); There are items with pseudo-guessing < 0: 0 ('item_0')"
+    )
 
     with pytest.raises(ValueError, match=rf"\A{re.escape(expected)}\Z"):
       ItemBank(items)
+
+  def test_a_parameter_error_names_the_items_that_break_the_rule(self) -> None:
+    """The message gives each offending item's index and name, the first five of them, and counts the rest (ADR-0004).
+
+    Items 1 to 7 of eight have a = 0. Fails if the message gives no item, as "There are items with discrimination <= 0"
+    did, so a researcher could not tell which rows of the bank to fix, or if it lists all of a large bank's items.
+    """
+    items = np.tile([0.0, 0.0, 0.0, 1.0], (8, 1))
+    items[0, 0] = 1.0
+    names = [f"q{row}" for row in range(8)]
+    expected = "There are items with discrimination <= 0: 1 ('q1'), 2 ('q2'), 3 ('q3'), 4 ('q4'), 5 ('q5') and 2 more"
+
+    with pytest.raises(ValueError, match=rf"\A{re.escape(expected)}\Z"):
+      ItemBank(items, names=names)
 
 
 class TestItemBankGenerate:
