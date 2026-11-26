@@ -148,6 +148,7 @@ redirects = {
   "stopping": "api/techniques/stopping/index.html",
   "api/cat": "metrics.html",
   # Guides and reference pages renamed.
+  "live-sessions": "embedding-catsim.html",
   "api/state": "session.html",
   # Technique pages merged into another page or renamed.
   "api/techniques/initialization/fixed-point-initializer": "index.html",
