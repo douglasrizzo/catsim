@@ -22,7 +22,8 @@ and `updated_theta`, the responses `response_vector` and `responses`, the random
     `catsim.exposure`, for the strategies, their base classes and the helpers documented for custom
     strategies;
   - `catsim.irt`, `catsim.metrics`, `catsim.plot` and `catsim.typing`, modules of functions and
-    type aliases.
+    type aliases, with the constants and types their functions take or return, such as
+    `irt.THETA_MIN_EXTENDED`, `plot.PlotType` and `metrics.Metric`.
 - Every other module is internal. Code outside catsim imports each name from its public path. A
   package's `__all__` lists every public name its modules define, and nothing else.
 - A module is named after what it holds, never after its package or a standard-library module.
