@@ -8,8 +8,11 @@
 # catR's grid with a standard normal prior, so the final estimate is the last provisional one, as
 # in catsim.
 #
-# Each case records catR's statistics with their Monte Carlo standard errors, all over the n
-# examinees:
+# Each case records catR's statistics with their standard errors over the n examinees, which treat
+# the abilities as drawn at random. Both packages use the same fixed abilities, so these standard
+# errors, which count the spread of a statistic between abilities as noise, overstate the Monte
+# Carlo error of the difference and make the comparison conservative (test_parity_catr.py's
+# TestSimulations gives an example):
 # - bias: the mean error (final estimate minus true ability), with sd(errors) / sqrt(n);
 # - RMSE: the square root of the mean squared error, with the standard error that the delta method
 #   gives from the MSE's, sd(squared errors) / (2 RMSE sqrt(n)) (Morris, White and Crowther, 2019);

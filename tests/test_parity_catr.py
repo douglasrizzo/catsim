@@ -5,7 +5,7 @@ versions, into the JSON files beside it; CONTRIBUTING.md says how to regenerate 
 records catR's settings, and the tests build the catsim strategy that matches them. Item indices in the files are
 0-based, as in catsim. The cases come in ADR-0020's three levels: single computations (probabilities, estimators,
 selectors, schedules and stopping rules), whole tests on recorded responses (``TestWholeTests``) and simulations of
-the randomized selectors, compared within their Monte Carlo error (``TestSimulations``).
+the randomized selectors, compared within a conservative bound on their Monte Carlo error (``TestSimulations``).
 
 A case where catsim departs from catR on purpose, with no setting that reproduces catR, is a strict expected failure
 with the reason (``_DEPARTURES``): it must fail its assertion, so a departure that closes, or a case that stops
@@ -649,7 +649,7 @@ _SIMULATION_SELECTORS: dict[str, Callable[[Case], BaseSelector]] = {
 
 
 def _simulation_summary(sessions: Sequence[Session], true_thetas: FloatArray, n_items: int) -> dict[str, Any]:
-  """Return the statistics simulations.R records for catR, with their Monte Carlo standard errors, for the sessions.
+  """Return the statistics simulations.R records for catR, with their standard errors over examinees, for the sessions.
 
   The bias and the mean test length come with the standard deviation over the square root of n, the RMSE with the
   delta-method standard error sd(squared errors) / (2 RMSE sqrt(n)) (Morris, White and Crowther, 2019), and catR's
@@ -710,6 +710,11 @@ class TestSimulations:
   catsim's from a fixed seed, catR's as simulations.R describes. A statistic agrees when the two differ by at most
   _SIMULATION_Z standard errors of their difference.
 
+  The standard errors are taken over the examinees, as if their abilities were drawn at random, so they count the
+  spread of the statistics between abilities as noise. Both packages use the same fixed abilities, whose spread would
+  cancel in a paired difference, so the bound is conservative: for two catsim runs of randomesque_precision on
+  different seeds, the mean length's standard error of the difference is 0.131, against 0.094 for the paired
+  differences of each examinee.
   """
 
   @pytest.mark.parametrize("case", _cases(_SIMULATIONS, "simulation_bias"))
