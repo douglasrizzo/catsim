@@ -1,9 +1,11 @@
-"""Parity tests with catR, catsim's reference implementation (ADR-0020), level 1: single computations.
+"""Parity tests with catR, catsim's reference implementation (ADR-0020).
 
 The expected values are catR's outputs on fixed cases, which ``tests/parity/catr/generate.R`` wrote, with the R and catR
 versions, into the JSON files beside it; CONTRIBUTING.md says how to regenerate them. The tests need no R. Each case
 records catR's settings, and the tests build the catsim strategy that matches them. Item indices in the files are
-0-based, as in catsim.
+0-based, as in catsim. The cases come in ADR-0020's three levels: single computations (probabilities, estimators,
+selectors, schedules and stopping rules), whole tests on recorded responses (``TestWholeTests``) and simulations of
+the randomized selectors, compared within a conservative bound on their Monte Carlo error (``TestSimulations``).
 
 A case where catsim departs from catR on purpose, with no setting that reproduces catR, is a strict expected failure
 with the reason (``_DEPARTURES``): it must fail its assertion, so a departure that closes, or a case that stops
@@ -13,14 +15,16 @@ departing, fails the run.
 from __future__ import annotations
 
 import dataclasses
+import functools
 import json
+import math
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pytest
 
-from catsim import ItemBank, StepContext, irt
+from catsim import CatEngine, ItemBank, StepContext, irt, simulate
 from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,
@@ -32,6 +36,7 @@ from catsim.estimation import (
   normal_log_prior,
   uniform_log_prior,
 )
+from catsim.initialization import FixedPointInitializer
 from catsim.selection import (
   BaseSelector,
   KLSelector,
@@ -40,6 +45,8 @@ from catsim.selection import (
   MLWISelector,
   ProgressiveSelector,
   ProportionalSelector,
+  RandomesqueSelector,
+  The54321Selector,
   UrrySelector,
 )
 from catsim.selection.progressive import _position_weight  # noqa: PLC2701 - the selectors expose no weight
@@ -47,6 +54,11 @@ from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthSto
 from catsim.typing import FloatArray
 from tests.banks import two_pl_bank
 from tests.generators import DeterministicRNG
+
+if TYPE_CHECKING:
+  from collections.abc import Callable, Sequence
+
+  from catsim import Session
 
 Case = dict[str, Any]
 
@@ -58,7 +70,9 @@ def _load(name: str) -> dict[str, Any]:
     return json.load(file)
 
 
-_IRT, _ESTIMATION, _SELECTION, _STOPPING = (_load(name) for name in ("irt", "estimation", "selection", "stopping"))
+_IRT, _ESTIMATION, _SELECTION, _STOPPING, _WHOLE_TESTS, _SIMULATIONS = (
+  _load(name) for name in ("irt", "estimation", "selection", "stopping", "whole_tests", "simulations")
+)
 
 # Closed forms, quadratures on the same nodes with the same weights, and KL's quadratures, which both packages take to
 # convergence: a relative 1e-10 (ADR-0020).
@@ -88,6 +102,12 @@ _WL_ROOTS = (
   "Warm's modified score has three roots in the range, two maxima of the weighted likelihood and a minimum; catR's "
   "uniroot converges to the lower maximum (-0.59), and catsim returns the higher one (0.66), as its technique page "
   "states"
+)
+_WL_ROOTS_WHOLE_TEST = (
+  "after items 21 and 38, answered correctly and incorrectly, Warm's modified score has three roots in the range, "
+  "-0.44, 0.63 and 0.84; catR's uniroot converges to 0.84, and catsim returns -0.44, the root of larger weighted "
+  "likelihood, as in wl/three_wl_roots. MLWI gives these two items first whatever the estimate, and the later "
+  "estimates agree again"
 )
 _MLWI_VALUES = (
   "catsim's MLWISelector weights its grid nodes equally, where catR's MWI integrates by the trapezoid rule, which "
@@ -147,6 +167,10 @@ _DEPARTURES: dict[str, dict[str, str]] = {
     },
     **{f"{rule}/one_item_test_N1_AP1_position1": _ONE_ITEM_TEST for rule in ("progressive", "proportional")},
   },
+  **{
+    test: {f"mlwi_wl/simulation/theta_{theta}": _WL_ROOTS_WHOLE_TEST for theta in ("-1.2", "0", "1.2")}
+    for test in ("whole_test_estimates", "whole_test_standard_errors")
+  },
 }
 
 
@@ -158,6 +182,8 @@ _DEPARTURE_DATA = {
   "values": _SELECTION,
   "trapezoid_values": _SELECTION,
   "schedule": _SELECTION,
+  "whole_test_estimates": _WHOLE_TESTS,
+  "whole_test_standard_errors": _WHOLE_TESTS,
 }
 
 
@@ -190,7 +216,10 @@ class TestData:
 
   def test_one_catr_run(self) -> None:
     """Files written by different R or catR versions would compare catsim with two references at once."""
-    versions = {(data["catr_version"], data["r_version"]) for data in (_IRT, _ESTIMATION, _SELECTION, _STOPPING)}
+    versions = {
+      (data["catr_version"], data["r_version"])
+      for data in (_IRT, _ESTIMATION, _SELECTION, _STOPPING, _WHOLE_TESTS, _SIMULATIONS)
+    }
 
     assert len(versions) == 1
 
@@ -325,6 +354,13 @@ _SELECTORS: dict[str, BaseSelector] = {
 }
 
 
+# The randomized selectors whose bin, the items they draw from, generate.R records as catR's randomesque bin.
+_POOL_SELECTORS: dict[str, Callable[[Case], BaseSelector]] = {
+  "randomesque": lambda case: RandomesqueSelector(case["bin_size"]),
+  "the54321": lambda _: The54321Selector(),
+}
+
+
 def _selector(case: Case) -> BaseSelector:
   return _SELECTORS[case["id"].split("/")[0]]
 
@@ -334,7 +370,8 @@ class TestSelectors:
 
   A case's ranking is the order in which catR picks every candidate when each pick is made unavailable for the next,
   its choice first; catsim's is the same with each pick excluded. The bank's parameters are continuous, and generate.R
-  checks that no two candidates nearly tie. The kl_window cases rank by catR's KL() over catsim's window.
+  checks that no two candidates nearly tie. The kl_window cases rank by catR's KL() over catsim's window. The
+  randomesque and the54321 cases compare the bin a randomized selector draws its item from.
   """
 
   @pytest.mark.parametrize("case", _cases(_SELECTION, "selection", tuple(f"{name}/" for name in _SELECTORS)))
@@ -350,6 +387,20 @@ class TestSelectors:
       ranking.append(_selector(case).select(dataclasses.replace(context, excluded_items=tuple(ranking))))
 
     assert ranking == case["ranking"]
+
+  @pytest.mark.parametrize("case", _cases(_SELECTION, "pool", tuple(f"{name}/" for name in _POOL_SELECTORS)))
+  def test_randomesque_pool(self, case: Case) -> None:
+    """A bin of the wrong size, or of other items than the most informative at the estimate, would draw elsewhere.
+
+    The pool is catR's randomesque bin, the items nextItem draws from with MFI and randomesque = k, best first. catR has
+    no 5-4-3-2-1 method; its bin at each position is catR's randomesque bin with k = max(1, 5 - administered items).
+    """
+    rng = DeterministicRNG([])
+    _POOL_SELECTORS[case["id"].split("/")[0]](case).select(_selection_context(case, rng=rng))
+    ((pool, probabilities),) = rng.choice_calls
+
+    assert probabilities is None
+    assert pool.tolist() == case["pool"]
 
   @pytest.mark.parametrize("case", _cases(_SELECTION, "values", ("mfi/",)))
   def test_information_values(self, case: Case) -> None:
@@ -489,3 +540,217 @@ class TestStoppers:
 
     assert [stopper.stop(context) for stopper in stoppers] == case["per_rule"]
     assert StopRule(*stoppers).stop(context) is case["decision"]
+
+
+def _stop_rule(case: Case) -> StopRule:
+  """Return catsim's stopping rule for catR's stop list: its rules, each with its threshold, stop at whichever holds."""
+  return StopRule(
+    *(_stopper(rule, threshold, alpha=0.05) for rule, threshold in zip(case["rules"], case["thresholds"], strict=True))
+  )
+
+
+_WHOLE_TEST_SELECTORS: dict[str, BaseSelector] = {"MFI": MaxInfoSelector(), "bOpt": UrrySelector(), "MLWI": _MLWI}
+
+
+@functools.cache
+def _whole_test_sessions(configuration: str, bank: str) -> tuple[Session, ...]:
+  """Return catsim's sessions of a bank's recorded examinees under a configuration of whole_tests.R, in examinee order.
+
+  The selector chooses the first item at ability 0, as catR does with no early item; the selection rule, the estimator
+  and the stopping rules are those matching catR's settings in the configuration's cases.
+  """
+  case = next(case for case in _WHOLE_TESTS["cases"] if case["id"].startswith(f"{configuration}/{bank}/"))
+  engine = CatEngine(
+    ItemBank(np.array(_WHOLE_TESTS["banks"][bank], dtype=float)),
+    FixedPointInitializer(0.0),
+    _WHOLE_TEST_SELECTORS[case["criterion"]],
+    _estimator(case),
+    _stop_rule(case),
+  )
+  # No item ties and no strategy draws, so the seed changes nothing.
+  return tuple(simulate(engine, responses=np.array(_WHOLE_TESTS["examinees"][bank], dtype=bool), rng=0).sessions)
+
+
+def _whole_test_session(case: Case) -> Session:
+  configuration, bank, _ = case["id"].split("/")
+  return _whole_test_sessions(configuration, bank)[case["examinee"]]
+
+
+class TestWholeTests:
+  """catR's randomCAT on recorded responses (level 2), against catsim's simulate on the same response patterns.
+
+  Each case is one recorded examinee's test with MFI, bOpt or MLWI selection, the ML, BM, EAP or WL estimator of
+  TestEstimators and catR's precision and length rules. catR starts with no early item at ability 0, as catsim's
+  FixedPointInitializer(0) does; generate.R checks that catR's default start, one early item that startItems chooses at
+  ability 0 by the test's own criterion, gives the same MFI and bOpt tests. It also checks that every choice and
+  stopping decision survives a change of the estimate by the estimates' tolerance, so the cases do not hinge on the
+  last digits.
+  """
+
+  @pytest.mark.parametrize("case", _cases(_WHOLE_TESTS, "whole_test_items"))
+  def test_items(self, case: Case) -> None:
+    """A selector, estimator or stopper that departed from catR's at any step would give another item or test length."""
+    assert list(_whole_test_session(case).administered_items) == case["items"]
+
+  @pytest.mark.parametrize("case", _cases(_WHOLE_TESTS, "whole_test_estimates"))
+  def test_estimates(self, case: Case) -> None:
+    """An estimate that read the responses of another step, or took Dodd's step from another estimate, would drift.
+
+    The estimates are those after every response, the starting ability first, compared as in TestEstimators.
+    """
+    thetas = np.array([estimate.theta for estimate in _whole_test_session(case).estimates])
+    expected = np.array(case["thetas"], dtype=float)
+
+    assert thetas.shape == expected.shape
+    if case["method"] == "EAP":
+      np.testing.assert_allclose(thetas, expected, rtol=_CLOSED_FORM_RTOL, atol=0)
+    else:
+      np.testing.assert_allclose(thetas, expected, rtol=0, atol=_ESTIMATE_ATOL)
+
+  @pytest.mark.parametrize("case", _cases(_WHOLE_TESTS, "whole_test_standard_errors"))
+  def test_standard_errors(self, case: Case) -> None:
+    """A standard error that stopped a precision rule at another item would come from the wrong items or estimate.
+
+    They are compared as in TestEstimators, except where ML's pattern is still constant: there catR reports an infinite
+    standard error and catsim the Fisher one at Dodd's estimate, the departure TestEstimators records for
+    ml_dodd/one_correct. The test checks that catR's is infinite exactly there, which is all it checks for the
+    all_correct examinee under ML, whose pattern stays constant.
+    """
+    standard_errors = np.array([estimate.se for estimate in _whole_test_session(case).estimates[1:]])
+    expected = _floats(case["ses"])
+    row = _WHOLE_TESTS["examinees"][case["bank"]]
+    pattern = [row[case["examinee"]][item] for item in case["items"]]
+    constant = np.array([len(set(pattern[: k + 1])) == 1 for k in range(len(pattern))])
+    finite = np.isfinite(expected)
+
+    assert (~finite).tolist() == (constant & (case["method"] == "ML")).tolist()
+    assert standard_errors.shape == expected.shape
+    if case["method"] == "EAP":
+      np.testing.assert_allclose(standard_errors, expected, rtol=_CLOSED_FORM_RTOL, atol=0)
+    else:
+      tolerance = _ESTIMATE_ATOL * (np.abs(_floats(case["se_slopes"])) + 1)
+      np.testing.assert_array_less(np.abs(standard_errors - expected)[finite], tolerance[finite])
+
+
+# A difference between catsim's statistic and catR's fails when it exceeds this many standard errors of the
+# difference, sqrt(se_catsim ** 2 + se_catR ** 2). Each simulation case makes 54 comparisons, four statistics and 50
+# exposure rates, and over the four cases Bonferroni's bound puts the chance that two agreeing implementations fail any
+# of them below 0.15% (216 times the normal distribution's two-sided tail beyond 4.5, 6.8e-6).
+_SIMULATION_Z = 4.5
+_SIMULATION_SEED = 20261125
+
+
+# catsim's randomized selector for each of catR's rules in simulations.R: randomesque MFI, progressive and proportional.
+_SIMULATION_SELECTORS: dict[str, Callable[[Case], BaseSelector]] = {
+  "MFI": lambda case: RandomesqueSelector(case["randomesque"]),
+  "progressive": lambda case: ProgressiveSelector(case["test_size"], acceleration=case["acceleration"]),
+  "proportional": lambda case: ProportionalSelector(case["test_size"], acceleration=case["acceleration"]),
+}
+
+
+def _simulation_summary(sessions: Sequence[Session], true_thetas: FloatArray, n_items: int) -> dict[str, Any]:
+  """Return the statistics simulations.R records for catR, with their standard errors over examinees, for the sessions.
+
+  The bias and the mean test length come with the standard deviation over the square root of n, the RMSE with the
+  delta-method standard error sd(squared errors) / (2 RMSE sqrt(n)) (Morris, White and Crowther, 2019), and catR's
+  overlap rate, the sum of squared exposure rates over the mean test length, with the jackknife standard error over the
+  examinees.
+  """
+  n = len(sessions)
+  errors = np.array([session.estimates[-1].theta for session in sessions]) - true_thetas
+  administered = np.zeros((n, n_items))
+  for row, session in zip(administered, sessions, strict=True):
+    row[list(session.administered_items)] = 1
+  counts = administered.sum(axis=0)
+  lengths = administered.sum(axis=1)
+  rates = counts / n
+  left_out = (counts - administered) / (n - 1)
+  overlaps = (left_out**2).sum(axis=1) / left_out.sum(axis=1)
+  rmse = math.sqrt(np.mean(errors**2))
+  return {
+    "bias": float(np.mean(errors)),
+    "bias_se": float(np.std(errors, ddof=1) / math.sqrt(n)),
+    "rmse": rmse,
+    "rmse_se": float(np.std(errors**2, ddof=1) / (2 * rmse * math.sqrt(n))),
+    "mean_length": float(np.mean(lengths)),
+    "mean_length_se": float(np.std(lengths, ddof=1) / math.sqrt(n)),
+    "overlap": float(np.sum(rates**2) / np.sum(rates)),
+    "overlap_se": math.sqrt((n - 1) / n * np.sum((overlaps - np.mean(overlaps)) ** 2)),
+    "exposure_counts": counts,
+  }
+
+
+@functools.cache
+def _catsim_simulation(case_id: str) -> dict[str, Any]:
+  """Return the statistics of catsim's run of a simulations.R case, on its bank and true abilities."""
+  case = next(case for case in _SIMULATIONS["cases"] if case["id"] == case_id)
+  bank = ItemBank(np.array(_SIMULATIONS["bank"], dtype=float))
+  true_thetas = np.array(_SIMULATIONS["true_thetas"], dtype=float)
+  estimator = EAPEstimator(grid=_trapezoid_grid(**_SIMULATIONS["grid"]), log_prior=_log_prior(_SIMULATIONS["prior"]))
+  selector = _SIMULATION_SELECTORS[case["criterion"]](case)
+  engine = CatEngine(bank, FixedPointInitializer(0.0), selector, estimator, _stop_rule(case))
+  result = simulate(engine, true_thetas=true_thetas, rng=_SIMULATION_SEED)
+  return _simulation_summary(result.sessions, true_thetas, bank.n_items)
+
+
+def _assert_agree(case: Case, statistic: str) -> None:
+  """Assert that catsim's statistic differs from catR's by at most _SIMULATION_Z standard errors of the difference."""
+  catsim = _catsim_simulation(case["id"])
+  difference = catsim[statistic] - case[statistic]
+  error = math.hypot(catsim[f"{statistic}_se"], case[f"{statistic}_se"])
+
+  assert abs(difference) <= _SIMULATION_Z * error, (difference, error)
+
+
+class TestSimulations:
+  """catR's simulateRespondents with the randomized selection rules (level 3), against catsim's simulate.
+
+  Both packages run the same true abilities, the quantiles of the standard normal distribution, on the same bank, with
+  catR's start at ability 0, EAP estimation on its grid and the same stopping rules, each with its own random numbers:
+  catsim's from a fixed seed, catR's as simulations.R describes. A statistic agrees when the two differ by at most
+  _SIMULATION_Z standard errors of their difference.
+
+  The standard errors are taken over the examinees, as if their abilities were drawn at random, so they count the
+  spread of the statistics between abilities as noise. Both packages use the same fixed abilities, whose spread would
+  cancel in a paired difference, so the bound is conservative: for two catsim runs of randomesque_precision on
+  different seeds, the mean length's standard error of the difference is 0.131, against 0.094 for the paired
+  differences of each examinee.
+  """
+
+  @pytest.mark.parametrize("case", _cases(_SIMULATIONS, "simulation_bias"))
+  def test_bias(self, case: Case) -> None:
+    """Final estimates pulled toward one end of the scale, as by a prior or start off catR's, would shift the bias."""
+    _assert_agree(case, "bias")
+
+  @pytest.mark.parametrize("case", _cases(_SIMULATIONS, "simulation_rmse"))
+  def test_rmse(self, case: Case) -> None:
+    """A selector that gave less informative items than catR's rule would leave the estimates further from the truth."""
+    _assert_agree(case, "rmse")
+
+  @pytest.mark.parametrize("case", _cases(_SIMULATIONS, "simulation_length"))
+  def test_mean_length(self, case: Case) -> None:
+    """A precision rule with another threshold, or tests that gained information at another pace, would end elsewhere.
+
+    The fixed-length cases have no Monte Carlo error: every test has the planned length in both packages.
+    """
+    _assert_agree(case, "mean_length")
+
+  @pytest.mark.parametrize("case", _cases(_SIMULATIONS, "simulation_overlap"))
+  def test_overlap(self, case: Case) -> None:
+    """A bin of another size, or a schedule weighting information more or less than catR's, would change the overlap."""
+    _assert_agree(case, "overlap")
+
+  @pytest.mark.parametrize("case", _cases(_SIMULATIONS, "simulation_exposure"))
+  def test_exposure_rates(self, case: Case) -> None:
+    """A selector that drew from other items than catR's rule, such as a bin at another estimate, would expose them.
+
+    Each item's exposure rate is compared by the two-proportion z test, its standard error from the rate pooled over
+    the two runs, which have the same number of examinees.
+    """
+    n = len(_SIMULATIONS["true_thetas"])
+    catsim = _catsim_simulation(case["id"])["exposure_counts"]
+    catr = np.array(case["exposure_counts"], dtype=float)
+    pooled = (catsim + catr) / (2 * n)
+    error = np.sqrt(pooled * (1 - pooled) * 2 / n)
+
+    assert np.all(np.abs(catsim - catr) / n <= _SIMULATION_Z * error)

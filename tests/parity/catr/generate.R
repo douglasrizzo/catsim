@@ -1,4 +1,4 @@
-# Writes the catR outputs that tests/test_parity_catr.py compares catsim with (ADR-0020, level 1).
+# Writes the catR outputs that tests/test_parity_catr.py compares catsim with (ADR-0020).
 #
 # Run from anywhere, with R installed:
 #
@@ -9,9 +9,14 @@
 # catR version is missing there, the script installs it from CRAN's source archive. Only base R and
 # catR are used.
 #
-# Each case script (irt.R, estimation.R, selection.R, stopping.R) builds the cases of one JSON file
-# beside it: the inputs, which the Python test reads too, and catR's outputs. Item indices in the
-# files are 0-based, as in catsim; the scripts add 1 for catR and subtract 1 from its answers.
+# Each case script builds the cases of one JSON file beside it: the inputs, which the Python test
+# reads too, and catR's outputs, at the three levels of ADR-0020:
+# 1. single computations: irt.R, estimation.R, selection.R and stopping.R;
+# 2. whole tests on recorded responses: whole_tests.R, on the banks of selection.R and
+#    simulations.R, which are sourced first;
+# 3. simulations of the randomized selection rules: simulations.R, which takes about two minutes.
+# Item indices in the files are 0-based, as in catsim; the scripts add 1 for catR and subtract 1
+# from its answers.
 
 CATR_VERSION <- "3.17"
 
@@ -55,7 +60,7 @@ stopifnot(has_pinned())
 suppressPackageStartupMessages(library(catR, lib.loc = lib))
 
 here <- script_dir()
-for (helper in c("json.R", "irt.R", "estimation.R", "selection.R", "stopping.R")) {
+for (helper in c("json.R", "irt.R", "estimation.R", "selection.R", "stopping.R", "simulations.R", "whole_tests.R")) {
   source(file.path(here, helper))
 }
 
@@ -64,7 +69,9 @@ outputs <- list(
   irt = irt_cases(),
   estimation = estimation_cases(),
   selection = selection_cases(),
-  stopping = stopping_cases()
+  stopping = stopping_cases(),
+  whole_tests = whole_test_cases(),
+  simulations = simulation_cases()
 )
 for (name in names(outputs)) {
   path <- file.path(here, paste0(name, ".json"))

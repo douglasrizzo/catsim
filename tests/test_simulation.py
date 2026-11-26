@@ -15,7 +15,7 @@ from catsim.compat import override
 from catsim.estimation import EAPEstimator, NumericalSearchEstimator
 from catsim.exposure import BaseExposureControl
 from catsim.initialization import BaseInitializer, FixedPointInitializer, UniformInitializer
-from catsim.selection import BaseSelector, MaxInfoSelector, RandomesqueSelector, RandomSelector
+from catsim.selection import BaseSelector, MaxInfoSelector, ProgressiveSelector, RandomesqueSelector, RandomSelector
 from catsim.stopping import BaseStopper, MaxLengthStopper, StandardErrorStopper, StopRule
 from catsim.typing import FloatArray
 
@@ -356,12 +356,31 @@ class TestRandomNumbers:
     assert simulate(random_engine, true_thetas=thetas, rng=np.random.default_rng(5)).sessions == first.sessions
     assert administered(simulate(random_engine, true_thetas=thetas, rng=five)) != administered(first)
 
-  def test_a_call_that_fails_its_checks_leaves_the_generator_as_it_was(self, random_engine: CatEngine) -> None:
-    """A call rejected for its inputs draws nothing; fails if the entropy is drawn before the inputs are checked."""
+  @pytest.mark.parametrize(
+    ("arguments", "lambda_prior"),
+    [
+      ({"true_thetas": [0.0, math.nan]}, False),
+      ({"true_thetas": [0.0], "parts": 2}, False),
+      ({"true_thetas": [0.0, 1.0], "parts": 2, "workers": 2}, True),
+    ],
+    ids=["nan-true-ability", "more-parts-than-examinees", "an-engine-the-workers-cannot-import"],
+  )
+  def test_a_call_that_fails_its_checks_leaves_the_generator_as_it_was(
+    self, random_engine: CatEngine, arguments: dict[str, object], lambda_prior: bool
+  ) -> None:
+    """A call rejected for its inputs draws nothing; fails if the entropy is drawn before the inputs are checked.
+
+    An engine with a lambda prior cannot go to the workers, and its check is one of the inputs' checks.
+    """
+    engine = (
+      dataclasses.replace(random_engine, estimator=EAPEstimator(log_prior=lambda theta: -0.5 * theta**2))
+      if lambda_prior
+      else random_engine
+    )
     rng = np.random.default_rng(5)
 
-    with pytest.raises(ValueError, match="finite"):
-      simulate(random_engine, true_thetas=[0.0, math.nan], rng=rng)
+    with pytest.raises(ValueError, match=r"finite|every part needs at least one examinee|cannot import"):
+      simulate(engine, rng=rng, **arguments)  # ty: ignore[invalid-argument-type]
 
     assert rng.random() == np.random.default_rng(5).random()
 
@@ -433,17 +452,107 @@ class TestExposure:
     assert np.allclose(result.proposal_rates().value, (result.exposure_counts + declines) / 20)
 
 
-def test_progress_is_told_after_each_session_how_many_have_finished(random_engine: CatEngine) -> None:
-  """progress is called once per session, in order, with the sessions finished and the total, and changes nothing.
+class TestParts:
+  """Tests for a run split into parts, each with exposure counts of its own (ADR-0015)."""
 
-  Fails if it is called before the first session ends or not after the last, with the examinee's index rather than
-  the count of finished sessions, or if passing it changes the sessions.
+  def test_one_part_is_the_sequential_run(self, item_bank: ItemBank) -> None:
+    """With parts=1, every session runs in examinee order, capped against catR's rates over all the sessions before it.
+
+    The run is rebuilt here from the engine's public steps: each examinee's pattern and session generator come from
+    its streams, and the rates from counts kept over the whole run. The initializer and the progressive selector draw
+    from the session's generator, and the selector's cap reads the rates. Fails if the one part runs its sessions out
+    of order, resets its counts, or gives an examinee the streams of another position.
+    """
+    engine = make_engine(
+      item_bank, ProgressiveSelector(test_size=5, r_max=0.3), 5, initializer=UniformInitializer(-1.0, 1.0)
+    )
+    thetas = np.random.default_rng(3).normal(0, 1, 12)
+
+    result = simulate(engine, true_thetas=thetas, rng=8, parts=1)
+
+    counts, sessions = np.zeros(item_bank.n_items, dtype=int), []
+    for i, theta in enumerate(thetas.tolist()):
+      pattern = stream(8, i, 0).random(item_bank.n_items) < probabilities(item_bank, theta)
+      rng = stream(8, i, 1)
+      rates = counts / i if i else None
+      session = engine.start(rng=rng)
+      while (selection := engine.select(session, rng=rng, exposure_rates=rates)).item is not None:
+        session = engine.answer(selection.session, selection.item, bool(pattern[selection.item]), rng=rng)
+      sessions.append(selection.session)
+      counts[list(selection.session.administered_items)] += 1
+    assert result.sessions == tuple(sessions)
+    assert result.exposure_counts.tolist() == counts.tolist()
+    assert result.parts == 1
+
+  def test_each_part_counts_its_own_exposure(self, item_bank: ItemBank) -> None:
+    """With exposure feedback, a session sees the exposure of the sessions before it in its part, and of no other.
+
+    Every session administers items 0 and 1. Five examinees in two parts are the first three and the last two, as
+    ``numpy.array_split`` sizes them, so the first session of each part sees no rates and each later one rates of 1
+    for both items. The run's counts are the parts' sums, 5 for each item. Fails if the parts share their counts (the
+    last session would see rates of 4), if a session divides by the sessions before it in the run (the fourth would see
+    rates of 0 rather than none, and the fifth 1/4), if the parts are sized 2 and 3, or if the run keeps one part's
+    counts.
+    """
+    selector = FirstRemainingSelector()
+
+    result = simulate(make_engine(item_bank, selector, 2), true_thetas=np.zeros(5), parts=2)
+
+    exposed = [1.0, 1.0] + [0.0] * (item_bank.n_items - 2)
+    seen = [None if rates is None else rates.tolist() for rates in selector.seen_exposure_rates]
+    assert seen == [None] * 2 + [exposed] * 4 + [None] * 2 + [exposed] * 2
+    assert result.exposure_counts.tolist() == [5, 5] + [0] * (item_bank.n_items - 2)
+    assert result.parts == 2
+
+  @pytest.mark.parametrize("parts", [2, 3, 7])
+  def test_without_exposure_feedback_the_parts_do_not_change_the_output(self, item_bank: ItemBank, parts: int) -> None:
+    """Without an r_max cap, a run in parts gives every examinee the session that the run in one part gives them.
+
+    The initializer and the randomesque selector draw from each session's generator, and the answers come from each
+    examinee's pattern; seven parts put every examinee in a part of their own. Fails if an examinee of a later part
+    draws from the streams of its position in its part rather than in the run (ADR-0013), or if the run's exposure
+    counts are not the sum of its parts'.
+    """
+    engine = CatEngine(
+      item_bank,
+      UniformInitializer(-1.0, 1.0),
+      RandomesqueSelector(bin_size=4),
+      EAPEstimator(),
+      StopRule(StandardErrorStopper(0.6), MaxLengthStopper(8)),
+    )
+    thetas = np.random.default_rng(5).normal(0, 1, 7)
+
+    whole = simulate(engine, true_thetas=thetas, rng=2)
+    split = simulate(engine, true_thetas=thetas, rng=2, parts=parts)
+
+    assert split.sessions == whole.sessions
+    assert split.exposure_counts.tolist() == whole.exposure_counts.tolist()
+    assert (whole.parts, split.parts) == (1, parts)
+
+
+@pytest.mark.parametrize(
+  ("parts", "workers"), [(1, 1), (2, 1), (2, 2)], ids=["sequential", "two-parts", "two-parts-on-two-workers"]
+)
+def test_progress_is_told_after_each_session_how_many_have_finished(
+  random_engine: CatEngine, parts: int, workers: int
+) -> None:
+  """progress is called in the calling process once per session, with the sessions finished and the total.
+
+  Two parts hold two examinees and one. Fails if it is called before the first session ends or not after the last,
+  with the examinee's index rather than the count of finished sessions, if each part counts from 1 again, if it is
+  called once per part, or in the workers (this list would stay empty, and a lambda cannot reach them), or if passing
+  it changes the sessions.
   """
   calls: list[tuple[int, int]] = []
   thetas = [-0.5, 0.0, 0.5]
 
   shown = simulate(
-    random_engine, true_thetas=thetas, rng=0, progress=lambda finished, total: calls.append((finished, total))
+    random_engine,
+    true_thetas=thetas,
+    rng=0,
+    parts=parts,
+    workers=workers,
+    progress=lambda finished, total: calls.append((finished, total)),
   )
 
   assert calls == [(1, 3), (2, 3), (3, 3)]
@@ -547,6 +656,36 @@ def test_progress_is_told_after_each_session_how_many_have_finished(random_engin
       {"true_thetas": [0.0], "rng": -1}, ValueError, "rng is -1; a seed must not be negative", id="negative-seed"
     ),
     pytest.param(
+      {"true_thetas": [0.0], "parts": 0}, ValueError, "parts is 0; it must be a positive integer", id="no-parts"
+    ),
+    pytest.param(
+      {"true_thetas": [0.0], "parts": 1.5}, TypeError, "parts is 1.5; it must be a positive integer", id="float-parts"
+    ),
+    pytest.param(
+      {"true_thetas": [0.0], "parts": True}, TypeError, "parts is True; it must be a positive integer", id="parts-flag"
+    ),
+    pytest.param(
+      {"true_thetas": [0.0], "workers": -2}, ValueError, "workers is -2; it must be a positive integer", id="no-workers"
+    ),
+    pytest.param(
+      {"true_thetas": [0.0], "workers": "4"},
+      TypeError,
+      "workers is '4'; it must be a positive integer",
+      id="workers-string",
+    ),
+    pytest.param(
+      {"true_thetas": [0.0, 1.0], "parts": 3},
+      ValueError,
+      "parts is 3 and the run has 2 examinees; every part needs at least one examinee",
+      id="more-parts-than-generated-examinees",
+    ),
+    pytest.param(
+      {"responses": np.zeros((2, 50)), "parts": 3},
+      ValueError,
+      "parts is 3 and the run has 2 examinees",
+      id="more-parts-than-recorded-examinees",
+    ),
+    pytest.param(
       {"true_thetas": [0.0], "progress": True},
       TypeError,
       r"progress is True; it must be None or a callable, called as progress\(finished, total\)",
@@ -561,8 +700,9 @@ def test_a_bad_input_fails_before_any_session_runs(
 
   Fails if simulate reads a bad input silently: a single number as a count or as one ability, a NaN ability whose
   answers would all be wrong, booleans as abilities 0 and 1, a response of 0.5 or 2 as correct, a missing column that
-  shifts every item, None as a missing answer, true abilities paired with the wrong rows, a float or boolean seed, or
-  the old ``progress=True`` flag.
+  shifts every item, None as a missing answer, true abilities paired with the wrong rows, a float or boolean seed, a
+  count of parts or workers that is not a positive integer, more parts than examinees (an empty part), or the old
+  ``progress=True`` flag.
   """
   with pytest.raises(error, match=message):
     simulate(random_engine, **arguments)  # ty: ignore[invalid-argument-type]

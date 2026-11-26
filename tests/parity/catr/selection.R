@@ -154,10 +154,10 @@ SCHEDULES <- list(
 )
 
 # trace() reads the locals of nextItem and MWI as they return: the weight wq, the selection
-# probabilities and MWI's integrand. It changes the namespace's copies, which catR::nextItem and
-# catR::MWI call, not the attached ones
+# probabilities, the randomesque bin and MWI's integrand. It changes the namespace's copies, which
+# catR::nextItem and catR::MWI call, not the attached ones
 captured <- new.env()
-capture_locals <- quote(for (name in c("wq", "randomValues", "probSelect", "crit.value")) {
+capture_locals <- quote(for (name in c("wq", "randomValues", "probSelect", "keep", "crit.value")) {
   if (exists(name, inherits = FALSE)) assign(name, get(name, inherits = FALSE), envir = captured)
 })
 
@@ -193,6 +193,28 @@ schedule_case <- function(criterion, test_size, acceleration, position, seed, na
   case
 }
 
+# The randomesque bin: the items nextItem draws from with criterion = "MFI" and randomesque = k,
+# best first. The 5-4-3-2-1 method, which catR does not have, draws the item at position n from
+# the 6 - n most informative items, catR's randomesque bin with k = max(1, 5 - administered items)
+BIN_SIZES <- list(randomesque = function(context) 3L, the54321 = function(context) max(1L, 5L - length(context$administered)))
+
+pool_case <- function(name, context_name) {
+  context <- CONTEXTS[[context_name]]
+  bin_size <- BIN_SIZES[[name]](context)
+  rm(list = ls(captured), envir = captured)
+  catR::nextItem(SELECTION_BANK,
+    theta = context$theta, out = out_of(context), x = x_of(context), criterion = "MFI", randomesque = bin_size
+  )
+  list(
+    id = paste0(name, "/", context_name),
+    administered = as_array(context$administered),
+    responses = as_array(context$responses == 1),
+    theta = context$theta,
+    bin_size = bin_size,
+    pool = as_array(as.integer(captured$keep) - 1L)
+  )
+}
+
 selection_cases <- function() {
   for (traced in c("nextItem", "MWI")) {
     suppressMessages(trace(traced, exit = capture_locals, print = FALSE, where = asNamespace("catR")))
@@ -205,6 +227,7 @@ selection_cases <- function() {
     add(ranked_case("bopt", context_name, criterion = "bOpt"))
     add(ranked_case("mlwi", context_name, criterion = "MLWI", values_of = "MLWI"))
     add(ranked_case("kl_window", context_name, values_of = "KL"))
+    for (name in names(BIN_SIZES)) add(pool_case(name, context_name))
   }
   sensitive <- KL_CONTEXTS$window_sensitive
   best <- sapply(1:3, function(n) {

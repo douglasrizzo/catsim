@@ -265,6 +265,7 @@ ignore_names = [
   "writeable",  # numpy's ndarray.flags.writeable, set to make arrays read-only
   "pytest_plugins",  # read by pytest
   "close_matplotlib_figures",  # autouse fixture
+  "reducer_override",  # called by pickle
 ]
 
 [tool.typos.files]
@@ -358,6 +359,7 @@ exhaustive = true  # every new top-level module must be placed in a layer
 layers = [
   "plot",  # draws items and sessions; nothing in catsim imports it
   "simulation",
+  "workers",  # the worker processes of a parallel run (ADR-0015)
   "engine",
   "selection | estimation | initialization | stopping | exposure",  # "|": siblings that never import each other
   "session",  # Session: built by the engine, read by the runner and the plots, never by a strategy
@@ -408,6 +410,7 @@ source_modules = [
   "catsim.session",
   "catsim.engine",
   "catsim.simulation",
+  "catsim.workers",
   "catsim.selection",
   "catsim.estimation",
   "catsim.initialization",
