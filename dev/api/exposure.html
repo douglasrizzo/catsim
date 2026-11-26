@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../_static/design-tabs.js?v=fcb327ea"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/exposure';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/favicon.svg"/>
@@ -390,14 +392,14 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="engine.html">CAT Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="session.html">Sessions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="context.html">Strategy Inputs and Estimates</a></li>
-<li class="toctree-l1"><a class="reference internal" href="state.html">Session State</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation Runs and Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="item_bank.html">Item Bank</a></li>
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="metrics.html">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="typing.html">Array Type Aliases – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 </ul>
@@ -469,34 +471,34 @@
 <dd><p>Base class for exposure controls, which may decline the item a selector proposes.</p>
 <p><a class="reference internal" href="engine.html#catsim.CatEngine" title="catsim.CatEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">CatEngine</span></code></a> asks its control about every item the selector proposes. A
 declined item is excluded from the session for the rest of its test, and the selector proposes
-again; a session with no item left to accept ends with <code class="docutils literal notranslate"><span class="pre">StopReason.NO_ITEMS</span></code>. A control holds
-configuration only, never per-session state, and draws from <code class="docutils literal notranslate"><span class="pre">context.rng</span></code>. This one administers
-each proposed item with probability one half:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">RunContext</span>
+again; a session with no item left to accept ends with <code class="docutils literal notranslate"><span class="pre">StopReason.NO_ITEMS</span></code>.
+<a class="reference internal" href="engine.html#catsim.CatEngine.select" title="catsim.CatEngine.select"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CatEngine.select</span></code></a> returns the declined items with its selection.
+A control holds configuration only, never per-session state, and draws from <code class="docutils literal notranslate"><span class="pre">context.rng</span></code>. This
+one administers each proposed item with probability one half:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">ItemBank</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">EAPEstimator</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.exposure</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseExposureControl</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">FixedPointInitializer</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxInfoSelector</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLengthStopper</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">CoinControl</span><span class="p">(</span><span class="n">BaseExposureControl</span><span class="p">):</span>
-<span class="gp">... </span>  <span class="k">def</span><span class="w"> </span><span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">item_id</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="k">def</span><span class="w"> </span><span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
 <span class="gp">... </span>    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">engine</span> <span class="o">=</span> <span class="n">CatEngine</span><span class="p">(</span>
 <span class="gp">... </span>  <span class="n">bank</span><span class="p">,</span> <span class="n">FixedPointInitializer</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">MaxInfoSelector</span><span class="p">(),</span> <span class="n">EAPEstimator</span><span class="p">(),</span> <span class="n">MaxLengthStopper</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span>
 <span class="gp">... </span>  <span class="n">exposure_control</span><span class="o">=</span><span class="n">CoinControl</span><span class="p">(),</span>
 <span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">context</span> <span class="o">=</span> <span class="n">RunContext</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">session</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">start_session</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">engine</span><span class="o">.</span><span class="n">select_next</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">context</span><span class="p">),</span> <span class="n">session</span><span class="o">.</span><span class="n">excluded_items</span>
-<span class="go">(11, [10, 16])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">selection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">engine</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">rng</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">selection</span><span class="o">.</span><span class="n">item</span><span class="p">,</span> <span class="n">selection</span><span class="o">.</span><span class="n">declined</span><span class="p">,</span> <span class="n">selection</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">excluded_items</span>
+<span class="go">(11, (10, 16), (10, 16))</span>
 </pre></div>
 </div>
-<p>The control declined the selector’s first two proposals, items 10 and 16, and accepted item 11.</p>
+<p>The control declined the selector’s first two proposals, items 10 and 16, and accepted item 11.
+The <a class="reference internal" href="../extending.html"><span class="doc">Extending catsim</span></a> guide lists what each strategy receives and returns.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.exposure.BaseExposureControl.accept">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">accept</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="context.html#catsim.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../_modules/catsim/exposure/base.html#BaseExposureControl.accept"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.exposure.BaseExposureControl.accept" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">accept</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="context.html#catsim.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">item</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../_modules/catsim/exposure/base.html#BaseExposureControl.accept"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.exposure.BaseExposureControl.accept" title="Link to this definition">#</a></dt>
 <dd><p>Return whether the engine administers the item the selector proposed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -504,7 +506,7 @@ each proposed item with probability one half:</p>
 <dt><strong>context</strong><span class="classifier">StepContext</span></dt><dd><p>The context the selector proposed the item from: the session as it stands, with the items
 declined so far in this selection among its <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code>.</p>
 </dd>
-<dt><strong>item_id</strong><span class="classifier">int</span></dt><dd><p>Index of the proposed item, an item of <code class="docutils literal notranslate"><span class="pre">context.item_bank</span></code> that is neither administered
+<dt><strong>item</strong><span class="classifier">int</span></dt><dd><p>Index of the proposed item, an item of <code class="docutils literal notranslate"><span class="pre">context.item_bank</span></code> that is neither administered
 nor excluded.</p>
 </dd>
 </dl>

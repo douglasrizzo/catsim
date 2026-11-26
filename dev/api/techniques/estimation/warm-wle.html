@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/techniques/estimation/warm-wle';</script>
@@ -521,14 +523,10 @@ can sit on the search bound, where <span class="math notranslate nohighlight">\(
 <p>The estimator returns a <a class="reference internal" href="../../context.html#catsim.Estimate" title="catsim.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a>. Its standard error
 is the Fisher one at the estimate, <span class="math notranslate nohighlight">\(1/\sqrt{I(\hat{\theta})}\)</span>, infinite where
 the information is 0. This departs from <span class="bibtex-citation" id="id9">Magis and Raîche [<a class="reference internal" href="#id24" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">2012</a>, p. 6, Equation 14]</span>,
-who add <span class="math notranslate nohighlight">\((I'J - IJ')/(2I^2)\)</span> to the information, and follows catR: since
-version 3.0 its <code class="docutils literal notranslate"><span class="pre">semTheta</span></code> gives the WLE the maximum likelihood formula, because
-the corrected one sometimes led to mathematical problems (<a class="reference external" href="https://github.com/cran/catR/blob/master/NEWS">catR’s
-NEWS</a>, version 3.0), and its
-default <code class="docutils literal notranslate"><span class="pre">sem.type</span> <span class="pre">=</span> <span class="pre">&quot;classic&quot;</span></code> still does. Under the 1PL and 2PL models the
+who add <span class="math notranslate nohighlight">\((I'J - IJ')/(2I^2)\)</span> to the information. Under the 1PL and 2PL models the
 corrected sum is the curvature of the weighted likelihood at its maximum, so it is
 positive; with guessing or slipping parameters it can be negative, which leaves no
-standard error: 13 of 3,920 response patterns (0.4% of their probability) on random
+standard error: 13 of 3,920 sets of responses (0.4% of their probability) on random
 3PL tests of 2 to 8 items, none of 4,560 on 2PL tests.</p>
 <section id="computation">
 <h3>Computation<a class="headerlink" href="#computation" title="Link to this heading">#</a></h3>
@@ -539,13 +537,9 @@ default range the points are 0.1 apart, so two roots closer than that can fall
 in one interval and go unseen. Each sign change from positive to negative brackets a maximum
 of the weighted likelihood and is refined with Brent’s method. If several maxima
 exist, which can happen with guessing, the one with the largest weighted
-likelihood is returned; candidates are ranked by integrating the modified score,
+likelihood is returned; the maxima are ranked by integrating the modified score,
 the derivative of the weighted log-likelihood. If the modified score never changes
-sign, the estimate is the bound it points to. This mirrors <code class="docutils literal notranslate"><span class="pre">catR</span></code>
-<span class="bibtex-citation" id="id10">[<a class="reference internal" href="#id24" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>]</span>, whose
-<a class="reference external" href="https://github.com/cran/catR/blob/master/R/thetaEst.R"><code class="docutils literal notranslate"><span class="pre">thetaEst.R</span></code></a> solves the
-same equation with <code class="docutils literal notranslate"><span class="pre">uniroot</span></code>; catsim adds the explicit handling of multiple
-roots.</p>
+sign, the estimate is the bound it points to.</p>
 </section>
 </section>
 <section id="parameters">
@@ -577,24 +571,48 @@ roots.</p>
 </section>
 <section id="behavior-and-comparison">
 <h2>Behavior and Comparison<a class="headerlink" href="#behavior-and-comparison" title="Link to this heading">#</a></h2>
-<p>Against the WLE’s sampling spread at a known ability (every response pattern for 5
-and 10 items, 3,000 simulated ones for 20 and 40), the classic formula
+<p>Against the WLE’s sampling spread at a known ability (every possible set of
+responses to 5 and 10 items, 3,000 simulated ones for 20 and 40), the classic formula
 overestimates the error in short tests, by 10% under the 2PL and 28% under the 3PL
 at 5 items. That is conservative: a standard-error stopper runs a few items longer
 than needed. Equation 14 roughly halves that gap. The sandwich formula of
-<span class="bibtex-citation" id="id11">Magis [<a class="reference internal" href="#id54" title="D. Magis. Efficient standard error formulas of ability estimators with dichotomous item response models. Psychometrika, 81(1):184–200, 2016. doi:10.1007/s11336-015-9443-3.">2016</a>]</span>, catR’s <code class="docutils literal notranslate"><span class="pre">sem.type</span> <span class="pre">=</span> <span class="pre">&quot;new&quot;</span></code>, is closest under the 3PL but underestimates the
+<span class="bibtex-citation" id="id10">Magis [<a class="reference internal" href="#id54" title="D. Magis. Efficient standard error formulas of ability estimators with dichotomous item response models. Psychometrika, 81(1):184–200, 2016. Not openly available. doi:10.1007/s11336-015-9443-3.">2016</a>]</span> is closest under the 3PL but underestimates the
 error under the 2PL (by 8% at 5 items), which would stop tests too early. From 20
 items on, the three agree within about 3%.</p>
-</section>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Comparison with catR</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">The estimator is catR’s <code class="docutils literal notranslate"><span class="pre">thetaEst</span></code> with <code class="docutils literal notranslate"><span class="pre">method</span> <span class="pre">=</span> <span class="pre">&quot;WL&quot;</span></code>, and its standard error
+is that of catR’s <code class="docutils literal notranslate"><span class="pre">semTheta</span></code> with its default <code class="docutils literal notranslate"><span class="pre">sem.type</span> <span class="pre">=</span> <span class="pre">&quot;classic&quot;</span></code>, which
+catR has given the WLE since version 3.0, because the corrected formula sometimes
+led to mathematical problems (<a class="reference external" href="https://github.com/cran/catR/blob/master/NEWS">catR’s
+NEWS</a>); its <code class="docutils literal notranslate"><span class="pre">sem.type</span> <span class="pre">=</span> <span class="pre">&quot;new&quot;</span></code> is
+the sandwich formula of <span class="bibtex-citation" id="id11">Magis [<a class="reference internal" href="#id54" title="D. Magis. Efficient standard error formulas of ability estimators with dichotomous item response models. Psychometrika, 81(1):184–200, 2016. Not openly available. doi:10.1007/s11336-015-9443-3.">2016</a>]</span>. With
+<code class="docutils literal notranslate"><span class="pre">bounds=(-4,</span> <span class="pre">4)</span></code>, catR’s default range, the parity tests
+(<a class="reference internal" href="../../../adr/0020-catr-as-the-reference.html"><span class="doc">ADR-0020</span></a>) find the same estimates and
+standard errors on fixed responses, all-correct and all-incorrect ones
+included, and in whole tests on recorded responses under MFI, bOpt and MLWI
+selection, with one departure, which they keep as an expected failure.</p>
+<p class="sd-card-text">When the modified score has several roots in the range, catR’s <code class="docutils literal notranslate"><span class="pre">uniroot</span></code> returns
+whichever root its search converges to, and catsim the one of largest weighted
+likelihood (see Computation); no setting makes catsim follow catR. Two items
+with guessing, one answered correctly and the other incorrectly, can give three
+roots, two maxima and a minimum: on one such pattern catR returns −0.59 and
+catsim 0.66. In a whole test with MLWI selection, the roots after the first two
+items are −0.44, 0.63 and 0.84, and catR returns 0.84 and catsim −0.44; the test’s
+items are the same in both, and the estimates agree again from the third
+response on.</p>
+</div>
+</details></section>
 <section id="guarantees">
 <h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
 <li><p>Every interior estimate is a root of the modified score equation, including for items with guessing.</p></li>
 <li><p>For items without guessing or slipping, the estimate maximizes the likelihood under a Jeffreys prior.</p></li>
-<li><p>The estimate is finite and inside the search interval for every response pattern, including
+<li><p>The estimate is finite and inside the search interval for any responses, including
 all-correct and all-incorrect patterns where the MLE diverges.</p></li>
 <li><p>Relative to a finite MLE, the WLE is pulled toward the abilities at which the administered items are most informative.</p></li>
-<li><p>On a short test without guessing, the exact expected bias (by enumeration of all response patterns)
+<li><p>On a short test without guessing, the exact expected bias (by enumeration of every possible set of responses)
 is small, and smaller than the MLE’s first-order bias above wherever that bias is
 non-negligible. With guessing and few items, the WLE at low ability is pulled upward, toward
 the items, so no unconditional bias guarantee is made for that case.</p></li>
@@ -610,12 +628,13 @@ the items, so no unconditional bias guarantee is made for that case.</p></li>
 <p>F. M. Lord. Unbiased estimators of ability parameters, of their variance, and of their parallel-forms reliability. <em>Psychometrika</em>, 48(2):233–245, 1983. Not openly available; Warm (1985, p. 7) gives its bias formula. <a class="reference external" href="https://doi.org/10.1007/BF02294018">doi:10.1007/BF02294018</a>.</p>
 </div>
 <div class="citation" id="id54" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id11">Mag16</a><span class="fn-bracket">]</span></span>
-<p>D. Magis. Efficient standard error formulas of ability estimators with dichotomous item response models. <em>Psychometrika</em>, 81(1):184–200, 2016. <a class="reference external" href="https://doi.org/10.1007/s11336-015-9443-3">doi:10.1007/s11336-015-9443-3</a>.</p>
+<span class="label"><span class="fn-bracket">[</span>Mag16<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id10">1</a>,<a role="doc-backlink" href="#id11">2</a>)</span>
+<p>D. Magis. Efficient standard error formulas of ability estimators with dichotomous item response models. <em>Psychometrika</em>, 81(1):184–200, 2016. Not openly available. <a class="reference external" href="https://doi.org/10.1007/s11336-015-9443-3">doi:10.1007/s11336-015-9443-3</a>.</p>
 </div>
 <div class="citation" id="id24" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span>MR12<span class="fn-bracket">]</span></span>
-<span class="backrefs">(<a role="doc-backlink" href="#id4">1</a>,<a role="doc-backlink" href="#id6">2</a>,<a role="doc-backlink" href="#id9">3</a>,<a role="doc-backlink" href="#id10">4</a>)</span>
+<span class="backrefs">(<a role="doc-backlink" href="#id4">1</a>,<a role="doc-backlink" href="#id6">2</a>,<a role="doc-backlink" href="#id9">3</a>)</span>
 <p>D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8):1–31, 2012. Open access. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">doi:10.18637/jss.v048.i08</a>.</p>
 </div>
 <div class="citation" id="id52" role="doc-biblioentry">
@@ -639,7 +658,7 @@ the items, so no unconditional bias guarantee is made for that case.</p></li>
 <dd><p>Bases: <a class="reference internal" href="index.html#catsim.estimation.BaseEstimator" title="catsim.estimation.base.BaseEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code></a></p>
 <p>Weighted likelihood estimator (WLE) of <span class="bibtex-citation" id="id1">Warm [<a class="reference internal" href="#id51" title="T. A. Warm. Weighted likelihood estimation of ability in item response theory. Psychometrika, 54(3):427–450, 1989. Not openly available; Warm (1985) derives the same estimator. doi:10.1007/BF02294627.">1989</a>]</span>.</p>
 <p>The root of Warm’s modified score equation, which removes the MLE’s first-order bias and stays
-finite for all-correct and all-incorrect response patterns; see
+finite for all-correct and all-incorrect responses; see
 <a class="reference internal" href="#"><span class="doc">Warm Weighted Likelihood Estimator</span></a>. If the equation has several roots within <code class="docutils literal notranslate"><span class="pre">bounds</span></code>,
 the one with the largest weighted likelihood is returned; if it has none, the bound the modified
 score points to.</p>

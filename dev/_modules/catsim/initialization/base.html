@@ -30,6 +30,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -41,6 +42,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 
@@ -803,7 +805,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  :class:`~catsim.StepContext`, because no session state exists yet.</span>
 
 <span class="sd">  An initializer holds its configuration and caches derived from the item bank, never per-session</span>
-<span class="sd">  state: one initializer starts every session of a run.</span>
+<span class="sd">  state: one initializer starts every session of a run. The :doc:`/extending` guide lists what each</span>
+<span class="sd">  strategy receives and returns.</span>
 <span class="sd">  """</span>
 
 <div class="viewcode-block" id="BaseInitializer.initialize">
@@ -817,7 +820,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    item_bank : ItemBank</span>
 <span class="sd">        Item bank used by the session.</span>
 <span class="sd">    rng : numpy.random.Generator</span>
-<span class="sd">        The run's random generator, for initializers that draw the estimate.</span>
+<span class="sd">        The generator of the call, for initializers that draw the estimate. When</span>
+<span class="sd">        :meth:`CatEngine.start &lt;catsim.CatEngine.start&gt;` calls the initializer, it is the generator</span>
+<span class="sd">        made from the ``rng`` given to ``start``, which is that ``rng`` itself when it is a generator.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>

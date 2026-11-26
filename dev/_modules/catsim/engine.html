@@ -30,6 +30,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -41,6 +42,7 @@
     <script src="../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../_static/design-tabs.js?v=fcb327ea"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 
@@ -784,99 +786,81 @@ window.runMermaid = runMermaid;</script>
                 <article class="bd-article">
                   
   <h1>Source code for catsim.engine</h1><div class="highlight"><pre>
-<span></span><span class="sd">"""Engine primitives for manual and automated CAT execution."""</span>
+<span></span><span class="sd">"""The CAT engine: a test's configuration and the three steps that take a session to the next (ADR-0006)."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">operator</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Protocol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimate</span><span class="p">,</span> <span class="n">StepContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.checks</span><span class="w"> </span><span class="kn">import</span> <span class="n">_check_in_bank</span><span class="p">,</span> <span class="n">_exposure_rates</span><span class="p">,</span> <span class="n">_item</span><span class="p">,</span> <span class="n">_item_indices</span><span class="p">,</span> <span class="n">_named</span><span class="p">,</span> <span class="n">_response</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimate</span><span class="p">,</span> <span class="n">StepContext</span><span class="p">,</span> <span class="n">_replaced</span><span class="p">,</span> <span class="n">_unchecked</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExcludedItemError</span><span class="p">,</span> <span class="n">NoItemsAvailableError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">CatStepResult</span><span class="p">,</span> <span class="n">ExposureTracker</span><span class="p">,</span> <span class="n">StopReason</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">Session</span><span class="p">,</span> <span class="n">StopReason</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-  <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hashable</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
 
   <span class="kn">from</span><span class="w"> </span><span class="nn">.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">.exposure</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseExposureControl</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseInitializer</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span>
-  <span class="kn">from</span><span class="w"> </span><span class="nn">.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatSessionSnapshot</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseStopper</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 
 
-<div class="viewcode-block" id="RunContext">
-<a class="viewcode-back" href="../../api/engine.html#catsim.RunContext">[docs]</a>
-<span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">RunContext</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Runtime services shared by CAT sessions in one run.</span>
+<div class="viewcode-block" id="Selection">
+<a class="viewcode-back" href="../../api/engine.html#catsim.Selection">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Selection</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""What :meth:`CatEngine.select` returns: the item to administer, the session and the items declined.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  rng : numpy.random.Generator</span>
-<span class="sd">      The run's random generator, which the initializer, the selector, the exposure control and the</span>
-<span class="sd">      response provider draw from.</span>
-<span class="sd">  exposure_tracker : ExposureTracker or None, optional</span>
-<span class="sd">      Counts sessions, item administrations and proposals across the run and gives selectors the</span>
-<span class="sd">      exposure rates their ``r_max`` cap is checked against. Without one, selectors get no rates and</span>
-<span class="sd">      apply no cap. Default is None.</span>
+<span class="sd">  item : int or None</span>
+<span class="sd">      Index of the item to administer, or None when the session has ended: it had already</span>
+<span class="sd">      stopped, or the selector had no item to offer, or none the exposure control accepted.</span>
+<span class="sd">  session : Session</span>
+<span class="sd">      The session to answer the item in: the one given to :meth:`CatEngine.select`, with the</span>
+<span class="sd">      declined items added to its excluded items and, when the selector ran out, its</span>
+<span class="sd">      ``stop_reason`` set to ``StopReason.NO_ITEMS``.</span>
+<span class="sd">  declined : tuple[int, ...]</span>
+<span class="sd">      The items the exposure control declined in this selection, in order (ADR-0011). Each is a</span>
+<span class="sd">      proposal that was not administered, so an application that counts proposals adds them and</span>
+<span class="sd">      the administered item.</span>
 <span class="sd">  """</span>
 
-  <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span>
-  <span class="n">exposure_tracker</span><span class="p">:</span> <span class="n">ExposureTracker</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+  <span class="n">item</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span>
+  <span class="n">session</span><span class="p">:</span> <span class="n">Session</span>
+  <span class="n">declined</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span></div>
 
 
 
-<div class="viewcode-block" id="ResponseProvider">
-<a class="viewcode-back" href="../../api/engine.html#catsim.ResponseProvider">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ResponseProvider</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">"""Source of the examinee's responses for :meth:`CatEngine.step` and :meth:`CatEngine.run_session`.</span>
-
-<span class="sd">  :class:`~catsim.SimulatedResponseProvider` draws them from a simulated examinee's true</span>
-<span class="sd">  ability; an application that steps sessions itself can wrap whatever collects real answers.</span>
-<span class="sd">  """</span>
-
-<div class="viewcode-block" id="ResponseProvider.answer">
-<a class="viewcode-back" href="../../api/engine.html#catsim.ResponseProvider.answer">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">answer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">session</span><span class="p">:</span> <span class="n">CatSessionSnapshot</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return whether the examinee answers the item correctly.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        The engine's item bank.</span>
-<span class="sd">    item_id : int</span>
-<span class="sd">        Index of the item the selector chose.</span>
-<span class="sd">    session : CatSessionSnapshot</span>
-<span class="sd">        The session as it stands before the response, which the provider cannot change.</span>
-<span class="sd">    rng : numpy.random.Generator</span>
-<span class="sd">        The run's random generator, the one the strategies draw from.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    bool</span>
-<span class="sd">        True for a correct response.</span>
-<span class="sd">    """</span></div>
-</div>
-
-
-
+<span class="c1"># eq=False: two engines are the same engine only if they are one object, as the strategies they hold</span>
+<span class="c1"># compare by identity too.</span>
 <div class="viewcode-block" id="CatEngine">
 <a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eq</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CatEngine</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Engine for stepwise CAT execution on one item bank.</span>
+<span class="w">  </span><span class="sd">"""The configuration of a computerized adaptive test, and the steps that run it.</span>
 
-<span class="sd">  Every session the engine runs is tested on its item bank: the item indices a session records,</span>
-<span class="sd">  and the exposure tracker of the run, refer to that bank. An application with several banks</span>
-<span class="sd">  builds one engine per bank.</span>
+<span class="sd">  An engine never changes. Its three step methods take a :class:`~catsim.Session` and return a new</span>
+<span class="sd">  one, and keep nothing between calls (ADR-0006): :meth:`start` begins a session, :meth:`select`</span>
+<span class="sd">  proposes its next item and :meth:`answer` records the response to it. The caller keeps the</span>
+<span class="sd">  sessions, the item on screen and the exposure counts. A session is tested on the engine's item</span>
+<span class="sd">  bank: its item indices are indices of that bank.</span>
+
+<span class="sd">  The stopper is asked once per state of the session: by :meth:`start` about the initial one and by</span>
+<span class="sd">  :meth:`answer` about each state after a response. A satisfied stopper ends the session with</span>
+<span class="sd">  ``StopReason.STOPPER``, and a selector with no item to offer ends it in :meth:`select` with</span>
+<span class="sd">  ``StopReason.NO_ITEMS`` (ADR-0010). The inputs of each step are checked where they enter</span>
+<span class="sd">  (ADR-0009).</span>
+
+<span class="sd">  The :doc:`/embedding-catsim` guide runs a test step by step.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -885,78 +869,239 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  initializer : BaseInitializer</span>
 <span class="sd">      Gives each session its initial ability estimate.</span>
 <span class="sd">  selector : BaseSelector</span>
-<span class="sd">      Chooses the next item.</span>
+<span class="sd">      Proposes the next item.</span>
 <span class="sd">  estimator : BaseEstimator</span>
 <span class="sd">      Updates the ability estimate after each response.</span>
 <span class="sd">  stopper : BaseStopper</span>
 <span class="sd">      Decides when a session has ended.</span>
 <span class="sd">  exposure_control : BaseExposureControl or None, optional</span>
 <span class="sd">      Decides whether to administer each item the selector proposes; a declined item is excluded</span>
-<span class="sd">      from the session for the rest of its test. Default is None, which administers every proposed</span>
-<span class="sd">      item.</span>
+<span class="sd">      from the session for the rest of its test (ADR-0011). Default is None, which administers every</span>
+<span class="sd">      proposed item.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  TypeError</span>
 <span class="sd">      If ``item_bank`` is not an :class:`~catsim.ItemBank`.</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  A test of five items, whose examinee answers every item easier than average correctly:</span>
+
+<span class="sd">  &gt;&gt;&gt; import numpy</span>
+<span class="sd">  &gt;&gt;&gt; from catsim import CatEngine, ItemBank</span>
+<span class="sd">  &gt;&gt;&gt; from catsim.estimation import EAPEstimator</span>
+<span class="sd">  &gt;&gt;&gt; from catsim.initialization import FixedPointInitializer</span>
+<span class="sd">  &gt;&gt;&gt; from catsim.selection import MaxInfoSelector</span>
+<span class="sd">  &gt;&gt;&gt; from catsim.stopping import MaxLengthStopper</span>
+<span class="sd">  &gt;&gt;&gt; bank = ItemBank.generate(50, rng=0)</span>
+<span class="sd">  &gt;&gt;&gt; engine = CatEngine(bank, FixedPointInitializer(0.0), MaxInfoSelector(), EAPEstimator(), MaxLengthStopper(5))</span>
+<span class="sd">  &gt;&gt;&gt; rng = numpy.random.default_rng(0)</span>
+<span class="sd">  &gt;&gt;&gt; session = engine.start(rng=rng)</span>
+<span class="sd">  &gt;&gt;&gt; while True:</span>
+<span class="sd">  ...   selection = engine.select(session, rng=rng)</span>
+<span class="sd">  ...   session = selection.session</span>
+<span class="sd">  ...   if selection.item is None:</span>
+<span class="sd">  ...     break</span>
+<span class="sd">  ...   session = engine.answer(session, selection.item, bool(bank.difficulty[selection.item] &lt; 0), rng=rng)</span>
+<span class="sd">  &gt;&gt;&gt; len(session.administered_items), session.stop_reason</span>
+<span class="sd">  (5, &lt;StopReason.STOPPER: 'stopper'&gt;)</span>
 <span class="sd">  """</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
-    <span class="n">initializer</span><span class="p">:</span> <span class="n">BaseInitializer</span><span class="p">,</span>
-    <span class="n">selector</span><span class="p">:</span> <span class="n">BaseSelector</span><span class="p">,</span>
-    <span class="n">estimator</span><span class="p">:</span> <span class="n">BaseEstimator</span><span class="p">,</span>
-    <span class="n">stopper</span><span class="p">:</span> <span class="n">BaseStopper</span><span class="p">,</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">exposure_control</span><span class="p">:</span> <span class="n">BaseExposureControl</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+  <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span>
+  <span class="n">initializer</span><span class="p">:</span> <span class="n">BaseInitializer</span>
+  <span class="n">selector</span><span class="p">:</span> <span class="n">BaseSelector</span>
+  <span class="n">estimator</span><span class="p">:</span> <span class="n">BaseEstimator</span>
+  <span class="n">stopper</span><span class="p">:</span> <span class="n">BaseStopper</span>
+  <span class="n">exposure_control</span><span class="p">:</span> <span class="n">BaseExposureControl</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kw_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Reject item parameters passed in place of an item bank."""</span>
     <span class="c1"># Checked here because a NumPy array of parameters would otherwise fail only at the first session.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">):</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"item_bank must be an ItemBank, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">; wrap item parameters in ItemBank(...)"</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">):</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"item_bank must be an ItemBank, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">item_bank</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">; wrap item parameters in ItemBank(...)"</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span> <span class="o">=</span> <span class="n">item_bank</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span> <span class="o">=</span> <span class="n">initializer</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span> <span class="o">=</span> <span class="n">selector</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span> <span class="o">=</span> <span class="n">estimator</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span> <span class="o">=</span> <span class="n">stopper</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_control</span> <span class="o">=</span> <span class="n">exposure_control</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">item_bank</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ItemBank</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the item bank the engine's sessions are tested on."""</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span>
-
-<div class="viewcode-block" id="CatEngine.context">
-<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.context">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StepContext</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return what the strategies may read about a session as it stands.</span>
-
-<span class="sd">    It is the context the selector is given for its next proposal: the session's items, responses,</span>
-<span class="sd">    excluded items and current estimate with its standard error, with the run's generator and</span>
-<span class="sd">    exposure rates. Without a run context, as for a finished session of a</span>
-<span class="sd">    :class:`~catsim.SimulationResult`, the generator is a fresh unseeded one and there are no</span>
-<span class="sd">    exposure rates, so a selector given it applies no ``r_max`` cap. A</span>
-<span class="sd">    :class:`~catsim.stopping.StopRule` asked with it tells which of its criteria hold. See</span>
-<span class="sd">    :doc:`/live-sessions`.</span>
+<div class="viewcode-block" id="CatEngine.start">
+<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.start">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">excluded_items</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Session</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Begin a session at the initializer's estimate, and ask the stopper about it.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    state : CatSessionState</span>
+<span class="sd">    rng : int, numpy.random.Generator or None</span>
+<span class="sd">        The random source of the initializer and of the stopper's context: a generator, used as</span>
+<span class="sd">        is, a seed, or None for fresh entropy (ADR-0013).</span>
+<span class="sd">    excluded_items : Iterable[int], optional</span>
+<span class="sd">        Items the session must not be given, such as those the examinee saw in an earlier attempt</span>
+<span class="sd">        or those a recorded examinee has no response to (ADR-0011). Default is no items.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Session</span>
+<span class="sd">        A session with no items, whose estimates hold the initial one, with an infinite standard</span>
+<span class="sd">        error and no evaluations. Its ``stop_reason`` is ``StopReason.STOPPER`` if the stopper is</span>
+<span class="sd">        satisfied before any item, and None otherwise.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    TypeError</span>
+<span class="sd">        If an excluded item is not an integer.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If an excluded item is outside the bank or repeats, or the initializer's estimate is not</span>
+<span class="sd">        finite.</span>
+<span class="sd">    """</span>
+    <span class="n">excluded</span> <span class="o">=</span> <span class="n">_item_indices</span><span class="p">(</span><span class="s2">"excluded_items"</span><span class="p">,</span> <span class="n">excluded_items</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">rng</span><span class="p">),</span> <span class="n">excluded</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CatEngine.select">
+<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.select">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Selection</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Propose the next item of a session, or end it when the selector has none to offer.</span>
+
+<span class="sd">    The selector proposes items until the exposure control accepts one; each item it declines</span>
+<span class="sd">    joins the session's excluded items (ADR-0011). Every call selects anew, and a selector may draw</span>
+<span class="sd">    at random, so a second call on the same session may propose another item: keeping the item on</span>
+<span class="sd">    screen until its response arrives is the caller's.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    session : Session</span>
+<span class="sd">        The session, which ``select`` does not change.</span>
+<span class="sd">    rng : int, numpy.random.Generator or None</span>
+<span class="sd">        The random source of the selector and the exposure control: a generator, used as is, a</span>
+<span class="sd">        seed, or None for fresh entropy (ADR-0013).</span>
+<span class="sd">    exposure_rates : numpy.ndarray or None, optional</span>
+<span class="sd">        Each item's exposure rate, one value in [0, 1] per item of the bank, which selectors compare</span>
+<span class="sd">        with their ``r_max`` cap; the caller computes them from the counts it keeps (ADR-0012).</span>
+<span class="sd">        Default is None, under which no cap applies.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Selection</span>
+<span class="sd">        The item to administer and the session to answer it in, with the items the control</span>
+<span class="sd">        declined. For a session that has stopped, no item and that same session; for a selector</span>
+<span class="sd">        with no item to offer, or none the control accepts, no item and the session ended with</span>
+<span class="sd">        ``StopReason.NO_ITEMS``.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    TypeError</span>
+<span class="sd">        If ``session`` is not a :class:`~catsim.Session`, the exposure rates are not real numbers or</span>
+<span class="sd">        the selector proposes an index that is not an integer.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If an item of the session is outside the bank, the exposure rates are not one value in</span>
+<span class="sd">        [0, 1] per item, or the selector proposes an item outside the bank or one the session has</span>
+<span class="sd">        had.</span>
+<span class="sd">    ExcludedItemError</span>
+<span class="sd">        If the selector proposes an item the session excluded.</span>
+<span class="sd">    """</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+    <span class="n">rates</span> <span class="o">=</span> <span class="n">_exposure_rates</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">rng</span><span class="p">),</span> <span class="n">rates</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CatEngine.answer">
+<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.answer">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">answer</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">,</span>
+    <span class="n">item</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">response</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>  <span class="c1"># noqa: FBT001 - the response is data, not a flag</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Session</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Record the response to an item, update the estimate and ask the stopper about the new state.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    session : Session</span>
+<span class="sd">        The running session the item was administered in, usually ``selection.session``.</span>
+<span class="sd">    item : int</span>
+<span class="sd">        Index of the administered item, usually ``selection.item``.</span>
+<span class="sd">    response : bool</span>
+<span class="sd">        Whether the examinee answered the item correctly: a ``bool``, a ``numpy.bool_`` or the</span>
+<span class="sd">        integer 0 or 1.</span>
+<span class="sd">    rng : int, numpy.random.Generator or None</span>
+<span class="sd">        The random source of the estimator's and the stopper's contexts: a generator, used as is,</span>
+<span class="sd">        a seed, or None for fresh entropy (ADR-0013). No built-in estimator or stopper draws from it.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Session</span>
+<span class="sd">        The session with the item, the response and the estimator's estimate added. Its</span>
+<span class="sd">        ``stop_reason`` is ``StopReason.STOPPER`` if the stopper is satisfied by the new state.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    TypeError</span>
+<span class="sd">        If ``session`` is not a :class:`~catsim.Session`, ``item`` is not an integer, the response</span>
+<span class="sd">        is neither a Boolean nor an integer, or the estimator returns something other than an</span>
+<span class="sd">        :class:`~catsim.Estimate`.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If the session has stopped, an item of the session or ``item`` is outside the bank, the</span>
+<span class="sd">        session has had ``item``, or an integer response is not 0 or 1.</span>
+<span class="sd">    ExcludedItemError</span>
+<span class="sd">        If the session excluded ``item``.</span>
+<span class="sd">    """</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">stop_reason</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"the session has stopped (stop_reason </span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">stop_reason</span><span class="o">.</span><span class="n">value</span><span class="si">!r}</span><span class="s2">) and accepts no more responses"</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">checked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked_item</span><span class="p">(</span><span class="s2">"item"</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_answer</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">checked</span><span class="p">,</span> <span class="n">_response</span><span class="p">(</span><span class="s2">"response"</span><span class="p">,</span> <span class="n">response</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">rng</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="CatEngine.context">
+<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.context">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">context</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StepContext</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return what the strategies may read about a session as it stands.</span>
+
+<span class="sd">    It is the context the selector reads for the session's next proposal and the stopper read</span>
+<span class="sd">    about its last state: the session's items, responses, excluded items and current estimate with</span>
+<span class="sd">    its standard error. A :class:`~catsim.stopping.StopRule` asked with it tells which of its</span>
+<span class="sd">    criteria hold.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    session : Session</span>
 <span class="sd">        The session.</span>
-<span class="sd">    context : RunContext or None, optional</span>
-<span class="sd">        Runtime services of the run, which give the random generator and the exposure rates.</span>
-<span class="sd">        Default is None.</span>
+<span class="sd">    rng : int, numpy.random.Generator or None, optional</span>
+<span class="sd">        The context's random source: a generator, used as is, a seed, or None for fresh entropy</span>
+<span class="sd">        (ADR-0013). Default is None.</span>
+<span class="sd">    exposure_rates : numpy.ndarray or None, optional</span>
+<span class="sd">        The context's exposure rates, one value in [0, 1] per item. Default is None.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    StepContext</span>
 <span class="sd">        The session's bank, items, responses, excluded items, current estimate and standard error,</span>
-<span class="sd">        generator and exposure rates.</span>
+<span class="sd">        with the generator and the exposure rates.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    TypeError</span>
+<span class="sd">        If ``session`` is not a :class:`~catsim.Session`, or the exposure rates are not real numbers.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If an item of the session is outside the bank, or the exposure rates are not one value in</span>
+<span class="sd">        [0, 1] per item.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">    &gt;&gt;&gt; from catsim import CatEngine, ItemBank, SimulationRunner</span>
+<span class="sd">    &gt;&gt;&gt; from catsim import CatEngine, ItemBank, simulate</span>
 <span class="sd">    &gt;&gt;&gt; from catsim.estimation import EAPEstimator</span>
 <span class="sd">    &gt;&gt;&gt; from catsim.initialization import FixedPointInitializer</span>
 <span class="sd">    &gt;&gt;&gt; from catsim.selection import MaxInfoSelector</span>
@@ -964,298 +1109,42 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    &gt;&gt;&gt; rule = StopRule(StandardErrorStopper(0.2), MaxLengthStopper(5))</span>
 <span class="sd">    &gt;&gt;&gt; bank = ItemBank.generate(50, rng=0)</span>
 <span class="sd">    &gt;&gt;&gt; engine = CatEngine(bank, FixedPointInitializer(0.0), MaxInfoSelector(), EAPEstimator(), rule)</span>
-<span class="sd">    &gt;&gt;&gt; session = SimulationRunner(engine).run([0.0], rng=0).sessions[0]</span>
+<span class="sd">    &gt;&gt;&gt; session = simulate(engine, true_thetas=[0.0], rng=0).sessions[0]</span>
 <span class="sd">    &gt;&gt;&gt; rule.satisfied(engine.context(session))</span>
 <span class="sd">    (MaxLengthStopper(max_items=5),)</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">context</span> <span class="o">=</span> <span class="n">RunContext</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">())</span>
-    <span class="n">tracker</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span>
-    <span class="k">return</span> <span class="n">StepContext</span><span class="p">(</span>
-      <span class="n">item_bank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="p">,</span>
-      <span class="n">rng</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">,</span>
-      <span class="n">administered_items</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">administered_items</span><span class="p">),</span>
-      <span class="n">responses</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">responses</span><span class="p">),</span>
-      <span class="n">excluded_items</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">excluded_items</span><span class="p">),</span>
-      <span class="n">theta</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">current_theta</span><span class="p">,</span>
-      <span class="n">se</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">current_se</span><span class="p">,</span>
-      <span class="n">exposure_rates</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">tracker</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tracker</span><span class="o">.</span><span class="n">rates</span><span class="p">(),</span>
-    <span class="p">)</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+    <span class="n">rates</span> <span class="o">=</span> <span class="n">_exposure_rates</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">rng</span><span class="p">),</span> <span class="n">rates</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="CatEngine.start_session">
-<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.start_session">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">start_session</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">session_id</span><span class="p">:</span> <span class="n">Hashable</span><span class="p">,</span>
-    <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">,</span>
-    <span class="n">true_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CatSessionState</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Create a new CAT session with an initial theta estimate.</span>
-
-<span class="sd">    The session is counted in the context's exposure tracker, if it has one, once the initializer</span>
-<span class="sd">    has succeeded.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    session_id : Hashable</span>
-<span class="sd">        Identifier of the session, such as an int, a str or a UUID.</span>
-<span class="sd">    context : RunContext</span>
-<span class="sd">        Runtime services of the run.</span>
-<span class="sd">    true_theta : float or None, optional</span>
-<span class="sd">        True ability of a simulated examinee. Default is None.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    CatSessionState</span>
-<span class="sd">        A running session whose estimate history holds the initial estimate, with an infinite</span>
-<span class="sd">        standard error.</span>
-<span class="sd">    """</span>
-    <span class="n">initial_theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">item_bank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span><span class="o">.</span><span class="n">start_session</span><span class="p">()</span>
-    <span class="n">initial</span> <span class="o">=</span> <span class="n">Estimate</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="n">initial_theta</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">evaluations</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">CatSessionState</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="n">session_id</span><span class="p">,</span> <span class="n">estimates</span><span class="o">=</span><span class="p">[</span><span class="n">initial</span><span class="p">],</span> <span class="n">true_theta</span><span class="o">=</span><span class="n">true_theta</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="CatEngine.should_stop">
-<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.should_stop">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">should_stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return whether the session satisfies the stopping criterion.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    state : CatSessionState</span>
-<span class="sd">        The session to check.</span>
-<span class="sd">    context : RunContext</span>
-<span class="sd">        Runtime services of the run.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    bool</span>
-<span class="sd">        What the stopper says about the session as it stands.</span>
-<span class="sd">    """</span>
-    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">)))</span></div>
-
-
-<div class="viewcode-block" id="CatEngine.select_next">
-<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.select_next">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">select_next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Select the next item to administer, or end the session.</span>
-
-<span class="sd">    It returns None once the session has ended, so a loop needs no other check. The stopper is</span>
-<span class="sd">    consulted here only before the first response; after that, :meth:`apply_response` consults it.</span>
-<span class="sd">    The items the exposure control declines join the session's ``excluded_items`` and the tracker's</span>
-<span class="sd">    proposals, unless the selection raises, so save the session after this call too. Each call</span>
-<span class="sd">    selects anew, so a second call may return another item or end the session: keep the returned id</span>
-<span class="sd">    until its response arrives. See :doc:`/live-sessions`.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    state : CatSessionState</span>
-<span class="sd">        The session to continue. It is marked stopped when this method returns None for it.</span>
-<span class="sd">    context : RunContext</span>
-<span class="sd">        Runtime services of the run: the random generator and, optionally, the exposure tracker.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    int or None</span>
-<span class="sd">        Index of the next item to administer. None when the session has ended: it was already</span>
-<span class="sd">        stopped (and is left untouched), its stopper is satisfied (reason ``StopReason.STOPPER``),</span>
-<span class="sd">        or the selector has no item to offer, or none the exposure control accepts (reason</span>
-<span class="sd">        ``StopReason.NO_ITEMS``).</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Raise unless ``session`` is a session whose items are items of the engine's bank.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
-<span class="sd">    ExcludedItemError</span>
-<span class="sd">        If the selector proposes an item the session excluded.</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If the selector proposes an item outside the bank or one already administered.</span>
-
-<span class="sd">    Examples</span>
-<span class="sd">    --------</span>
-<span class="sd">    &gt;&gt;&gt; import numpy</span>
-<span class="sd">    &gt;&gt;&gt; from catsim import CatEngine, ItemBank, RunContext</span>
-<span class="sd">    &gt;&gt;&gt; from catsim.estimation import EAPEstimator</span>
-<span class="sd">    &gt;&gt;&gt; from catsim.initialization import FixedPointInitializer</span>
-<span class="sd">    &gt;&gt;&gt; from catsim.selection import MaxInfoSelector</span>
-<span class="sd">    &gt;&gt;&gt; from catsim.stopping import MaxLengthStopper</span>
-<span class="sd">    &gt;&gt;&gt; bank = ItemBank.generate(50, rng=0)</span>
-<span class="sd">    &gt;&gt;&gt; engine = CatEngine(bank, FixedPointInitializer(0.0), MaxInfoSelector(), EAPEstimator(), MaxLengthStopper(5))</span>
-<span class="sd">    &gt;&gt;&gt; context = RunContext(rng=numpy.random.default_rng(0))</span>
-<span class="sd">    &gt;&gt;&gt; state = engine.start_session("examinee-1", context)</span>
-<span class="sd">    &gt;&gt;&gt; while (item_id := engine.select_next(state, context)) is not None:</span>
-<span class="sd">    ...   step = engine.apply_response(state, item_id, response=bool(bank.difficulty[item_id] &lt; 0), context=context)</span>
-<span class="sd">    &gt;&gt;&gt; state.administered_count, state.stop_reason</span>
-<span class="sd">    (5, &lt;StopReason.STOPPER: 'stopper'&gt;)</span>
-<span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">:</span>
-      <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">administered_count</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_stop</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-      <span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">=</span> <span class="n">StopReason</span><span class="o">.</span><span class="n">STOPPER</span>
-      <span class="k">return</span> <span class="kc">None</span>
-
-    <span class="n">declined</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accepted_item</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">),</span> <span class="n">declined</span><span class="p">)</span>
-    <span class="k">except</span> <span class="n">NoItemsAvailableError</span><span class="p">:</span>
-      <span class="n">item_id</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="c1"># Committed only here, so a selection that raises changes neither the session nor the tracker.</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">excluded_items</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">declined</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="k">for</span> <span class="n">declined_item</span> <span class="ow">in</span> <span class="n">declined</span><span class="p">:</span>
-        <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span><span class="o">.</span><span class="n">record_decline</span><span class="p">(</span><span class="n">declined_item</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">item_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">=</span> <span class="n">StopReason</span><span class="o">.</span><span class="n">NO_ITEMS</span>
-    <span class="k">return</span> <span class="n">item_id</span></div>
-
-
-  <span class="k">def</span><span class="w"> </span><span class="nf">_accepted_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">,</span> <span class="n">declined</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the first item the selector proposes that the exposure control accepts.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    context : StepContext</span>
-<span class="sd">        The session as it stands.</span>
-<span class="sd">    declined : list[int]</span>
-<span class="sd">        Receives each item the control declines, in order.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    int</span>
-<span class="sd">        The accepted item.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    NoItemsAvailableError</span>
-<span class="sd">        If the selector has no item left to propose.</span>
-<span class="sd">    """</span>
-    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-      <span class="c1"># Checked before the control or a response provider sees it: a live provider shows the item to an</span>
-      <span class="c1"># examinee, and a selector that ignores excluded_items would be asked again forever.</span>
-      <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked_item</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">context</span><span class="p">)))</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_control</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exposure_control</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">item_id</span><span class="p">)):</span>
-        <span class="k">return</span> <span class="n">item_id</span>
-      <span class="n">declined</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
-      <span class="n">context</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">excluded_items</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="n">context</span><span class="o">.</span><span class="n">excluded_items</span><span class="p">,</span> <span class="n">item_id</span><span class="p">))</span>
-
-<div class="viewcode-block" id="CatEngine.apply_response">
-<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.apply_response">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">apply_response</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span>
-    <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">response</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-    <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">,</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CatStepResult</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Record the examinee's response to an item, update the estimate and check the stopper.</span>
-
-<span class="sd">    The step is atomic: the inputs are validated, and the new estimate and the stopper's decision</span>
-<span class="sd">    are computed, before the session or the exposure tracker change, so a step that raises leaves</span>
-<span class="sd">    both as they were.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    state : CatSessionState</span>
-<span class="sd">        The session that administered the item. It must not be stopped.</span>
-<span class="sd">    item_id : int</span>
-<span class="sd">        Index of the administered item, usually the one :meth:`select_next` returned.</span>
-<span class="sd">    response : bool</span>
-<span class="sd">        Whether the examinee answered the item correctly; a ``bool`` or ``numpy.bool_``.</span>
-<span class="sd">    context : RunContext</span>
-<span class="sd">        Runtime services of the run; the item's administration is recorded in its exposure</span>
-<span class="sd">        tracker, if it has one.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    CatStepResult</span>
-<span class="sd">        The administered item, the response, the updated estimate and whether the session stopped.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ExcludedItemError</span>
-<span class="sd">        If the item is in the session's ``excluded_items``.</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If the session has stopped, the item index is outside the bank or the item was already</span>
-<span class="sd">        administered in this session.</span>
 <span class="sd">    TypeError</span>
-<span class="sd">        If the item index is not an integer, the response is not a ``bool`` or ``numpy.bool_``, or</span>
-<span class="sd">        the estimator returns something other than an :class:`~catsim.Estimate`.</span>
+<span class="sd">        If ``session`` is not a :class:`~catsim.Session`.</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Session </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">session_id</span><span class="si">}</span><span class="s2"> has stopped (reason: </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span><span class="si">}</span><span class="s2">) and accepts no more responses"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="n">irt</span><span class="o">.</span><span class="n">validate_response_vector</span><span class="p">((</span><span class="n">response</span><span class="p">,),</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
-    <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked_item</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">item_id</span><span class="p">)</span>
-
-    <span class="n">response</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-    <span class="c1"># The estimator starts from the previous estimate; the stopper judges the new one.</span>
-    <span class="n">answered</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-      <span class="n">current</span><span class="p">,</span>
-      <span class="n">administered_items</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="n">current</span><span class="o">.</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">item_id</span><span class="p">),</span>
-      <span class="n">responses</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="n">current</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span> <span class="n">response</span><span class="p">),</span>
-    <span class="p">)</span>
-    <span class="n">estimate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">answered</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">estimate</span><span class="p">,</span> <span class="n">Estimate</span><span class="p">):</span>
-      <span class="c1"># An estimator written for the float-returning contract would otherwise fail on .theta.</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.estimate must return an Estimate, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">Session</span><span class="p">):</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"session is a </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">session</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">; it must be a Session"</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="c1"># The session holds Python scalars, whatever NumPy types a custom estimator puts in its Estimate.</span>
-    <span class="n">estimate</span> <span class="o">=</span> <span class="n">Estimate</span><span class="p">(</span>
-      <span class="n">theta</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">theta</span><span class="p">),</span>
-      <span class="n">se</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">se</span><span class="p">),</span>
-      <span class="n">evaluations</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">estimate</span><span class="o">.</span><span class="n">evaluations</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">evaluations</span><span class="p">),</span>
-    <span class="p">)</span>
-    <span class="n">stopped</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">answered</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">estimate</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="n">estimate</span><span class="o">.</span><span class="n">se</span><span class="p">)))</span>
+    <span class="c1"># The session checked everything else when it was built, but it does not know the bank.</span>
+    <span class="n">_check_in_bank</span><span class="p">(</span><span class="s2">"administered_items"</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">administered_items</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">)</span>
+    <span class="n">_check_in_bank</span><span class="p">(</span><span class="s2">"excluded_items"</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">excluded_items</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">)</span>
 
-    <span class="n">state</span><span class="o">.</span><span class="n">administered_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">responses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">estimates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">stopped</span><span class="p">:</span>
-      <span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">=</span> <span class="n">StopReason</span><span class="o">.</span><span class="n">STOPPER</span>
-
-    <span class="k">return</span> <span class="n">CatStepResult</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(),</span> <span class="n">selected_item_id</span><span class="o">=</span><span class="n">item_id</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="CatEngine.step">
-<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.step">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span>
-    <span class="n">response_provider</span><span class="p">:</span> <span class="n">ResponseProvider</span><span class="p">,</span>
-    <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">,</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CatStepResult</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Execute one full CAT step: select an item, get its response and apply it.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_checked_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">session</span><span class="p">:</span> <span class="n">Session</span> <span class="o">|</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return ``value`` as an item index, raising unless the session may be given that item.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    state : CatSessionState</span>
-<span class="sd">        The session to advance.</span>
-<span class="sd">    response_provider : ResponseProvider</span>
-<span class="sd">        Source of the examinee's response to the selected item.</span>
-<span class="sd">    context : RunContext</span>
-<span class="sd">        Runtime services of the run.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    CatStepResult</span>
-<span class="sd">        The result of :meth:`apply_response`. When :meth:`select_next` returns None instead, a</span>
-<span class="sd">        result with no item and no response that reports the session stopped, with the stop</span>
-<span class="sd">        reason it has (an already stopped session keeps its earlier one).</span>
-<span class="sd">    """</span>
-    <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">select_next</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">item_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">CatStepResult</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(),</span> <span class="n">selected_item_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="n">response_provider</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="p">,</span> <span class="n">item_id</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(),</span> <span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_response</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_id</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span></div>
-
-
-  <span class="k">def</span><span class="w"> </span><span class="nf">_checked_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">,</span> <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return ``item_id`` as an int, raising unless the session in ``context`` may be given it.</span>
+<span class="sd">    label : str</span>
+<span class="sd">        What the value is, for the messages.</span>
+<span class="sd">    value : object</span>
+<span class="sd">        The item index.</span>
+<span class="sd">    session : Session or StepContext</span>
+<span class="sd">        The session, or the context it is proposed in, whose items and exclusions it is checked</span>
+<span class="sd">        against.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1264,57 +1153,127 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
-<span class="sd">    TypeError</span>
-<span class="sd">        If ``item_id`` is not an integer.</span>
 <span class="sd">    ExcludedItemError</span>
-<span class="sd">        If the context excludes the item.</span>
+<span class="sd">        If the session excluded the item.</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        If ``item_id`` is not an index of the bank, or the session has already had the item.</span>
+<span class="sd">        If the session has had the item.</span>
 <span class="sd">    """</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="n">item_id</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"item_id must be an integer, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">item_id</span><span class="si">!r}</span><span class="s2">"</span>
-      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
-    <span class="k">if</span> <span class="n">item_id</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">item_id</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Invalid item index </span><span class="si">{</span><span class="n">item_id</span><span class="si">}</span><span class="s2">. Must be between 0 and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="n">_item</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">session</span><span class="o">.</span><span class="n">administered_items</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">_named</span><span class="p">(</span><span class="n">item</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s2">; the session has already been given that item"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">item_id</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Item </span><span class="si">{</span><span class="n">item_id</span><span class="si">}</span><span class="s2"> has already been administered in this session"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">item_id</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">excluded_items</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Item </span><span class="si">{</span><span class="n">item_id</span><span class="si">}</span><span class="s2"> is excluded from this session; remove it from the session's excluded_items to give it"</span>
+    <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">session</span><span class="o">.</span><span class="n">excluded_items</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">_named</span><span class="p">(</span><span class="n">item</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s2">; the session excluded that item, which it must not be given"</span>
+      <span class="p">)</span>
       <span class="k">raise</span> <span class="n">ExcludedItemError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">item_id</span>
+    <span class="k">return</span> <span class="n">item</span>
 
-<div class="viewcode-block" id="CatEngine.run_session">
-<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.run_session">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">run_session</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span>
-    <span class="n">response_provider</span><span class="p">:</span> <span class="n">ResponseProvider</span><span class="p">,</span>
-    <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">,</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CatSessionState</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Step a session until it stops.</span>
+  <span class="c1"># The steps below take checked inputs and check nothing again, so simulate calls</span>
+  <span class="c1"># them directly with the inputs it builds itself (ADR-0009).</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    state : CatSessionState</span>
-<span class="sd">        The session to run, which this call advances in place.</span>
-<span class="sd">    response_provider : ResponseProvider</span>
-<span class="sd">        Source of the examinee's responses.</span>
-<span class="sd">    context : RunContext</span>
-<span class="sd">        Runtime services of the run.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span> <span class="n">excluded_items</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Session</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return a new session excluding ``excluded_items``, stopped if the stopper holds before any item."""</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initializer</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">item_bank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">))</span>
+    <span class="n">initial</span> <span class="o">=</span> <span class="n">Estimate</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">evaluations</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">session</span> <span class="o">=</span> <span class="n">_unchecked</span><span class="p">(</span><span class="n">Session</span><span class="p">,</span> <span class="n">estimates</span><span class="o">=</span><span class="p">(</span><span class="n">initial</span><span class="p">,),</span> <span class="n">excluded_items</span><span class="o">=</span><span class="n">excluded_items</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="kc">None</span><span class="p">))):</span>
+      <span class="k">return</span> <span class="n">_replaced</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">stop_reason</span><span class="o">=</span><span class="n">StopReason</span><span class="o">.</span><span class="n">STOPPER</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">session</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span> <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Selection</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the selection for ``session``, ending it with ``NO_ITEMS`` when no item is accepted."""</span>
+    <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">stop_reason</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">Selection</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">,</span> <span class="n">declined</span><span class="o">=</span><span class="p">())</span>
+    <span class="n">item</span><span class="p">,</span> <span class="n">declined</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accepted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">exposure_rates</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">excluded</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">session</span><span class="o">.</span><span class="n">excluded_items</span><span class="p">,</span> <span class="o">*</span><span class="n">declined</span><span class="p">)</span>
+      <span class="n">session</span> <span class="o">=</span> <span class="n">_replaced</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">excluded_items</span><span class="o">=</span><span class="n">excluded</span><span class="p">,</span> <span class="n">stop_reason</span><span class="o">=</span><span class="n">StopReason</span><span class="o">.</span><span class="n">NO_ITEMS</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">declined</span><span class="p">:</span>
+      <span class="n">session</span> <span class="o">=</span> <span class="n">_replaced</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">excluded_items</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="n">session</span><span class="o">.</span><span class="n">excluded_items</span><span class="p">,</span> <span class="o">*</span><span class="n">declined</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">Selection</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="n">item</span><span class="p">,</span> <span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">,</span> <span class="n">declined</span><span class="o">=</span><span class="n">declined</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_accepted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Return the first proposal the exposure control accepts, or None, with the proposals it declined before.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    CatSessionState</span>
-<span class="sd">        ``state``, stopped, with its ``stop_reason`` set.</span>
+<span class="sd">    tuple[int or None, tuple[int, ...]]</span>
+<span class="sd">        The accepted item, or None if the selector ran out first, and the declined items, in order.</span>
 <span class="sd">    """</span>
-    <span class="k">while</span> <span class="ow">not</span> <span class="n">state</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">response_provider</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">state</span></div>
-</div>
+    <span class="n">declined</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Checked before the control sees it: a selector that ignores excluded_items would be asked</span>
+        <span class="c1"># about a declined item forever.</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked_item</span><span class="p">(</span>
+          <span class="sa">f</span><span class="s2">"the item </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> proposed"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">context</span><span class="p">),</span> <span class="n">context</span>
+        <span class="p">)</span>
+        <span class="n">accepted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exposure_control</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exposure_control</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">item</span><span class="p">))</span>
+      <span class="k">except</span> <span class="n">NoItemsAvailableError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">declined</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">accepted</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">item</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">declined</span><span class="p">)</span>
+      <span class="n">declined</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+      <span class="n">context</span> <span class="o">=</span> <span class="n">_replaced</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">excluded_items</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="n">context</span><span class="o">.</span><span class="n">excluded_items</span><span class="p">,</span> <span class="n">item</span><span class="p">))</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_answer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Session</span><span class="p">:</span>  <span class="c1"># noqa: FBT001</span>
+<span class="w">    </span><span class="sd">"""Return ``session`` with the response to ``item`` and the new estimate, stopped if the stopper holds."""</span>
+    <span class="c1"># The estimator starts from the previous estimate; the stopper judges the new one.</span>
+    <span class="n">answered</span> <span class="o">=</span> <span class="n">_replaced</span><span class="p">(</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_context</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+      <span class="n">administered_items</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="n">session</span><span class="o">.</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">item</span><span class="p">),</span>
+      <span class="n">responses</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="n">session</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span> <span class="n">response</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">estimate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="p">(</span><span class="n">answered</span><span class="p">)</span>
+    <span class="n">stopped</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">_replaced</span><span class="p">(</span><span class="n">answered</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">estimate</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="n">estimate</span><span class="o">.</span><span class="n">se</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">_unchecked</span><span class="p">(</span>
+      <span class="n">Session</span><span class="p">,</span>
+      <span class="n">administered_items</span><span class="o">=</span><span class="n">answered</span><span class="o">.</span><span class="n">administered_items</span><span class="p">,</span>
+      <span class="n">responses</span><span class="o">=</span><span class="n">answered</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span>
+      <span class="n">estimates</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="n">session</span><span class="o">.</span><span class="n">estimates</span><span class="p">,</span> <span class="n">estimate</span><span class="p">),</span>
+      <span class="n">excluded_items</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">excluded_items</span><span class="p">,</span>
+      <span class="n">stop_reason</span><span class="o">=</span><span class="n">StopReason</span><span class="o">.</span><span class="n">STOPPER</span> <span class="k">if</span> <span class="n">stopped</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Estimate</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the estimator's estimate for ``context``, holding Python scalars.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Estimate</span>
+<span class="sd">        The estimate, its theta and standard error as floats and its evaluations as an int or None.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    TypeError</span>
+<span class="sd">        If the estimator returns something other than an :class:`~catsim.Estimate`.</span>
+<span class="sd">    """</span>
+    <span class="n">estimate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">estimate</span><span class="p">,</span> <span class="n">Estimate</span><span class="p">):</span>
+      <span class="c1"># An estimator written for the float-returning contract would otherwise fail on .theta.</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.estimate must return an Estimate, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="c1"># The session holds Python scalars, whatever NumPy types a custom estimator puts in its Estimate.</span>
+    <span class="k">return</span> <span class="n">Estimate</span><span class="p">(</span>
+      <span class="n">theta</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">theta</span><span class="p">),</span>
+      <span class="n">se</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">se</span><span class="p">),</span>
+      <span class="n">evaluations</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">estimate</span><span class="o">.</span><span class="n">evaluations</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">evaluations</span><span class="p">),</span>
+    <span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span> <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StepContext</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the context of ``session`` as it stands, built from its checked fields without checking them again."""</span>
+    <span class="k">return</span> <span class="n">_unchecked</span><span class="p">(</span>
+      <span class="n">StepContext</span><span class="p">,</span>
+      <span class="n">item_bank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">item_bank</span><span class="p">,</span>
+      <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span>
+      <span class="n">administered_items</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">administered_items</span><span class="p">,</span>
+      <span class="n">responses</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span>
+      <span class="n">excluded_items</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">excluded_items</span><span class="p">,</span>
+      <span class="n">theta</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">current_theta</span><span class="p">,</span>
+      <span class="n">se</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">current_se</span><span class="p">,</span>
+      <span class="n">exposure_rates</span><span class="o">=</span><span class="n">exposure_rates</span><span class="p">,</span>
+    <span class="p">)</span></div>
 
 </pre></div>
 

@@ -30,6 +30,7 @@
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -41,6 +42,7 @@
     <script src="_static/documentation_options.js?v=c4f92b34"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="_static/design-tabs.js?v=fcb327ea"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 
@@ -794,19 +796,9 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="api/exposure.html#catsim.exposure.BaseExposureControl.accept">accept() (catsim.exposure.BaseExposureControl method)</a>
 </li>
-      <li><a href="api/state.html#catsim.CatSessionState.administered_count">administered_count (catsim.CatSessionState property)</a>
-</li>
-      <li><a href="api/simulation.html#catsim.SimulationResult.administered_items">administered_items (catsim.SimulationResult property)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/engine.html#catsim.ResponseProvider.answer">answer() (catsim.ResponseProvider method)</a>
-
-      <ul>
-        <li><a href="api/simulation.html#catsim.SimulatedResponseProvider.answer">(catsim.SimulatedResponseProvider method)</a>
-</li>
-      </ul></li>
-      <li><a href="api/engine.html#catsim.CatEngine.apply_response">apply_response() (catsim.CatEngine method)</a>
+      <li><a href="api/engine.html#catsim.CatEngine.answer">answer() (catsim.CatEngine method)</a>
 </li>
       <li><a href="api/techniques/selection/stratified-selector.html#catsim.selection.AStratBBlockSelector">AStratBBlockSelector (class in catsim.selection)</a>
 </li>
@@ -834,10 +826,12 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="api/techniques/selection/index.html#catsim.selection.best_pool">best_pool() (in module catsim.selection)</a>
 </li>
-      <li><a href="api/simulation.html#catsim.SimulationResult.bias">bias (catsim.SimulationResult property)</a>
+      <li><a href="api/simulation.html#catsim.SimulationResult.bias">bias() (catsim.SimulationResult method)</a>
+
+      <ul>
+        <li><a href="api/metrics.html#catsim.metrics.bias">(in module catsim.metrics)</a>
 </li>
-      <li><a href="api/metrics.html#catsim.metrics.bias">bias() (in module catsim.metrics)</a>
-</li>
+      </ul></li>
       <li><a href="api/techniques/selection/randomesque-selector.html#catsim.selection.RandomesqueSelector.bin_size">bin_size (catsim.selection.RandomesqueSelector property)</a>
 </li>
       <li><a href="api/techniques/selection/mlwi-selector.html#catsim.selection.MLWISelector.bounds">bounds (catsim.selection.MLWISelector property)</a>
@@ -851,10 +845,6 @@ window.runMermaid = runMermaid;</script>
       <li><a href="api/techniques/selection/cluster-selector.html#catsim.selection.CapFallback">CapFallback (class in catsim.selection)</a>
 </li>
       <li><a href="api/engine.html#catsim.CatEngine">CatEngine (class in catsim)</a>
-</li>
-      <li><a href="api/state.html#catsim.CatSessionSnapshot">CatSessionSnapshot (class in catsim)</a>
-</li>
-      <li><a href="api/state.html#catsim.CatSessionState">CatSessionState (class in catsim)</a>
 </li>
       <li>
     catsim
@@ -905,6 +895,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="api/plot.html#module-catsim.plot">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     catsim.selection
 
@@ -912,8 +904,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="api/techniques/selection/index.html#module-catsim.selection">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     catsim.stopping
 
@@ -928,8 +918,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="api/typing.html#module-catsim.typing">module</a>
 </li>
       </ul></li>
-      <li><a href="api/state.html#catsim.CatStepResult">CatStepResult (class in catsim)</a>
-</li>
       <li><a href="api/techniques/selection/index.html#catsim.selection.check_r_max">check_r_max() (in module catsim.selection)</a>
 </li>
       <li><a href="api/techniques/selection/index.html#catsim.selection.check_test_size">check_test_size() (in module catsim.selection)</a>
@@ -948,30 +936,22 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="api/engine.html#catsim.CatEngine.context">context() (catsim.CatEngine method)</a>
 </li>
-      <li><a href="api/state.html#catsim.CatSessionSnapshot.current_se">current_se (catsim.CatSessionSnapshot property)</a>
-
-      <ul>
-        <li><a href="api/state.html#catsim.CatSessionState.current_se">(catsim.CatSessionState property)</a>
+      <li><a href="api/session.html#catsim.Session.current_se">current_se (catsim.Session property)</a>
 </li>
-      </ul></li>
-      <li><a href="api/state.html#catsim.CatSessionSnapshot.current_theta">current_theta (catsim.CatSessionSnapshot property)</a>
-
-      <ul>
-        <li><a href="api/state.html#catsim.CatSessionState.current_theta">(catsim.CatSessionState property)</a>
+      <li><a href="api/session.html#catsim.Session.current_theta">current_theta (catsim.Session property)</a>
 </li>
-        <li><a href="api/state.html#catsim.CatStepResult.current_theta">(catsim.CatStepResult property)</a>
-</li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/item_bank.html#catsim.ItemBank.difficulty">difficulty (catsim.ItemBank property)</a>
+      <li><a href="api/simulation.html#catsim.SimulationResult.deciles">deciles() (catsim.SimulationResult method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/item_bank.html#catsim.ItemBank.difficulty">difficulty (catsim.ItemBank property)</a>
+</li>
       <li><a href="api/item_bank.html#catsim.ItemBank.discrimination">discrimination (catsim.ItemBank property)</a>
 </li>
   </ul></td>
@@ -981,8 +961,6 @@ window.runMermaid = runMermaid;</script>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/techniques/estimation/eap-estimator.html#catsim.estimation.EAPEstimator">EAPEstimator (class in catsim.estimation)</a>
-</li>
-      <li><a href="api/simulation.html#catsim.SimulationRunner.engine">engine (catsim.SimulationRunner property)</a>
 </li>
       <li><a href="api/context.html#catsim.Estimate">Estimate (class in catsim)</a>
 </li>
@@ -1002,29 +980,29 @@ window.runMermaid = runMermaid;</script>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/techniques/selection/mei-selector.html#catsim.selection.MEISelector.estimator">estimator (catsim.selection.MEISelector property)</a>
 </li>
-      <li><a href="api/simulation.html#catsim.SimulationResult.evaluations">evaluations (catsim.SimulationResult property)</a>
+      <li><a href="api/simulation.html#catsim.SimulationResult.examinees">examinees() (catsim.SimulationResult method)</a>
 </li>
       <li><a href="api/exceptions.html#catsim.ExcludedItemError">ExcludedItemError</a>
 </li>
-      <li><a href="api/simulation.html#catsim.SimulationResult.exposure_rates">exposure_rates (catsim.SimulationResult property)</a>
+      <li><a href="api/simulation.html#catsim.SimulationResult.exposure_rates">exposure_rates() (catsim.SimulationResult method)</a>
+
+      <ul>
+        <li><a href="api/metrics.html#catsim.metrics.exposure_rates">(in module catsim.metrics)</a>
 </li>
-      <li><a href="api/state.html#catsim.ExposureTracker">ExposureTracker (class in catsim)</a>
-</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/simulation.html#catsim.SimulationResult.final_ses">final_ses (catsim.SimulationResult property)</a>
-</li>
-      <li><a href="api/simulation.html#catsim.SimulationResult.final_thetas">final_thetas (catsim.SimulationResult property)</a>
+      <li><a href="api/techniques/initialization/index.html#catsim.initialization.FixedPointInitializer">FixedPointInitializer (class in catsim.initialization)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/techniques/initialization/index.html#catsim.initialization.FixedPointInitializer">FixedPointInitializer (class in catsim.initialization)</a>
-</li>
       <li><a href="api/typing.html#catsim.typing.FloatArray">FloatArray (in module catsim.typing)</a>
+</li>
+      <li><a href="api/item_bank.html#catsim.ItemBank.from_csv">from_csv() (catsim.ItemBank class method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1052,6 +1030,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="api/irt.html#catsim.irt.icc">(in module catsim.irt)</a>
 </li>
       </ul></li>
+      <li><a href="api/item_bank.html#catsim.ItemBank.index">index() (catsim.ItemBank method)</a>
+</li>
+      <li><a href="api/techniques/selection/linear-selector.html#catsim.selection.LinearSelector.indices">indices (catsim.selection.LinearSelector property)</a>
+</li>
       <li><a href="api/irt.html#catsim.irt.info_integral">info_integral() (in module catsim.irt)</a>
 </li>
       <li><a href="api/item_bank.html#catsim.ItemBank.information">information() (catsim.ItemBank method)</a>
@@ -1072,23 +1054,15 @@ window.runMermaid = runMermaid;</script>
         <li><a href="api/techniques/initialization/index.html#catsim.initialization.UniformInitializer.initialize">(catsim.initialization.UniformInitializer method)</a>
 </li>
       </ul></li>
-      <li><a href="api/typing.html#catsim.typing.IntArray">IntArray (in module catsim.typing)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/typing.html#catsim.typing.IntArray">IntArray (in module catsim.typing)</a>
+</li>
       <li><a href="api/techniques/selection/interval-info-selector.html#catsim.selection.IntervalInfoSelector.interval">interval (catsim.selection.IntervalInfoSelector property)</a>
 </li>
       <li><a href="api/techniques/selection/interval-info-selector.html#catsim.selection.IntervalInfoSelector">IntervalInfoSelector (class in catsim.selection)</a>
 </li>
       <li><a href="api/item_bank.html#catsim.IrtModel">IrtModel (class in catsim)</a>
-</li>
-      <li><a href="api/state.html#catsim.CatSessionSnapshot.is_stopped">is_stopped (catsim.CatSessionSnapshot property)</a>
-
-      <ul>
-        <li><a href="api/state.html#catsim.CatSessionState.is_stopped">(catsim.CatSessionState property)</a>
-</li>
-      </ul></li>
-      <li><a href="api/engine.html#catsim.CatEngine.item_bank">item_bank (catsim.CatEngine property)</a>
 </li>
       <li><a href="api/plot.html#catsim.plot.item_curve">item_curve() (in module catsim.plot)</a>
 </li>
@@ -1097,11 +1071,7 @@ window.runMermaid = runMermaid;</script>
       <li><a href="api/item_bank.html#catsim.ItemBank">ItemBank (class in catsim)</a>
 </li>
       <li><a href="api/item_bank.html#catsim.ItemBank.items">items (catsim.ItemBank property)</a>
-
-      <ul>
-        <li><a href="api/techniques/selection/linear-selector.html#catsim.selection.LinearSelector.items">(catsim.selection.LinearSelector property)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -1150,18 +1120,22 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="api/techniques/stopping/max-length-stopper.html#catsim.stopping.MaxLengthStopper">MaxLengthStopper (class in catsim.stopping)</a>
 </li>
-      <li><a href="api/simulation.html#catsim.SimulationResult.mean_evaluations">mean_evaluations (catsim.SimulationResult property)</a>
+      <li><a href="api/metrics.html#catsim.metrics.Metric.mc_se">mc_se (catsim.metrics.Metric attribute)</a>
+</li>
+      <li><a href="api/metrics.html#catsim.metrics.mean">mean() (in module catsim.metrics)</a>
 </li>
       <li><a href="api/techniques/selection/mei-selector.html#catsim.selection.MEISelector">MEISelector (class in catsim.selection)</a>
 </li>
       <li><a href="api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector.method">method (catsim.selection.ClusterSelector property)</a>
 </li>
-      <li><a href="api/techniques/selection/mlwi-selector.html#catsim.selection.MLWISelector">MLWISelector (class in catsim.selection)</a>
+      <li><a href="api/metrics.html#catsim.metrics.Metric">Metric (class in catsim.metrics)</a>
 </li>
-      <li><a href="api/item_bank.html#catsim.ItemBank.model">model (catsim.ItemBank property)</a>
+      <li><a href="api/techniques/selection/mlwi-selector.html#catsim.selection.MLWISelector">MLWISelector (class in catsim.selection)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/item_bank.html#catsim.ItemBank.model">model (catsim.ItemBank property)</a>
+</li>
       <li>
     module
 
@@ -1187,10 +1161,12 @@ window.runMermaid = runMermaid;</script>
         <li><a href="api/typing.html#module-catsim.typing">catsim.typing</a>
 </li>
       </ul></li>
-      <li><a href="api/simulation.html#catsim.SimulationResult.mse">mse (catsim.SimulationResult property)</a>
+      <li><a href="api/simulation.html#catsim.SimulationResult.mse">mse() (catsim.SimulationResult method)</a>
+
+      <ul>
+        <li><a href="api/metrics.html#catsim.metrics.mse">(in module catsim.metrics)</a>
 </li>
-      <li><a href="api/metrics.html#catsim.metrics.mse">mse() (in module catsim.metrics)</a>
-</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -1202,6 +1178,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="api/techniques/selection/mlwi-selector.html#catsim.selection.MLWISelector.n_nodes">n_nodes (catsim.selection.MLWISelector property)</a>
 </li>
       <li><a href="api/techniques/selection/stratified-selector.html#catsim.selection.StratifiedSelector.n_strata">n_strata (catsim.selection.StratifiedSelector property)</a>
+</li>
+      <li><a href="api/item_bank.html#catsim.ItemBank.names">names (catsim.ItemBank property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -1219,12 +1197,12 @@ window.runMermaid = runMermaid;</script>
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/simulation.html#catsim.SimulationResult.overlap_rate">overlap_rate (catsim.SimulationResult property)</a>
+      <li><a href="api/simulation.html#catsim.SimulationResult.overlap_rate">overlap_rate() (catsim.SimulationResult method)</a>
+
+      <ul>
+        <li><a href="api/metrics.html#catsim.metrics.overlap_rate">(in module catsim.metrics)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/metrics.html#catsim.metrics.overlap_rate">overlap_rate() (in module catsim.metrics)</a>
-</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -1247,7 +1225,7 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="api/techniques/selection/proportional-selector.html#catsim.selection.ProportionalSelector">ProportionalSelector (class in catsim.selection)</a>
 </li>
-      <li><a href="api/simulation.html#catsim.SimulationResult.proposal_rates">proposal_rates (catsim.SimulationResult property)</a>
+      <li><a href="api/simulation.html#catsim.SimulationResult.proposal_rates">proposal_rates() (catsim.SimulationResult method)</a>
 </li>
       <li><a href="api/item_bank.html#catsim.ItemBank.pseudo_guessing">pseudo_guessing (catsim.ItemBank property)</a>
 </li>
@@ -1283,36 +1261,22 @@ window.runMermaid = runMermaid;</script>
         <li><a href="api/techniques/selection/proportional-selector.html#catsim.selection.ProportionalSelector.r_max">(catsim.selection.ProportionalSelector property)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/techniques/selection/randomesque-selector.html#catsim.selection.RandomesqueSelector">RandomesqueSelector (class in catsim.selection)</a>
 </li>
       <li><a href="api/techniques/selection/random-selector.html#catsim.selection.RandomSelector">RandomSelector (class in catsim.selection)</a>
-</li>
-      <li><a href="api/state.html#catsim.ExposureTracker.rates">rates() (catsim.ExposureTracker method)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/state.html#catsim.ExposureTracker.record">record() (catsim.ExposureTracker method)</a>
-</li>
-      <li><a href="api/state.html#catsim.ExposureTracker.record_decline">record_decline() (catsim.ExposureTracker method)</a>
 </li>
       <li><a href="api/irt.html#catsim.irt.reliability">reliability() (in module catsim.irt)</a>
 </li>
       <li><a href="api/techniques/selection/index.html#catsim.selection.remaining">remaining() (in module catsim.selection)</a>
 </li>
-      <li><a href="api/engine.html#catsim.ResponseProvider">ResponseProvider (class in catsim)</a>
+      <li><a href="api/simulation.html#catsim.SimulationResult.rmse">rmse() (catsim.SimulationResult method)</a>
+
+      <ul>
+        <li><a href="api/metrics.html#catsim.metrics.rmse">(in module catsim.metrics)</a>
 </li>
-      <li><a href="api/simulation.html#catsim.SimulationResult.responses">responses (catsim.SimulationResult property)</a>
-</li>
-      <li><a href="api/simulation.html#catsim.SimulationResult.rmse">rmse (catsim.SimulationResult property)</a>
-</li>
-      <li><a href="api/metrics.html#catsim.metrics.rmse">rmse() (in module catsim.metrics)</a>
-</li>
-      <li><a href="api/simulation.html#catsim.SimulationRunner.run">run() (catsim.SimulationRunner method)</a>
-</li>
-      <li><a href="api/engine.html#catsim.CatEngine.run_session">run_session() (catsim.CatEngine method)</a>
-</li>
-      <li><a href="api/engine.html#catsim.RunContext">RunContext (class in catsim)</a>
-</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -1323,11 +1287,15 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="api/irt.html#catsim.irt.scale_to_theta">scale_to_theta() (in module catsim.irt)</a>
 </li>
+      <li><a href="api/simulation.html#catsim.SimulationResult.se">se() (catsim.SimulationResult method)</a>
+</li>
       <li><a href="api/irt.html#catsim.irt.see">see() (in module catsim.irt)</a>
 </li>
-      <li><a href="api/techniques/selection/index.html#catsim.selection.BaseSelector.select">select() (catsim.selection.BaseSelector method)</a>
+      <li><a href="api/engine.html#catsim.CatEngine.select">select() (catsim.CatEngine method)</a>
 
       <ul>
+        <li><a href="api/techniques/selection/index.html#catsim.selection.BaseSelector.select">(catsim.selection.BaseSelector method)</a>
+</li>
         <li><a href="api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector.select">(catsim.selection.ClusterSelector method)</a>
 </li>
         <li><a href="api/techniques/selection/interval-info-selector.html#catsim.selection.IntervalInfoSelector.select">(catsim.selection.IntervalInfoSelector method)</a>
@@ -1357,33 +1325,25 @@ window.runMermaid = runMermaid;</script>
         <li><a href="api/techniques/selection/urry-selector.html#catsim.selection.UrrySelector.select">(catsim.selection.UrrySelector method)</a>
 </li>
       </ul></li>
-      <li><a href="api/engine.html#catsim.CatEngine.select_next">select_next() (catsim.CatEngine method)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/engine.html#catsim.Selection">Selection (class in catsim)</a>
+</li>
+      <li><a href="api/session.html#catsim.Session">Session (class in catsim)</a>
 </li>
       <li><a href="api/plot.html#catsim.plot.session_progress">session_progress() (in module catsim.plot)</a>
 </li>
-      <li><a href="api/engine.html#catsim.CatEngine.should_stop">should_stop() (catsim.CatEngine method)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/simulation.html#catsim.SimulatedResponseProvider">SimulatedResponseProvider (class in catsim)</a>
+      <li><a href="api/simulation.html#catsim.simulate">simulate() (in module catsim)</a>
 </li>
       <li><a href="api/simulation.html#catsim.SimulationResult">SimulationResult (class in catsim)</a>
 </li>
-      <li><a href="api/simulation.html#catsim.SimulationRunner">SimulationRunner (class in catsim)</a>
-</li>
-      <li><a href="api/state.html#catsim.CatSessionState.snapshot">snapshot() (catsim.CatSessionState method)</a>
-</li>
       <li><a href="api/techniques/stopping/standard-error-stopper.html#catsim.stopping.StandardErrorStopper">StandardErrorStopper (class in catsim.stopping)</a>
 </li>
-      <li><a href="api/engine.html#catsim.CatEngine.start_session">start_session() (catsim.CatEngine method)</a>
-
-      <ul>
-        <li><a href="api/state.html#catsim.ExposureTracker.start_session">(catsim.ExposureTracker method)</a>
-</li>
-      </ul></li>
-      <li><a href="api/engine.html#catsim.CatEngine.step">step() (catsim.CatEngine method)</a>
+      <li><a href="api/engine.html#catsim.CatEngine.start">start() (catsim.CatEngine method)</a>
 </li>
       <li><a href="api/context.html#catsim.StepContext">StepContext (class in catsim)</a>
+</li>
+      <li><a href="api/simulation.html#catsim.SimulationResult.steps">steps() (catsim.SimulationResult method)</a>
 </li>
       <li><a href="api/techniques/stopping/index.html#catsim.stopping.BaseStopper.stop">stop() (catsim.stopping.BaseStopper method)</a>
 
@@ -1397,11 +1357,7 @@ window.runMermaid = runMermaid;</script>
         <li><a href="api/techniques/stopping/index.html#catsim.stopping.StopRule.stop">(catsim.stopping.StopRule method)</a>
 </li>
       </ul></li>
-      <li><a href="api/state.html#catsim.CatStepResult.stop_reason">stop_reason (catsim.CatStepResult property)</a>
-</li>
-      <li><a href="api/state.html#catsim.CatStepResult.stopped">stopped (catsim.CatStepResult property)</a>
-</li>
-      <li><a href="api/state.html#catsim.StopReason">StopReason (class in catsim)</a>
+      <li><a href="api/session.html#catsim.StopReason">StopReason (class in catsim)</a>
 </li>
       <li><a href="api/techniques/stopping/index.html#catsim.stopping.StopRule">StopRule (class in catsim.stopping)</a>
 </li>
@@ -1417,7 +1373,7 @@ window.runMermaid = runMermaid;</script>
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/simulation.html#catsim.SimulationResult.test_lengths">test_lengths (catsim.SimulationResult property)</a>
+      <li><a href="api/simulation.html#catsim.SimulationResult.test_length">test_length() (catsim.SimulationResult method)</a>
 </li>
       <li><a href="api/techniques/selection/progressive-selector.html#catsim.selection.ProgressiveSelector.test_size">test_size (catsim.selection.ProgressiveSelector property)</a>
 
@@ -1429,18 +1385,12 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="api/techniques/selection/the-54321-selector.html#catsim.selection.The54321Selector">The54321Selector (class in catsim.selection)</a>
 </li>
-      <li><a href="api/simulation.html#catsim.SimulationResult.theta_histories">theta_histories (catsim.SimulationResult property)</a>
+      <li><a href="api/session.html#catsim.Session.theta_history">theta_history (catsim.Session property)</a>
 </li>
-      <li><a href="api/state.html#catsim.CatSessionSnapshot.theta_history">theta_history (catsim.CatSessionSnapshot property)</a>
-
-      <ul>
-        <li><a href="api/state.html#catsim.CatSessionState.theta_history">(catsim.CatSessionState property)</a>
-</li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/irt.html#catsim.irt.THETA_MAX_EXTENDED">THETA_MAX_EXTENDED (in module catsim.irt)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/irt.html#catsim.irt.THETA_MAX_TYPICAL">THETA_MAX_TYPICAL (in module catsim.irt)</a>
 </li>
       <li><a href="api/irt.html#catsim.irt.THETA_MIN_EXTENDED">THETA_MIN_EXTENDED (in module catsim.irt)</a>
@@ -1449,14 +1399,14 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="api/irt.html#catsim.irt.theta_to_scale">theta_to_scale() (in module catsim.irt)</a>
 </li>
+      <li><a href="api/item_bank.html#catsim.ItemBank.to_csv">to_csv() (catsim.ItemBank method)</a>
+</li>
       <li><a href="api/item_bank.html#catsim.ItemBank.total_information">total_information() (catsim.ItemBank method)</a>
 
       <ul>
         <li><a href="api/irt.html#catsim.irt.total_information">(in module catsim.irt)</a>
 </li>
       </ul></li>
-      <li><a href="api/simulation.html#catsim.SimulationResult.true_thetas">true_thetas (catsim.SimulationResult property)</a>
-</li>
   </ul></td>
 </tr></table>
 
@@ -1485,6 +1435,8 @@ window.runMermaid = runMermaid;</script>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/metrics.html#catsim.metrics.Metric.value">value (catsim.metrics.Metric attribute)</a>
+</li>
       <li><a href="api/irt.html#catsim.irt.var">var() (in module catsim.irt)</a>
 </li>
   </ul></td>

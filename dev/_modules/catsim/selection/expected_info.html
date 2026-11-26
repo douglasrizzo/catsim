@@ -30,6 +30,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -41,6 +42,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 
@@ -789,9 +791,9 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..estimation.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..estimation.numerical</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumericalSearchEstimator</span>
@@ -848,14 +850,14 @@ window.runMermaid = runMermaid;</script>
 <span class="w">    </span><span class="sd">"""Return the maximum exposure rate accepted by the selector."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">_expected_information</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">,</span> <span class="n">candidate</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the candidate's information, expected over its two responses, at the one-step-ahead estimates."""</span>
-    <span class="n">administered_items</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">candidate</span><span class="p">)</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_expected_information</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return a candidate item's information, expected over its two responses, at the one-step-ahead estimates."""</span>
+    <span class="n">administered_items</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
     <span class="n">correct</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">responses</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="n">context</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
     <span class="n">incorrect</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">correct</span><span class="p">,</span> <span class="n">responses</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="n">context</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
     <span class="n">theta_correct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">correct</span><span class="p">)</span><span class="o">.</span><span class="n">theta</span>
     <span class="n">theta_incorrect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">incorrect</span><span class="p">)</span><span class="o">.</span><span class="n">theta</span>
-    <span class="n">p_correct</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">icc</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">candidate</span><span class="p">])</span>
+    <span class="n">p_correct</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">icc</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">item</span><span class="p">])</span>
     <span class="n">info_correct</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">total_information</span><span class="p">(</span><span class="n">theta_correct</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
     <span class="n">info_incorrect</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">total_information</span><span class="p">(</span><span class="n">theta_incorrect</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">p_correct</span> <span class="o">*</span> <span class="n">info_correct</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">p_correct</span><span class="p">)</span> <span class="o">*</span> <span class="n">info_incorrect</span><span class="p">)</span>
@@ -880,7 +882,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        Index of the selected item.</span>
 <span class="sd">    """</span>
     <span class="n">candidates</span> <span class="o">=</span> <span class="n">below_cap</span><span class="p">(</span><span class="n">remaining</span><span class="p">(</span><span class="n">context</span><span class="p">),</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="p">)</span>
-    <span class="n">scores</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_expected_information</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_expected_information</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">))</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">scores</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span></div>
 </div>
 

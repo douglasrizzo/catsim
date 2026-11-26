@@ -30,6 +30,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -41,6 +42,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 
@@ -799,9 +801,9 @@ window.runMermaid = runMermaid;</script>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">minimize_scalar</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..irt</span><span class="w"> </span><span class="kn">import</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MIN_EXTENDED</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
@@ -845,8 +847,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
 <span class="sd">  LogPrior</span>
-<span class="sd">      A vectorized function mapping ability values to their log-density under</span>
-<span class="sd">      :math:`\mathcal{N}(\text{mean}, \text{sd}^2)`.</span>
+<span class="sd">      A vectorized callable mapping ability values to their log-density under</span>
+<span class="sd">      :math:`\mathcal{N}(\text{mean}, \text{sd}^2)`. It pickles, equals any prior this function</span>
+<span class="sd">      returns for the same arguments, and its repr is the call that builds it.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
@@ -859,15 +862,28 @@ window.runMermaid = runMermaid;</script>
   <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">sd</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sd</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"sd must be positive and finite, got </span><span class="si">{</span><span class="n">sd</span><span class="si">}</span><span class="s2">"</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">_NormalLogPrior</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">mean</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">sd</span><span class="p">))</span></div>
 
-  <span class="n">var</span> <span class="o">=</span> <span class="n">sd</span> <span class="o">*</span> <span class="n">sd</span>
-  <span class="n">norm</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">var</span><span class="p">)</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">_log_prior</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">norm</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">theta</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">var</span>
 
-  <span class="k">return</span> <span class="n">_log_prior</span></div>
+<span class="c1"># The priors are module-level classes rather than closures so that an estimator holding one pickles, as an engine sent</span>
+<span class="c1"># to a worker process must (ADR-0015).</span>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_NormalLogPrior</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""The normal log-density that :func:`normal_log_prior` returns."""</span>
 
+  <span class="n">mean</span><span class="p">:</span> <span class="nb">float</span>
+  <span class="n">sd</span><span class="p">:</span> <span class="nb">float</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the log-density at each ability."""</span>
+    <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span>
+    <span class="k">return</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">var</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">theta</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">var</span>
+
+  <span class="nd">@override</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the call to :func:`normal_log_prior` that builds this prior."""</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"normal_log_prior(mean=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="si">!r}</span><span class="s2">, sd=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="si">!r}</span><span class="s2">)"</span>
 
 
 <div class="viewcode-block" id="uniform_log_prior">
@@ -885,8 +901,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
 <span class="sd">  LogPrior</span>
-<span class="sd">      A vectorized function returning :math:`-\log(\text{high} - \text{low})` inside the</span>
-<span class="sd">      bounds and :math:`-\infty` outside them.</span>
+<span class="sd">      A vectorized callable returning :math:`-\log(\text{high} - \text{low})` inside the</span>
+<span class="sd">      bounds and :math:`-\infty` outside them. It pickles, equals any prior this function returns</span>
+<span class="sd">      for the same arguments, and its repr is the call that builds it.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
@@ -899,16 +916,26 @@ window.runMermaid = runMermaid;</script>
   <span class="k">if</span> <span class="n">high</span> <span class="o">&lt;=</span> <span class="n">low</span><span class="p">:</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"high must be greater than low, got low=</span><span class="si">{</span><span class="n">low</span><span class="si">}</span><span class="s2">, high=</span><span class="si">{</span><span class="n">high</span><span class="si">}</span><span class="s2">"</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">_UniformLogPrior</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">low</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">high</span><span class="p">))</span></div>
 
-  <span class="n">inv_width</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span>
-  <span class="n">log_density</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">inv_width</span><span class="p">))</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">_log_prior</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
-    <span class="n">inside</span> <span class="o">=</span> <span class="p">(</span><span class="n">theta</span> <span class="o">&gt;=</span> <span class="n">low</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">theta</span> <span class="o">&lt;=</span> <span class="n">high</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">inside</span><span class="p">,</span> <span class="n">log_density</span><span class="p">,</span> <span class="o">-</span><span class="n">numpy</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
 
-  <span class="k">return</span> <span class="n">_log_prior</span></div>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_UniformLogPrior</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""The uniform log-density that :func:`uniform_log_prior` returns."""</span>
 
+  <span class="n">low</span><span class="p">:</span> <span class="nb">float</span>
+  <span class="n">high</span><span class="p">:</span> <span class="nb">float</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the log-density at each ability: minus the log of the width inside the bounds, -inf outside."""</span>
+    <span class="n">inside</span> <span class="o">=</span> <span class="p">(</span><span class="n">theta</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">low</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">theta</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">high</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">inside</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">high</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">low</span><span class="p">))),</span> <span class="o">-</span><span class="n">numpy</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+
+  <span class="nd">@override</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the call to :func:`uniform_log_prior` that builds this prior."""</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"uniform_log_prior(low=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">low</span><span class="si">!r}</span><span class="s2">, high=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">high</span><span class="si">!r}</span><span class="s2">)"</span>
 
 
 <span class="c1"># eq=False: generated equality and hashing would compare the arrays, which raises; a grid is compared by identity</span>
@@ -1020,7 +1047,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  responses : Sequence[bool]</span>
-<span class="sd">      Responses to the administered items, in the same order as ``items``.</span>
+<span class="sd">      Responses to the administered items, in the same order as ``items``: each a Boolean or the</span>
+<span class="sd">      integer 0 or 1.</span>
 <span class="sd">  items : numpy.ndarray</span>
 <span class="sd">      Parameter matrix of the administered items, one row per item.</span>
 <span class="sd">  grid : QuadratureGrid</span>
@@ -1037,9 +1065,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
 <span class="sd">      If the log-prior or log-likelihood is NaN or :math:`+\infty` at any node, if every node has</span>
-<span class="sd">      zero posterior mass, or if ``responses`` and ``items`` differ in length.</span>
+<span class="sd">      zero posterior mass, if ``responses`` and ``items`` differ in length, or if an integer response</span>
+<span class="sd">      is not 0 or 1.</span>
 <span class="sd">  TypeError</span>
-<span class="sd">      If a response is not a ``bool`` or ``numpy.bool_``.</span>
+<span class="sd">      If a response is neither a Boolean nor an integer.</span>
 <span class="sd">  """</span>
   <span class="n">log_lik</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">responses</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
   <span class="n">log_post</span> <span class="o">=</span> <span class="n">log_prior</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span> <span class="o">+</span> <span class="n">log_lik</span> <span class="o">+</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
@@ -1123,8 +1152,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">grid</span><span class="p">:</span> <span class="n">QuadratureGrid</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">log_prior</span><span class="p">:</span> <span class="n">LogPrior</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="c1"># Kept as given for the repr, where a default shows as None: the default grid's repr would list every</span>
-    <span class="c1"># node, and a prior function has no source form.</span>
+    <span class="c1"># Kept as given for the repr, where a default shows as None: the default grid's repr would list every node.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_grid_argument</span> <span class="o">=</span> <span class="n">grid</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior_argument</span> <span class="o">=</span> <span class="n">log_prior</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span> <span class="o">=</span> <span class="n">grid</span> <span class="k">if</span> <span class="n">grid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">QuadratureGrid</span><span class="o">.</span><span class="n">uniform</span><span class="p">()</span>
@@ -1208,7 +1236,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
     <span class="n">bounds</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">),</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="c1"># Kept as given for the repr, where the default shows as None: a prior function has no source form.</span>
+    <span class="c1"># Kept as given for the repr, which shows the default as None, as EAPEstimator's does.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior_argument</span> <span class="o">=</span> <span class="n">log_prior</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span> <span class="o">=</span> <span class="n">log_prior</span> <span class="k">if</span> <span class="n">log_prior</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">normal_log_prior</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_tol</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>

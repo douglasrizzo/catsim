@@ -30,6 +30,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -41,6 +42,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 
@@ -804,7 +806,8 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">  An estimator holds its configuration and caches derived from the item bank, never per-session</span>
 <span class="sd">  state: one estimator serves every session of a run, which an application may interleave, and</span>
-<span class="sd">  look-ahead selectors such as MEI call it with hypothetical responses.</span>
+<span class="sd">  look-ahead selectors such as MEI call it with hypothetical responses. The :doc:`/extending` guide</span>
+<span class="sd">  lists what an estimator receives and returns.</span>
 <span class="sd">  """</span>
 
 <div class="viewcode-block" id="BaseEstimator.estimate">
@@ -814,19 +817,20 @@ window.runMermaid = runMermaid;</script>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Return the updated ability estimate given the responses so far, with its standard error.</span>
 
 <span class="sd">    Once an item has been administered, the estimate is finite and lies within the estimator's</span>
-<span class="sd">    bounds, whatever the response pattern, all correct and all incorrect included.</span>
+<span class="sd">    bounds, whatever the responses, all correct and all incorrect included.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    context : StepContext</span>
 <span class="sd">        The session to estimate for, with the newest item and response, and with ``theta`` the</span>
-<span class="sd">        estimate before them.</span>
+<span class="sd">        estimate before them. When :meth:`CatEngine.answer &lt;catsim.CatEngine.answer&gt;` calls the</span>
+<span class="sd">        estimator, the context's generator is the one made from the ``rng`` given to ``answer``.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Estimate</span>
-<span class="sd">        The updated ability estimate :math:`\hat\theta`, its standard error (finite, or</span>
-<span class="sd">        ``math.inf``, never NaN) and the number of objective evaluations it took.</span>
+<span class="sd">        The updated ability estimate :math:`\hat\theta`, its standard error (positive, possibly</span>
+<span class="sd">        ``math.inf``) and the number of objective evaluations it took.</span>
 <span class="sd">    """</span></div>
 
 

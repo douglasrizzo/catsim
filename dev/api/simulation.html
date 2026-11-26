@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,13 +43,16 @@
     <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../_static/design-tabs.js?v=fcb327ea"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/simulation';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Item Bank" href="item_bank.html" />
-    <link rel="prev" title="Session State" href="state.html" />
+    <link rel="prev" title="Strategy Inputs and Estimates" href="context.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -390,14 +394,14 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="engine.html">CAT Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="session.html">Sessions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="context.html">Strategy Inputs and Estimates</a></li>
-<li class="toctree-l1"><a class="reference internal" href="state.html">Session State</a></li>
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Simulation Runs and Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="item_bank.html">Item Bank</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exposure.html">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="metrics.html">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="typing.html">Array Type Aliases – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 </ul>
@@ -462,251 +466,562 @@
                   
   <section class="tex2jax_ignore mathjax_ignore" id="simulation-runs-and-results">
 <h1>Simulation Runs and Results<a class="headerlink" href="#simulation-runs-and-results" title="Link to this heading">#</a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="catsim.SimulationRunner">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.</span></span><span class="sig-name descname"><span class="pre">SimulationRunner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="engine.html#catsim.CatEngine" title="catsim.CatEngine"><span class="pre">CatEngine</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/simulation.html#SimulationRunner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.SimulationRunner" title="Link to this definition">#</a></dt>
-<dd><p>Run a simulated CAT session on an engine for each of a set of examinees.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.simulate">
+<span class="sig-prename descclassname"><span class="pre">catsim.</span></span><span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="engine.html#catsim.CatEngine" title="catsim.CatEngine"><span class="pre">CatEngine</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_thetas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">npt.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">responses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">npt.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><span class="pre">numpy.random.Generator</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><span class="pre">object</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#catsim.SimulationResult" title="catsim.SimulationResult"><span class="pre">SimulationResult</span></a></span></span><a class="reference internal" href="../_modules/catsim/simulation.html#simulate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.simulate" title="Link to this definition">#</a></dt>
+<dd><p>Run one CAT session per examinee on an engine, in parts that can run on several processes.</p>
+<p>Each examinee has an answer to every item of the bank, possibly missing for a recorded examinee,
+and its session takes the answer to each item it is given from them (ADR-0014). The examinees are
+given in one of three ways:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">true_thetas</span></code> alone: generated examinees. Before its test, examinee <code class="docutils literal notranslate"><span class="pre">i</span></code> draws one uniform
+number <span class="math notranslate nohighlight">\(u_j\)</span> per item of the bank, and its answer to item <span class="math notranslate nohighlight">\(j\)</span> is correct when
+<span class="math notranslate nohighlight">\(u_j &lt; P_j(\theta_i)\)</span>, the item’s probability of a correct answer at the true ability
+<span class="math notranslate nohighlight">\(\theta_i\)</span> (<code class="docutils literal notranslate"><span class="pre">true_thetas[i]</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">responses</span></code> alone: recorded examinees, whose true abilities are unknown. Row <code class="docutils literal notranslate"><span class="pre">i</span></code> holds
+examinee <code class="docutils literal notranslate"><span class="pre">i</span></code>’s answers. The items whose answer is missing are excluded from the start of the
+session (ADR-0011), so a recorded examinee is given only items they answered, and one who runs
+out of them ends with <code class="docutils literal notranslate"><span class="pre">StopReason.NO_ITEMS</span></code>.</p></li>
+<li><p>Both: recorded examinees whose true abilities are known, as when a study draws its own response
+matrix with a response model of its choice.</p></li>
+</ul>
+<p>Every random draw comes from <code class="docutils literal notranslate"><span class="pre">rng</span></code> (ADR-0013). The run takes one root entropy from it, and
+examinee <code class="docutils literal notranslate"><span class="pre">i</span></code>, at position <code class="docutils literal notranslate"><span class="pre">i</span></code> of the run, draws from two streams of its own:
+<code class="docutils literal notranslate"><span class="pre">SeedSequence(entropy,</span> <span class="pre">spawn_key=(i,</span> <span class="pre">0))</span></code> for its answers to every item, and
+<code class="docutils literal notranslate"><span class="pre">SeedSequence(entropy,</span> <span class="pre">spawn_key=(i,</span> <span class="pre">1))</span></code> for its session, the generator of its <code class="docutils literal notranslate"><span class="pre">start</span></code>,
+<code class="docutils literal notranslate"><span class="pre">select</span></code> and <code class="docutils literal notranslate"><span class="pre">answer</span></code> steps, from which the initializer, the selector and the exposure control
+draw. A generated examinee therefore gives the same answer to an item whatever the engine and
+whenever the item comes, so two engines run on the same seed and examinees are compared on common
+random numbers.</p>
+<p>The examinees are split, in order, into <code class="docutils literal notranslate"><span class="pre">parts</span></code> contiguous parts of near-equal size, and each
+part runs its sessions one after another (ADR-0015). Each session’s selections are capped
+against the items’ exposure rates: each item’s administrations over the sessions before it in its
+part (ADR-0012), so the first session of a part sees no rates. This exposure feedback is the only
+way one session depends on another, and the parts are part of the run’s configuration: with an
+<code class="docutils literal notranslate"><span class="pre">r_max</span></code> cap, a session sees only the exposure of its own part, so <code class="docutils literal notranslate"><span class="pre">parts</span></code> changes the result,
+and <code class="docutils literal notranslate"><span class="pre">parts=1</span></code>, the default, is the sequential run. Without a cap, an examinee’s session depends
+on neither the other examinees nor <code class="docutils literal notranslate"><span class="pre">parts</span></code>.</p>
+<p>The parts run on up to <code class="docutils literal notranslate"><span class="pre">workers</span></code> processes, which never change the result: it depends only on
+the engine, the examinees, the seed and <code class="docutils literal notranslate"><span class="pre">parts</span></code>. With more than one part and more than one
+worker, the parts run on processes of Python’s standard library, spawned on every platform. Each
+receives the engine pickled and imports every class and function it refers to by its module and
+name, so a strategy defined in a notebook or a script’s main module, a lambda (such as a custom
+<code class="docutils literal notranslate"><span class="pre">log_prior</span></code>) or a function defined inside another function raises before any part runs: define
+it in a module and import it from there. A script that runs on workers calls <code class="docutils literal notranslate"><span class="pre">simulate</span></code> under
+<code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">__name__</span> <span class="pre">==</span> <span class="pre">&quot;__main__&quot;:</span></code>, as every process pool of Python requires.</p>
+<p>The <a class="reference internal" href="../running-simulations.html"><span class="doc">Running Simulations</span></a> guide runs a study and reads its result.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>engine</strong><span class="classifier">CatEngine</span></dt><dd><p>The engine whose item bank and strategies every simulated session uses.</p>
+<dt><strong>engine</strong><span class="classifier">CatEngine</span></dt><dd><p>The engine whose item bank and strategies every session uses.</p>
 </dd>
-</dl>
+<dt><strong>true_thetas</strong><span class="classifier">array-like or None, optional</span></dt><dd><p>The examinees’ true abilities: a non-empty, one-dimensional sequence of finite numbers. To
+simulate <code class="docutils literal notranslate"><span class="pre">n</span></code> examinees from a population, draw their abilities, e.g.
+<code class="docutils literal notranslate"><span class="pre">numpy.random.default_rng(1).normal(0,</span> <span class="pre">1,</span> <span class="pre">n)</span></code>. Default is None, for recorded examinees whose
+abilities are unknown.</p>
 </dd>
-</dl>
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.SimulationRunner.engine">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">engine</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="engine.html#catsim.CatEngine" title="catsim.CatEngine"><span class="pre">CatEngine</span></a></span><a class="headerlink" href="#catsim.SimulationRunner.engine" title="Link to this definition">#</a></dt>
-<dd><p>Return the engine the runner simulates sessions on.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="catsim.SimulationRunner.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_thetas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">npt.ArrayLike</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><span class="pre">numpy.random.Generator</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#catsim.SimulationResult" title="catsim.SimulationResult"><span class="pre">SimulationResult</span></a></span></span><a class="reference internal" href="../_modules/catsim/simulation.html#SimulationRunner.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.SimulationRunner.run" title="Link to this definition">#</a></dt>
-<dd><p>Run one simulated session per true ability, one after another.</p>
-<p>One random generator serves the whole run: the initializer, the selectors’ tie-breaking and
-randomization and the simulated responses of every session draw from it, in session order. It
-is built from <code class="docutils literal notranslate"><span class="pre">rng</span></code> at the start of every call, so the same seed gives the same result however
-many times the runner has run; see <a class="reference internal" href="../reproducibility.html"><span class="doc">Reproducibility</span></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>true_thetas</strong><span class="classifier">array-like</span></dt><dd><p>True abilities of the simulated examinees: a non-empty, one-dimensional sequence of finite
-numbers. Session <code class="docutils literal notranslate"><span class="pre">i</span></code> simulates the examinee of ability <code class="docutils literal notranslate"><span class="pre">true_thetas[i]</span></code> and has session
-id <code class="docutils literal notranslate"><span class="pre">i</span></code>. To simulate <code class="docutils literal notranslate"><span class="pre">n</span></code> examinees from a population, draw their abilities, e.g.
-<code class="docutils literal notranslate"><span class="pre">numpy.random.default_rng(1).normal(0,</span> <span class="pre">1,</span> <span class="pre">n)</span></code>.</p>
+<dt><strong>responses</strong><span class="classifier">array-like or None, optional</span></dt><dd><p>The recorded examinees’ answers: a matrix with one row per examinee and one column per item of
+the bank, of Booleans, of the integers 0 and 1, or of the floats 0.0 and 1.0 with NaN where an
+answer is missing. Default is None, for generated examinees.</p>
 </dd>
-<dt><strong>rng</strong><span class="classifier">int, numpy.random.Generator or None, optional</span></dt><dd><p>The source of the run’s random draws. None, the default, draws fresh randomness, so every
-call gives other tests. An int seeds a new generator, so the same seed gives the same result.
-A generator is drawn from as is, and the run advances it, so passing the same generator to
-another run gives other results.</p>
+<dt><strong>rng</strong><span class="classifier">int, numpy.random.Generator or None, optional</span></dt><dd><p>The source of the run’s root entropy. None, the default, takes fresh entropy, so every call
+gives other tests. A non-negative int is the entropy itself, so the same seed gives the same
+result. From a generator, one 128-bit number is drawn as the entropy, which advances it, so
+passing the same generator to another run gives other results; a call whose inputs fail
+their checks draws nothing from it.</p>
 </dd>
-<dt><strong>progress</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether to show a <code class="docutils literal notranslate"><span class="pre">tqdm</span></code> progress bar over the sessions. Default is False.</p>
+<dt><strong>parts</strong><span class="classifier">int, optional</span></dt><dd><p>The number of parts the examinees are split into, from 1 to the number of examinees: each
+part holds the next examinees in order, and the first <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">%</span> <span class="pre">parts</span></code> of the parts of <code class="docutils literal notranslate"><span class="pre">n</span></code>
+examinees have one examinee more than the others, the sizes of <code class="docutils literal notranslate"><span class="pre">numpy.array_split</span></code>. Default
+is 1, the sequential run.</p>
+</dd>
+<dt><strong>workers</strong><span class="classifier">int, optional</span></dt><dd><p>The most processes the parts run on at once, a positive integer. With 1, the default, or with
+one part, the calling process runs the parts itself, one after another; otherwise
+<code class="docutils literal notranslate"><span class="pre">min(workers,</span> <span class="pre">parts)</span></code> worker processes run them.</p>
+</dd>
+<dt><strong>progress</strong><span class="classifier">callable or None, optional</span></dt><dd><p>Called in the calling process as <code class="docutils literal notranslate"><span class="pre">progress(finished,</span> <span class="pre">total)</span></code> after each session ends, with
+the number of sessions finished and the number of examinees, such as
+<code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">finished,</span> <span class="pre">total:</span> <span class="pre">bar.update(1)</span></code> for a progress bar <code class="docutils literal notranslate"><span class="pre">bar</span></code>. On workers, the sessions
+end in the order the processes run them, and each call still counts one more session.
+Default is None.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>SimulationResult</dt><dd><p>The sessions, in the order of <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code>, with the run’s exposure and proposal counts
-and its duration.</p>
+<dt>SimulationResult</dt><dd><p>The sessions, in examinee order, with the true abilities (None for recorded examinees whose
+abilities are unknown), the run’s exposure and proposal counts, summed over its parts, the
+number of parts, and the run’s duration: the wall-clock time in the calling process from the
+start of the first part to the end of the last. On workers it includes starting them and
+sending them the engine, so it depends on <code class="docutils literal notranslate"><span class="pre">workers</span></code> and on the machine, which the sessions
+do not.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>TypeError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code> is a single number or has more than one dimension.</p>
+<dt>TypeError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">engine</span></code> is not a <a class="reference internal" href="engine.html#catsim.CatEngine" title="catsim.CatEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">CatEngine</span></code></a>; neither <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code> nor <code class="docutils literal notranslate"><span class="pre">responses</span></code>
+is given; <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code> is a single number, holds values that are not real numbers or has
+more than one dimension; <code class="docutils literal notranslate"><span class="pre">responses</span></code> is not two-dimensional or holds values that are neither
+Booleans nor real numbers; <code class="docutils literal notranslate"><span class="pre">rng</span></code> is neither None, an integer nor a generator; <code class="docutils literal notranslate"><span class="pre">parts</span></code> or
+<code class="docutils literal notranslate"><span class="pre">workers</span></code> is not an integer; or <code class="docutils literal notranslate"><span class="pre">progress</span></code> is neither None nor callable.</p>
 </dd>
-<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code> is empty or holds a value that is not finite.</p>
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code> or <code class="docutils literal notranslate"><span class="pre">responses</span></code> is empty; a true ability is not finite; <code class="docutils literal notranslate"><span class="pre">responses</span></code> does
+not have one column per item of the bank, or holds a response other than 0, 1 and NaN; the two
+inputs have different numbers of examinees; <code class="docutils literal notranslate"><span class="pre">rng</span></code> is a negative integer; <code class="docutils literal notranslate"><span class="pre">parts</span></code> or
+<code class="docutils literal notranslate"><span class="pre">workers</span></code> is less than 1; <code class="docutils literal notranslate"><span class="pre">parts</span></code> exceeds the number of examinees; or, when the parts run
+on workers, the engine refers to a class or function the workers cannot import, or cannot be
+pickled.</p>
 </dd>
 </dl>
 </dd>
 </dl>
-</dd></dl>
-
+<p class="rubric">Examples</p>
+<p>Generated examinees, drawn from a standard normal population:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">simulate</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">EAPEstimator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">FixedPointInitializer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxInfoSelector</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLengthStopper</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">engine</span> <span class="o">=</span> <span class="n">CatEngine</span><span class="p">(</span><span class="n">bank</span><span class="p">,</span> <span class="n">FixedPointInitializer</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">MaxInfoSelector</span><span class="p">(),</span> <span class="n">EAPEstimator</span><span class="p">(),</span> <span class="n">MaxLengthStopper</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">thetas</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">simulate</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">true_thetas</span><span class="o">=</span><span class="n">thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">sessions</span><span class="p">),</span> <span class="n">result</span><span class="o">.</span><span class="n">examinees</span><span class="p">()[</span><span class="s2">"test_length"</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">==</span> <span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span>
+<span class="go">(100, True)</span>
+</pre></div>
+</div>
+<p>Without an exposure cap, the run’s four parts give the sequential run’s sessions, and two
+workers give the same sessions as one:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">in_parts</span> <span class="o">=</span> <span class="n">simulate</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">true_thetas</span><span class="o">=</span><span class="n">thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parts</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">in_parts</span><span class="o">.</span><span class="n">parts</span><span class="p">,</span> <span class="n">in_parts</span><span class="o">.</span><span class="n">sessions</span> <span class="o">==</span> <span class="n">result</span><span class="o">.</span><span class="n">sessions</span>
+<span class="go">(4, True)</span>
+</pre></div>
+</div>
+<p>Two recorded examinees: the first answered every item correctly, the second only items 3, 8 and
+15, so the second runs out of answered items after three:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">responses</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">responses</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">responses</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">15</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">simulate</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">responses</span><span class="o">=</span><span class="n">responses</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[(</span><span class="nb">len</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">administered_items</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">stop_reason</span><span class="p">))</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
+<span class="go">[(10, 'stopper'), (3, 'no_items')]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">sorted</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span>
+<span class="go">[3, 8, 15]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">rmse</span><span class="p">()</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="c">...</span>
+<span class="gr">ValueError</span>: <span class="n">rmse needs the examinees' true abilities, and this result has none; ...</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.SimulationResult">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.</span></span><span class="sig-name descname"><span class="pre">SimulationResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><span class="pre">ItemBank</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sessions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="state.html#catsim.CatSessionState" title="catsim.CatSessionState"><span class="pre">CatSessionState</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_counts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="typing.html#catsim.typing.IntArray" title="catsim.typing.IntArray"><span class="pre">IntArray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">proposal_counts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="typing.html#catsim.typing.IntArray" title="catsim.typing.IntArray"><span class="pre">IntArray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/simulation.html#SimulationResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.SimulationResult" title="Link to this definition">#</a></dt>
-<dd><p>The sessions of a simulated run, with the run’s item exposure and duration.</p>
-<p><a class="reference internal" href="#catsim.SimulationRunner.run" title="catsim.SimulationRunner.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SimulationRunner.run()</span></code></a> returns one; one can also be built from sessions an application ran
-itself, whose true abilities may be unknown.</p>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.</span></span><span class="sig-name descname"><span class="pre">SimulationResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><span class="pre">ItemBank</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sessions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="session.html#catsim.Session" title="catsim.Session"><span class="pre">Session</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proposal_counts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="typing.html#catsim.typing.IntArray" title="catsim.typing.IntArray"><span class="pre">IntArray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_thetas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="typing.html#catsim.typing.FloatArray" title="catsim.typing.FloatArray"><span class="pre">FloatArray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/simulation.html#SimulationResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.SimulationResult" title="Link to this definition">#</a></dt>
+<dd><p>The sessions of a simulated run, with the run’s tables and metrics (ADR-0016).</p>
+<p><a class="reference internal" href="#catsim.simulate" title="catsim.simulate"><code class="xref py py-func docutils literal notranslate"><span class="pre">simulate()</span></code></a> returns one; one can also be built from sessions an application ran itself,
+whose true abilities may be unknown. A result is immutable: its sessions are a tuple of
+<a class="reference internal" href="session.html#catsim.Session" title="catsim.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code></a> values, which never change, and its arrays are read-only. It compares by
+identity.</p>
+<p><strong>Tables.</strong> <a class="reference internal" href="#catsim.SimulationResult.steps" title="catsim.SimulationResult.steps"><code class="xref py py-meth docutils literal notranslate"><span class="pre">steps()</span></code></a> has one row per session and step, <a class="reference internal" href="#catsim.SimulationResult.examinees" title="catsim.SimulationResult.examinees"><code class="xref py py-meth docutils literal notranslate"><span class="pre">examinees()</span></code></a> one row per session,
+and <a class="reference internal" href="#catsim.SimulationResult.deciles" title="catsim.SimulationResult.deciles"><code class="xref py py-meth docutils literal notranslate"><span class="pre">deciles()</span></code></a> one row per decile of the true ability. Each is a dict of equal-length NumPy
+columns, which <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame(result.steps())</span></code> and polars take as they are, and which
+<a class="reference external" href="https://docs.python.org/3/library/csv.html#csv.DictWriter" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">csv.DictWriter</span></code></a> writes row by row. Items appear by index and by name (ADR-0004).</p>
+<p><strong>Metrics.</strong> <a class="reference internal" href="#catsim.SimulationResult.bias" title="catsim.SimulationResult.bias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bias()</span></code></a>, <a class="reference internal" href="#catsim.SimulationResult.mse" title="catsim.SimulationResult.mse"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mse()</span></code></a>, <a class="reference internal" href="#catsim.SimulationResult.rmse" title="catsim.SimulationResult.rmse"><code class="xref py py-meth docutils literal notranslate"><span class="pre">rmse()</span></code></a>, <a class="reference internal" href="#catsim.SimulationResult.test_length" title="catsim.SimulationResult.test_length"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_length()</span></code></a>, <a class="reference internal" href="#catsim.SimulationResult.se" title="catsim.SimulationResult.se"><code class="xref py py-meth docutils literal notranslate"><span class="pre">se()</span></code></a>,
+<a class="reference internal" href="#catsim.SimulationResult.exposure_rates" title="catsim.SimulationResult.exposure_rates"><code class="xref py py-meth docutils literal notranslate"><span class="pre">exposure_rates()</span></code></a> and <a class="reference internal" href="#catsim.SimulationResult.overlap_rate" title="catsim.SimulationResult.overlap_rate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">overlap_rate()</span></code></a> each return a <a class="reference internal" href="metrics.html#catsim.metrics.Metric" title="catsim.metrics.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a>,
+the value and its Monte Carlo standard error, computed by <a class="reference internal" href="metrics.html#module-catsim.metrics" title="catsim.metrics"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a> over the run’s
+sessions, or with <code class="docutils literal notranslate"><span class="pre">decile=k</span></code> over the sessions of decile <code class="docutils literal notranslate"><span class="pre">k</span></code> only; <a class="reference internal" href="#catsim.SimulationResult.proposal_rates" title="catsim.SimulationResult.proposal_rates"><code class="xref py py-meth docutils literal notranslate"><span class="pre">proposal_rates()</span></code></a>
+covers the whole run. The Monte Carlo errors treat the sessions as independent: with exposure
+feedback (an <code class="docutils literal notranslate"><span class="pre">r_max</span></code> cap), each session depends on the sessions before it, so the errors are
+approximations, and replications of the run give the exact spread. A decile with no session
+gives NaN. Bias, MSE and RMSE, and every metric by decile, need the true abilities, and raise
+without them.</p>
+<p><strong>Deciles.</strong> Decile <span class="math notranslate nohighlight">\(k\)</span>, from 0 to 9, holds the sessions whose true ability <span class="math notranslate nohighlight">\(\theta\)</span>
+has <span class="math notranslate nohighlight">\(q_k \leq \theta &lt; q_{k+1}\)</span>, where <span class="math notranslate nohighlight">\(q_0, \ldots, q_{10}\)</span> are the quantiles of the
+run’s true abilities at <span class="math notranslate nohighlight">\(0, 0.1, \ldots, 1\)</span>, interpolated linearly (NumPy’s default, R’s
+type 7), and decile 9 also holds the abilities equal to <span class="math notranslate nohighlight">\(q_{10}\)</span>, the highest. With
+<span class="math notranslate nohighlight">\(N\)</span> distinct abilities, each decile holds <span class="math notranslate nohighlight">\(N/10\)</span> sessions when 10 divides <span class="math notranslate nohighlight">\(N\)</span>.
+Equal abilities always share a decile, so with ties some deciles may hold more sessions and others
+none: when every examinee has the same ability, all are in decile 9.</p>
+<p>The <a class="reference internal" href="../running-simulations.html"><span class="doc">Running Simulations</span></a> guide reads a result.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>The item bank the sessions drew from.</p>
 </dd>
-<dt><strong>sessions</strong><span class="classifier">list of CatSessionState</span></dt><dd><p>The run’s sessions, in the order they ran.</p>
+<dt><strong>sessions</strong><span class="classifier">Sequence[Session]</span></dt><dd><p>The run’s sessions, at least one, in examinee order, each ended. Stored as a tuple.</p>
 </dd>
-<dt><strong>exposure_counts</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>Each item’s administrations over the run.</p>
+<dt><strong>proposal_counts</strong><span class="classifier">array-like</span></dt><dd><p>Each item’s proposals over the run, as integers: its administrations plus the times the
+engine’s exposure control declined it. A session proposes an item at most once, so a count is
+between the item’s administrations and the number of sessions. Without an exposure control,
+the proposals are the administrations.</p>
 </dd>
 <dt><strong>duration</strong><span class="classifier">float</span></dt><dd><p>The run’s wall-clock time, in seconds.</p>
 </dd>
-<dt><strong>proposal_counts</strong><span class="classifier">numpy.ndarray or None, optional</span></dt><dd><p>Each item’s proposals: its administrations plus the times the engine’s exposure control
-declined it. Default is None, for a result built without them.</p>
+<dt><strong>true_thetas</strong><span class="classifier">array-like or None, optional</span></dt><dd><p>Each session’s true ability, a finite number, in session order, or None when the true
+abilities are unknown, as for recorded examinees. A session does not hold its examinee’s true
+ability, so the result does. Default is None.</p>
+</dd>
+<dt><strong>parts</strong><span class="classifier">int, optional</span></dt><dd><p>The number of contiguous parts the run’s examinees were split into, each with exposure counts
+of its own (ADR-0015). Default is 1, a sequential run.</p>
 </dd>
 </dl>
 </dd>
+<dt class="field-even">Attributes<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>exposure_counts</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>Each item’s administrations over the run, counted from the sessions.</p>
+</dd>
 </dl>
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.SimulationResult.administered_items">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">administered_items</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#catsim.SimulationResult.administered_items" title="Link to this definition">#</a></dt>
-<dd><p>Return each session’s administered items, in the order given.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.SimulationResult.bias">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">bias</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.SimulationResult.bias" title="Link to this definition">#</a></dt>
-<dd><p>Return the mean of the final estimates minus the true abilities, <a class="reference internal" href="metrics.html#catsim.metrics.bias" title="catsim.metrics.bias"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.metrics.bias()</span></code></a>.</p>
-<dl class="field-list simple">
+</dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>ValueError</dt><dd><p>If the result has no session, or any session has no true ability.</p>
+<dt>TypeError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">item_bank</span></code> is not an <a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code></a>, <code class="docutils literal notranslate"><span class="pre">duration</span></code> is not a number, a session
+is not a <a class="reference internal" href="session.html#catsim.Session" title="catsim.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code></a>, the proposal counts are not integers, or <code class="docutils literal notranslate"><span class="pre">parts</span></code> is not
+an integer.</p>
+</dd>
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">duration</span></code> is negative or not finite, there is no session, a session has not ended or
+administered an index the bank does not have, <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code> does not hold one finite number
+per session, the proposal counts are not one per item between its administrations and the
+number of sessions, or <code class="docutils literal notranslate"><span class="pre">parts</span></code> is not positive.</p>
 </dd>
 </dl>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.SimulationResult.evaluations">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">evaluations</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#catsim.SimulationResult.evaluations" title="Link to this definition">#</a></dt>
-<dd><p>Return how many objective evaluations each session’s estimates took, summed over its responses.</p>
-<p>The initial estimate, which no estimator computed, counts 0. A session is None when the estimator
-gave no count for one of its estimates (the <code class="docutils literal notranslate"><span class="pre">evaluations</span></code> of an <a class="reference internal" href="context.html#catsim.Estimate" title="catsim.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a>).</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.SimulationResult.exposure_rates">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">exposure_rates</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="typing.html#catsim.typing.FloatArray" title="catsim.typing.FloatArray"><span class="pre">FloatArray</span></a></span><a class="headerlink" href="#catsim.SimulationResult.exposure_rates" title="Link to this definition">#</a></dt>
-<dd><p>Return per-item exposure rates across the simulated sessions.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.SimulationResult.final_ses">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">final_ses</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="typing.html#catsim.typing.FloatArray" title="catsim.typing.FloatArray"><span class="pre">FloatArray</span></a></span><a class="headerlink" href="#catsim.SimulationResult.final_ses" title="Link to this definition">#</a></dt>
-<dd><p>Return the standard error of each session’s final ability estimate.</p>
-<p>It is infinite for a session that ended before its first response.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.SimulationResult.final_thetas">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">final_thetas</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="typing.html#catsim.typing.FloatArray" title="catsim.typing.FloatArray"><span class="pre">FloatArray</span></a></span><a class="headerlink" href="#catsim.SimulationResult.final_thetas" title="Link to this definition">#</a></dt>
-<dd><p>Return each session’s final ability estimate.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.SimulationResult.mean_evaluations">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">mean_evaluations</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#catsim.SimulationResult.mean_evaluations" title="Link to this definition">#</a></dt>
-<dd><p>Return the mean number of objective evaluations per estimate over the run’s responses.</p>
-<p>Only the estimates that have a count take part. None when no estimate of the run has one, as for
-a run whose estimator gives no counts or whose sessions have no responses.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.SimulationResult.mse">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">mse</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.SimulationResult.mse" title="Link to this definition">#</a></dt>
-<dd><p>Return the mean squared difference between the final estimates and the true abilities.</p>
-<p>See <a class="reference internal" href="metrics.html#catsim.metrics.mse" title="catsim.metrics.mse"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.metrics.mse()</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt>ValueError</dt><dd><p>If the result has no session, or any session has no true ability.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.SimulationResult.overlap_rate">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">overlap_rate</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#catsim.SimulationResult.overlap_rate" title="Link to this definition">#</a></dt>
-<dd><p>Return the test overlap rate, or None unless every session administered the same number of items.</p>
-<p>The overlap-rate formula (<a class="reference internal" href="metrics.html#catsim.metrics.overlap_rate" title="catsim.metrics.overlap_rate"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.metrics.overlap_rate()</span></code></a>) assumes one fixed test length, so
-there is no overlap rate for a run of variable-length tests, for a run with no sessions or for
-tests of no items.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.SimulationResult.proposal_rates">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">proposal_rates</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="typing.html#catsim.typing.FloatArray" title="catsim.typing.FloatArray"><span class="pre">FloatArray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#catsim.SimulationResult.proposal_rates" title="Link to this definition">#</a></dt>
-<dd><p>Return the share of the sessions in which the selector proposed each item, or None without proposal counts.</p>
-<p>A session proposes an item at most once, as the exposure control declines it or the session administers it, so
-the rate is at most 1. Without an exposure control it equals <a class="reference internal" href="#catsim.SimulationResult.exposure_rates" title="catsim.SimulationResult.exposure_rates"><code class="xref py py-attr docutils literal notranslate"><span class="pre">exposure_rates</span></code></a>.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.SimulationResult.responses">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">responses</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#catsim.SimulationResult.responses" title="Link to this definition">#</a></dt>
-<dd><p>Return each session’s responses, in the order given.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.SimulationResult.rmse">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">rmse</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.SimulationResult.rmse" title="Link to this definition">#</a></dt>
-<dd><p>Return the square root of <a class="reference internal" href="#catsim.SimulationResult.mse" title="catsim.SimulationResult.mse"><code class="xref py py-attr docutils literal notranslate"><span class="pre">mse</span></code></a>, <a class="reference internal" href="metrics.html#catsim.metrics.rmse" title="catsim.metrics.rmse"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.metrics.rmse()</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt>ValueError</dt><dd><p>If the result has no session, or any session has no true ability.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.SimulationResult.test_lengths">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">test_lengths</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="typing.html#catsim.typing.IntArray" title="catsim.typing.IntArray"><span class="pre">IntArray</span></a></span><a class="headerlink" href="#catsim.SimulationResult.test_lengths" title="Link to this definition">#</a></dt>
-<dd><p>Return how many items each session administered.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.SimulationResult.theta_histories">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">theta_histories</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#catsim.SimulationResult.theta_histories" title="Link to this definition">#</a></dt>
-<dd><p>Return each session’s ability estimates, the initial one first.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.SimulationResult.true_thetas">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">true_thetas</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="typing.html#catsim.typing.FloatArray" title="catsim.typing.FloatArray"><span class="pre">FloatArray</span></a></span><a class="headerlink" href="#catsim.SimulationResult.true_thetas" title="Link to this definition">#</a></dt>
-<dd><p>Return each session’s true ability, NaN for a session that has none.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="catsim.SimulatedResponseProvider">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.</span></span><span class="sig-name descname"><span class="pre">SimulatedResponseProvider</span></span><a class="reference internal" href="../_modules/catsim/simulation.html#SimulatedResponseProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.SimulatedResponseProvider" title="Link to this definition">#</a></dt>
-<dd><p>Draw a simulated examinee’s responses from their true ability.</p>
-<p>The response to an item is correct with the probability the item’s 4PL model gives at
-<code class="docutils literal notranslate"><span class="pre">session.true_theta</span></code>, decided by one uniform draw from the run’s generator.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">simulate</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">EAPEstimator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">FixedPointInitializer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxInfoSelector</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLengthStopper</span><span class="p">,</span> <span class="n">StandardErrorStopper</span><span class="p">,</span> <span class="n">StopRule</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">engine</span> <span class="o">=</span> <span class="n">CatEngine</span><span class="p">(</span>
+<span class="gp">... </span>  <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+<span class="gp">... </span>  <span class="n">FixedPointInitializer</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span>
+<span class="gp">... </span>  <span class="n">MaxInfoSelector</span><span class="p">(),</span>
+<span class="gp">... </span>  <span class="n">EAPEstimator</span><span class="p">(),</span>
+<span class="gp">... </span>  <span class="n">StopRule</span><span class="p">(</span><span class="n">StandardErrorStopper</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">MaxLengthStopper</span><span class="p">(</span><span class="mi">30</span><span class="p">)),</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">simulate</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">true_thetas</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="n">rng</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">value</span><span class="p">,</span> <span class="n">mc_se</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">rmse</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"RMSE </span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> ± </span><span class="si">{</span><span class="n">mc_se</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, mean length </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">test_length</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="go">RMSE 0.472 ± 0.025, mean length 13.9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">steps</span><span class="p">())</span>
+<span class="go">['session', 'position', 'item', 'name', 'response', 'theta', 'se', 'evaluations', 'true_theta']</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">by_decile</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">deciles</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">by_decile</span><span class="p">[</span><span class="s2">"n_sessions"</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[20, 20, 20, 20, 20, 20, 20, 20, 20, 20]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">by_decile</span><span class="p">[</span><span class="s2">"test_length"</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[14.8, 13.4, 13.3, 14.0, 13.2, 13.2, 14.2, 14.1, 14.4, 14.8]</span>
+</pre></div>
+</div>
+<p>The tests differ in length, so there is no overlap rate:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">overlap_rate</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="go">True</span>
+</pre></div>
+</div>
 <dl class="py method">
-<dt class="sig sig-object py" id="catsim.SimulatedResponseProvider.answer">
-<span class="sig-name descname"><span class="pre">answer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><span class="pre">ItemBank</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="state.html#catsim.CatSessionSnapshot" title="catsim.CatSessionSnapshot"><span class="pre">CatSessionSnapshot</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><span class="pre">numpy.random.Generator</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../_modules/catsim/simulation.html#SimulatedResponseProvider.answer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.SimulatedResponseProvider.answer" title="Link to this definition">#</a></dt>
-<dd><p>Return a correct response with the item’s probability of a correct answer at the true ability.</p>
+<dt class="sig sig-object py" id="catsim.SimulationResult.bias">
+<span class="sig-name descname"><span class="pre">bias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">decile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="metrics.html#catsim.metrics.Metric" title="catsim.metrics.Metric"><span class="pre">Metric</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/catsim/simulation.html#SimulationResult.bias"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.SimulationResult.bias" title="Link to this definition">#</a></dt>
+<dd><p>Return the mean of the final estimates minus the true abilities, with its Monte Carlo error.</p>
+<p>See <a class="reference internal" href="metrics.html#catsim.metrics.bias" title="catsim.metrics.bias"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.metrics.bias()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>The engine’s item bank.</p>
-</dd>
-<dt><strong>item_id</strong><span class="classifier">int</span></dt><dd><p>Index of the item the selector chose.</p>
-</dd>
-<dt><strong>session</strong><span class="classifier">CatSessionSnapshot</span></dt><dd><p>The session as it stands before the response; it must have a true ability.</p>
-</dd>
-<dt><strong>rng</strong><span class="classifier">numpy.random.Generator</span></dt><dd><p>The run’s random generator.</p>
+<dt><strong>decile</strong><span class="classifier">int or None, optional</span></dt><dd><p>The decile of the true ability whose sessions to cover, 0 to 9, or None, the default, for
+every session.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>bool</dt><dd><p>True for a correct response.</p>
+<dt>Metric</dt><dd><p>The bias and its Monte Carlo standard error.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>ValueError</dt><dd><p>If the session has no true ability.</p>
+<dt>ValueError</dt><dd><p>If the result has no true abilities, or <code class="docutils literal notranslate"><span class="pre">decile</span></code> is not one of 0 to 9.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.SimulationResult.deciles">
+<span class="sig-name descname"><span class="pre">deciles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/catsim/simulation.html#SimulationResult.deciles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.SimulationResult.deciles" title="Link to this definition">#</a></dt>
+<dd><p>Return the table of the run’s metrics by decile of the true ability: one row per decile, from the lowest.</p>
+<dl class="field-list">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt>dict[str, numpy.ndarray]</dt><dd><p>Ten rows, with the columns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">decile</span></code> (int): 0 to 9;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">n_sessions</span></code> (int): how many sessions the decile holds;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">true_theta</span></code> (float): the mean true ability of its sessions;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bias</span></code>, <code class="docutils literal notranslate"><span class="pre">mse</span></code>, <code class="docutils literal notranslate"><span class="pre">rmse</span></code>, <code class="docutils literal notranslate"><span class="pre">test_length</span></code>, <code class="docutils literal notranslate"><span class="pre">se</span></code> and <code class="docutils literal notranslate"><span class="pre">overlap_rate</span></code> (float): the
+metrics of the methods of those names with <code class="docutils literal notranslate"><span class="pre">decile</span></code> set, each followed by its Monte
+Carlo error, <code class="docutils literal notranslate"><span class="pre">bias_mc_se</span></code> to <code class="docutils literal notranslate"><span class="pre">overlap_rate_mc_se</span></code>. The overlap rate is NaN for a
+decile whose tests differ in length.</p></li>
+</ul>
+<p>A decile with no session has NaN for every float.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>ValueError</dt><dd><p>If the result has no true abilities.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.SimulationResult.examinees">
+<span class="sig-name descname"><span class="pre">examinees</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/catsim/simulation.html#SimulationResult.examinees"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.SimulationResult.examinees" title="Link to this definition">#</a></dt>
+<dd><p>Return the table of the run’s examinees: one row per session, in session order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>dict[str, numpy.ndarray]</dt><dd><p>The columns, each with one entry per session:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">session</span></code> (int): the session’s position in the run, its examinee’s position;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test_length</span></code> (int): how many items the session administered;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">theta</span></code> (float): the session’s final ability estimate;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">se</span></code> (float): its standard error, infinite for a session that ended before its first
+response;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stop_reason</span></code> (str): why the session ended, the value of its
+<a class="reference internal" href="session.html#catsim.StopReason" title="catsim.StopReason"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopReason</span></code></a>, <code class="docutils literal notranslate"><span class="pre">&quot;stopper&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;no_items&quot;</span></code>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">true_theta</span></code> (float) and <code class="docutils literal notranslate"><span class="pre">decile</span></code> (int): the examinee’s true ability and its decile,
+from 0 to 9, columns only when the result has true abilities.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.SimulationResult.exposure_rates">
+<span class="sig-name descname"><span class="pre">exposure_rates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">decile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="metrics.html#catsim.metrics.Metric" title="catsim.metrics.Metric"><span class="pre">Metric</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="typing.html#catsim.typing.FloatArray" title="catsim.typing.FloatArray"><span class="pre">FloatArray</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/catsim/simulation.html#SimulationResult.exposure_rates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.SimulationResult.exposure_rates" title="Link to this definition">#</a></dt>
+<dd><p>Return each item’s exposure rate, the share of the sessions that were given it, with its Monte Carlo error.</p>
+<p>See <a class="reference internal" href="metrics.html#catsim.metrics.exposure_rates" title="catsim.metrics.exposure_rates"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.metrics.exposure_rates()</span></code></a>. These are the rates at the end of the run, over all
+its sessions, not the rates any session saw (ADR-0012).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>decile</strong><span class="classifier">int or None, optional</span></dt><dd><p>The decile of the true ability whose sessions to cover, 0 to 9, or None, the default, for
+every session.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Metric</dt><dd><p>One rate and one Monte Carlo standard error per item, as arrays.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">decile</span></code> is given and the result has no true abilities, or <code class="docutils literal notranslate"><span class="pre">decile</span></code> is not one of 0
+to 9.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.SimulationResult.mse">
+<span class="sig-name descname"><span class="pre">mse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">decile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="metrics.html#catsim.metrics.Metric" title="catsim.metrics.Metric"><span class="pre">Metric</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/catsim/simulation.html#SimulationResult.mse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.SimulationResult.mse" title="Link to this definition">#</a></dt>
+<dd><p>Return the mean squared difference of the final estimates from the true abilities, with its Monte Carlo error.</p>
+<p>See <a class="reference internal" href="metrics.html#catsim.metrics.mse" title="catsim.metrics.mse"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.metrics.mse()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>decile</strong><span class="classifier">int or None, optional</span></dt><dd><p>The decile of the true ability whose sessions to cover, 0 to 9, or None, the default, for
+every session.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Metric</dt><dd><p>The mean squared error and its Monte Carlo standard error.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If the result has no true abilities, or <code class="docutils literal notranslate"><span class="pre">decile</span></code> is not one of 0 to 9.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.SimulationResult.overlap_rate">
+<span class="sig-name descname"><span class="pre">overlap_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">decile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="metrics.html#catsim.metrics.Metric" title="catsim.metrics.Metric"><span class="pre">Metric</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/catsim/simulation.html#SimulationResult.overlap_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.SimulationResult.overlap_rate" title="Link to this definition">#</a></dt>
+<dd><p>Return the test overlap rate, with its Monte Carlo error, or None unless every session gave as many items.</p>
+<p>See <a class="reference internal" href="metrics.html#catsim.metrics.overlap_rate" title="catsim.metrics.overlap_rate"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.metrics.overlap_rate()</span></code></a>, whose formula assumes one fixed test length, so there is
+no overlap rate for tests of different lengths, or of no items. By decile, it is the overlap of
+the tests of examinees of similar ability.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>decile</strong><span class="classifier">int or None, optional</span></dt><dd><p>The decile of the true ability whose sessions to cover, 0 to 9, or None, the default, for
+every session.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Metric or None</dt><dd><p>The overlap rate and its Monte Carlo standard error, or None.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">decile</span></code> is given and the result has no true abilities, or <code class="docutils literal notranslate"><span class="pre">decile</span></code> is not one of 0
+to 9.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.SimulationResult.proposal_rates">
+<span class="sig-name descname"><span class="pre">proposal_rates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="metrics.html#catsim.metrics.Metric" title="catsim.metrics.Metric"><span class="pre">Metric</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="typing.html#catsim.typing.FloatArray" title="catsim.typing.FloatArray"><span class="pre">FloatArray</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/catsim/simulation.html#SimulationResult.proposal_rates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.SimulationResult.proposal_rates" title="Link to this definition">#</a></dt>
+<dd><p>Return the share of the sessions in which the selector proposed each item, with its Monte Carlo error.</p>
+<p>A session proposes an item at most once, as the exposure control declines it or the session
+administers it, so the rate is at most 1. Without an exposure control it equals
+<a class="reference internal" href="#catsim.SimulationResult.exposure_rates" title="catsim.SimulationResult.exposure_rates"><code class="xref py py-meth docutils literal notranslate"><span class="pre">exposure_rates()</span></code></a>. See <a class="reference internal" href="metrics.html#catsim.metrics.exposure_rates" title="catsim.metrics.exposure_rates"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.metrics.exposure_rates()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>Metric</dt><dd><p>One rate and one Monte Carlo standard error per item, as arrays.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.SimulationResult.rmse">
+<span class="sig-name descname"><span class="pre">rmse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">decile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="metrics.html#catsim.metrics.Metric" title="catsim.metrics.Metric"><span class="pre">Metric</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/catsim/simulation.html#SimulationResult.rmse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.SimulationResult.rmse" title="Link to this definition">#</a></dt>
+<dd><p>Return the root of <a class="reference internal" href="#catsim.SimulationResult.mse" title="catsim.SimulationResult.mse"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mse()</span></code></a>, with its Monte Carlo error.</p>
+<p>See <a class="reference internal" href="metrics.html#catsim.metrics.rmse" title="catsim.metrics.rmse"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.metrics.rmse()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>decile</strong><span class="classifier">int or None, optional</span></dt><dd><p>The decile of the true ability whose sessions to cover, 0 to 9, or None, the default, for
+every session.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Metric</dt><dd><p>The root mean squared error and its Monte Carlo standard error.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If the result has no true abilities, or <code class="docutils literal notranslate"><span class="pre">decile</span></code> is not one of 0 to 9.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.SimulationResult.se">
+<span class="sig-name descname"><span class="pre">se</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">decile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="metrics.html#catsim.metrics.Metric" title="catsim.metrics.Metric"><span class="pre">Metric</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/catsim/simulation.html#SimulationResult.se"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.SimulationResult.se" title="Link to this definition">#</a></dt>
+<dd><p>Return the mean standard error of the sessions’ final estimates, with its Monte Carlo error.</p>
+<p>See <a class="reference internal" href="metrics.html#catsim.metrics.mean" title="catsim.metrics.mean"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.metrics.mean()</span></code></a>. It is infinite, with a NaN error, when a session ended before
+its first response.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>decile</strong><span class="classifier">int or None, optional</span></dt><dd><p>The decile of the true ability whose sessions to cover, 0 to 9, or None, the default, for
+every session.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Metric</dt><dd><p>The mean standard error and its Monte Carlo standard error.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">decile</span></code> is given and the result has no true abilities, or <code class="docutils literal notranslate"><span class="pre">decile</span></code> is not one of 0
+to 9.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.SimulationResult.steps">
+<span class="sig-name descname"><span class="pre">steps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/catsim/simulation.html#SimulationResult.steps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.SimulationResult.steps" title="Link to this definition">#</a></dt>
+<dd><p>Return the table of the run’s steps: one row per session and administered item.</p>
+<p>The rows are in session order, and in the order the items were given within a session.</p>
+<dl class="field-list">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt>dict[str, numpy.ndarray]</dt><dd><p>The columns, each with one entry per row:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">session</span></code> (int): the session’s position in the run, its examinee’s position;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">position</span></code> (int): the item’s position in its session’s test, 0 for the first, so the
+row’s item is <code class="docutils literal notranslate"><span class="pre">sessions[session].administered_items[position]</span></code>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">item</span></code> (int): the item’s index in the bank;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code> (str): the item’s name, <code class="docutils literal notranslate"><span class="pre">item_bank.names[item]</span></code>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">response</span></code> (bool): the examinee’s response;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">theta</span></code> (float): the ability estimate after the response;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">se</span></code> (float): its standard error;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">evaluations</span></code> (float): how many times the estimator evaluated its objective for that
+estimate, NaN where the estimator gave no count (<a class="reference internal" href="context.html#catsim.Estimate" title="catsim.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a>);</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">true_theta</span></code> (float): the examinee’s true ability, a column only when the result has
+true abilities.</p></li>
+</ul>
+<p>Each session’s initial estimate, which precedes its first item, is the first of the
+session’s <code class="docutils literal notranslate"><span class="pre">estimates</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.SimulationResult.test_length">
+<span class="sig-name descname"><span class="pre">test_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">decile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="metrics.html#catsim.metrics.Metric" title="catsim.metrics.Metric"><span class="pre">Metric</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/catsim/simulation.html#SimulationResult.test_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.SimulationResult.test_length" title="Link to this definition">#</a></dt>
+<dd><p>Return the mean number of items the sessions administered, with its Monte Carlo error.</p>
+<p>See <a class="reference internal" href="metrics.html#catsim.metrics.mean" title="catsim.metrics.mean"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.metrics.mean()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>decile</strong><span class="classifier">int or None, optional</span></dt><dd><p>The decile of the true ability whose sessions to cover, 0 to 9, or None, the default, for
+every session.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Metric</dt><dd><p>The mean test length and its Monte Carlo standard error.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">decile</span></code> is given and the result has no true abilities, or <code class="docutils literal notranslate"><span class="pre">decile</span></code> is not one of 0
+to 9.</p>
 </dd>
 </dl>
 </dd>
@@ -728,12 +1043,12 @@ the rate is at most 1. Without an exposure control it equals <a class="reference
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="state.html"
+       href="context.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Session State</p>
+        <p class="prev-next-title">Strategy Inputs and Estimates</p>
       </div>
     </a>
     <a class="right-next"
@@ -764,31 +1079,19 @@ the rate is at most 1. Without an exposure control it equals <a class="reference
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationRunner"><code class="docutils literal notranslate"><span class="pre">SimulationRunner</span></code></a><ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationRunner.engine"><code class="docutils literal notranslate"><span class="pre">SimulationRunner.engine</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationRunner.run"><code class="docutils literal notranslate"><span class="pre">SimulationRunner.run()</span></code></a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.simulate"><code class="docutils literal notranslate"><span class="pre">simulate()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult"><code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code></a><ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.administered_items"><code class="docutils literal notranslate"><span class="pre">SimulationResult.administered_items</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.bias"><code class="docutils literal notranslate"><span class="pre">SimulationResult.bias</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.evaluations"><code class="docutils literal notranslate"><span class="pre">SimulationResult.evaluations</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.exposure_rates"><code class="docutils literal notranslate"><span class="pre">SimulationResult.exposure_rates</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.final_ses"><code class="docutils literal notranslate"><span class="pre">SimulationResult.final_ses</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.final_thetas"><code class="docutils literal notranslate"><span class="pre">SimulationResult.final_thetas</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.mean_evaluations"><code class="docutils literal notranslate"><span class="pre">SimulationResult.mean_evaluations</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.mse"><code class="docutils literal notranslate"><span class="pre">SimulationResult.mse</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.overlap_rate"><code class="docutils literal notranslate"><span class="pre">SimulationResult.overlap_rate</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.proposal_rates"><code class="docutils literal notranslate"><span class="pre">SimulationResult.proposal_rates</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.responses"><code class="docutils literal notranslate"><span class="pre">SimulationResult.responses</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.rmse"><code class="docutils literal notranslate"><span class="pre">SimulationResult.rmse</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.test_lengths"><code class="docutils literal notranslate"><span class="pre">SimulationResult.test_lengths</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.theta_histories"><code class="docutils literal notranslate"><span class="pre">SimulationResult.theta_histories</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.true_thetas"><code class="docutils literal notranslate"><span class="pre">SimulationResult.true_thetas</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulatedResponseProvider"><code class="docutils literal notranslate"><span class="pre">SimulatedResponseProvider</span></code></a><ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulatedResponseProvider.answer"><code class="docutils literal notranslate"><span class="pre">SimulatedResponseProvider.answer()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.bias"><code class="docutils literal notranslate"><span class="pre">SimulationResult.bias()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.deciles"><code class="docutils literal notranslate"><span class="pre">SimulationResult.deciles()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.examinees"><code class="docutils literal notranslate"><span class="pre">SimulationResult.examinees()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.exposure_rates"><code class="docutils literal notranslate"><span class="pre">SimulationResult.exposure_rates()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.mse"><code class="docutils literal notranslate"><span class="pre">SimulationResult.mse()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.overlap_rate"><code class="docutils literal notranslate"><span class="pre">SimulationResult.overlap_rate()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.proposal_rates"><code class="docutils literal notranslate"><span class="pre">SimulationResult.proposal_rates()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.rmse"><code class="docutils literal notranslate"><span class="pre">SimulationResult.rmse()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.se"><code class="docutils literal notranslate"><span class="pre">SimulationResult.se()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.steps"><code class="docutils literal notranslate"><span class="pre">SimulationResult.steps()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.SimulationResult.test_length"><code class="docutils literal notranslate"><span class="pre">SimulationResult.test_length()</span></code></a></li>
 </ul>
 </li>
 </ul>

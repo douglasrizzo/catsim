@@ -30,6 +30,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -41,6 +42,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 
@@ -798,37 +800,37 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">  :class:`~catsim.CatEngine` asks its control about every item the selector proposes. A</span>
 <span class="sd">  declined item is excluded from the session for the rest of its test, and the selector proposes</span>
-<span class="sd">  again; a session with no item left to accept ends with ``StopReason.NO_ITEMS``. A control holds</span>
-<span class="sd">  configuration only, never per-session state, and draws from ``context.rng``. This one administers</span>
-<span class="sd">  each proposed item with probability one half:</span>
+<span class="sd">  again; a session with no item left to accept ends with ``StopReason.NO_ITEMS``.</span>
+<span class="sd">  :meth:`CatEngine.select &lt;catsim.CatEngine.select&gt;` returns the declined items with its selection.</span>
+<span class="sd">  A control holds configuration only, never per-session state, and draws from ``context.rng``. This</span>
+<span class="sd">  one administers each proposed item with probability one half:</span>
 
-<span class="sd">  &gt;&gt;&gt; import numpy</span>
-<span class="sd">  &gt;&gt;&gt; from catsim import CatEngine, ItemBank, RunContext</span>
+<span class="sd">  &gt;&gt;&gt; from catsim import CatEngine, ItemBank</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.estimation import EAPEstimator</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.exposure import BaseExposureControl</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.initialization import FixedPointInitializer</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.selection import MaxInfoSelector</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.stopping import MaxLengthStopper</span>
 <span class="sd">  &gt;&gt;&gt; class CoinControl(BaseExposureControl):</span>
-<span class="sd">  ...   def accept(self, context, item_id):</span>
+<span class="sd">  ...   def accept(self, context, item):</span>
 <span class="sd">  ...     return bool(context.rng.random() &lt; 0.5)</span>
 <span class="sd">  &gt;&gt;&gt; bank = ItemBank.generate(20, rng=0)</span>
 <span class="sd">  &gt;&gt;&gt; engine = CatEngine(</span>
 <span class="sd">  ...   bank, FixedPointInitializer(0.0), MaxInfoSelector(), EAPEstimator(), MaxLengthStopper(5),</span>
 <span class="sd">  ...   exposure_control=CoinControl(),</span>
 <span class="sd">  ... )</span>
-<span class="sd">  &gt;&gt;&gt; context = RunContext(rng=numpy.random.default_rng(1))</span>
-<span class="sd">  &gt;&gt;&gt; session = engine.start_session(0, context)</span>
-<span class="sd">  &gt;&gt;&gt; engine.select_next(session, context), session.excluded_items</span>
-<span class="sd">  (11, [10, 16])</span>
+<span class="sd">  &gt;&gt;&gt; selection = engine.select(engine.start(rng=1), rng=1)</span>
+<span class="sd">  &gt;&gt;&gt; selection.item, selection.declined, selection.session.excluded_items</span>
+<span class="sd">  (11, (10, 16), (10, 16))</span>
 
 <span class="sd">  The control declined the selector's first two proposals, items 10 and 16, and accepted item 11.</span>
+<span class="sd">  The :doc:`/extending` guide lists what each strategy receives and returns.</span>
 <span class="sd">  """</span>
 
 <div class="viewcode-block" id="BaseExposureControl.accept">
 <a class="viewcode-back" href="../../../api/exposure.html#catsim.exposure.BaseExposureControl.accept">[docs]</a>
   <span class="nd">@abstractmethod</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">,</span> <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return whether the engine administers the item the selector proposed.</span>
 
 <span class="sd">    Parameters</span>
@@ -836,7 +838,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    context : StepContext</span>
 <span class="sd">        The context the selector proposed the item from: the session as it stands, with the items</span>
 <span class="sd">        declined so far in this selection among its ``excluded_items``.</span>
-<span class="sd">    item_id : int</span>
+<span class="sd">    item : int</span>
 <span class="sd">        Index of the proposed item, an item of ``context.item_bank`` that is neither administered</span>
 <span class="sd">        nor excluded.</span>
 

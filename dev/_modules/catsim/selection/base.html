@@ -30,6 +30,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -41,6 +42,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 
@@ -839,7 +841,7 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="below_cap">
 <a class="viewcode-back" href="../../../api/techniques/selection/index.html#catsim.selection.below_cap">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">below_cap</span><span class="p">(</span><span class="n">candidates</span><span class="p">:</span> <span class="n">IntArray</span><span class="p">,</span> <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">r_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IntArray</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Return the candidates whose exposure rate is below ``r_max``, or all of them if none is.</span>
+<span class="w">  </span><span class="sd">"""Return the candidate items whose exposure rate is below ``r_max``, or all of them if none is.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -857,7 +859,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      The candidates whose exposure rate is below ``r_max``, in their order in ``candidates``, or</span>
 <span class="sd">      ``candidates`` itself if none is below it or ``r_max`` is 1.</span>
 <span class="sd">  """</span>
-  <span class="c1"># As in catR, a cap of 1 is no cap: an item that every earlier examinee received has a rate of</span>
+  <span class="c1"># A cap of 1 is no cap: an item that every earlier examinee received has a rate of</span>
   <span class="c1"># exactly 1, which the strict comparison below would pass over.</span>
   <span class="k">if</span> <span class="n">exposure_rates</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">r_max</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">candidates</span>
@@ -869,7 +871,7 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="pick_best">
 <a class="viewcode-back" href="../../../api/techniques/selection/index.html#catsim.selection.pick_best">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">:</span> <span class="n">IntArray</span><span class="p">,</span> <span class="n">scores</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">Generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Return the candidate with the highest score, breaking exact ties uniformly at random.</span>
+<span class="w">  </span><span class="sd">"""Return the candidate item with the highest score, breaking exact ties uniformly at random.</span>
 
 <span class="sd">  This is the package's single tie-breaking rule: the candidates whose score equals the best score</span>
 <span class="sd">  exactly are tied, and one of them is drawn uniformly with ``rng``. With a single best candidate,</span>
@@ -908,7 +910,7 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="best_pool">
 <a class="viewcode-back" href="../../../api/techniques/selection/index.html#catsim.selection.best_pool">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">best_pool</span><span class="p">(</span><span class="n">candidates</span><span class="p">:</span> <span class="n">IntArray</span><span class="p">,</span> <span class="n">scores</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IntArray</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Return the candidates scoring at least the ``size``-th best score, best first.</span>
+<span class="w">  </span><span class="sd">"""Return the candidate items scoring at least the ``size``-th best score, best first.</span>
 
 <span class="sd">  Every candidate tied with the ``size``-th best score joins the pool, so the pool holds more than</span>
 <span class="sd">  ``size`` items only when items tie at the cutoff. Tied candidates keep</span>
@@ -1011,14 +1013,14 @@ window.runMermaid = runMermaid;</script>
 <span class="w">  </span><span class="sd">"""Base class for item selectors.</span>
 
 <span class="sd">  A selector chooses the next item to administer from what a :class:`~catsim.StepContext` tells it</span>
-<span class="sd">  about the session. A custom selector behaves like the built-in ones when it draws its candidates</span>
+<span class="sd">  about the session. A custom selector behaves like the built-in ones when it draws its candidate items</span>
 <span class="sd">  with :func:`remaining`, applies its exposure cap with :func:`below_cap`, and chooses with</span>
 <span class="sd">  :func:`pick_best` or :func:`best_pool`, which break ties the same way.</span>
 
 <span class="sd">  A selector that passes a changed context to another adds to its excluded items, never replaces</span>
 <span class="sd">  them. A selector holds its configuration and caches derived from the item bank, never</span>
 <span class="sd">  per-session state: one selector serves every session of a run, which an application may</span>
-<span class="sd">  interleave.</span>
+<span class="sd">  interleave. The :doc:`/extending` guide writes one.</span>
 <span class="sd">  """</span>
 
 <div class="viewcode-block" id="BaseSelector.select">

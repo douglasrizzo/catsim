@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../_static/design-tabs.js?v=fcb327ea"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/index';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/favicon.svg"/>
@@ -390,14 +392,14 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="engine.html">CAT Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="session.html">Sessions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="context.html">Strategy Inputs and Estimates</a></li>
-<li class="toctree-l1"><a class="reference internal" href="state.html">Session State</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation Runs and Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="item_bank.html">Item Bank</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exposure.html">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="metrics.html">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="typing.html">Array Type Aliases – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 </ul>
@@ -463,15 +465,20 @@
 <p>Each object is documented at its public import path. The core types come from <a class="reference internal" href="#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>; the
 strategies, their base classes and the helpers for custom strategies from
 <a class="reference internal" href="techniques/selection/index.html#module-catsim.selection" title="catsim.selection"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a>, <a class="reference internal" href="techniques/estimation/index.html#module-catsim.estimation" title="catsim.estimation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a>, <a class="reference internal" href="techniques/initialization/index.html#module-catsim.initialization" title="catsim.initialization"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a>,
-<a class="reference internal" href="techniques/stopping/index.html#module-catsim.stopping" title="catsim.stopping"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a> and <a class="reference internal" href="exposure.html#module-catsim.exposure" title="catsim.exposure"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a>; functions and type aliases from
-<a class="reference internal" href="irt.html#module-catsim.irt" title="catsim.irt"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a>, <a class="reference internal" href="metrics.html#module-catsim.metrics" title="catsim.metrics"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a>, <a class="reference internal" href="plot.html#module-catsim.plot" title="catsim.plot"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a> and <a class="reference internal" href="typing.html#module-catsim.typing" title="catsim.typing"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></a>. The
-technique pages document each strategy with its method.</p>
+<a class="reference internal" href="techniques/stopping/index.html#module-catsim.stopping" title="catsim.stopping"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a> and <a class="reference internal" href="exposure.html#module-catsim.exposure" title="catsim.exposure"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a>; functions and type aliases, with the constants
+and types the functions take or return, from <a class="reference internal" href="irt.html#module-catsim.irt" title="catsim.irt"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a>, <a class="reference internal" href="metrics.html#module-catsim.metrics" title="catsim.metrics"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a>,
+<a class="reference internal" href="plot.html#module-catsim.plot" title="catsim.plot"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a> and <a class="reference internal" href="typing.html#module-catsim.typing" title="catsim.typing"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></a>. The technique pages document each strategy with its
+method.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="engine.html">CAT Engine</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="engine.html#catsim.CatEngine"><code class="docutils literal notranslate"><span class="pre">CatEngine</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="engine.html#catsim.RunContext"><code class="docutils literal notranslate"><span class="pre">RunContext</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="engine.html#catsim.ResponseProvider"><code class="docutils literal notranslate"><span class="pre">ResponseProvider</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine.html#catsim.Selection"><code class="docutils literal notranslate"><span class="pre">Selection</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="session.html">Sessions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="session.html#catsim.Session"><code class="docutils literal notranslate"><span class="pre">Session</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="session.html#catsim.StopReason"><code class="docutils literal notranslate"><span class="pre">StopReason</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="context.html">Strategy Inputs and Estimates</a><ul>
@@ -479,18 +486,9 @@ technique pages document each strategy with its method.</p>
 <li class="toctree-l2"><a class="reference internal" href="context.html#catsim.Estimate"><code class="docutils literal notranslate"><span class="pre">Estimate</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="state.html">Session State</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="state.html#catsim.CatSessionState"><code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="state.html#catsim.CatSessionSnapshot"><code class="docutils literal notranslate"><span class="pre">CatSessionSnapshot</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="state.html#catsim.CatStepResult"><code class="docutils literal notranslate"><span class="pre">CatStepResult</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="state.html#catsim.StopReason"><code class="docutils literal notranslate"><span class="pre">StopReason</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="state.html#catsim.ExposureTracker"><code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code></a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation Runs and Results</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="simulation.html#catsim.SimulationRunner"><code class="docutils literal notranslate"><span class="pre">SimulationRunner</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation.html#catsim.simulate"><code class="docutils literal notranslate"><span class="pre">simulate()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="simulation.html#catsim.SimulationResult"><code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="simulation.html#catsim.SimulatedResponseProvider"><code class="docutils literal notranslate"><span class="pre">SimulatedResponseProvider</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="item_bank.html">Item Bank</a><ul>
@@ -525,13 +523,16 @@ technique pages document each strategy with its method.</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="metrics.html">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#catsim.metrics.Metric"><code class="docutils literal notranslate"><span class="pre">Metric</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="metrics.html#catsim.metrics.bias"><code class="docutils literal notranslate"><span class="pre">bias()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#catsim.metrics.exposure_rates"><code class="docutils literal notranslate"><span class="pre">exposure_rates()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#catsim.metrics.mean"><code class="docutils literal notranslate"><span class="pre">mean()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="metrics.html#catsim.metrics.mse"><code class="docutils literal notranslate"><span class="pre">mse()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="metrics.html#catsim.metrics.overlap_rate"><code class="docutils literal notranslate"><span class="pre">overlap_rate()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="metrics.html#catsim.metrics.rmse"><code class="docutils literal notranslate"><span class="pre">rmse()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a><ul>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="plot.html#catsim.plot.PlotType"><code class="docutils literal notranslate"><span class="pre">PlotType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot.html#catsim.plot.item_curve"><code class="docutils literal notranslate"><span class="pre">item_curve()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot.html#catsim.plot.item_exposure"><code class="docutils literal notranslate"><span class="pre">item_exposure()</span></code></a></li>

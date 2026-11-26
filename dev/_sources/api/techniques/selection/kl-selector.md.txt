@@ -46,8 +46,8 @@ parameter, is a positive schedule constant. For a small window the criterion is 
 curvature, that is, by the Fisher information; for a large one, by the tails of
 the divergence (p. 220). Before the first item, catsim uses $n = 1$, so the
 window is $\hat{\theta} \pm c$. Chang and Ying also define a Bayesian version
-that weights the divergence by the posterior (p. 222), a planned extension,
-KLP. The selector chooses the item, neither administered nor excluded, with the
+that weights the divergence by the posterior (p. 222), KLP, a
+{doc}`planned technique </planned-techniques>`. The selector chooses the item, neither administered nor excluded, with the
 largest value of $K_i(\hat{\theta})$.
 
 ### Computation
@@ -85,6 +85,28 @@ nodes and the error grows, to about $2 \times 10^{-7}$ at $a\,\delta_n = 120$.
        out before the KL scores are computed, unless every remaining item is.
 ```
 
+## Behavior and Comparison
+
+Since the window narrows as $1/\sqrt{n}$, the criterion comes to be governed by
+the curvature of the divergence as the test goes on, and its choices approach
+those of the {doc}`maximum-information selector <max-info-selector>`.
+
+:::{dropdown} Comparison with catR
+
+catR's `nextItem` with `criterion = "KL"` departs from this definition: it weights
+the divergence by the likelihood of the responses so far and integrates it over
+its whole grid, `parInt`, by default 33 nodes on $[-4, 4]$
+([`nextItem.R`](https://github.com/cran/catR/blob/master/R/nextItem.R)). catsim
+integrates the divergence unweighted over the window, the index of
+{cite:t}`Chang1996{pp. 219–220, Equation 17}`, and no `KLSelector` setting weights
+it. The parity tests ({doc}`ADR-0020 </adr/0020-catr-as-the-reference>`) therefore
+compare the integral itself: over catsim's window, catR's `KL()` with the
+likelihood set to 1 gives catsim's values and ranking in five contexts, one of
+which picks another item under the windows of one item more or one item fewer.
+catR's own KL ranking, in a context after two responses, differs, and the tests
+keep it as an expected failure.
+:::
+
 ## Guarantees
 
 1. It never returns an item that was already administered or excluded.
@@ -99,7 +121,7 @@ nodes and the error grows, to about $2 \times 10^{-7}$ at $a\,\delta_n = 120$.
 ```
 
 :::{seealso}
-Posterior-weighted variant: a planned extension, KLP.
+Posterior-weighted variant: KLP, among the {doc}`/planned-techniques`.
 :::
 
 ## API Reference

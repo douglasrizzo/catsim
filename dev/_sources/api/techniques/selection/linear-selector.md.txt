@@ -24,11 +24,17 @@ step it returns the first item of the list that is neither administered nor excl
    * - Parameter
      - Default
      - Description
-   * - ``items``
+   * - ``indices``
      - required
      - Non-empty list of non-negative item indices, administered in the order
        given.
 ```
+
+## Behavior and Comparison
+
+With an exposure control, each declined item is lost for the rest of the test,
+so the list can run out before the test is complete, and the session then ends
+with `StopReason.NO_ITEMS`.
 
 ## Guarantees
 

@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/techniques/estimation/eap-estimator';</script>
@@ -487,7 +489,7 @@ adaptive test lengths, including the first few items.</p>
 variance serves as the error variance of the estimate <span class="bibtex-citation" id="id3">[<a class="reference internal" href="#id36" title="R. D. Bock and R. J. Mislevy. Adaptive EAP estimation of ability in a microcomputer environment. Applied Psychological Measurement, 6(4):431–444, 1982. Open copy: https://hdl.handle.net/11299/101546. doi:10.1177/014662168200600405.">Bock and Mislevy, 1982</a>, p. 432]</span>;
 in their simulations the posterior standard deviation behaved like the
 standard error of measurement (p. 431). The estimator reports the posterior
-standard deviation as the estimate’s standard error, as catR does
+standard deviation as the estimate’s standard error
 <span class="bibtex-citation" id="id4">[<a class="reference internal" href="#id18" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, p. 6, Equation 11]</span>, and the precision stoppers judge it.</p>
 </section>
 <section id="definition">
@@ -556,11 +558,35 @@ standard error are the prior’s mean and standard deviation on the grid.</p>
 on <span class="math notranslate nohighlight">\([-6, 6]\)</span>) is accurate while the posterior standard deviation is at least
 about 0.065; longer tests need a finer grid (see
 <a class="reference internal" href="bayesian-infrastructure.html"><span class="doc">Bayesian Estimation Infrastructure</span></a>).</p>
-</section>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Comparison with catR</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">The estimator is catR’s <code class="docutils literal notranslate"><span class="pre">thetaEst</span></code> with <code class="docutils literal notranslate"><span class="pre">method</span> <span class="pre">=</span> <span class="pre">&quot;EAP&quot;</span></code>, and its standard error
+is that of catR’s <code class="docutils literal notranslate"><span class="pre">semTheta</span></code>, the posterior standard deviation. catR integrates
+by the trapezoid rule on its <code class="docutils literal notranslate"><span class="pre">parInt</span></code> grid, by default 33 nodes on <span class="math notranslate nohighlight">\([-4, 4]\)</span>,
+which halves the weights of the two end nodes; catsim’s default grid has 121
+equally weighted nodes on <span class="math notranslate nohighlight">\([-6, 6]\)</span>
+(<a class="reference internal" href="../../../adr/0020-catr-as-the-reference.html"><span class="doc">ADR-0020</span></a>). A grid with catR’s nodes and
+weights reproduces catR’s estimator:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">EAPEstimator</span><span class="p">,</span> <span class="n">QuadratureGrid</span>
+
+<span class="n">weights</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="mi">33</span><span class="p">,</span> <span class="mi">8</span> <span class="o">/</span> <span class="mi">32</span><span class="p">)</span>
+<span class="n">weights</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">/=</span> <span class="mi">2</span>
+<span class="n">catr_eap</span> <span class="o">=</span> <span class="n">EAPEstimator</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">QuadratureGrid</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">33</span><span class="p">),</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">))</span>
+</pre></div>
+</div>
+<p class="sd-card-text">On such grids the parity tests find catR’s estimates and standard errors, to a
+relative <span class="math notranslate nohighlight">\(10^{-10}\)</span>, on fixed responses under normal and uniform priors,
+on catsim’s 121 nodes as on catR’s 33, and in whole tests on recorded responses.
+The simulations that check the randomized selectors against catR estimate with
+this estimator too. They find no departure.</p>
+</div>
+</details></section>
 <section id="guarantees">
 <h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
-<li><p>The estimate is finite for extreme response patterns such as all-correct or all-incorrect strings.</p></li>
+<li><p>The estimate is finite for all-correct and all-incorrect responses.</p></li>
 <li><p>The standard error is the posterior standard deviation on the grid.</p></li>
 <li><p>Relative to a flatter prior, a centered normal prior produces stronger shrinkage of extreme short-test estimates toward the prior mean.</p></li>
 </ol>

@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/techniques/selection/mei-selector';</script>
@@ -511,8 +513,8 @@ the candidate item. The selector chooses the item, neither administered nor
 excluded, with the largest expected information value.</p>
 <p><span class="bibtex-citation" id="id2"><a class="reference internal" href="#id52" title="W. J. van der Linden. Bayesian item selection criteria for adaptive testing. Research Report 96-01, University of Twente, Enschede, 1996. Open copy: https://research.utwente.nl/files/247173933/Research_Report_96_01.pdf.">van der Linden</a></span>’s <span class="bibtex-citation" id="id3"><a class="reference internal" href="#id52" title="W. J. van der Linden. Bayesian item selection criteria for adaptive testing. Research Report 96-01, University of Twente, Enschede, 1996. Open copy: https://research.utwente.nl/files/247173933/Research_Report_96_01.pdf.">1996</a></span> report, which preceded the
 <span class="bibtex-citation" id="id4"><a class="reference internal" href="#id25" title="W. J. van der Linden. Bayesian item selection criteria for adaptive testing. Psychometrika, 63(2):201–216, 1998. Not openly available; the 1996 research report of the same title preceded it. doi:10.1007/BF02294775.">1998</a></span> article, defines MEI
-with the observed information of the <strong>whole response pattern</strong>, the
-administered items plus the candidate’s predicted response, each evaluated at
+with the observed information of <strong>every response</strong>, to the administered
+items and the candidate’s predicted one, each evaluated at
 its updated estimate, and weights the two branches by the response
 probabilities at the current estimate (p. 11, Equation 13). He notes that the
 criterion therefore re-evaluates the information of the items already
@@ -565,11 +567,6 @@ item is.</p></td>
 </section>
 <section id="behavior-and-comparison">
 <h2>Behavior and Comparison<a class="headerlink" href="#behavior-and-comparison" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">catR</span></code> departs from van der Linden’s definition: its
-<a class="reference external" href="https://github.com/cran/catR/blob/master/R/MEI.R"><code class="docutils literal notranslate"><span class="pre">MEI.R</span></code></a> uses only the
-<strong>candidate item’s</strong> information at each updated estimate
-<span class="bibtex-citation" id="id6">[<a class="reference internal" href="#id19" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, p. 9, Table 1]</span>, observed information by default (p. 17). The two forms
-can rank items differently.</p>
 <p>With the default estimator (maximum likelihood with Dodd’s heuristic), while the
 responses so far are all correct, the hypothetical correct branch is still an
 all-correct pattern, so Dodd’s heuristic returns the same updated estimate for
@@ -577,7 +574,24 @@ every candidate; the same happens on the incorrect branch while all responses
 are incorrect. On that branch the look-ahead is a fixed jump rather than an
 estimate. Bayesian estimators and WLE give a genuine updated estimate on both
 branches from the first item.</p>
-</section>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Comparison with catR</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">catR</span></code> departs from van der Linden’s definition: its
+<a class="reference external" href="https://github.com/cran/catR/blob/master/R/MEI.R"><code class="docutils literal notranslate"><span class="pre">MEI.R</span></code></a> uses only the
+<strong>candidate item’s</strong> information at each updated estimate
+<span class="bibtex-citation" id="id6">[<a class="reference internal" href="#id19" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, p. 9, Table 1]</span>, observed information by default (p. 17). The two forms
+can rank items differently. catsim keeps the whole-pattern measure of the
+definition it follows, and no <code class="docutils literal notranslate"><span class="pre">MEISelector</span></code> setting scores the candidate alone.</p>
+<p class="sd-card-text">The parity tests (<a class="reference internal" href="../../../adr/0020-catr-as-the-reference.html"><span class="doc">ADR-0020</span></a>) run catR’s
+MEI with <code class="docutils literal notranslate"><span class="pre">infoType</span> <span class="pre">=</span> <span class="pre">&quot;Fisher&quot;</span></code> and its Bayes modal estimator on <span class="math notranslate nohighlight">\([-4, 4]\)</span>, which
+<code class="docutils literal notranslate"><span class="pre">MEISelector(estimator=MAPEstimator(bounds=(-4,</span> <span class="pre">4)))</span></code> matches. Before the first
+response, where the administered test adds no information, catR’s values and
+ranking are catsim’s. After two responses the values differ, a departure the
+tests keep as an expected failure, although in that context the two rank the
+items alike. No whole test compares the two.</p>
+</div>
+</details></section>
 <section id="guarantees">
 <h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
@@ -615,7 +629,7 @@ estimator.</p></li>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Sister spec: <a class="reference internal" href="mlwi-selector.html"><span class="doc">Maximum Likelihood Weighted Information Selector</span></a></p>
+<p><a class="reference internal" href="mlwi-selector.html"><span class="doc">Maximum Likelihood Weighted Information Selector</span></a>, the likelihood-weighted information criterion</p>
 </div>
 </section>
 <section id="api-reference">

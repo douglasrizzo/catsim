@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,13 +43,14 @@
     <script src="_static/documentation_options.js?v=c4f92b34"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="_static/design-tabs.js?v=fcb327ea"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'reproducibility';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="_static/favicon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Extending catsim" href="extending.html" />
-    <link rel="prev" title="Live CAT Sessions" href="live-sessions.html" />
+    <link rel="prev" title="Running Simulations" href="running-simulations.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -392,9 +394,9 @@
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="terms-and-notation.html">Terms and Notation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-simulations.html">Running Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="live-sessions.html">Live CAT Sessions</a></li>
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Reproducibility</a></li>
 <li class="toctree-l1"><a class="reference internal" href="extending.html">Extending catsim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="embedding-catsim.html">Embedding catsim</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 </ul>
 </div>
@@ -459,133 +461,172 @@
   <section class="tex2jax_ignore mathjax_ignore" id="reproducibility">
 <h1>Reproducibility<a class="headerlink" href="#reproducibility" title="Link to this heading">#</a></h1>
 <p>A simulation study is reproducible when running its code again gives the same numbers. This guide
-shows how to seed one run, a study of many replications and a study split across processes.
-<a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a> shows how to build and run the test itself.</p>
+seeds one run, says how the examinees of a run depend on each other, seeds a study of many
+replications and runs a study on several processes. <a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a> shows how to build
+and run the test itself.</p>
 <section id="one-seed-per-run">
 <h2>One Seed per Run<a class="headerlink" href="#one-seed-per-run" title="Link to this heading">#</a></h2>
-<p><a class="reference internal" href="api/simulation.html#catsim.SimulationRunner.run" title="catsim.SimulationRunner.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SimulationRunner.run</span></code></a> takes <code class="docutils literal notranslate"><span class="pre">rng</span></code>, the source of every
-random draw of the run: the initializer’s starting points, the selectors’ random choices and
-tie-breaks, the decisions of the engine’s exposure control, if it has one, and every simulated
-response. Custom strategies draw from it too (<a class="reference internal" href="extending.html"><span class="doc">Extending catsim</span></a>). It can be:</p>
+<p><a class="reference internal" href="api/simulation.html#catsim.simulate" title="catsim.simulate"><code class="xref py py-func docutils literal notranslate"><span class="pre">simulate()</span></code></a> takes <code class="docutils literal notranslate"><span class="pre">rng</span></code>, the source of every random draw of the run: each
+examinee’s answers, the initializer’s starting points, the selectors’ random choices and
+tie-breaks, and the decisions of the engine’s exposure control, if it has one. It can be:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>, the default: the run draws fresh randomness, so every call gives other tests and none can
-be repeated;</p></li>
-<li><p>an int: a seed, so the same seed and the same true abilities give the same result every time,
-however many times the runner has run, and on any runner built with the same item bank and
-strategies;</p></li>
-<li><p>a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>: the run draws from it as it is and advances it, so passing
-the same generator to a second run gives other tests.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>, the default: the run draws fresh entropy, so every call gives other tests and none can be
+repeated;</p></li>
+<li><p>an int: a seed, so the same seed and the same examinees give the same result every time;</p></li>
+<li><p>a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>: the run draws its seed from it, which advances it, so
+passing the same generator to a second run gives other tests.</p></li>
 </ul>
-<p>A seeded run repeats on the same versions of catsim and NumPy. Seeded results can change between
-catsim versions, when a strategy changes how many random numbers it draws, so record the versions
-with a study’s seeds.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">SimulationRunner</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">simulate</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumericalSearchEstimator</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">UniformInitializer</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxInfoSelector</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLengthStopper</span><span class="p">,</span> <span class="n">StandardErrorStopper</span><span class="p">,</span> <span class="n">StopRule</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">engine</span> <span class="o">=</span> <span class="n">CatEngine</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">42</span><span class="p">),</span>
-<span class="gp">... </span>    <span class="n">UniformInitializer</span><span class="p">(),</span>
-<span class="gp">... </span>    <span class="n">MaxInfoSelector</span><span class="p">(),</span>
-<span class="gp">... </span>    <span class="n">NumericalSearchEstimator</span><span class="p">(),</span>
-<span class="gp">... </span>    <span class="n">StopRule</span><span class="p">(</span><span class="n">StandardErrorStopper</span><span class="p">(</span><span class="mf">0.4</span><span class="p">),</span> <span class="n">MaxLengthStopper</span><span class="p">(</span><span class="mi">20</span><span class="p">)),</span>
-<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">item_bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stopper</span> <span class="o">=</span> <span class="n">StopRule</span><span class="p">(</span><span class="n">StandardErrorStopper</span><span class="p">(</span><span class="mf">0.4</span><span class="p">),</span> <span class="n">MaxLengthStopper</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">engine</span> <span class="o">=</span> <span class="n">CatEngine</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">UniformInitializer</span><span class="p">(),</span> <span class="n">MaxInfoSelector</span><span class="p">(),</span> <span class="n">NumericalSearchEstimator</span><span class="p">(),</span> <span class="n">stopper</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">true_thetas</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">runner</span> <span class="o">=</span> <span class="n">SimulationRunner</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">first</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span><span class="o">.</span><span class="n">final_thetas</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">numpy</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">first</span> <span class="o">=</span> <span class="n">simulate</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">true_thetas</span><span class="o">=</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">first</span><span class="o">.</span><span class="n">sessions</span> <span class="o">==</span> <span class="n">simulate</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">true_thetas</span><span class="o">=</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span><span class="o">.</span><span class="n">sessions</span>
 <span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">numpy</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">43</span><span class="p">)</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">first</span><span class="o">.</span><span class="n">sessions</span> <span class="o">==</span> <span class="n">simulate</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">true_thetas</span><span class="o">=</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">43</span><span class="p">)</span><span class="o">.</span><span class="n">sessions</span>
 <span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">numpy</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">)</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">,</span> <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">)</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">simulate</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">true_thetas</span><span class="o">=</span><span class="n">true_thetas</span><span class="p">)</span><span class="o">.</span><span class="n">sessions</span> <span class="o">==</span> <span class="n">simulate</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">true_thetas</span><span class="o">=</span><span class="n">true_thetas</span><span class="p">)</span><span class="o">.</span><span class="n">sessions</span>
 <span class="go">False</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">generator</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">numpy</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">generator</span><span class="p">)</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">)</span>
-<span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">numpy</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">generator</span><span class="p">)</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">simulate</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">true_thetas</span><span class="o">=</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">generator</span><span class="p">)</span><span class="o">.</span><span class="n">sessions</span> <span class="o">==</span> <span class="n">simulate</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">engine</span><span class="p">,</span> <span class="n">true_thetas</span><span class="o">=</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">generator</span>
+<span class="gp">... </span><span class="p">)</span><span class="o">.</span><span class="n">sessions</span>
 <span class="go">False</span>
 </pre></div>
 </div>
-<p>The same seed gives the same estimates, another seed or no seed other ones. A generator built from
-seed 42 gives the run of seed 42 the first time, and other tests the second time, because the first
-run advanced it.</p>
+<p>A seeded run repeats on the same versions of catsim and NumPy, and across platforms its results
+agree up to floating-point rounding. Seeded results can change between catsim versions, when a
+strategy changes how many random numbers it draws, so record the versions with a study’s seeds.</p>
 <p><a class="reference internal" href="api/item_bank.html#catsim.ItemBank.generate" title="catsim.ItemBank.generate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ItemBank.generate</span></code></a> takes an <code class="docutils literal notranslate"><span class="pre">rng</span></code> of its own, with the same
-rules: pass it a seed to draw the same bank every time. A calibrated bank read from a file needs
-none.</p>
+rules, so a generated bank depends on no run. A calibrated bank read from a file needs none.</p>
 </section>
 <section id="the-population-is-an-input">
 <h2>The Population Is an Input<a class="headerlink" href="#the-population-is-an-input" title="Link to this heading">#</a></h2>
-<p>The runner never draws the examinees: their true abilities are an input to <code class="docutils literal notranslate"><span class="pre">run</span></code>. To simulate a
-population, draw the abilities with a generator of your own, as
+<p><code class="docutils literal notranslate"><span class="pre">simulate</span></code> never draws the examinees: their true abilities, or their recorded responses, are an
+input. To simulate a population, draw the abilities with a generator of your own, as
 <code class="docutils literal notranslate"><span class="pre">numpy.random.default_rng(7).normal(0,</span> <span class="pre">1,</span> <span class="pre">10)</span></code> does above, and pass the same array to every engine
 you compare, so that every strategy meets the same examinees. Seeding the population apart from the
-run also lets a study hold the examinees fixed while it varies the run’s seed, or the reverse.
-Abilities from elsewhere, such as the estimates of a calibration sample, work the same way.</p>
+run also lets a study hold the examinees fixed while it varies the run’s seed, or the reverse.</p>
 </section>
-<section id="sessions-run-in-sequence">
-<h2>Sessions Run in Sequence<a class="headerlink" href="#sessions-run-in-sequence" title="Link to this heading">#</a></h2>
-<p>A run gives its tests one examinee after another, in the order of <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code>, and every session
-draws from the one generator in turn. Each session’s draws therefore depend on all the sessions
-before it:</p>
-<ul class="simple">
-<li><p>reordering the examinees, or adding or removing one, changes the tests of every examinee after
-it, even under the same seed;</p></li>
-<li><p>with an exposure cap, the items a session may be given also depend on the items given to the
-examinees before it.</p></li>
-</ul>
-<p>To compare one examinee’s test across two runs, keep the population array identical. Why catsim
-runs the sessions in sequence and draws from one generator is in
-<a class="reference internal" href="adr/0010-random-numbers-and-reproducibility.html"><span class="doc">ADR-0010: Random Numbers and Reproducibility</span></a>.</p>
+<section id="each-examinee-draws-on-its-own">
+<h2>Each Examinee Draws on Its Own<a class="headerlink" href="#each-examinee-draws-on-its-own" title="Link to this heading">#</a></h2>
+<p>An examinee’s answers and test depend on the run’s seed and the examinee’s position in the run, not
+on the tests of the examinees before it:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">first</span><span class="o">.</span><span class="n">sessions</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="n">simulate</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">true_thetas</span><span class="o">=</span><span class="n">true_thetas</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span> <span class="n">rng</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span><span class="o">.</span><span class="n">sessions</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">first</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="n">simulate</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">true_thetas</span><span class="o">=</span><span class="n">true_thetas</span><span class="p">[</span><span class="mi">4</span><span class="p">:],</span> <span class="n">rng</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span><span class="o">.</span><span class="n">sessions</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+<p>The first four examinees take the same tests in a run of their own. What counts is the position,
+though: in a run without the first four, every later examinee has another position, and so other
+draws. Reordering, adding or removing examinees changes the tests of those after them, so keep the
+population array identical to compare one examinee across runs.</p>
+<p>Two engines run on the same seed and examinees give every examinee the same answer to every item,
+whichever items each engine chooses. Here an engine with randomesque selection gives the first
+examinee 14 of the items the first engine gave, and the answers to them agree:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomesqueSelector</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">other</span> <span class="o">=</span> <span class="n">CatEngine</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">UniformInitializer</span><span class="p">(),</span> <span class="n">RandomesqueSelector</span><span class="p">(</span><span class="n">bin_size</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span> <span class="n">NumericalSearchEstimator</span><span class="p">(),</span> <span class="n">stopper</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">second</span> <span class="o">=</span> <span class="n">simulate</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">true_thetas</span><span class="o">=</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">answers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">first</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">responses</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">others</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">second</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">second</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">responses</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shared</span> <span class="o">=</span> <span class="n">answers</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">others</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">shared</span><span class="p">),</span> <span class="nb">all</span><span class="p">(</span><span class="n">answers</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">==</span> <span class="n">others</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">shared</span><span class="p">)</span>
+<span class="go">(14, True)</span>
+</pre></div>
+</div>
+<p>These are <em>common random numbers</em>: the difference between two strategies run on the same seed is
+not blurred by examinees who happened to answer differently, so it carries less Monte Carlo error
+than either strategy’s own metrics (<a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a> compares selectors this way).</p>
+<p>The one way a test depends on the tests before it is the exposure feedback of a selector with an
+<code class="docutils literal notranslate"><span class="pre">r_max</span></code> cap: the items an examinee may be given depend on how often they were given to the
+examinees before. <a class="reference internal" href="adr/0013-random-numbers-and-reproducibility.html"><span class="doc">ADR-0013: Every Draw Comes From a Generator the Caller Passes, One Stream per Examinee</span></a> explains why catsim draws
+this way.</p>
 </section>
 <section id="replications">
 <h2>Replications<a class="headerlink" href="#replications" title="Link to this heading">#</a></h2>
-<p>The metrics of one run depend on its draws. To measure their spread, run each configuration several
-times, each replication with a seed of its own, spawned from one root seed with
-<a class="reference external" href="https://numpy.org/doc/stable/reference/random/bit_generators/generated/numpy.random.SeedSequence.html#numpy.random.SeedSequence" title="(in NumPy v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.SeedSequence</span></code></a>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">replications</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">SeedSequence</span><span class="p">(</span><span class="mi">2026</span><span class="p">)</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-<span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">))</span> <span class="k">for</span> <span class="n">seed</span> <span class="ow">in</span> <span class="n">replications</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">result</span><span class="o">.</span><span class="n">rmse</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">std</span><span class="p">([</span><span class="n">result</span><span class="o">.</span><span class="n">rmse</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">],</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<p>The metrics of one run depend on its draws. To measure their spread, run each configuration
+several times, each replication with a seed of its own:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">simulate</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">true_thetas</span><span class="o">=</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span> <span class="k">for</span> <span class="n">seed</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+<span class="n">rmses</span> <span class="o">=</span> <span class="p">[</span><span class="n">result</span><span class="o">.</span><span class="n">rmse</span><span class="p">()</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"RMSE </span><span class="si">{</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">rmses</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, standard deviation over replications </span><span class="si">{</span><span class="n">numpy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">rmses</span><span class="p">,</span><span class="w"> </span><span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Monte Carlo error of the first replication's RMSE </span><span class="si">{</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rmse</span><span class="p">()</span><span class="o">.</span><span class="n">mc_se</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The whole study repeats from the root seed, and the spawned seeds give independent streams. Give
-every configuration you compare the same spawned seeds; <a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a> compares
-selectors this way. Unseeded replications would differ from each other too, but the study could not
-be repeated.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>RMSE 0.472, standard deviation over replications 0.116
+Monte Carlo error of the first replication's RMSE 0.108
+</pre></div>
+</div>
+<p>The whole study repeats from its seeds. Give every configuration you compare the same seeds, so that
+the comparison uses common random numbers. Each run’s metrics come with Monte Carlo errors, which
+estimate this spread from the run alone: 0.108 for the first replication, against 0.116 over the
+ten. Under an exposure cap the errors are approximations, and replications give the exact spread.</p>
 </section>
-<section id="parallel-studies">
-<h2>Parallel Studies<a class="headerlink" href="#parallel-studies" title="Link to this heading">#</a></h2>
-<p>A run’s sessions do not run in parallel: their draws would then depend on which session drew first.
-To use several processes, split the study into parts that do not share a generator, each with a
-seed of its own. Independent replications are such parts, and so is a population split in pieces:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimulationResult</span>
+<section id="parts-and-workers">
+<h2>Parts and Workers<a class="headerlink" href="#parts-and-workers" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">simulate(...,</span> <span class="pre">parts=4,</span> <span class="pre">workers=4)</span></code> splits the examinees, in order, into four contiguous parts of
+near-equal size, and runs the parts on four processes. The result depends on the engine, the
+examinees, the seed and <code class="docutils literal notranslate"><span class="pre">parts</span></code>, never on <code class="docutils literal notranslate"><span class="pre">workers</span></code>, on which process runs which part, or on
+timing, so a run repeats on any machine from its seed and its number of parts. <code class="docutils literal notranslate"><span class="pre">parts=1</span></code>, the
+default, is the sequential run.</p>
+<p>Each part runs its tests in order, and counts exposure for its own examinees. Without an exposure
+cap, the parts change nothing, since every examinee draws from its own streams. With a cap, an
+examinee sees the exposure of the earlier examinees of its part only, so the result differs from
+the sequential one; the cap still holds over the whole run. Record <code class="docutils literal notranslate"><span class="pre">parts</span></code>, which the result keeps
+as <code class="docutils literal notranslate"><span class="pre">result.parts</span></code>, with the seed.</p>
+<p>A script that runs on workers calls <code class="docutils literal notranslate"><span class="pre">simulate</span></code> under <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">__name__</span> <span class="pre">==</span> <span class="pre">&quot;__main__&quot;:</span></code>, as every process
+pool of Python requires: each worker imports the script, and without the guard each would start the
+study again, which fails.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># study.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
-<span class="n">parts</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="n">seeds</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">SeedSequence</span><span class="p">(</span><span class="mi">2026</span><span class="p">)</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">))</span>
-<span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">))</span> <span class="k">for</span> <span class="n">part</span><span class="p">,</span> <span class="n">seed</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">parts</span><span class="p">,</span> <span class="n">seeds</span><span class="p">)]</span>
-<span class="n">combined</span> <span class="o">=</span> <span class="n">SimulationResult</span><span class="p">(</span>
-    <span class="n">runner</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">item_bank</span><span class="p">,</span>
-    <span class="n">sessions</span><span class="o">=</span><span class="p">[</span><span class="n">session</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">sessions</span><span class="p">],</span>
-    <span class="n">exposure_counts</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">exposure_counts</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">),</span>
-    <span class="n">duration</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">duration</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">),</span>
-    <span class="n">proposal_counts</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">proposal_counts</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">),</span>
-<span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">combined</span><span class="o">.</span><span class="n">rmse</span><span class="p">,</span> <span class="n">combined</span><span class="o">.</span><span class="n">exposure_rates</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">simulate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">EAPEstimator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">FixedPointInitializer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxInfoSelector</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLengthStopper</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">item_bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="s2">"3PL"</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">true_thetas</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2000</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">r_max</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">):</span>
+        <span class="n">selector</span> <span class="o">=</span> <span class="n">MaxInfoSelector</span><span class="p">(</span><span class="n">r_max</span><span class="o">=</span><span class="n">r_max</span><span class="p">)</span>
+        <span class="n">engine</span> <span class="o">=</span> <span class="n">CatEngine</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">FixedPointInitializer</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">selector</span><span class="p">,</span> <span class="n">EAPEstimator</span><span class="p">(),</span> <span class="n">MaxLengthStopper</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
+        <span class="n">sequential</span> <span class="o">=</span> <span class="n">simulate</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">true_thetas</span><span class="o">=</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">in_parts</span> <span class="o">=</span> <span class="n">simulate</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">true_thetas</span><span class="o">=</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">parts</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">on_workers</span> <span class="o">=</span> <span class="n">simulate</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">true_thetas</span><span class="o">=</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">parts</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"r_max=</span><span class="si">{</span><span class="n">r_max</span><span class="si">}</span><span class="s2">: parts change the tests: </span><span class="si">{</span><span class="n">in_parts</span><span class="o">.</span><span class="n">sessions</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">sequential</span><span class="o">.</span><span class="n">sessions</span><span class="si">}</span><span class="s2">, "</span>
+            <span class="sa">f</span><span class="s2">"workers change them: </span><span class="si">{</span><span class="n">on_workers</span><span class="o">.</span><span class="n">sessions</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">in_parts</span><span class="o">.</span><span class="n">sessions</span><span class="si">}</span><span class="s2">, "</span>
+            <span class="sa">f</span><span class="s2">"highest exposure rate </span><span class="si">{</span><span class="n">in_parts</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Each part depends only on its own abilities and seed, so the parts can run in separate processes,
-for example with <a class="reference external" href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">concurrent.futures.ProcessPoolExecutor</span></code></a>, in any order, and give the same
-results. Building one <a class="reference internal" href="api/simulation.html#catsim.SimulationResult" title="catsim.SimulationResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulationResult</span></code></a> from their sessions and counts gives the
-metrics and exposure rates of the whole population. They differ from those of one sequential run of
-the same population: each part draws from its own stream, and with an exposure cap, each part’s
-sessions see the exposure of that part alone.</p>
-<p>Two fields of the combined result describe the parts, not one run. Its <code class="docutils literal notranslate"><span class="pre">duration</span></code> is the sum of the
-parts’ run times: compute time, longer than the wall-clock time when the parts run in parallel. Its
-session ids repeat, since each run numbers its sessions from 0, so tell the parts’ sessions apart by
-their position in <code class="docutils literal notranslate"><span class="pre">sessions</span></code>.</p>
-<p>In a live deployment the application builds the <a class="reference internal" href="api/engine.html#catsim.RunContext" title="catsim.RunContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunContext</span></code></a>, and so the
-generator, that its sessions draw from; <a class="reference internal" href="live-sessions.html"><span class="doc">Live CAT Sessions</span></a> shows how.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>r_max=1.0: parts change the tests: False, workers change them: False, highest exposure rate 1.00
+r_max=0.2: parts change the tests: True, workers change them: False, highest exposure rate 0.20
+</pre></div>
+</div>
+<p>The built-in strategies run on workers from anywhere, notebooks included. A custom strategy class, a
+lambda such as a custom prior, or a function defined inside another function must come from a <code class="docutils literal notranslate"><span class="pre">.py</span></code>
+module that the notebook or script imports: one defined in the notebook or script itself cannot
+reach the workers, and <code class="docutils literal notranslate"><span class="pre">simulate</span></code> raises before any part runs, naming what to move
+(<a class="reference internal" href="extending.html"><span class="doc">Extending catsim</span></a>). For the same reason, a script read from standard input, such as
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-</span> <span class="pre">&lt;&lt;EOF</span></code>, cannot run on workers.</p>
+<p>A result’s <code class="docutils literal notranslate"><span class="pre">duration</span></code> is wall-clock time, which depends on <code class="docutils literal notranslate"><span class="pre">workers</span></code> and on the machine; its tests
+do not.</p>
+<p>In an application, each step of a test takes the generator of its call, and the application
+chooses how its sessions draw (<a class="reference internal" href="embedding-catsim.html"><span class="doc">Embedding catsim</span></a>).</p>
 </section>
 </section>
 
@@ -600,12 +641,12 @@ generator, that its sessions draw from; <a class="reference internal" href="live
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="live-sessions.html"
+       href="running-simulations.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Live CAT Sessions</p>
+        <p class="prev-next-title">Running Simulations</p>
       </div>
     </a>
     <a class="right-next"
@@ -638,9 +679,9 @@ generator, that its sessions draw from; <a class="reference internal" href="live
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#one-seed-per-run">One Seed per Run</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-population-is-an-input">The Population Is an Input</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sessions-run-in-sequence">Sessions Run in Sequence</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#each-examinee-draws-on-its-own">Each Examinee Draws on Its Own</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#replications">Replications</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-studies">Parallel Studies</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parts-and-workers">Parts and Workers</a></li>
 </ul>
   </nav></div>
 

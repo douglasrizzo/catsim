@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/irt';</script>
@@ -392,14 +394,14 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="engine.html">CAT Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="session.html">Sessions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="context.html">Strategy Inputs and Estimates</a></li>
-<li class="toctree-l1"><a class="reference internal" href="state.html">Session State</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation Runs and Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="item_bank.html">Item Bank</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exposure.html">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a></li>
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="metrics.html">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="typing.html">Array Type Aliases – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 </ul>
@@ -462,10 +464,9 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="item-response-theory-functions-catsim-irt">
-<h1>Item Response Theory Functions – <a class="reference internal" href="#module-catsim.irt" title="catsim.irt"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a><a class="headerlink" href="#item-response-theory-functions-catsim-irt" title="Link to this heading">#</a></h1>
-<p>This module contains functions pertaining to the Item Response Theory logistic models, including probability calculations, information functions, likelihood estimation, and other IRT-related utilities.</p>
-<p id="module-catsim.irt">Item response theory quantities of the four-parameter logistic (4PL) model.</p>
+  <section class="tex2jax_ignore mathjax_ignore" id="module-catsim.irt">
+<span id="item-response-theory-functions-catsim-irt"></span><h1>Item Response Theory Functions – <a class="reference internal" href="#module-catsim.irt" title="catsim.irt"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a><a class="headerlink" href="#module-catsim.irt" title="Link to this heading">#</a></h1>
+<p>Item response theory quantities of the four-parameter logistic (4PL) model.</p>
 <p>The functions take one item as a row <code class="docutils literal notranslate"><span class="pre">[a,</span> <span class="pre">b,</span> <span class="pre">c,</span> <span class="pre">d]</span></code> of shape <code class="docutils literal notranslate"><span class="pre">(4,)</span></code>, or several as a matrix of
 such rows, shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">4)</span></code>: discrimination, difficulty, guessing parameter and upper asymptote.
 <a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.ItemBank</span></code></a> builds and validates such a matrix.</p>
@@ -676,15 +677,16 @@ with a single item of shape <code class="docutils literal notranslate"><span cla
 \[\log L(\theta) = \sum_{i=1}^{n} \left[ u_i \log P_i(\theta) + (1 - u_i) \log Q_i(\theta) \right]\]</div>
 <p>where <span class="math notranslate nohighlight">\(u_i\)</span> is 1 for a correct response and 0 otherwise, <span class="math notranslate nohighlight">\(P_i\)</span> is the <a class="reference internal" href="#catsim.irt.icc" title="catsim.irt.icc"><code class="xref py py-func docutils literal notranslate"><span class="pre">icc()</span></code></a>
 and <span class="math notranslate nohighlight">\(Q_i = 1 - P_i\)</span> <span class="bibtex-citation" id="id3">[<a class="reference internal" href="../references.html#id3" title="R. J. De Ayala. The Theory and Practice of Item Response Theory. Guilford Press, New York, 2009. URL: http://books.google.com/books?id=-k36zbOBa28C&amp;pgis=1.">De Ayala, 2009</a>]</span>. Both logarithms are computed as in
-<a class="reference internal" href="#catsim.irt.log_response_probabilities" title="catsim.irt.log_response_probabilities"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_response_probabilities()</span></code></a>, exact at any distance from the difficulty: far from
-it, a correct guess costs <span class="math notranslate nohighlight">\(\log c_i\)</span> and a slip <span class="math notranslate nohighlight">\(\log(1 - d_i)\)</span>. With no items the
+<a class="reference internal" href="#catsim.irt.log_response_probabilities" title="catsim.irt.log_response_probabilities"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_response_probabilities()</span></code></a>: finite at any distance from the difficulty, and accurate to
+about <span class="math notranslate nohighlight">\(10^{-16}\)</span> in absolute terms, the accuracy a sum needs. Far from the difficulty, a
+correct guess costs <span class="math notranslate nohighlight">\(\log c_i\)</span> and a slip <span class="math notranslate nohighlight">\(\log(1 - d_i)\)</span>. With no items the
 log-likelihood is 0.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>theta</strong><span class="classifier">float or numpy.ndarray</span></dt><dd><p>An ability, or an array of abilities.</p>
 </dd>
-<dt><strong>responses</strong><span class="classifier">Sequence[bool]</span></dt><dd><p>One response per item, True for a correct one.</p>
+<dt><strong>responses</strong><span class="classifier">Sequence[bool]</span></dt><dd><p>One response per item: True or 1 for a correct one, False or 0 for an incorrect one.</p>
 </dd>
 <dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>The answered items, a matrix of shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">4)</span></code> whose items satisfy
 <span class="math notranslate nohighlight">\(0 \leq c &lt; d \leq 1\)</span>, as <a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code></a> validates.</p>
@@ -700,9 +702,9 @@ log-likelihood is 0.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">responses</span></code> does not hold one response per item.</p>
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">responses</span></code> does not hold one response per item, or an integer response is not 0 or 1.</p>
 </dd>
-<dt>TypeError</dt><dd><p>If a response is not a <code class="docutils literal notranslate"><span class="pre">bool</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy.bool_</span></code>.</p>
+<dt>TypeError</dt><dd><p>If a response is neither a Boolean nor an integer.</p>
 </dd>
 </dl>
 </dd>
@@ -726,7 +728,7 @@ function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>responses</strong><span class="classifier">Sequence[bool]</span></dt><dd><p>One response per item, True for a correct one.</p>
+<dt><strong>responses</strong><span class="classifier">Sequence[bool]</span></dt><dd><p>One response per item: True or 1 for a correct one, False or 0 for an incorrect one.</p>
 </dd>
 <dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>The answered items, a matrix of shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">4)</span></code> whose items satisfy
 <span class="math notranslate nohighlight">\(0 \leq c &lt; d \leq 1\)</span>, as <a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code></a> validates.</p>
@@ -742,9 +744,10 @@ shape of <code class="docutils literal notranslate"><span class="pre">theta</spa
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">items</span></code> is not an <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">4)</span></code> matrix or <code class="docutils literal notranslate"><span class="pre">responses</span></code> does not hold one response per item.</p>
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">items</span></code> is not an <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">4)</span></code> matrix, <code class="docutils literal notranslate"><span class="pre">responses</span></code> does not hold one response per item,
+or an integer response is not 0 or 1.</p>
 </dd>
-<dt>TypeError</dt><dd><p>If a response is not a <code class="docutils literal notranslate"><span class="pre">bool</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy.bool_</span></code>.</p>
+<dt>TypeError</dt><dd><p>If a response is neither a Boolean nor an integer.</p>
 </dd>
 </dl>
 </dd>
@@ -765,9 +768,16 @@ shape of <code class="docutils literal notranslate"><span class="pre">theta</spa
 <dd><p>Return the log-probabilities of a correct and of an incorrect response to each item.</p>
 <p>They are the logarithms of the <a class="reference internal" href="#catsim.irt.icc" title="catsim.irt.icc"><code class="xref py py-func docutils literal notranslate"><span class="pre">icc()</span></code></a> <span class="math notranslate nohighlight">\(P_i\)</span> and of its complement <span class="math notranslate nohighlight">\(Q_i = 1 - P_i\)</span>,
 computed from the logit <span class="math notranslate nohighlight">\(a_i(\theta - b_i)\)</span>, never from a <span class="math notranslate nohighlight">\(P_i\)</span> that has rounded to 0 or
-1. They are exact at any distance from the difficulty: far below it <span class="math notranslate nohighlight">\(\log P_i\)</span> tends to
+1, so they stay finite at any distance from the difficulty: far below it <span class="math notranslate nohighlight">\(\log P_i\)</span> tends to
 <span class="math notranslate nohighlight">\(\log c_i\)</span>, far above it <span class="math notranslate nohighlight">\(\log Q_i\)</span> tends to <span class="math notranslate nohighlight">\(\log(1 - d_i)\)</span>, and without guessing
 or slipping they keep falling linearly in the logit.</p>
+<p>Each value is accurate to about <span class="math notranslate nohighlight">\(10^{-16}\)</span> in absolute terms, so <span class="math notranslate nohighlight">\(P_i\)</span> and <span class="math notranslate nohighlight">\(Q_i\)</span>
+are accurate to that relative error. <span class="math notranslate nohighlight">\(\log P_i\)</span> is also accurate in relative terms when
+<span class="math notranslate nohighlight">\(c_i = 0\)</span>, and <span class="math notranslate nohighlight">\(\log Q_i\)</span> when <span class="math notranslate nohighlight">\(d_i = 1\)</span>. Otherwise, where a probability nears 1,
+its logarithm is accurate in absolute terms only, and can round to 0 or just above it, such as
+<span class="math notranslate nohighlight">\(5.6 \times 10^{-17}\)</span>: <span class="math notranslate nohighlight">\(\log P_i\)</span> far above the difficulty of an item with
+<span class="math notranslate nohighlight">\(c_i &gt; 0\)</span> and <span class="math notranslate nohighlight">\(d_i = 1\)</span>, and <span class="math notranslate nohighlight">\(\log Q_i\)</span> far below that of an item with
+<span class="math notranslate nohighlight">\(c_i = 0\)</span> and <span class="math notranslate nohighlight">\(d_i &lt; 1\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -1038,13 +1048,14 @@ the estimate (<a class="reference internal" href="#catsim.irt.var" title="catsim
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.irt.validate_response_vector">
 <span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">validate_response_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">responses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.15)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/catsim/irt.html#validate_response_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.validate_response_vector" title="Link to this definition">#</a></dt>
-<dd><p>Check that <code class="docutils literal notranslate"><span class="pre">responses</span></code> holds one Boolean answer per administered item.</p>
-<p>An answer must be a <code class="docutils literal notranslate"><span class="pre">bool</span></code> or a <code class="docutils literal notranslate"><span class="pre">numpy.bool_</span></code>, such as an element of a NumPy Boolean array;
-1, 0, 1.0 and 0.0 are rejected.</p>
+<dd><p>Check that <code class="docutils literal notranslate"><span class="pre">responses</span></code> holds one answer per administered item, each a Boolean or the integer 0 or 1.</p>
+<p>An answer is a <code class="docutils literal notranslate"><span class="pre">bool</span></code>, a <code class="docutils literal notranslate"><span class="pre">numpy.bool_</span></code>, such as an element of a NumPy Boolean array, or the
+integer 0 or 1, as the engine takes them (ADR-0009). Floats such as 1.0, and anything else, are
+rejected rather than converted.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>responses</strong><span class="classifier">Sequence[bool]</span></dt><dd><p>The examinee’s answers, where True indicates a correct response.</p>
+<dt><strong>responses</strong><span class="classifier">Sequence[bool]</span></dt><dd><p>The examinee’s answers, where True or 1 indicates a correct response.</p>
 </dd>
 <dt><strong>n_items</strong><span class="classifier">int</span></dt><dd><p>Number of administered items the answers belong to.</p>
 </dd>
@@ -1052,9 +1063,9 @@ the estimate (<a class="reference internal" href="#catsim.irt.var" title="catsim
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">responses</span></code> does not have <code class="docutils literal notranslate"><span class="pre">n_items</span></code> elements.</p>
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">responses</span></code> does not have <code class="docutils literal notranslate"><span class="pre">n_items</span></code> elements, or an integer answer is not 0 or 1.</p>
 </dd>
-<dt>TypeError</dt><dd><p>If an element of <code class="docutils literal notranslate"><span class="pre">responses</span></code> is not a <code class="docutils literal notranslate"><span class="pre">bool</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy.bool_</span></code>.</p>
+<dt>TypeError</dt><dd><p>If an answer is neither a Boolean nor an integer.</p>
 </dd>
 </dl>
 </dd>

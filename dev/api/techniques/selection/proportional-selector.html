@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/techniques/selection/proportional-selector';</script>
@@ -532,12 +534,6 @@ Segall’s method, and a large power approaches maximum information
 the denominator as the progressive selector’s page explains for Equation 12).</p>
 <section id="computation">
 <h3>Computation<a class="headerlink" href="#computation" title="Link to this heading">#</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">catR</span></code> computes the power the same way in
-<a class="reference external" href="https://github.com/cran/catR/blob/master/R/nextItem.R"><code class="docutils literal notranslate"><span class="pre">nextItem.R</span></code></a>, as <code class="docutils literal notranslate"><span class="pre">thr</span></code>
-times the progressive weight. catsim departs from both where the progressive
-selector does: the default is <span class="math notranslate nohighlight">\(s = 0\)</span>, where <code class="docutils literal notranslate"><span class="pre">catR</span></code>’s <code class="docutils literal notranslate"><span class="pre">AP</span></code> defaults to 1; past
-position <span class="math notranslate nohighlight">\(N\)</span> the exponent stays at <span class="math notranslate nohighlight">\(N\)</span>, where <code class="docutils literal notranslate"><span class="pre">catR</span></code>’s keeps growing; and with
-<span class="math notranslate nohighlight">\(N = 1\)</span> the exponent is 1, Segall’s method, where Equation 13 and <code class="docutils literal notranslate"><span class="pre">catR</span></code> give 0.</p>
 <p>catsim divides the information by its maximum over the available items before
 raising it to the power, which leaves the probabilities unchanged and keeps a
 large exponent from underflowing every weight to zero.</p>
@@ -580,7 +576,30 @@ out before sampling, unless every remaining item is.</p></td>
 <p>At the last item of a 20-item test at <span class="math notranslate nohighlight">\(\theta = 0\)</span>, over 20 simulated 500-item
 3PL banks, the most informative item is drawn with probability 0.32 to 0.96
 (median 0.64).</p>
-</section>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Comparison with catR</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">catR</span></code> computes the power the same way in
+<a class="reference external" href="https://github.com/cran/catR/blob/master/R/nextItem.R"><code class="docutils literal notranslate"><span class="pre">nextItem.R</span></code></a>, as <code class="docutils literal notranslate"><span class="pre">thr</span></code>
+times the progressive weight
+(<a class="reference internal" href="../../../adr/0019-published-progressive-schedule.html"><span class="doc">ADR-0019</span></a>). Within the planned
+length, the parity tests (<a class="reference internal" href="../../../adr/0020-catr-as-the-reference.html"><span class="doc">ADR-0020</span></a>)
+find catR’s selection probabilities at every position of the tests the
+<a class="reference internal" href="progressive-selector.html"><span class="doc">progressive selector’s page</span></a> lists, and a
+simulation of 1,000 examinees taking 10-item tests with <span class="math notranslate nohighlight">\(s = 1\)</span> gives catR’s
+bias, RMSE, overlap rate and exposure rates within their Monte Carlo error.
+catsim departs from catR where the progressive selector does, the last two
+times from Equation 13 as well:</p>
+<ul class="simple">
+<li><p>The default is <span class="math notranslate nohighlight">\(s = 0\)</span>, where catR’s <code class="docutils literal notranslate"><span class="pre">AP</span></code> defaults to 1; <code class="docutils literal notranslate"><span class="pre">acceleration=1</span></code>
+gives catR’s exponent.</p></li>
+<li><p>Past position <span class="math notranslate nohighlight">\(N\)</span> the exponent stays at <span class="math notranslate nohighlight">\(N\)</span>, where catR’s keeps growing.</p></li>
+<li><p>With <span class="math notranslate nohighlight">\(N = 1\)</span> the exponent is 1, Segall’s method, where Equation 13 and catR
+give 0, uniform selection.</p></li>
+</ul>
+<p class="sd-card-text">The parity tests keep the last two as expected failures.</p>
+</div>
+</details></section>
 <section id="guarantees">
 <h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
@@ -591,7 +610,7 @@ position, whatever the acceleration.</p></li>
 uniformly among them.</p></li>
 <li><p>When every remaining item is at or above the exposure cap, it samples from all
 the remaining items.</p></li>
-<li><p>It draws with the session’s random generator, so a run with the same seed
+<li><p>It draws with the generator of the call, so a run with the same seed
 administers the same items.</p></li>
 </ol>
 </section>
@@ -613,7 +632,7 @@ administers the same items.</p></li>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Companion spec: <a class="reference internal" href="progressive-selector.html"><span class="doc">Progressive Selector</span></a></p>
+<p><a class="reference internal" href="progressive-selector.html"><span class="doc">Progressive Selector</span></a>, which follows the same schedule</p>
 </div>
 </section>
 <section id="api-reference">

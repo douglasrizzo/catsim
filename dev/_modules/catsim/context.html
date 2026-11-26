@@ -30,6 +30,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -41,6 +42,7 @@
     <script src="../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../_static/design-tabs.js?v=fcb327ea"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 
@@ -788,17 +790,29 @@ window.runMermaid = runMermaid;</script>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">TypeVar</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.checks</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+  <span class="n">_check_disjoint</span><span class="p">,</span>
+  <span class="n">_check_se</span><span class="p">,</span>
+  <span class="n">_check_theta</span><span class="p">,</span>
+  <span class="n">_exposure_rates</span><span class="p">,</span>
+  <span class="n">_item_indices</span><span class="p">,</span>
+  <span class="n">_responses</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
   <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">_typeshed</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataclassInstance</span>
 
   <span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
+
+<span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"_T"</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s2">"DataclassInstance"</span><span class="p">)</span>
 
 
 <span class="c1"># eq=False: a generated __eq__ would compare the exposure-rate arrays elementwise and raise, and a</span>
@@ -807,12 +821,12 @@ window.runMermaid = runMermaid;</script>
 <a class="viewcode-back" href="../../api/context.html#catsim.StepContext">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eq</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">StepContext</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""What a selector, an estimator or a stopper may read about the session it serves.</span>
+<span class="w">  </span><span class="sd">"""What a selector, an estimator, a stopper or an exposure control may read about the session it serves.</span>
 
-<span class="sd">  The engine builds a new context for every call: for the selector, from the session as it stands;</span>
-<span class="sd">  for the estimator, with the newest item and response added and ``theta`` still the previous</span>
-<span class="sd">  estimate; for the stopper, with the new estimate as well. A context holds no true ability, so</span>
-<span class="sd">  strategies cannot see the simulated truth.</span>
+<span class="sd">  :class:`~catsim.CatEngine` builds a new context for every call: for the selector and the exposure</span>
+<span class="sd">  control, from the session as it stands; for the estimator, with the newest item and response</span>
+<span class="sd">  added and ``theta`` still the previous estimate; for the stopper, with the new estimate as well.</span>
+<span class="sd">  A context holds no true ability, so strategies cannot see the simulated truth.</span>
 
 <span class="sd">  To call a strategy directly, build a context by hand. Only the item bank and the random</span>
 <span class="sd">  generator are required; the other fields describe a session with no responses yet:</span>
@@ -828,48 +842,55 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  &gt;&gt;&gt; round(estimate.theta, 3), round(estimate.se, 3), estimate.evaluations</span>
 <span class="sd">  (-0.427, 0.978, 121)</span>
 
-<span class="sd">  A wrapper passes a changed copy on with :func:`dataclasses.replace`, which checks it the same way.</span>
+<span class="sd">  The context checks its fields when it is built, so a strategy receives checked inputs. A</span>
+<span class="sd">  wrapper passes a changed copy on with :func:`dataclasses.replace`, which checks it the same way.</span>
+<span class="sd">  :meth:`CatEngine.context &lt;catsim.CatEngine.context&gt;` gives the context of a session. The</span>
+<span class="sd">  :doc:`/extending` guide lists what each strategy reads from it.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  item_bank : ItemBank</span>
 <span class="sd">      Item bank used by the session.</span>
 <span class="sd">  rng : numpy.random.Generator</span>
-<span class="sd">      The run's random generator. Every random draw a strategy makes, tie-breaking included, comes</span>
+<span class="sd">      The generator of the call. Every random draw a strategy makes, tie-breaking included, comes</span>
 <span class="sd">      from it.</span>
 <span class="sd">  administered_items : tuple[int, ...], optional</span>
 <span class="sd">      Indices of the items administered so far, in order. Their number is the test position.</span>
 <span class="sd">      Default is no items.</span>
 <span class="sd">  responses : tuple[bool, ...], optional</span>
-<span class="sd">      The examinee's responses to ``administered_items``, one per item, in the same order. Default</span>
-<span class="sd">      is no responses.</span>
+<span class="sd">      The examinee's responses to ``administered_items``, one per item, in the same order: each a</span>
+<span class="sd">      ``bool``, a ``numpy.bool_`` or the integer 0 or 1, stored as a ``bool``. Default is no</span>
+<span class="sd">      responses.</span>
 <span class="sd">  excluded_items : tuple[int, ...], optional</span>
 <span class="sd">      Items a selector must not choose although they have not been administered: the session's</span>
 <span class="sd">      excluded items, such as those the engine's exposure control declined. They do not count</span>
 <span class="sd">      toward the test position. A wrapper that passes a changed context on adds to them, never</span>
 <span class="sd">      replaces them. Default is no items.</span>
 <span class="sd">  theta : float, optional</span>
-<span class="sd">      The current ability estimate. For the estimator, it is the estimate before the newest</span>
+<span class="sd">      The current ability estimate, finite. For the estimator, it is the estimate before the newest</span>
 <span class="sd">      response, the starting point of its update. Default is 0.</span>
 <span class="sd">  se : float, optional</span>
-<span class="sd">      The standard error of ``theta``, as its estimator reported it. For the estimator, it is the</span>
-<span class="sd">      error before the newest response. Default is ``math.inf``, the error before any response.</span>
+<span class="sd">      The standard error of ``theta``, as its estimator reported it: positive, or ``math.inf``. For</span>
+<span class="sd">      the estimator, it is the error before the newest response. Default is ``math.inf``, the error</span>
+<span class="sd">      before any response.</span>
 <span class="sd">  exposure_rates : numpy.ndarray or None, optional</span>
-<span class="sd">      Each item's exposure rate over the other sessions of the run, as</span>
-<span class="sd">      :meth:`ExposureTracker.rates` counts it, which selectors compare with their ``r_max`` cap.</span>
-<span class="sd">      None when the run has no exposure tracker, which means no cap applies. Default is None.</span>
+<span class="sd">      Each item's exposure rate, one value in [0, 1] per item of the bank, which selectors compare</span>
+<span class="sd">      with their ``r_max`` cap. None means that no cap applies. Default is None.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
-<span class="sd">  ValueError</span>
-<span class="sd">      If ``responses`` does not hold one response per administered item, or an index in</span>
-<span class="sd">      ``administered_items`` or ``excluded_items`` is outside the item bank.</span>
 <span class="sd">  TypeError</span>
-<span class="sd">      If a response is not a ``bool`` or ``numpy.bool_``.</span>
+<span class="sd">      If an item index is not an integer, a response is neither a Boolean nor an integer, or the</span>
+<span class="sd">      exposure rates are not real numbers.</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If an item index is outside the bank or repeats, an item is both administered and excluded,</span>
+<span class="sd">      the responses and the administered items differ in number, an integer response is not 0 or 1,</span>
+<span class="sd">      ``theta`` is not finite, ``se`` is not positive, or the exposure rates are not one value in</span>
+<span class="sd">      [0, 1] per item.</span>
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
-<span class="sd">  Lists given for ``administered_items``, ``responses`` or ``excluded_items`` are stored as</span>
+<span class="sd">  Sequences given for ``administered_items``, ``responses`` or ``excluded_items`` are stored as</span>
 <span class="sd">  tuples, so a strategy cannot change the session through its context, and a caller's list cannot</span>
 <span class="sd">  change under a strategy. Contexts compare equal only to themselves.</span>
 <span class="sd">  """</span>
@@ -884,17 +905,17 @@ window.runMermaid = runMermaid;</script>
   <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
   <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Store the item and response sequences as tuples, and check that they fit each other and the bank."""</span>
-    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"administered_items"</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">administered_items</span><span class="p">))</span>
-    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"responses"</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="p">))</span>
-    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"excluded_items"</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">excluded_items</span><span class="p">))</span>
-    <span class="n">irt</span><span class="o">.</span><span class="n">validate_response_vector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">administered_items</span><span class="p">))</span>
-    <span class="n">n_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span>
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">items</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"administered_items"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">administered_items</span><span class="p">),</span> <span class="p">(</span><span class="s2">"excluded_items"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">excluded_items</span><span class="p">)):</span>
-      <span class="c1"># NumPy would read a negative index as one counted from the end, and silently drop the wrong item.</span>
-      <span class="k">if</span> <span class="n">items</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">max</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">n_items</span><span class="p">):</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> must hold item indices between 0 and </span><span class="si">{</span><span class="n">n_items</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">items</span><span class="si">}</span><span class="s2">"</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+<span class="w">    </span><span class="sd">"""Store the item and response sequences as tuples, after checking them, the estimate and the rates."""</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">names</span>
+    <span class="n">administered</span> <span class="o">=</span> <span class="n">_item_indices</span><span class="p">(</span><span class="s2">"administered_items"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
+    <span class="n">excluded</span> <span class="o">=</span> <span class="n">_item_indices</span><span class="p">(</span><span class="s2">"excluded_items"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">excluded_items</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
+    <span class="n">_check_disjoint</span><span class="p">(</span><span class="n">administered</span><span class="p">,</span> <span class="n">excluded</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
+    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"administered_items"</span><span class="p">,</span> <span class="n">administered</span><span class="p">)</span>
+    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"excluded_items"</span><span class="p">,</span> <span class="n">excluded</span><span class="p">)</span>
+    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"responses"</span><span class="p">,</span> <span class="n">_responses</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered</span><span class="p">)))</span>
+    <span class="n">_check_theta</span><span class="p">(</span><span class="s2">"theta"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span>
+    <span class="n">_check_se</span><span class="p">(</span><span class="s2">"se"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">se</span><span class="p">)</span>
+    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"exposure_rates"</span><span class="p">,</span> <span class="n">_exposure_rates</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)))</span></div>
 
 
 
@@ -907,9 +928,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  theta : float</span>
-<span class="sd">      The ability estimate.</span>
+<span class="sd">      The ability estimate, finite.</span>
 <span class="sd">  se : float</span>
-<span class="sd">      Its standard error, by the estimator's own formula: finite, or ``math.inf`` when the</span>
+<span class="sd">      Its standard error, by the estimator's own formula: positive, or ``math.inf`` when the</span>
 <span class="sd">      responses carry no information about the ability, as before any response.</span>
 <span class="sd">  evaluations : int or None, optional</span>
 <span class="sd">      How many times the estimator evaluated its objective (the likelihood, the posterior or the</span>
@@ -919,7 +940,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If ``theta`` is not finite, ``se`` is negative or NaN, or ``evaluations`` is negative.</span>
+<span class="sd">      If ``theta`` is not finite, ``se`` is not positive (zero, negative or NaN), or</span>
+<span class="sd">      ``evaluations`` is negative.</span>
 <span class="sd">  """</span>
 
   <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span>
@@ -928,18 +950,64 @@ window.runMermaid = runMermaid;</script>
 
   <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Reject an estimate that the stoppers and the session could not use."""</span>
-    <span class="c1"># A NaN error would make every comparison False: a confidence-interval stopper would stop at</span>
-    <span class="c1"># once and a standard-error stopper never.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">):</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"theta must be finite, got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="si">}</span><span class="s2">"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">se</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"se must be non-negative (math.inf allowed), got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">se</span><span class="si">}</span><span class="s2">"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">_check_theta</span><span class="p">(</span><span class="s2">"theta"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span>
+    <span class="n">_check_se</span><span class="p">(</span><span class="s2">"se"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">se</span><span class="p">)</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluations</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"evaluations must be non-negative, got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluations</span><span class="si">}</span><span class="s2">"</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"evaluations is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluations</span><span class="si">!r}</span><span class="s2">; an evaluation count must not be negative"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 
+
+
+<span class="nd">@functools</span><span class="o">.</span><span class="n">cache</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_field_defaults</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">DataclassInstance</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">  </span><span class="sd">"""Return the name and default of every field of a dataclass, in order."""</span>
+  <span class="k">return</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_unchecked</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">_T</span><span class="p">],</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_T</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""Return an instance of a frozen dataclass built from checked fields, without checking them again.</span>
+
+<span class="sd">  The engine builds every session and step context from inputs it has already checked, and</span>
+<span class="sd">  :func:`~catsim.simulate` from inputs it built itself (ADR-0009), so the checks of their ``__post_init__``</span>
+<span class="sd">  would only repeat work. A field left out takes its default; one without a default raises</span>
+<span class="sd">  ``KeyError``.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  cls : type</span>
+<span class="sd">      The dataclass, :class:`StepContext` or :class:`~catsim.Session`.</span>
+<span class="sd">  **fields : object</span>
+<span class="sd">      The values of its fields, in the types the class stores.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  object</span>
+<span class="sd">      The instance.</span>
+<span class="sd">  """</span>
+  <span class="n">instance</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">default</span> <span class="ow">in</span> <span class="n">_field_defaults</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">fields</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">fields</span> <span class="ow">or</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span> <span class="k">else</span> <span class="n">default</span>
+    <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>  <span class="c1"># noqa: PLC2801 - the class is frozen</span>
+  <span class="k">return</span> <span class="n">instance</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_replaced</span><span class="p">(</span><span class="n">instance</span><span class="p">:</span> <span class="n">_T</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">changes</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_T</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""Return a copy of a frozen dataclass with some fields changed, as :func:`dataclasses.replace` does, unchecked.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  instance : object</span>
+<span class="sd">      A :class:`StepContext` or a :class:`~catsim.Session`.</span>
+<span class="sd">  **changes : object</span>
+<span class="sd">      The fields to change, in the types the class stores, already checked.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  object</span>
+<span class="sd">      The copy.</span>
+<span class="sd">  """</span>
+  <span class="n">fields</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">_field_defaults</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">instance</span><span class="p">))}</span>
+  <span class="k">return</span> <span class="n">_unchecked</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">instance</span><span class="p">),</span> <span class="o">**</span><span class="p">(</span><span class="n">fields</span> <span class="o">|</span> <span class="n">changes</span><span class="p">))</span>
 </pre></div>
 
                 </article>

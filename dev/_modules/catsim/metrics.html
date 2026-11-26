@@ -30,6 +30,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -41,6 +42,7 @@
     <script src="../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../_static/design-tabs.js?v=fcb327ea"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 
@@ -784,215 +786,543 @@ window.runMermaid = runMermaid;</script>
                 <article class="bd-article">
                   
   <h1>Source code for catsim.metrics</h1><div class="highlight"><pre>
-<span></span><span class="sd">"""Metrics that score a simulation study: how accurate the ability estimates are and how much the tests overlap."""</span>
+<span></span><span class="sa">r</span><span class="sd">"""The performance measures of a simulation study, each with its Monte Carlo standard error.</span>
+
+<span class="sd">A simulation estimates every measure from a finite number of sessions, so a rerun with another seed</span>
+<span class="sd">gives another value. Each function here returns a :class:`Metric`: the value, and its Monte Carlo</span>
+<span class="sd">standard error, an estimate of the standard deviation of that value across such reruns</span>
+<span class="sd">:cite:p:`Morris2019`. A difference between two designs that is small next to their errors cannot be</span>
+<span class="sd">told from noise. :class:`~catsim.SimulationResult` computes these measures for a run, overall and by</span>
+<span class="sd">decile of the true ability.</span>
+
+<span class="sd">The errors treat the sessions as independent draws, as they are when no session sees exposure rates:</span>
+<span class="sd">every examinee draws from streams of their own (ADR-0013). Under exposure feedback each session</span>
+<span class="sd">depends on the ones before it, so the errors are approximations, and replications of the run give</span>
+<span class="sd">the exact spread (ADR-0016).</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">NamedTuple</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+  <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_errors</span><span class="p">(</span><span class="n">actual</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">predicted</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Return the estimates minus the true abilities.</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntArray</span>
+
+<span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"_T"</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">FloatArray</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Metric">
+<a class="viewcode-back" href="../../api/metrics.html#catsim.metrics.Metric">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Metric</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_T</span><span class="p">]):</span>
+<span class="w">  </span><span class="sd">"""A performance measure of a simulation run, with its Monte Carlo standard error.</span>
+
+<span class="sd">  A metric unpacks as a pair, ``value, mc_se = metrics.bias(true_thetas, thetas)``. A measure with</span>
+<span class="sd">  one value per item, such as the exposure rates, holds one array of values and one of errors.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  value : float or numpy.ndarray</span>
+<span class="sd">      The measure's value over the run's sessions.</span>
+<span class="sd">  mc_se : float or numpy.ndarray</span>
+<span class="sd">      Its Monte Carlo standard error, NaN where the sessions give no estimate of it, as a single</span>
+<span class="sd">      session cannot.</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; from catsim.metrics import bias</span>
+<span class="sd">  &gt;&gt;&gt; value, mc_se = bias([0.0, 0.0, 0.0], [0.5, -0.5, 1.5])</span>
+<span class="sd">  &gt;&gt;&gt; value, round(mc_se, 4)</span>
+<span class="sd">  (0.5, 0.5774)</span>
+<span class="sd">  """</span>
+
+  <span class="n">value</span><span class="p">:</span> <span class="n">_T</span>
+  <span class="n">mc_se</span><span class="p">:</span> <span class="n">_T</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_vector</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""Return one value per session as a float array, checking that there is at least one and no NaN.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  name : str</span>
+<span class="sd">      The parameter's name, for the error messages.</span>
+<span class="sd">  values : array-like</span>
+<span class="sd">      The values.</span>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
 <span class="sd">  numpy.ndarray</span>
-<span class="sd">      Each examinee's estimated minus true ability.</span>
+<span class="sd">      The values as a one-dimensional float array.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If ``values`` is not one-dimensional or holds values that are not real numbers.</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``values`` is empty or holds NaN.</span>
+<span class="sd">  """</span>
+  <span class="n">array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> must be one-dimensional, one value per session, got shape </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="c1"># Booleans would be read as the numbers 0 and 1.</span>
+  <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s2">"iuf"</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> holds </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2"> values; they must be real numbers"</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> cannot be empty"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">array</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">array</span><span class="p">))[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2">] is nan; a metric takes one number per session, with no missing ones"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">array</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_errors</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">thetas</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""Return each session's estimate minus its true ability.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  true_thetas : array-like</span>
+<span class="sd">      The true abilities, finite.</span>
+<span class="sd">  thetas : array-like</span>
+<span class="sd">      The estimates, one per true ability, finite.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  numpy.ndarray</span>
+<span class="sd">      The errors.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If ``actual`` and ``predicted`` differ in length; a one-element vector would otherwise</span>
-<span class="sd">      broadcast against the other.</span>
+<span class="sd">      If the two differ in length, which would otherwise broadcast a single value against the other,</span>
+<span class="sd">      or hold a value that is not finite.</span>
 <span class="sd">  """</span>
-  <span class="n">actual</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-  <span class="n">predicted</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">predicted</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">predicted</span><span class="p">):</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"actual and predicted vectors need to be the same size"</span>
+  <span class="n">actual</span> <span class="o">=</span> <span class="n">_vector</span><span class="p">(</span><span class="s2">"true_thetas"</span><span class="p">,</span> <span class="n">true_thetas</span><span class="p">)</span>
+  <span class="n">estimated</span> <span class="o">=</span> <span class="n">_vector</span><span class="p">(</span><span class="s2">"thetas"</span><span class="p">,</span> <span class="n">thetas</span><span class="p">)</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">estimated</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+      <span class="sa">f</span><span class="s2">"true_thetas has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span><span class="si">}</span><span class="s2"> entries and thetas </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">estimated</span><span class="p">)</span><span class="si">}</span><span class="s2">; there must be one estimate per true ability"</span>
+    <span class="p">)</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-  <span class="k">return</span> <span class="n">predicted</span> <span class="o">-</span> <span class="n">actual</span>
+  <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">array</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"true_thetas"</span><span class="p">,</span> <span class="n">actual</span><span class="p">),</span> <span class="p">(</span><span class="s2">"thetas"</span><span class="p">,</span> <span class="n">estimated</span><span class="p">)):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">array</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+      <span class="n">position</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="o">~</span><span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">array</span><span class="p">))[</span><span class="mi">0</span><span class="p">])</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2">] is </span><span class="si">{</span><span class="n">array</span><span class="p">[</span><span class="n">position</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">!r}</span><span class="s2">; abilities and their estimates must be finite"</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">estimated</span> <span class="o">-</span> <span class="n">actual</span>
+
+
+<div class="viewcode-block" id="mean">
+<a class="viewcode-back" href="../../api/metrics.html#catsim.metrics.mean">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mean</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Metric</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the mean of a statistic over a run's sessions, with its Monte Carlo standard error.</span>
+
+<span class="sd">  .. math::</span>
+
+<span class="sd">     \bar{x} = \frac{1}{N} \sum_{j=1}^{N} x_j, \qquad</span>
+<span class="sd">     \widehat{\mathrm{SE}}(\bar{x}) = \sqrt{\frac{1}{N(N-1)} \sum_{j=1}^{N} (x_j - \bar{x})^2}</span>
+
+<span class="sd">  where :math:`x_j` is session :math:`j`'s value and :math:`N` the number of sessions. This is the</span>
+<span class="sd">  Monte Carlo standard error of a mean, as Morris, White &amp; Crowther give it for the bias</span>
+<span class="sd">  (:cite:t:`Morris2019`, Table 6) and Siepe et al. for the mean of any statistic</span>
+<span class="sd">  (:cite:t:`Siepe2024`, Table 3). The mean test length and the mean standard error of a run are</span>
+<span class="sd">  such means.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  values : array-like</span>
+<span class="sd">      One value per session, such as its test length or the standard error of its final estimate.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  Metric</span>
+<span class="sd">      The mean and its Monte Carlo standard error. The error is NaN for a single session, whose</span>
+<span class="sd">      values have no spread to estimate it from, and for values that are not all finite, such as</span>
+<span class="sd">      the infinite standard error of a session that ended before its first response, whose mean is</span>
+<span class="sd">      infinite.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If ``values`` is not one-dimensional or holds values that are not real numbers.</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``values`` is empty or holds NaN.</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  Two tests of 10 and 14 items: their deviations from the mean, 12, are -2 and 2, so the error is</span>
+<span class="sd">  :math:`\sqrt{8 / (2 \cdot 1)} = 2`.</span>
+
+<span class="sd">  &gt;&gt;&gt; from catsim.metrics import mean</span>
+<span class="sd">  &gt;&gt;&gt; mean([10, 14])</span>
+<span class="sd">  Metric(value=12.0, mc_se=2.0)</span>
+<span class="sd">  """</span>
+  <span class="n">array</span> <span class="o">=</span> <span class="n">_vector</span><span class="p">(</span><span class="s2">"values"</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+  <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">array</span><span class="p">))</span>
+  <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">array</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>  <span class="c1"># noqa: PLR2004 - a spread needs two values</span>
+    <span class="k">return</span> <span class="n">Metric</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">Metric</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="n">array</span><span class="o">.</span><span class="n">size</span><span class="p">))</span></div>
+
 
 
 <div class="viewcode-block" id="bias">
 <a class="viewcode-back" href="../../api/metrics.html#catsim.metrics.bias">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">bias</span><span class="p">(</span>
-  <span class="n">actual</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
-  <span class="n">predicted</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the mean signed error of the ability estimates :cite:p:`Chang2001`.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">bias</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">thetas</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Metric</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the mean signed error of the ability estimates :cite:p:`Chang2001`, with its Monte Carlo standard error.</span>
 
-<span class="sd">  .. math:: \mathrm{Bias} = \frac{1}{N} \sum_{j=1}^{N} (\hat{\theta}_j - \theta_j)</span>
+<span class="sd">  .. math::</span>
 
-<span class="sd">  where :math:`\theta_j` is examinee :math:`j`'s true ability, :math:`\hat{\theta}_j` their estimate</span>
-<span class="sd">  and :math:`N` the number of examinees. A positive bias means the estimates overestimate ability on</span>
-<span class="sd">  average, a negative one that they underestimate it.</span>
+<span class="sd">     \mathrm{Bias} = \frac{1}{N} \sum_{j=1}^{N} e_j, \qquad</span>
+<span class="sd">     \widehat{\mathrm{SE}}(\mathrm{Bias}) = \sqrt{\frac{1}{N(N-1)} \sum_{j=1}^{N} (e_j - \mathrm{Bias})^2}</span>
+
+<span class="sd">  where :math:`e_j = \hat{\theta}_j - \theta_j` is examinee :math:`j`'s estimate minus their true</span>
+<span class="sd">  ability and :math:`N` the number of examinees. A positive bias means the estimates overestimate</span>
+<span class="sd">  ability on average, a negative one that they underestimate it. The error is that of the bias in</span>
+<span class="sd">  :cite:t:`Morris2019` (Table 6), with :math:`e_j` in place of :math:`\hat{\theta}_i - \theta`,</span>
+<span class="sd">  since each examinee has their own true ability: the error of the mean of the errors</span>
+<span class="sd">  (:func:`mean`).</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  actual : array-like</span>
-<span class="sd">      The true abilities.</span>
-<span class="sd">  predicted : array-like</span>
-<span class="sd">      The estimated abilities, one per true ability.</span>
+<span class="sd">  true_thetas : array-like</span>
+<span class="sd">      The true abilities, finite.</span>
+<span class="sd">  thetas : array-like</span>
+<span class="sd">      The estimated abilities, one per true ability, finite.</span>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
-<span class="sd">  float</span>
-<span class="sd">      The bias.</span>
+<span class="sd">  Metric</span>
+<span class="sd">      The bias and its Monte Carlo standard error, NaN for a single examinee.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If either input is not one-dimensional or holds values that are not real numbers.</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If ``actual`` and ``predicted`` differ in length.</span>
+<span class="sd">      If the inputs are empty, differ in length or hold a value that is not finite.</span>
 
 <span class="sd">  Examples</span>
 <span class="sd">  --------</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.metrics import bias</span>
 <span class="sd">  &gt;&gt;&gt; bias([1.0, -1.0], [0.0, 6.0])</span>
-<span class="sd">  3.0</span>
+<span class="sd">  Metric(value=3.0, mc_se=4.0)</span>
 <span class="sd">  """</span>
-  <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">_errors</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="n">predicted</span><span class="p">)))</span></div>
+  <span class="k">return</span> <span class="n">mean</span><span class="p">(</span><span class="n">_errors</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">thetas</span><span class="p">))</span></div>
 
 
 
 <div class="viewcode-block" id="mse">
 <a class="viewcode-back" href="../../api/metrics.html#catsim.metrics.mse">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">mse</span><span class="p">(</span>
-  <span class="n">actual</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
-  <span class="n">predicted</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the mean squared error of the ability estimates :cite:p:`Chang2001`.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mse</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">thetas</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Metric</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the mean squared error of the ability estimates :cite:p:`Chang2001`, with its Monte Carlo standard error.</span>
 
-<span class="sd">  .. math:: \mathrm{MSE} = \frac{1}{N} \sum_{j=1}^{N} (\hat{\theta}_j - \theta_j)^2</span>
+<span class="sd">  .. math::</span>
 
-<span class="sd">  where :math:`\theta_j` is examinee :math:`j`'s true ability, :math:`\hat{\theta}_j` their estimate</span>
-<span class="sd">  and :math:`N` the number of examinees. Lower values mean more accurate estimates; the MSE is the</span>
-<span class="sd">  squared :func:`bias` plus the variance of the errors.</span>
+<span class="sd">     \mathrm{MSE} = \frac{1}{N} \sum_{j=1}^{N} e_j^2, \qquad</span>
+<span class="sd">     \widehat{\mathrm{SE}}(\mathrm{MSE}) = \sqrt{\frac{1}{N(N-1)} \sum_{j=1}^{N} (e_j^2 - \mathrm{MSE})^2}</span>
+
+<span class="sd">  where :math:`e_j = \hat{\theta}_j - \theta_j` is examinee :math:`j`'s estimate minus their true</span>
+<span class="sd">  ability and :math:`N` the number of examinees. Lower values mean more accurate estimates; the MSE</span>
+<span class="sd">  is the squared :func:`bias` plus the variance of the errors. The error is that of the MSE in</span>
+<span class="sd">  :cite:t:`Morris2019` (Table 6), with :math:`e_j` in place of :math:`\hat{\theta}_i - \theta`: the</span>
+<span class="sd">  error of the mean of the squared errors (:func:`mean`).</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  actual : array-like</span>
-<span class="sd">      The true abilities.</span>
-<span class="sd">  predicted : array-like</span>
-<span class="sd">      The estimated abilities, one per true ability.</span>
+<span class="sd">  true_thetas : array-like</span>
+<span class="sd">      The true abilities, finite.</span>
+<span class="sd">  thetas : array-like</span>
+<span class="sd">      The estimated abilities, one per true ability, finite.</span>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
-<span class="sd">  float</span>
-<span class="sd">      The mean squared error.</span>
+<span class="sd">  Metric</span>
+<span class="sd">      The mean squared error and its Monte Carlo standard error, NaN for a single examinee.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If either input is not one-dimensional or holds values that are not real numbers.</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If ``actual`` and ``predicted`` differ in length.</span>
+<span class="sd">      If the inputs are empty, differ in length or hold a value that is not finite.</span>
 
 <span class="sd">  Examples</span>
 <span class="sd">  --------</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.metrics import mse</span>
 <span class="sd">  &gt;&gt;&gt; mse([1.0, -1.0], [0.0, 6.0])</span>
-<span class="sd">  25.0</span>
+<span class="sd">  Metric(value=25.0, mc_se=24.0)</span>
 <span class="sd">  """</span>
-  <span class="n">errors</span> <span class="o">=</span> <span class="n">_errors</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="n">predicted</span><span class="p">)</span>
-  <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">errors</span> <span class="o">*</span> <span class="n">errors</span><span class="p">))</span></div>
+  <span class="n">errors</span> <span class="o">=</span> <span class="n">_errors</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">thetas</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">mean</span><span class="p">(</span><span class="n">errors</span> <span class="o">*</span> <span class="n">errors</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="rmse">
 <a class="viewcode-back" href="../../api/metrics.html#catsim.metrics.rmse">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">rmse</span><span class="p">(</span>
-  <span class="n">actual</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
-  <span class="n">predicted</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the root mean squared error of the ability estimates :cite:p:`Bar10`.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rmse</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">thetas</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Metric</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the root mean squared error of the ability estimates :cite:p:`Bar10`, with its Monte Carlo standard error.</span>
 
-<span class="sd">  .. math:: \mathrm{RMSE} = \sqrt{\frac{1}{N} \sum_{j=1}^{N} (\hat{\theta}_j - \theta_j)^2}</span>
+<span class="sd">  .. math::</span>
 
-<span class="sd">  where :math:`\theta_j` is examinee :math:`j`'s true ability, :math:`\hat{\theta}_j` their estimate</span>
-<span class="sd">  and :math:`N` the number of examinees. It is the square root of :func:`mse`, in the units of the</span>
-<span class="sd">  ability scale.</span>
+<span class="sd">     \mathrm{RMSE} = \sqrt{\mathrm{MSE}}, \qquad</span>
+<span class="sd">     \widehat{\mathrm{SE}}(\mathrm{RMSE}) = \frac{\widehat{\mathrm{SE}}(\mathrm{MSE})}{2\,\mathrm{RMSE}}</span>
+
+<span class="sd">  where :math:`\mathrm{MSE}` and its error are those of :func:`mse`. The RMSE is in the units of the</span>
+<span class="sd">  ability scale. Its error follows from the MSE's by the delta method, since the derivative of</span>
+<span class="sd">  :math:`\sqrt{m}` is :math:`1 / (2\sqrt{m})`; it is the error :cite:t:`Siepe2024` give for the</span>
+<span class="sd">  RMSE (Table 3). It is 0 when every estimate equals its true ability.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  actual : array-like</span>
-<span class="sd">      The true abilities.</span>
-<span class="sd">  predicted : array-like</span>
-<span class="sd">      The estimated abilities, one per true ability.</span>
+<span class="sd">  true_thetas : array-like</span>
+<span class="sd">      The true abilities, finite.</span>
+<span class="sd">  thetas : array-like</span>
+<span class="sd">      The estimated abilities, one per true ability, finite.</span>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
-<span class="sd">  float</span>
-<span class="sd">      The root mean squared error.</span>
+<span class="sd">  Metric</span>
+<span class="sd">      The root mean squared error and its Monte Carlo standard error, NaN for a single examinee.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If either input is not one-dimensional or holds values that are not real numbers.</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If ``actual`` and ``predicted`` differ in length.</span>
+<span class="sd">      If the inputs are empty, differ in length or hold a value that is not finite.</span>
 
 <span class="sd">  Examples</span>
 <span class="sd">  --------</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.metrics import rmse</span>
 <span class="sd">  &gt;&gt;&gt; rmse([1.0, -1.0], [0.0, 6.0])</span>
-<span class="sd">  5.0</span>
+<span class="sd">  Metric(value=5.0, mc_se=2.4)</span>
 <span class="sd">  """</span>
-  <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="n">predicted</span><span class="p">))</span></div>
+  <span class="n">squared</span> <span class="o">=</span> <span class="n">mse</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">thetas</span><span class="p">)</span>
+  <span class="n">value</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">squared</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+  <span class="c1"># With every error 0, the MSE's error is 0 too (or NaN for one examinee), and so is the RMSE's.</span>
+  <span class="k">return</span> <span class="n">Metric</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">squared</span><span class="o">.</span><span class="n">mc_se</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">squared</span><span class="o">.</span><span class="n">mc_se</span><span class="p">)</span></div>
 
 
 
-<div class="viewcode-block" id="overlap_rate">
-<a class="viewcode-back" href="../../api/metrics.html#catsim.metrics.overlap_rate">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">overlap_rate</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the test overlap rate: the expected share of items two examinees' tests have in common :cite:p:`Bar10`.</span>
+<div class="viewcode-block" id="exposure_rates">
+<a class="viewcode-back" href="../../api/metrics.html#catsim.metrics.exposure_rates">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">exposure_rates</span><span class="p">(</span><span class="n">counts</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">n_sessions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Metric</span><span class="p">[</span><span class="n">FloatArray</span><span class="p">]:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return each item's exposure rate, the share of a run's sessions given it, with its Monte Carlo standard error.</span>
 
-<span class="sd">  .. math:: T = \frac{M}{n} S_r^2 + \frac{n}{M}</span>
+<span class="sd">  .. math::</span>
 
-<span class="sd">  where :math:`M` is the bank size, :math:`n` the test length and :math:`S_r^2` the population</span>
-<span class="sd">  variance (divisor :math:`M`) of the items' exposure rates. It assumes every examinee takes</span>
-<span class="sd">  :math:`n` items. It is :math:`n/M` when every item is equally exposed and 1 when every examinee</span>
-<span class="sd">  takes the same test; higher values mean examinees share more items, which weakens test security.</span>
+<span class="sd">     r_i = \frac{c_i}{N}, \qquad \widehat{\mathrm{SE}}(r_i) = \sqrt{\frac{r_i (1 - r_i)}{N}}</span>
+
+<span class="sd">  where :math:`c_i` is the number of sessions that administered item :math:`i` and :math:`N` the</span>
+<span class="sd">  number of sessions. A session gives an item at most once, so a rate is a proportion of the</span>
+<span class="sd">  sessions, and its error is the binomial one that :cite:t:`Morris2019` (Table 6) give for coverage</span>
+<span class="sd">  and rejection rates. The error is 0 for an item that no session, or every session, was given.</span>
+<span class="sd">  The proposal counts of a run give its proposal rates the same way.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  exposure_rates : numpy.ndarray</span>
-<span class="sd">      Each item's exposure rate, the share of examinees who took it.</span>
+<span class="sd">  counts : array-like</span>
+<span class="sd">      Each item's count over the run: the sessions that administered it, or that proposed it.</span>
+<span class="sd">      Integers from 0 to ``n_sessions``.</span>
+<span class="sd">  n_sessions : int</span>
+<span class="sd">      The number of sessions in the run, positive.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  Metric</span>
+<span class="sd">      One rate per item, and one Monte Carlo standard error per item, as arrays.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If ``counts`` is not a one-dimensional array of integers, or ``n_sessions`` is not an integer.</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``counts`` is empty, ``n_sessions`` is not positive, or a count is negative or above</span>
+<span class="sd">      ``n_sessions``.</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; from catsim.metrics import exposure_rates</span>
+<span class="sd">  &gt;&gt;&gt; rates, errors = exposure_rates([4, 1, 0], n_sessions=4)</span>
+<span class="sd">  &gt;&gt;&gt; rates.tolist(), errors.round(4).tolist()</span>
+<span class="sd">  ([1.0, 0.25, 0.0], [0.0, 0.2165, 0.0])</span>
+<span class="sd">  """</span>
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n_sessions</span><span class="p">,</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">bool_</span><span class="p">))</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n_sessions</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"n_sessions is </span><span class="si">{</span><span class="n">n_sessions</span><span class="si">!r}</span><span class="s2">; it must be an integer"</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">n_sessions</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"n_sessions is </span><span class="si">{</span><span class="n">n_sessions</span><span class="si">}</span><span class="s2">; a run has at least one session"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="n">array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+  <span class="c1"># Before the type check: an empty list has NumPy's float dtype, and a bank has at least one item.</span>
+  <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"counts is empty; there is one count per item of the bank"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s2">"iu"</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"counts must be a one-dimensional array of integers, one per item, got </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2"> of shape </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="n">outside</span> <span class="o">=</span> <span class="p">(</span><span class="n">array</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">array</span> <span class="o">&gt;</span> <span class="n">n_sessions</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">outside</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">outside</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"counts[</span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">] is </span><span class="si">{</span><span class="n">array</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s2">; a count must be between 0 and the </span><span class="si">{</span><span class="n">n_sessions</span><span class="si">}</span><span class="s2"> sessions"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="n">rates</span> <span class="o">=</span> <span class="n">array</span> <span class="o">/</span> <span class="n">n_sessions</span>
+  <span class="k">return</span> <span class="n">Metric</span><span class="p">(</span><span class="n">rates</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rates</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">rates</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_sessions</span><span class="p">))</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_overlap</span><span class="p">(</span><span class="n">rates</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""Return the large-sample test overlap rate of tests of ``test_size`` items, from the items' exposure rates.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  rates : numpy.ndarray</span>
+<span class="sd">      Each item's exposure rate.</span>
 <span class="sd">  test_size : int</span>
 <span class="sd">      The number of items in each test.</span>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
 <span class="sd">  float</span>
-<span class="sd">      The overlap rate, between 0 and 1.</span>
+<span class="sd">      :math:`(M / L) S_r^2 + L / M`, as :func:`overlap_rate` defines it.</span>
+<span class="sd">  """</span>
+  <span class="n">bank_size</span> <span class="o">=</span> <span class="n">rates</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="k">return</span> <span class="p">(</span><span class="n">bank_size</span> <span class="o">/</span> <span class="n">test_size</span><span class="p">)</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">rates</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="n">test_size</span> <span class="o">/</span> <span class="n">bank_size</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_test_matrix</span><span class="p">(</span><span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">n_items</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IntArray</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""Return the items of a run's fixed-length tests as an integer matrix, checking them.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  administered_items : array-like</span>
+<span class="sd">      One row per session, with the indices of the items it administered.</span>
+<span class="sd">  n_items : int</span>
+<span class="sd">      The number of items in the bank.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  numpy.ndarray</span>
+<span class="sd">      The tests, one row per session.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If the tests are not a two-dimensional array of integers, or ``n_items`` is not an integer.</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If an exposure rate is outside [0, 1], if ``test_size`` is not positive, or if it is larger</span>
-<span class="sd">      than the bank.</span>
+<span class="sd">      If there is no session or no item per session, an index is outside the bank, or a session</span>
+<span class="sd">      repeats an item.</span>
+<span class="sd">  """</span>
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n_items</span><span class="p">,</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">bool_</span><span class="p">))</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n_items</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"n_items is </span><span class="si">{</span><span class="n">n_items</span><span class="si">!r}</span><span class="s2">; it must be an integer"</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="n">tests</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
+  <span class="c1"># Before the shape check: an empty list has one dimension and NumPy's float dtype, and is still no sessions.</span>
+  <span class="k">if</span> <span class="n">tests</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"administered_items has shape </span><span class="si">{</span><span class="n">tests</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">; the overlap rate needs at least one session of one item or more"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">tests</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">tests</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s2">"iu"</span><span class="p">:</span>  <span class="c1"># noqa: PLR2004 - a matrix</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+      <span class="s2">"administered_items must be a two-dimensional array of item indices, one row per session and one column per "</span>
+      <span class="sa">f</span><span class="s2">"position of the fixed-length tests, got </span><span class="si">{</span><span class="n">tests</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2"> of shape </span><span class="si">{</span><span class="n">tests</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span>
+    <span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="n">outside</span> <span class="o">=</span> <span class="p">(</span><span class="n">tests</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">tests</span> <span class="o">&gt;=</span> <span class="n">n_items</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">outside</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+    <span class="n">row</span><span class="p">,</span> <span class="n">column</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">outside</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"administered_items[</span><span class="si">{</span><span class="n">row</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">column</span><span class="si">}</span><span class="s2">] is </span><span class="si">{</span><span class="n">tests</span><span class="p">[</span><span class="n">row</span><span class="p">,</span><span class="w"> </span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s2">; an item index is 0 to </span><span class="si">{</span><span class="n">n_items</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="n">repeated</span> <span class="o">=</span> <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">tests</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">repeated</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+    <span class="n">row</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">repeated</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"administered_items[</span><span class="si">{</span><span class="n">row</span><span class="si">}</span><span class="s2">] gives an item twice; a session administers each item at most once"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">tests</span>
+
+
+<div class="viewcode-block" id="overlap_rate">
+<a class="viewcode-back" href="../../api/metrics.html#catsim.metrics.overlap_rate">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">overlap_rate</span><span class="p">(</span><span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">n_items</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Metric</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the test overlap rate of a run's fixed-length tests, with its Monte Carlo standard error.</span>
+
+<span class="sd">  The test overlap rate is the share of items that the tests of two examinees have in common,</span>
+<span class="sd">  averaged over every pair of examinees :cite:p:`Chen2003`. For :math:`N` tests of :math:`L` items</span>
+<span class="sd">  each from a bank of :math:`M` items, with exposure rates :math:`r_i`, its large-sample value is</span>
+
+<span class="sd">  .. math:: T = \frac{1}{L} \sum_{i=1}^{M} r_i^2 = \frac{M}{L} S_r^2 + \frac{L}{M}</span>
+
+<span class="sd">  where :math:`S_r^2` is the variance (divisor :math:`M`) of the exposure rates</span>
+<span class="sd">  (:cite:t:`Chen1999`, equations 11 and 14). It is :math:`L/M` when every item is equally exposed,</span>
+<span class="sd">  and 1 when every examinee takes the same test; higher values mean examinees share more items,</span>
+<span class="sd">  which weakens test security. It is the overlap rate of :cite:t:`Bar10`. The average over the</span>
+<span class="sd">  :math:`N(N-1)/2` pairs of distinct examinees is :math:`(N T - 1) / (N - 1)` (:cite:t:`Chen1999`,</span>
+<span class="sd">  equation 10), which :math:`T` exceeds by :math:`(1 - T) / (N - 1)`.</span>
+
+<span class="sd">  The Monte Carlo standard error is the delta method's. :math:`T` is a function of the rates, the</span>
+<span class="sd">  means over the sessions of each session's item indicators :math:`x_j`, and its gradient in them is</span>
+<span class="sd">  :math:`2 r / L`, so</span>
+
+<span class="sd">  .. math::</span>
+
+<span class="sd">     \widehat{\mathrm{SE}}(T) = \frac{2}{L} \sqrt{\frac{1}{N(N-1)} \sum_{j=1}^{N} (y_j - \bar{y})^2},</span>
+<span class="sd">     \qquad y_j = r \cdot x_j = \sum_{i \in t_j} r_i</span>
+
+<span class="sd">  where :math:`y_j` sums the exposure rates of the items of session :math:`j`'s test :math:`t_j`;</span>
+<span class="sd">  :math:`y_j / L` is that test's average overlap with the run's tests, and :math:`T` their mean.</span>
+<span class="sd">  :cite:t:`Choe2019` prove that the average test overlap rate of fixed-length tests is</span>
+<span class="sd">  asymptotically normal.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  administered_items : array-like</span>
+<span class="sd">      The run's tests, one row per session holding the indices of the items it administered, so</span>
+<span class="sd">      every test has the same length. Each row gives an item at most once.</span>
+<span class="sd">  n_items : int</span>
+<span class="sd">      The number of items in the bank, :math:`M`.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  Metric</span>
+<span class="sd">      The overlap rate and its Monte Carlo standard error, NaN for a single session.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If ``administered_items`` is not a two-dimensional array of integers, or ``n_items`` is not an</span>
+<span class="sd">      integer.</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If there is no session or the tests have no item, an index is outside the bank, or a session</span>
+<span class="sd">      gives an item twice.</span>
 
 <span class="sd">  Examples</span>
 <span class="sd">  --------</span>
-<span class="sd">  &gt;&gt;&gt; import numpy</span>
+<span class="sd">  Half the examinees take items 0 and 1 and half items 0 and 2, so a pair shares both items with</span>
+<span class="sd">  probability 1/2 and one item otherwise, and the rates are 1, 0.5, 0.5 and 0:</span>
+
 <span class="sd">  &gt;&gt;&gt; from catsim.metrics import overlap_rate</span>
-<span class="sd">  &gt;&gt;&gt; overlap_rate(numpy.array([1.0, 0.5, 0.5, 0.0]), test_size=2)</span>
+<span class="sd">  &gt;&gt;&gt; overlap_rate([[0, 1], [0, 2]], n_items=4).value</span>
 <span class="sd">  0.75</span>
 <span class="sd">  """</span>
-  <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">exposure_rates</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="n">numpy</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">exposure_rates</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Exposure rates must be between 0 and 1"</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-  <span class="k">if</span> <span class="n">test_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Test size must be positive"</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-  <span class="n">bank_size</span> <span class="o">=</span> <span class="n">exposure_rates</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-  <span class="k">if</span> <span class="n">test_size</span> <span class="o">&gt;</span> <span class="n">bank_size</span><span class="p">:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Test size (</span><span class="si">{</span><span class="n">test_size</span><span class="si">}</span><span class="s2">) cannot be larger than bank size (</span><span class="si">{</span><span class="n">bank_size</span><span class="si">}</span><span class="s2">)"</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-  <span class="n">var_r</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">))</span>
-  <span class="k">return</span> <span class="p">(</span><span class="n">bank_size</span> <span class="o">/</span> <span class="n">test_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">var_r</span> <span class="o">+</span> <span class="p">(</span><span class="n">test_size</span> <span class="o">/</span> <span class="n">bank_size</span><span class="p">)</span></div>
+  <span class="n">tests</span> <span class="o">=</span> <span class="n">_test_matrix</span><span class="p">(</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">n_items</span><span class="p">)</span>
+  <span class="n">n_sessions</span><span class="p">,</span> <span class="n">test_size</span> <span class="o">=</span> <span class="n">tests</span><span class="o">.</span><span class="n">shape</span>
+  <span class="n">rates</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">tests</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">minlength</span><span class="o">=</span><span class="n">n_items</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_sessions</span>
+  <span class="n">value</span> <span class="o">=</span> <span class="n">_overlap</span><span class="p">(</span><span class="n">rates</span><span class="p">,</span> <span class="n">test_size</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">n_sessions</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># noqa: PLR2004 - a spread needs two sessions</span>
+    <span class="k">return</span> <span class="n">Metric</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+  <span class="n">summed_rates</span> <span class="o">=</span> <span class="n">rates</span><span class="p">[</span><span class="n">tests</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">Metric</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="n">test_size</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">summed_rates</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="n">n_sessions</span><span class="p">))</span></div>
 
 </pre></div>
 

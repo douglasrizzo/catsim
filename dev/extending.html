@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="_static/documentation_options.js?v=c4f92b34"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'extending';</script>
@@ -49,7 +51,7 @@
     <link rel="icon" href="_static/favicon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Tutorials" href="tutorials.html" />
+    <link rel="next" title="Embedding catsim" href="embedding-catsim.html" />
     <link rel="prev" title="Reproducibility" href="reproducibility.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
@@ -394,9 +396,9 @@
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="terms-and-notation.html">Terms and Notation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-simulations.html">Running Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="live-sessions.html">Live CAT Sessions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reproducibility.html">Reproducibility</a></li>
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Extending catsim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="embedding-catsim.html">Embedding catsim</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 </ul>
 </div>
@@ -460,65 +462,91 @@
                   
   <section class="tex2jax_ignore mathjax_ignore" id="extending-catsim">
 <h1>Extending catsim<a class="headerlink" href="#extending-catsim" title="Link to this heading">#</a></h1>
-<p>The initializer, the selector, the estimator and the stopper of a test, and the engine’s optional
-exposure control, are <em>strategies</em>: objects that <a class="reference internal" href="api/engine.html#catsim.CatEngine" title="catsim.CatEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">CatEngine</span></code></a> calls at fixed
-points of every session. A method catsim lacks is a subclass of a strategy’s base class, and it
-runs in live sessions and in <a class="reference internal" href="api/simulation.html#catsim.SimulationRunner" title="catsim.SimulationRunner"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulationRunner</span></code></a> like the built-in ones, with
-their metrics and plots. This guide is for method authors: it lists what each strategy receives and
-returns and the rules every strategy keeps, then writes a custom selector and a custom stopper and
-runs each in a simulation. It assumes <a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a>.</p>
-<section id="the-base-classes">
-<h2>The Base Classes<a class="headerlink" href="#the-base-classes" title="Link to this heading">#</a></h2>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Strategy</p></th>
-<th class="head"><p>Base class</p></th>
-<th class="head"><p>The engine calls</p></th>
-<th class="head"><p>It returns</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>initializer</p></td>
-<td><p><a class="reference internal" href="api/techniques/initialization/index.html#catsim.initialization.BaseInitializer" title="catsim.initialization.BaseInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseInitializer</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">initialize(*,</span> <span class="pre">item_bank,</span> <span class="pre">rng)</span></code>, once per session, before the first item</p></td>
-<td><p>the initial ability estimate, a float</p></td>
-</tr>
-<tr class="row-odd"><td><p>selector</p></td>
-<td><p><a class="reference internal" href="api/techniques/selection/index.html#catsim.selection.BaseSelector" title="catsim.selection.BaseSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">select(context)</span></code>, before each item</p></td>
-<td><p>the index of an item neither administered nor excluded</p></td>
-</tr>
-<tr class="row-even"><td><p>estimator</p></td>
-<td><p><a class="reference internal" href="api/techniques/estimation/index.html#catsim.estimation.BaseEstimator" title="catsim.estimation.BaseEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">estimate(context)</span></code>, after each response</p></td>
-<td><p>an <a class="reference internal" href="api/context.html#catsim.Estimate" title="catsim.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p>stopper</p></td>
-<td><p><a class="reference internal" href="api/techniques/stopping/index.html#catsim.stopping.BaseStopper" title="catsim.stopping.BaseStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseStopper</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">stop(context)</span></code>, after each estimate, and once before the first item</p></td>
-<td><p>whether the test ends</p></td>
-</tr>
-<tr class="row-even"><td><p>exposure control</p></td>
-<td><p><a class="reference internal" href="api/exposure.html#catsim.exposure.BaseExposureControl" title="catsim.exposure.BaseExposureControl"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseExposureControl</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">accept(context,</span> <span class="pre">item_id)</span></code>, for each item the selector proposes</p></td>
-<td><p>whether to administer it</p></td>
-</tr>
-</tbody>
-</table>
+<p>A method catsim lacks is a class: subclass the base class of its kind of strategy and implement its
+one method. <a class="reference internal" href="api/engine.html#catsim.CatEngine" title="catsim.CatEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">CatEngine</span></code></a> then calls it at fixed points of every test, and it runs
+in <a class="reference internal" href="api/simulation.html#catsim.simulate" title="catsim.simulate"><code class="xref py py-func docutils literal notranslate"><span class="pre">simulate()</span></code></a> like the built-in strategies, with their metrics and plots. This
+guide writes an initializer, an estimator, a selector and a stopper, says after each what that kind
+of strategy must do, and ends by running all four in one simulation. It assumes
+<a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a>.</p>
+<p>The examples share these imports:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">Estimate</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">NoItemsAvailableError</span><span class="p">,</span> <span class="n">StepContext</span><span class="p">,</span> <span class="n">simulate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseInitializer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.irt</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_likelihood</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span><span class="p">,</span> <span class="n">below_cap</span><span class="p">,</span> <span class="n">check_r_max</span><span class="p">,</span> <span class="n">pick_best</span><span class="p">,</span> <span class="n">remaining</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseStopper</span><span class="p">,</span> <span class="n">MaxLengthStopper</span><span class="p">,</span> <span class="n">StopRule</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntArray</span>
+</pre></div>
 </div>
-<p>The exposure control is optional: an engine has one only when it is given one, as
-<code class="docutils literal notranslate"><span class="pre">CatEngine(...,</span> <span class="pre">exposure_control=...)</span></code>. An item it declines is excluded from the session for the
-rest of its test, and the selector proposes again. <a class="reference internal" href="live-sessions.html"><span class="doc">Live CAT Sessions</span></a> shows one at work.</p>
-<p>Decorate each method you override with <code class="docutils literal notranslate"><span class="pre">&#64;override</span></code>, from the <code class="docutils literal notranslate"><span class="pre">typing_extensions</span></code> package that
-catsim depends on, so that a type checker reports a method that overrides nothing, such as one with
-a misspelt name. Annotate arrays with the aliases of <a class="reference internal" href="api/typing.html#module-catsim.typing" title="catsim.typing"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></a>, <code class="docutils literal notranslate"><span class="pre">FloatArray</span></code> and
-<code class="docutils literal notranslate"><span class="pre">IntArray</span></code>, as catsim’s own signatures do.</p>
+<p><code class="docutils literal notranslate"><span class="pre">&#64;override</span></code> marks each method that implements one of a base class, so that a type checker reports a
+method that overrides nothing, such as one with a misspelt name. It is in <code class="docutils literal notranslate"><span class="pre">typing</span></code> from Python 3.12
+on, and in the <code class="docutils literal notranslate"><span class="pre">typing_extensions</span></code> package on Python 3.11.</p>
+<section id="an-initializer">
+<h2>An Initializer<a class="headerlink" href="#an-initializer" title="Link to this heading">#</a></h2>
+<p>An initializer gives each session its ability estimate before the first item. When every examinee
+starts at the same estimate, every examinee gets the same first item. This initializer starts each
+session near the bank’s median difficulty, moved at random by up to <code class="docutils literal notranslate"><span class="pre">spread</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MedianDifficultyInitializer</span><span class="p">(</span><span class="n">BaseInitializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Start near the bank's median difficulty, moved at random by up to `spread`."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spread</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spread</span> <span class="o">=</span> <span class="n">spread</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">median</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">difficulty</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">median</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">spread</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spread</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>What an initializer must do:</strong> implement
+<a class="reference internal" href="api/techniques/initialization/index.html#catsim.initialization.BaseInitializer.initialize" title="catsim.initialization.BaseInitializer.initialize"><code class="xref py py-meth docutils literal notranslate"><span class="pre">initialize()</span></code></a>, which the engine calls once per
+session, before any item. The session has no responses yet, so the initializer receives only the
+item bank and the generator of the call, and it returns the initial estimate as a finite float.</p>
+<p>This initializer also keeps the three rules that every strategy keeps:</p>
+<ul class="simple">
+<li><p><strong>It draws only from the generator it is given:</strong> <code class="docutils literal notranslate"><span class="pre">rng</span></code> here, <code class="docutils literal notranslate"><span class="pre">context.rng</span></code> in the other
+strategies. In a simulation, that generator is the examinee’s own, so a seeded run repeats
+(<a class="reference internal" href="reproducibility.html"><span class="doc">Reproducibility</span></a>). A generator of the strategy’s own, or <code class="docutils literal notranslate"><span class="pre">numpy.random</span></code>’s global
+functions, escapes the run’s seed.</p></li>
+<li><p><strong>It keeps nothing about a session.</strong> A strategy holds its configuration, and data it derives from
+the item bank, nothing else: one strategy object serves every session of a run, and an
+application may interleave the sessions of many examinees on one engine. Whatever a strategy needs
+about the session, it computes at each call.</p></li>
+<li><p><strong>It can run on workers,</strong> so that <code class="docutils literal notranslate"><span class="pre">simulate(...,</span> <span class="pre">workers=4)</span></code> can send it to other processes:
+define the class in a module, not in a notebook or in the script being run, and give it no lambdas
+or functions defined inside other functions as attributes. Otherwise <code class="docutils literal notranslate"><span class="pre">simulate</span></code> raises before it
+runs anything, and names what to move. With one worker, the default, any strategy runs.</p></li>
+</ul>
+<p><a class="reference internal" href="adr/0007-strategy-contracts.html"><span class="doc">ADR-0007: Strategies Are Classes That Take One Step Context</span></a> explains why strategies are shaped this way.</p>
 </section>
-<section id="what-a-strategy-reads">
-<h2>What a Strategy Reads<a class="headerlink" href="#what-a-strategy-reads" title="Link to this heading">#</a></h2>
-<p>The initializer runs before the session has any state, so it receives only the item bank and the
-run’s random generator. The other strategies receive a <a class="reference internal" href="api/context.html#catsim.StepContext" title="catsim.StepContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">StepContext</span></code></a>, which the
-engine builds for every call:</p>
+<section id="an-estimator">
+<h2>An Estimator<a class="headerlink" href="#an-estimator" title="Link to this heading">#</a></h2>
+<p>An estimator updates the ability estimate after each response. This one computes the maximum a
+posteriori estimate under a standard normal prior, by brute force: it evaluates the log-posterior on
+a grid of abilities and returns the grid point where it is highest. Its standard error is
+<span class="math notranslate nohighlight">\(1/\sqrt{I(\hat{\theta}) + 1}\)</span>, where <span class="math notranslate nohighlight">\(I(\hat{\theta})\)</span> is the test information at the estimate and
+the 1 comes from the prior.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">GridMAPEstimator</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Return the most probable ability on a grid, under a standard normal prior."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">low</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="n">high</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">,</span> <span class="n">points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">161</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Estimate</span><span class="p">:</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span>
+        <span class="n">log_posterior</span> <span class="o">=</span> <span class="n">log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">log_posterior</span><span class="p">)])</span>
+        <span class="n">information</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">total_information</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Estimate</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">information</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">evaluations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The estimator, the selector and the stopper receive a <a class="reference internal" href="api/context.html#catsim.StepContext" title="catsim.StepContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">StepContext</span></code></a>: what they
+may read about the session, built anew by the engine for every call.</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Field</p></th>
@@ -529,100 +557,51 @@ engine builds for every call:</p>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">item_bank</span></code></p></td>
 <td><p>the session’s <a class="reference internal" href="api/item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rng</span></code></p></td>
-<td><p>the run’s random generator</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">administered_items</span></code>, <code class="docutils literal notranslate"><span class="pre">responses</span></code></p></td>
+<td><p>the items given so far and the responses to them, in order</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">administered_items</span></code>, <code class="docutils literal notranslate"><span class="pre">responses</span></code></p></td>
-<td><p>the items given so far and the responses to them, in order, as tuples</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">excluded_items</span></code></p></td>
+<td><p>the items the session must not be given, although it has not had them</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">excluded_items</span></code></p></td>
-<td><p>items the selector must not choose although they were not given, such as those the exposure control declined</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">theta</span></code>, <code class="docutils literal notranslate"><span class="pre">se</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">theta</span></code>, <code class="docutils literal notranslate"><span class="pre">se</span></code></p></td>
 <td><p>the current ability estimate and its standard error</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code></p></td>
-<td><p>each item’s administrations divided by the other sessions started, or <code class="docutils literal notranslate"><span class="pre">None</span></code> when the run counts no exposure, in which case no cap applies; an item this session was given counts its own administration, so its rate can exceed 1</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code></p></td>
+<td><p>each item’s exposure rate, from 0 to 1, or <code class="docutils literal notranslate"><span class="pre">None</span></code> when no rates are given</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rng</span></code></p></td>
+<td><p>the generator of the call</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>The selector receives the session as it stands, and the exposure control the same context with the
-items it already declined in this selection among the excluded ones. The estimator receives the
-newest item and response, with <code class="docutils literal notranslate"><span class="pre">theta</span></code> and <code class="docutils literal notranslate"><span class="pre">se</span></code> still those of the previous estimate, its starting
-point. The stopper receives the new estimate as well; before the first item, it receives the
-initial estimate, no items and an infinite <code class="docutils literal notranslate"><span class="pre">se</span></code>, so it must handle an empty test. No context holds the examinee’s true ability,
-so a strategy cannot see the simulated truth.</p>
-<p>An estimator returns an <a class="reference internal" href="api/context.html#catsim.Estimate" title="catsim.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a>: <code class="docutils literal notranslate"><span class="pre">theta</span></code>, which must be finite; <code class="docutils literal notranslate"><span class="pre">se</span></code>, its
-standard error by the estimator’s own formula, which may be <code class="docutils literal notranslate"><span class="pre">math.inf</span></code> but never NaN, because the
-precision stoppers compare it with their targets; and <code class="docutils literal notranslate"><span class="pre">evaluations</span></code>, how many times the estimator
-evaluated its objective, or <code class="docutils literal notranslate"><span class="pre">None</span></code>. For the likelihood, <a class="reference internal" href="api/irt.html#catsim.irt.log_likelihood_function" title="catsim.irt.log_likelihood_function"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.log_likelihood_function()</span></code></a>
-returns the log-likelihood of the responses as a function of the ability, and
-<a class="reference internal" href="api/irt.html#catsim.irt.log_response_probabilities" title="catsim.irt.log_response_probabilities"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.log_response_probabilities()</span></code></a> returns <span class="math notranslate nohighlight">\(\log P_i(\theta)\)</span> and <span class="math notranslate nohighlight">\(\log Q_i(\theta)\)</span>,
-exact even far from the item’s difficulty. Bayesian estimators can build on the priors and the
+<p>No context holds the examinee’s true ability, so no strategy can see the simulated truth.</p>
+<p><strong>What an estimator must do:</strong> implement <a class="reference internal" href="api/techniques/estimation/index.html#catsim.estimation.BaseEstimator.estimate" title="catsim.estimation.BaseEstimator.estimate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">estimate()</span></code></a>,
+which the engine calls after each response. Its context holds the newest item and response, while
+<code class="docutils literal notranslate"><span class="pre">theta</span></code> and <code class="docutils literal notranslate"><span class="pre">se</span></code> are still the previous estimate’s, from which an iterative estimator can start. It
+returns an <a class="reference internal" href="api/context.html#catsim.Estimate" title="catsim.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a> of three fields:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">theta</span></code>, finite whatever the responses, all correct and all incorrect included; a grid has no
+infinite points, so this estimator’s estimate is always finite;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">se</span></code>, the standard error by the estimator’s own formula: positive, possibly <code class="docutils literal notranslate"><span class="pre">math.inf</span></code>. The
+stoppers that target a precision compare it with their targets;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">evaluations</span></code>, how many times the estimator evaluated its objective, or <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+</ul>
+<p>Look-ahead selectors, such as MEI, also call the estimator with responses the examinee has not
+given, which is one more reason for it to keep nothing about a session. For the likelihood,
+<a class="reference internal" href="api/irt.html#catsim.irt.log_likelihood_function" title="catsim.irt.log_likelihood_function"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.log_likelihood_function()</span></code></a> returns the log-likelihood of the responses as a
+function of the ability, and <a class="reference internal" href="api/irt.html#catsim.irt.log_response_probabilities" title="catsim.irt.log_response_probabilities"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.log_response_probabilities()</span></code></a> returns
+<span class="math notranslate nohighlight">\(\log P_i(\theta)\)</span> and <span class="math notranslate nohighlight">\(\log Q_i(\theta)\)</span>. A Bayesian estimator can build on the priors and the
 posterior of <a class="reference internal" href="api/techniques/estimation/bayesian-infrastructure.html"><span class="doc">Bayesian Estimation Infrastructure</span></a>.</p>
 </section>
-<section id="the-rules-a-strategy-keeps">
-<h2>The Rules a Strategy Keeps<a class="headerlink" href="#the-rules-a-strategy-keeps" title="Link to this heading">#</a></h2>
-<ul class="simple">
-<li><p><strong>No per-session state.</strong> A strategy holds its configuration and caches derived from the item
-bank, nothing else. One strategy object serves every session of a run, an application may
-interleave the sessions of many examinees on one engine, and look-ahead selectors such as MEI
-call their estimator with hypothetical responses. Whatever a strategy needs about the session, it
-computes from the context at each call.</p></li>
-<li><p><strong>Randomness only from the run’s generator:</strong> <code class="docutils literal notranslate"><span class="pre">context.rng</span></code>, or the initializer’s <code class="docutils literal notranslate"><span class="pre">rng</span></code>. Every
-random draw of a run then comes from one generator, so a seeded run repeats
-(<a class="reference internal" href="reproducibility.html"><span class="doc">Reproducibility</span></a>). A strategy that draws from anywhere else, such as a generator of its
-own or <code class="docutils literal notranslate"><span class="pre">numpy.random</span></code>’s global functions, escapes the run’s seed.</p></li>
-<li><p><strong>A selector chooses an item neither administered nor excluded,</strong> and raises
-<a class="reference internal" href="api/exceptions.html#catsim.NoItemsAvailableError" title="catsim.NoItemsAvailableError"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code></a> when it has none to offer; the engine then ends the
-session with <code class="docutils literal notranslate"><span class="pre">StopReason.NO_ITEMS</span></code>. A selector that passes a changed context to another, with
-<a class="reference external" href="https://docs.python.org/3/library/dataclasses.html#dataclasses.replace" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dataclasses.replace()</span></code></a>, adds to its excluded items and never removes any.</p></li>
-<li><p><strong>A stopper is pure:</strong> the same context always gives the same answer, so a
-<a class="reference internal" href="api/techniques/stopping/index.html#catsim.stopping.StopRule" title="catsim.stopping.StopRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopRule</span></code></a> can be asked after a run which of its stoppers held.</p></li>
-<li><p><strong>An estimator’s estimate is finite</strong> once an item has been administered, whatever the responses,
-all correct and all incorrect included.</p></li>
-</ul>
-<p><a class="reference internal" href="adr/0005-explicit-strategy-contracts.html"><span class="doc">ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate</span></a> explains why the strategies are shaped this way.</p>
-</section>
-<section id="the-selector-helpers">
-<h2>The Selector Helpers<a class="headerlink" href="#the-selector-helpers" title="Link to this heading">#</a></h2>
-<p><a class="reference internal" href="api/techniques/selection/index.html#module-catsim.selection" title="catsim.selection"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a> exports the functions that make the built-in selectors behave alike. A
-custom selector that uses them draws its candidates, applies an exposure cap and breaks ties as the
-built-in ones do:</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="api/techniques/selection/index.html#catsim.selection.remaining" title="catsim.selection.remaining"><code class="xref py py-func docutils literal notranslate"><span class="pre">remaining()</span></code></a> returns the items neither administered nor excluded, and
-raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code> when there are none;</p></li>
-<li><p><a class="reference internal" href="api/techniques/selection/index.html#catsim.selection.below_cap" title="catsim.selection.below_cap"><code class="xref py py-func docutils literal notranslate"><span class="pre">below_cap()</span></code></a> keeps the candidates whose exposure rate is below a cap
-<code class="docutils literal notranslate"><span class="pre">r_max</span></code>, or all of them when none is;</p></li>
-<li><p><a class="reference internal" href="api/techniques/selection/index.html#catsim.selection.pick_best" title="catsim.selection.pick_best"><code class="xref py py-func docutils literal notranslate"><span class="pre">pick_best()</span></code></a> returns the candidate with the highest score, and breaks
-exact ties at random with the generator it is given, as every built-in selector does
-(<a class="reference internal" href="api/techniques/selection/index.html#selection-ties"><span class="std std-ref">Ties</span></a>);</p></li>
-<li><p><a class="reference internal" href="api/techniques/selection/index.html#catsim.selection.best_pool" title="catsim.selection.best_pool"><code class="xref py py-func docutils literal notranslate"><span class="pre">best_pool()</span></code></a> returns the best candidates, with every candidate tied at
-the cutoff, for selectors that draw from a pool of good items;</p></li>
-<li><p><a class="reference internal" href="api/techniques/selection/index.html#catsim.selection.check_r_max" title="catsim.selection.check_r_max"><code class="xref py py-func docutils literal notranslate"><span class="pre">check_r_max()</span></code></a> and <a class="reference internal" href="api/techniques/selection/index.html#catsim.selection.check_test_size" title="catsim.selection.check_test_size"><code class="xref py py-func docutils literal notranslate"><span class="pre">check_test_size()</span></code></a> check a
-selector’s constructor arguments.</p></li>
-</ul>
-</section>
-<section id="a-custom-selector">
-<h2>A Custom Selector<a class="headerlink" href="#a-custom-selector" title="Link to this heading">#</a></h2>
-<p>Content balancing keeps each test’s mix of content areas, such as algebra, geometry and statistics,
-close to a target. The selector below gives the most informative item of the area given least so
-far in the session, among the items under an exposure cap. The areas, one per item, and their
-number are configuration; how many items of each area the session has had is computed from the
-context at every call, never stored.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">NoItemsAvailableError</span><span class="p">,</span> <span class="n">SimulationRunner</span><span class="p">,</span> <span class="n">StepContext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">EAPEstimator</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">FixedPointInitializer</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span><span class="p">,</span> <span class="n">MaxInfoSelector</span><span class="p">,</span> <span class="n">below_cap</span><span class="p">,</span> <span class="n">check_r_max</span><span class="p">,</span> <span class="n">pick_best</span><span class="p">,</span> <span class="n">remaining</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseStopper</span><span class="p">,</span> <span class="n">MaxLengthStopper</span><span class="p">,</span> <span class="n">StopRule</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntArray</span>
-
-
-<span class="k">class</span><span class="w"> </span><span class="nc">ContentBalancedSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
+<section id="a-selector">
+<h2>A Selector<a class="headerlink" href="#a-selector" title="Link to this heading">#</a></h2>
+<p>A selector chooses the next item. Content balancing keeps each test’s mix of content areas, such as
+algebra, geometry and statistics, close to a target. This selector gives the most informative item
+of the area the session has had least, among the items under an exposure cap. The item’s areas are
+configuration; how many items of each area the session has had, it counts from the context at every
+call.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ContentBalancedSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Give the most informative item of the content area given least so far."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">areas</span><span class="p">:</span> <span class="n">IntArray</span><span class="p">,</span> <span class="n">r_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -640,37 +619,47 @@ context at every call, never stored.</p>
         <span class="k">return</span> <span class="n">pick_best</span><span class="p">(</span><span class="n">in_area</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">)[</span><span class="n">in_area</span><span class="p">],</span> <span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Among the areas with items left, <code class="docutils literal notranslate"><span class="pre">argmin</span></code> picks the one given least, the lowest-numbered on a tie.
-A strategy can be called by hand, which is how to test one, with a context built from its two
-required fields and any others (for a session an engine runs, <a class="reference internal" href="api/engine.html#catsim.CatEngine.context" title="catsim.CatEngine.context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">context()</span></code></a>
-gives the one its selector sees next):</p>
+<p>Among the areas with items left, <code class="docutils literal notranslate"><span class="pre">argmin</span></code> picks the area given least, the lowest-numbered on a tie.
+The helpers of <a class="reference internal" href="api/techniques/selection/index.html#module-catsim.selection" title="catsim.selection"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a> make a custom selector behave like the built-in ones:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="api/techniques/selection/index.html#catsim.selection.remaining" title="catsim.selection.remaining"><code class="xref py py-func docutils literal notranslate"><span class="pre">remaining()</span></code></a> returns the candidate items, those neither administered nor
+excluded, and raises <a class="reference internal" href="api/exceptions.html#catsim.NoItemsAvailableError" title="catsim.NoItemsAvailableError"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code></a> when there are none;</p></li>
+<li><p><a class="reference internal" href="api/techniques/selection/index.html#catsim.selection.below_cap" title="catsim.selection.below_cap"><code class="xref py py-func docutils literal notranslate"><span class="pre">below_cap()</span></code></a> keeps the candidate items whose exposure rate is below a cap
+<code class="docutils literal notranslate"><span class="pre">r_max</span></code>, or all of them when none is, and treats <code class="docutils literal notranslate"><span class="pre">None</span></code> rates as no exposure;</p></li>
+<li><p><a class="reference internal" href="api/techniques/selection/index.html#catsim.selection.pick_best" title="catsim.selection.pick_best"><code class="xref py py-func docutils literal notranslate"><span class="pre">pick_best()</span></code></a> returns the candidate item with the highest score, and
+breaks exact ties at random with the generator it is given (<a class="reference internal" href="api/techniques/selection/index.html#selection-ties"><span class="std std-ref">Ties</span></a>);</p></li>
+<li><p><a class="reference internal" href="api/techniques/selection/index.html#catsim.selection.best_pool" title="catsim.selection.best_pool"><code class="xref py py-func docutils literal notranslate"><span class="pre">best_pool()</span></code></a> returns the best candidate items, for a selector that draws
+from a pool of good ones;</p></li>
+<li><p><a class="reference internal" href="api/techniques/selection/index.html#catsim.selection.check_r_max" title="catsim.selection.check_r_max"><code class="xref py py-func docutils literal notranslate"><span class="pre">check_r_max()</span></code></a> and <a class="reference internal" href="api/techniques/selection/index.html#catsim.selection.check_test_size" title="catsim.selection.check_test_size"><code class="xref py py-func docutils literal notranslate"><span class="pre">check_test_size()</span></code></a> check a
+selector’s settings.</p></li>
+</ul>
+<p><strong>What a selector must do:</strong> implement <a class="reference internal" href="api/techniques/selection/index.html#catsim.selection.BaseSelector.select" title="catsim.selection.BaseSelector.select"><code class="xref py py-meth docutils literal notranslate"><span class="pre">select()</span></code></a>, which the
+engine calls before each item. It returns the index of an item neither administered nor excluded,
+or raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code> when it has none to offer, as <code class="docutils literal notranslate"><span class="pre">remaining</span></code> does for it; the engine
+then ends the session with <code class="docutils literal notranslate"><span class="pre">StopReason.NO_ITEMS</span></code>. A selector that calls another with a changed
+context, made with <a class="reference external" href="https://docs.python.org/3/library/dataclasses.html#dataclasses.replace" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dataclasses.replace()</span></code></a>, may add excluded items but never removes one.</p>
+<p>A strategy can be called by hand, which is how to test one. A context needs only an item bank and a
+generator; its other fields default to an empty test. For a session that an engine runs,
+<a class="reference internal" href="api/engine.html#catsim.CatEngine.context" title="catsim.CatEngine.context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CatEngine.context</span></code></a> returns the context its selector sees next.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">item_bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="s2">"3PL"</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">areas</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">resize</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">)</span>
 <span class="n">selector</span> <span class="o">=</span> <span class="n">ContentBalancedSelector</span><span class="p">(</span><span class="n">areas</span><span class="p">,</span> <span class="n">r_max</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
 <span class="n">context</span> <span class="o">=</span> <span class="n">StepContext</span><span class="p">(</span><span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">administered_items</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">responses</span><span class="o">=</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
-<span class="n">item_id</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">item_id</span><span class="p">,</span> <span class="n">areas</span><span class="p">[</span><span class="n">item_id</span><span class="p">])</span>
+<span class="n">item</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">areas</span><span class="p">[</span><span class="n">item</span><span class="p">])</span>
 </pre></div>
 </div>
-<p>The items belong to three areas in turn: 0, 1, 2, 0, 1, 2 and so on. Items 0 and 1 are of areas 0
-and 1, so the selector gives an item of area 2. In a simulation, the selector goes wherever a
-built-in one does:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">true_thetas</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
-<span class="n">engine</span> <span class="o">=</span> <span class="n">CatEngine</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">FixedPointInitializer</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">selector</span><span class="p">,</span> <span class="n">EAPEstimator</span><span class="p">(),</span> <span class="n">MaxLengthStopper</span><span class="p">(</span><span class="mi">12</span><span class="p">))</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">SimulationRunner</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">areas</span><span class="p">[</span><span class="n">result</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">administered_items</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"RMSE </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">rmse</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, highest exposure rate </span><span class="si">{</span><span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>155 2
 </pre></div>
 </div>
-<p>Every test of 12 items gives 4 of each area, in turn, and no item’s exposure rate goes above the
-cap of 0.3.</p>
+<p>The items belong to the three areas in turn: 0, 1, 2, 0, 1, 2 and so on. Items 0 and 1 are of areas
+0 and 1, so the selector gives an item of area 2, item 155.</p>
 </section>
-<section id="a-custom-stopper">
-<h2>A Custom Stopper<a class="headerlink" href="#a-custom-stopper" title="Link to this heading">#</a></h2>
-<p>A test can end when no item left in the bank would tell much more about the examinee. The stopper
-below ends the test once the most informative remaining item gives less than <code class="docutils literal notranslate"><span class="pre">min_info</span></code> at the
-current estimate. It reads the item bank, the estimate and the remaining items from the context,
-so it is pure.</p>
+<section id="a-stopper">
+<h2>A Stopper<a class="headerlink" href="#a-stopper" title="Link to this heading">#</a></h2>
+<p>A stopper decides whether the test ends. A test can end when no item left in the bank would tell
+much more about the examinee. This stopper ends it once the most informative remaining item gives
+less than <code class="docutils literal notranslate"><span class="pre">min_info</span></code> at the current estimate:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MinInfoStopper</span><span class="p">(</span><span class="n">BaseStopper</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Stop once no remaining item gives at least `min_info` at the current estimate."""</span>
 
@@ -684,21 +673,52 @@ so it is pure.</p>
         <span class="k">except</span> <span class="n">NoItemsAvailableError</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">)[</span><span class="n">candidates</span><span class="p">])</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_info</span><span class="p">)</span>
-
-
-<span class="n">stopper</span> <span class="o">=</span> <span class="n">StopRule</span><span class="p">(</span><span class="n">MinInfoStopper</span><span class="p">(</span><span class="mf">0.2</span><span class="p">),</span> <span class="n">MaxLengthStopper</span><span class="p">(</span><span class="mi">30</span><span class="p">),</span> <span class="n">min_items</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-<span class="n">engine</span> <span class="o">=</span> <span class="n">CatEngine</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">FixedPointInitializer</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">MaxInfoSelector</span><span class="p">(),</span> <span class="n">EAPEstimator</span><span class="p">(),</span> <span class="n">stopper</span><span class="p">)</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">SimulationRunner</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">early</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">test_lengths</span> <span class="o">&lt;</span> <span class="mi">30</span>
-<span class="n">extreme</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1.5</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">early</span><span class="p">)</span><span class="si">}</span><span class="s2"> tests end before 30 items"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"abilities beyond ±1.5: </span><span class="si">{</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">extreme</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> of the population, </span><span class="si">{</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">extreme</span><span class="p">[</span><span class="n">early</span><span class="p">])</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> of those tests"</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>A <a class="reference internal" href="api/techniques/stopping/index.html#catsim.stopping.StopRule" title="catsim.stopping.StopRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopRule</span></code></a> combines the custom stopper with a length cap and a minimum
-length, as it does the built-in ones. In this run, 33 of the 500 tests end before the cap, nearly 9
-in 10 of them for examinees whose ability lies beyond ±1.5, against 14% of the population: the bank
-has few informative items at those abilities, and the stopper ends the test once it has given them.</p>
+<p><strong>What a stopper must do:</strong> implement <a class="reference internal" href="api/techniques/stopping/index.html#catsim.stopping.BaseStopper.stop" title="catsim.stopping.BaseStopper.stop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">stop()</span></code></a>, which the
+engine calls after each estimate, and once before the first item. That first call has no items and
+an infinite <code class="docutils literal notranslate"><span class="pre">se</span></code>, so a stopper must handle an empty test. It returns whether the test ends, and it
+is pure: the same context always gives the same answer, so a
+<a class="reference internal" href="api/techniques/stopping/index.html#catsim.stopping.StopRule" title="catsim.stopping.StopRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopRule</span></code></a> can tell after a run which of its stoppers held.</p>
+</section>
+<section id="all-four-in-one-test">
+<h2>All Four in One Test<a class="headerlink" href="#all-four-in-one-test" title="Link to this heading">#</a></h2>
+<p>The four strategies go wherever built-in ones do. Here a <a class="reference internal" href="api/techniques/stopping/index.html#catsim.stopping.StopRule" title="catsim.stopping.StopRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopRule</span></code></a>
+combines the custom stopper with a length cap of 30 items and a minimum of 5, as it combines
+built-in stoppers:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">engine</span> <span class="o">=</span> <span class="n">CatEngine</span><span class="p">(</span>
+    <span class="n">item_bank</span><span class="p">,</span>
+    <span class="n">MedianDifficultyInitializer</span><span class="p">(</span><span class="n">spread</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
+    <span class="n">selector</span><span class="p">,</span>
+    <span class="n">GridMAPEstimator</span><span class="p">(),</span>
+    <span class="n">StopRule</span><span class="p">(</span><span class="n">MinInfoStopper</span><span class="p">(</span><span class="mf">0.2</span><span class="p">),</span> <span class="n">MaxLengthStopper</span><span class="p">(</span><span class="mi">30</span><span class="p">),</span> <span class="n">min_items</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">true_thetas</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">simulate</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">true_thetas</span><span class="o">=</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">lengths</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">examinees</span><span class="p">()[</span><span class="s2">"test_length"</span><span class="p">]</span>
+<span class="n">first_items</span> <span class="o">=</span> <span class="p">{</span><span class="n">session</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">sessions</span><span class="p">}</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">areas</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[:</span><span class="mi">9</span><span class="p">])])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">first_items</span><span class="p">)</span><span class="si">}</span><span class="s2"> first items, highest exposure rate </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">lengths</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">30</span><span class="p">)</span><span class="si">}</span><span class="s2"> tests end before 30 items; RMSE </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">rmse</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[0 1 2 0 1 2 0 1 2]
+26 first items, highest exposure rate 0.30
+8 tests end before 30 items; RMSE 0.358
+</pre></div>
+</div>
+<p>Each test takes its items from the three areas in turn, as the first nine items of the first test
+show. The initializer spreads the first items over 26 items of the bank, and the selector’s cap
+keeps every item’s exposure rate at 0.3 or below. The 8 tests that end before the cap are all of
+examinees whose ability lies beyond ±1.9: the bank has few informative items there, and the stopper
+ends the test once it has given them.</p>
+<p>An exposure control is written the same way: subclass
+<a class="reference internal" href="api/exposure.html#catsim.exposure.BaseExposureControl" title="catsim.exposure.BaseExposureControl"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseExposureControl</span></code></a> and implement <code class="docutils literal notranslate"><span class="pre">accept(context,</span> <span class="pre">item)</span></code>, which says
+whether to administer the item the selector proposes. The
+<a class="reference external" href="https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/04_custom_strategies.ipynb">custom-strategies notebook</a>
+writes one, along with another selector and stopper.</p>
+<p>The strategies of this guide are defined in the script that runs them, so they run with one worker.
+To run them on several, move the classes into a module and import them from there.</p>
 </section>
 </section>
 
@@ -722,11 +742,11 @@ has few informative items at those abilities, and the stopper ends the test once
       </div>
     </a>
     <a class="right-next"
-       href="tutorials.html"
+       href="embedding-catsim.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Tutorials</p>
+        <p class="prev-next-title">Embedding catsim</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -749,12 +769,11 @@ has few informative items at those abilities, and the stopper ends the test once
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-base-classes">The Base Classes</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-a-strategy-reads">What a Strategy Reads</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-rules-a-strategy-keeps">The Rules a Strategy Keeps</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-selector-helpers">The Selector Helpers</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-custom-selector">A Custom Selector</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-custom-stopper">A Custom Stopper</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#an-initializer">An Initializer</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#an-estimator">An Estimator</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-selector">A Selector</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-stopper">A Stopper</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#all-four-in-one-test">All Four in One Test</a></li>
 </ul>
   </nav></div>
 

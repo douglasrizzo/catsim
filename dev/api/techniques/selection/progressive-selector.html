@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/techniques/selection/progressive-selector';</script>
@@ -495,8 +497,8 @@ near-Fisher behavior late, and no need for offline calibration.</p>
 </section>
 <section id="definition">
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
-<p>At test position <span class="math notranslate nohighlight">\(n\)</span> out of a planned total length <span class="math notranslate nohighlight">\(N\)</span>, the candidate
-score for item <span class="math notranslate nohighlight">\(i\)</span> is</p>
+<p>At test position <span class="math notranslate nohighlight">\(n\)</span> out of a planned total length <span class="math notranslate nohighlight">\(N\)</span>, the score
+of item <span class="math notranslate nohighlight">\(i\)</span> is</p>
 <div class="math notranslate nohighlight">
 \[S_i^{(n)}
 =
@@ -528,23 +530,6 @@ it. The selector chooses the available item with the largest score.</p>
 to <span class="math notranslate nohighlight">\(k\)</span>, and Equations 12 and 13 both use the exponent <span class="math notranslate nohighlight">\(s\)</span>; the text under them,
 which names <span class="math notranslate nohighlight">\(t\)</span> and <span class="math notranslate nohighlight">\(s\)</span> as the two acceleration parameters and gives a weight of
 1 at the last item, puts <span class="math notranslate nohighlight">\(K\)</span> in the denominator and <span class="math notranslate nohighlight">\(t\)</span> in Equation 12.</p>
-<section id="computation">
-<h3>Computation<a class="headerlink" href="#computation" title="Link to this heading">#</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">catR</span></code> computes the schedule that way in
-<a class="reference external" href="https://github.com/cran/catR/blob/master/R/nextItem.R"><code class="docutils literal notranslate"><span class="pre">nextItem.R</span></code></a>, with its
-argument <code class="docutils literal notranslate"><span class="pre">AP</span></code> as <span class="math notranslate nohighlight">\(t\)</span> and <code class="docutils literal notranslate"><span class="pre">thr</span></code> as <span class="math notranslate nohighlight">\(N\)</span> when <code class="docutils literal notranslate"><span class="pre">rule</span> <span class="pre">=</span> <span class="pre">&quot;length&quot;</span></code>. catsim departs
-from both in three places:</p>
-<ul class="simple">
-<li><p>The default is <span class="math notranslate nohighlight">\(t = 0\)</span>, the linear schedule; <code class="docutils literal notranslate"><span class="pre">catR</span></code>’s <code class="docutils literal notranslate"><span class="pre">nextItem</span></code> defaults to
-<code class="docutils literal notranslate"><span class="pre">AP</span> <span class="pre">=</span> <span class="pre">1</span></code>.</p></li>
-<li><p>Past position <span class="math notranslate nohighlight">\(N\)</span>, which a session reaches when its stopper allows more items
-than planned, the weight stays 1. In <code class="docutils literal notranslate"><span class="pre">catR</span></code> the sums keep growing, and the
-weight passes 1 and gives the random component a negative coefficient.</p></li>
-<li><p>With <span class="math notranslate nohighlight">\(N = 1\)</span> the only position is the last, and the weight is 1. Equation 12
-and <code class="docutils literal notranslate"><span class="pre">catR</span></code> give 0 at the first position whatever <span class="math notranslate nohighlight">\(N\)</span> is.</p></li>
-</ul>
-<p><code class="docutils literal notranslate"><span class="pre">catR</span></code>’s other schedule, for its precision stopping rule, is not implemented.</p>
-</section>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
@@ -584,7 +569,35 @@ out before the scores are computed, unless every remaining item is.</p></td>
 at the last item <span class="bibtex-citation" id="id8">[<a class="reference internal" href="#id45" title="Juan Ramón Barrada, Julio Olea, Vicente Ponsoda, and Francisco J. Abad. Incorporating randomness in the Fisher information for improving item-exposure control in CATs. British Journal of Mathematical and Statistical Psychology, 61(2):493–513, 2008. Open copy: https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf. doi:10.1348/000711007X230937.">Barrada <em>et al.</em>, 2008</a>, p. 496, Equation 7]</span>; Barrada et al. did
 not test it separately, since it differs little from Equation 12 with <span class="math notranslate nohighlight">\(t = 0\)</span>
 (p. 500).</p>
-</section>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Comparison with catR</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">catR</span></code> computes the schedule as above in
+<a class="reference external" href="https://github.com/cran/catR/blob/master/R/nextItem.R"><code class="docutils literal notranslate"><span class="pre">nextItem.R</span></code></a>, with its
+argument <code class="docutils literal notranslate"><span class="pre">AP</span></code> as <span class="math notranslate nohighlight">\(t\)</span> and <code class="docutils literal notranslate"><span class="pre">thr</span></code> as <span class="math notranslate nohighlight">\(N\)</span> when <code class="docutils literal notranslate"><span class="pre">rule</span> <span class="pre">=</span> <span class="pre">&quot;length&quot;</span></code>
+(<a class="reference internal" href="../../../adr/0019-published-progressive-schedule.html"><span class="doc">ADR-0019</span></a>). Within the planned
+length, the parity tests (<a class="reference internal" href="../../../adr/0020-catr-as-the-reference.html"><span class="doc">ADR-0020</span></a>)
+find catR’s weight and, given catR’s random draws, its choice at every position
+of 5-item tests with <span class="math notranslate nohighlight">\(t = -0.5\)</span>, 0, 1 and 2.5 and of an 8-item test with
+<span class="math notranslate nohighlight">\(t = 1\)</span>; and a simulation of 1,000 examinees taking 10-item tests with <span class="math notranslate nohighlight">\(t = 1\)</span>
+gives catR’s bias, RMSE, overlap rate and exposure rates within their Monte
+Carlo error. catsim departs from catR in three places, the last two from
+Equation 12 as well:</p>
+<ul class="simple">
+<li><p>The default is <span class="math notranslate nohighlight">\(t = 0\)</span>, the linear schedule, where catR’s <code class="docutils literal notranslate"><span class="pre">nextItem</span></code> defaults
+to <code class="docutils literal notranslate"><span class="pre">AP</span> <span class="pre">=</span> <span class="pre">1</span></code>; <code class="docutils literal notranslate"><span class="pre">acceleration=1</span></code> gives catR’s schedule.</p></li>
+<li><p>Past position <span class="math notranslate nohighlight">\(N\)</span>, which a session reaches when its stopper allows more items
+than planned, the weight stays 1, so the selector keeps choosing by
+information. In catR the sums keep growing, and the weight passes 1, which
+gives the random component a negative coefficient.</p></li>
+<li><p>With <span class="math notranslate nohighlight">\(N = 1\)</span> the only position is the last, and the weight is 1. Equation 12
+and catR give 0 at the first position whatever <span class="math notranslate nohighlight">\(N\)</span> is, which makes a one-item
+test random.</p></li>
+</ul>
+<p class="sd-card-text">The parity tests keep the last two as expected failures. catR’s other schedule,
+for its precision criterion, has no catsim counterpart.</p>
+</div>
+</details></section>
 <section id="guarantees">
 <h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
@@ -594,7 +607,7 @@ information: every available item is equally likely.</p></li>
 <li><p>From the <code class="docutils literal notranslate"><span class="pre">test_size</span></code>-th item on, it returns the most informative available item.</p></li>
 <li><p>When every remaining item is at or above the exposure cap, it chooses among all
 the remaining items.</p></li>
-<li><p>It draws with the session’s random generator, so a run with the same seed
+<li><p>It draws with the generator of the call, so a run with the same seed
 administers the same items.</p></li>
 </ol>
 </section>
@@ -620,7 +633,7 @@ administers the same items.</p></li>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Companion spec: <a class="reference internal" href="proportional-selector.html"><span class="doc">Proportional Selector</span></a></p>
+<p><a class="reference internal" href="proportional-selector.html"><span class="doc">Proportional Selector</span></a>, which follows the same schedule</p>
 </div>
 </section>
 <section id="api-reference">
@@ -751,10 +764,7 @@ unless no other items are available. Default is 1 (no restriction).</p>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#motivation">Motivation</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#definition">Definition</a><ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#computation">Computation</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#definition">Definition</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavior-and-comparison">Behavior and Comparison</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#guarantees">Guarantees</a></li>

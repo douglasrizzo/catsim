@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/techniques/selection/randomesque-selector';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../../../_static/favicon.svg"/>
@@ -494,8 +496,8 @@ choose at random among several optimal items near the current estimate.</p>
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
 <p>At each step the selector ranks the items that are neither administered nor excluded by Fisher
 information at the current ability estimate, keeps the <code class="docutils literal notranslate"><span class="pre">bin_size</span></code> most informative of them, and
-draws one uniformly at random from that candidate set. Items tied in information with the last of
-those candidates also join the set, as in catR (<a class="reference internal" href="../../../adr/0011-random-tie-breaking.html"><span class="doc">ADR-0011: Break Ties Between Items Uniformly at Random</span></a>).</p>
+draws one uniformly at random from them. Items tied in information with the last of them also
+join the set (<a class="reference internal" href="../../../adr/0017-random-tie-breaking.html"><span class="doc">ADR-0017: Break Ties Between Items Uniformly at Random</span></a>).</p>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
@@ -526,15 +528,27 @@ least 1. A bin of 1 is maximum-information selection.</p></td>
 <p>Unlike the <a class="reference internal" href="the-54321-selector.html"><span class="doc">5-4-3-2-1 technique</span></a>, it keeps drawing from the same
 number of best items for the whole test rather than switch to maximum information
 <span class="bibtex-citation" id="id4">[<a class="reference internal" href="#id53" title="E. G. Georgiadou, E. Triantafillou, and A. A. Economides. A review of item exposure control strategies for computerized adaptive testing developed from 1983 to 2005. The Journal of Technology, Learning, and Assessment, 5(8):1–39, 2007. Open access. URL: https://ejournals.bc.edu/index.php/jtla/article/view/1647.">Georgiadou <em>et al.</em>, 2007</a>, p. 9]</span>. The random draw from the candidate set is its only exposure control.</p>
-</section>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Comparison with catR</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">The selector is catR’s <code class="docutils literal notranslate"><span class="pre">nextItem</span></code> with <code class="docutils literal notranslate"><span class="pre">criterion</span> <span class="pre">=</span> <span class="pre">&quot;MFI&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">randomesque</span></code> set to
+<code class="docutils literal notranslate"><span class="pre">bin_size</span></code>; catR also applies randomesque bins to its other criteria, and catsim
+to maximum information only. The parity tests
+(<a class="reference internal" href="../../../adr/0020-catr-as-the-reference.html"><span class="doc">ADR-0020</span></a>) find catR’s bin, the items it
+draws from, in four contexts, and simulations of 1,000 examinees with bins of 5,
+on 10-item tests and on tests that stop at a standard error of 0.4 or 20 items,
+give catR’s bias, RMSE, mean test length, overlap rate and exposure rates within
+their Monte Carlo error. They find no departure.</p>
+</div>
+</details></section>
 <section id="guarantees">
 <h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
 <li><p>It never returns an item that was already administered or excluded.</p></li>
 <li><p>It returns one of the <code class="docutils literal notranslate"><span class="pre">bin_size</span></code> most informative remaining items at the current estimate, or an
-item tied with the last of them, drawn with the session’s random generator.</p></li>
+item tied with the last of them, drawn with the generator of the call.</p></li>
 <li><p>When no item remains, it raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>.</p></li>
-<li><p>It applies no exposure cap: the run’s exposure rates do not change its choice.</p></li>
+<li><p>It applies no exposure cap: the exposure rates do not change its choice.</p></li>
 </ol>
 </section>
 <section id="references">
@@ -582,6 +596,8 @@ bin also join it. The selector applies no exposure cap: <code class="docutils li
 </dl>
 </dd>
 </dl>
+<p class="rubric">Notes</p>
+<p>For full algorithmic details, see <a class="reference internal" href="#"><span class="doc">Randomesque Selector</span></a>.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="catsim.selection.RandomesqueSelector.bin_size">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">bin_size</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#catsim.selection.RandomesqueSelector.bin_size" title="Link to this definition">#</a></dt>

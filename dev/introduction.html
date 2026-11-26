@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="_static/documentation_options.js?v=c4f92b34"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
@@ -752,9 +754,9 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="terms-and-notation.html">Terms and Notation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-simulations.html">Running Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="live-sessions.html">Live CAT Sessions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reproducibility.html">Reproducibility</a></li>
 <li class="toctree-l1"><a class="reference internal" href="extending.html">Extending catsim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="embedding-catsim.html">Embedding catsim</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 </ul>
 </div>
@@ -818,11 +820,12 @@ window.runMermaid = runMermaid;</script>
                   
   <section class="tex2jax_ignore mathjax_ignore" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h1>
-<p><a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> is a Python package for computerized adaptive testing (CAT). It runs adaptive
-tests one item at a time, in an application, and simulates them on examinees whose abilities are
-known, to compare testing methods. This page introduces CAT and the item response theory behind it,
-and ends with a map of catsim’s parts. <a class="reference internal" href="terms-and-notation.html"><span class="doc">Terms and Notation</span></a> lists the terms and symbols these
-pages use.</p>
+<p><a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> is a Python package for computerized adaptive testing (CAT). It computes the
+steps of an adaptive test, from the choice of each item to the decision to stop, and simulates
+tests on examinees whose abilities are known, to compare testing methods. An application that
+gives adaptive tests can use those computations as its core. This page introduces CAT and the item
+response theory behind it, and ends with a map of catsim’s parts. <a class="reference internal" href="terms-and-notation.html"><span class="doc">Terms and Notation</span></a> lists
+the terms and symbols these pages use.</p>
 <section id="what-a-test-measures">
 <h2>What a Test Measures<a class="headerlink" href="#what-a-test-measures" title="Link to this heading">#</a></h2>
 <p>A test measures an examinee’s <em>ability</em>: a characteristic that cannot be observed directly, such as
@@ -856,7 +859,7 @@ the standard normal distribution <span class="math notranslate nohighlight">\(N(
 and <span class="math notranslate nohighlight">\(4\)</span>. The ability cannot be observed, so it is estimated from the responses: the <em>ability
 estimate</em> <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>, which tends to get closer to the true <span class="math notranslate nohighlight">\(\theta\)</span> as the test gets longer.
 By default, <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>’s estimators keep their estimates within <span class="math notranslate nohighlight">\([-6, 6]\)</span>, wider than any plausible
-examinee or item bank (<a class="reference internal" href="adr/0012-ability-scale-and-extreme-patterns.html"><span class="doc">ADR-0012: Ability Scale and Extreme Response Patterns</span></a>).</p>
+examinee or item bank (<a class="reference internal" href="adr/0018-ability-scale-and-extreme-patterns.html"><span class="doc">ADR-0018: Ability Scale and Extreme Response Patterns</span></a>).</p>
 <p>Under the logistic models, item <span class="math notranslate nohighlight">\(i\)</span> has up to four parameters:</p>
 <ul class="simple">
 <li><p>its <em>discrimination</em> <span class="math notranslate nohighlight">\(a_i\)</span>: how sharply the item separates examinees of lower and higher ability.
@@ -930,7 +933,9 @@ item matrix, and <a class="reference internal" href="api/item_bank.html#catsim.I
 </div>
 <p>These examples draw five items under each logistic model. Whatever the model, the item matrix has
 four columns. In the last example, the discrimination and the difficulty have a correlation of
-<span class="math notranslate nohighlight">\(0.5\)</span>, which simulations may need <span class="bibtex-citation" id="id7">[<a class="reference internal" href="references.html#id14" title="H.-H. Chang, J. Qian, and Z. Ying. a-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. Not openly available; Barrada et al. (2006) describe the method. doi:10.1177/01466210122032181.">Chang <em>et al.</em>, 2001</a>]</span>.</p>
+<span class="math notranslate nohighlight">\(0.5\)</span>, which simulations may need <span class="bibtex-citation" id="id7">[<a class="reference internal" href="references.html#id14" title="H.-H. Chang, J. Qian, and Z. Ying. a-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. Not openly available; Barrada et al. (2006) describe the method. doi:10.1177/01466210122032181.">Chang <em>et al.</em>, 2001</a>]</span>. Each item also has a name, so that results
+can say which item is which; a calibrated bank and its names can be read from a CSV file
+(<a class="reference internal" href="api/item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code></a>).</p>
 </section>
 </section>
 <section id="computerized-adaptive-tests">
@@ -965,7 +970,7 @@ phase.</p>
 <section id="initialization">
 <h4>Initialization<a class="headerlink" href="#initialization" title="Link to this heading">#</a></h4>
 <p>The initializer runs once per examinee and sets the initial ability estimate <span class="math notranslate nohighlight">\(\hat\theta_0\)</span>. It may
-give every examinee the same value (<a class="reference internal" href="api/techniques/initialization/index.html#catsim.initialization.FixedPointInitializer" title="catsim.initialization.FixedPointInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.FixedPointInitializer</span></code></a>), draw
+give every examinee the same value (<a class="reference internal" href="api/techniques/initialization/index.html#catsim.initialization.FixedPointInitializer" title="catsim.initialization.FixedPointInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.FixedPointInitializer</span></code></a>), or draw
 one from a uniform or a normal distribution (<a class="reference internal" href="api/techniques/initialization/index.html#catsim.initialization.UniformInitializer" title="catsim.initialization.UniformInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.UniformInitializer</span></code></a>,
 <a class="reference internal" href="api/techniques/initialization/index.html#catsim.initialization.NormalInitializer" title="catsim.initialization.NormalInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.NormalInitializer</span></code></a>). The literature also starts at other points,
 such as the ability at which the item bank is most informative.</p>
@@ -984,16 +989,16 @@ proposed.</p>
 <p>where <span class="math notranslate nohighlight">\(q_i\)</span> is the number of examinees given item <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(N\)</span> the number of examinees. An item given
 to many examinees becomes known to future ones. Exposure-control methods keep the rates below a cap
 <span class="math notranslate nohighlight">\(r_{\max}\)</span> or choose among the best items at random
-(<a class="reference internal" href="api/techniques/selection/index.html"><span class="doc">selection techniques</span></a>). A simulation reports the rates as
-<a class="reference internal" href="api/simulation.html#catsim.SimulationResult.exposure_rates" title="catsim.SimulationResult.exposure_rates"><code class="xref py py-attr docutils literal notranslate"><span class="pre">exposure_rates</span></code></a>.</p>
+(<a class="reference internal" href="api/techniques/selection/index.html"><span class="doc">selection techniques</span></a>). A simulation reports the rates with
+<a class="reference internal" href="api/simulation.html#catsim.SimulationResult.exposure_rates" title="catsim.SimulationResult.exposure_rates"><code class="xref py py-meth docutils literal notranslate"><span class="pre">exposure_rates()</span></code></a>.</p>
 <p>In <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>, selectors are in the <a class="reference internal" href="api/techniques/selection/index.html#module-catsim.selection" title="catsim.selection"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a> module.</p>
 </section>
 <section id="ability-estimation">
 <h4>Ability Estimation<a class="headerlink" href="#ability-estimation" title="Link to this heading">#</a></h4>
 <p>After each response, the estimator updates the ability estimate <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> from the responses
 so far, each correct or incorrect, and the parameters of the items answered. In <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>,
-the responses are a list of booleans, <code class="docutils literal notranslate"><span class="pre">True</span></code> for a correct response, one for each administered
-item, in the order they were given:</p>
+the responses are a sequence with one entry for each administered item, in the order they were
+given: <code class="docutils literal notranslate"><span class="pre">True</span></code> or 1 for a correct response, <code class="docutils literal notranslate"><span class="pre">False</span></code> or 0 for an incorrect one.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">responses</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
 </pre></div>
 </div>
@@ -1017,23 +1022,37 @@ holds, after an optional minimum number of items.</p>
 </section>
 </section>
 </section>
-<section id="architecture">
-<h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading">#</a></h2>
+<section id="catsim-s-parts">
+<h2>catsim’s Parts<a class="headerlink" href="#catsim-s-parts" title="Link to this heading">#</a></h2>
 <pre  class="mermaid">
         flowchart LR
-    bank[(Item bank)] --&gt; engine[CatEngine]
+    bank[(ItemBank)] --&gt; engine[CatEngine]
     strategies[&quot;Strategies:&lt;br&gt;initializer, selector,&lt;br&gt;estimator, stopper&quot;] --&gt; engine
-    app([Your application]) -- &quot;one session,&lt;br&gt;item by item&quot; --&gt; engine
-    runner[SimulationRunner] -- &quot;one session per&lt;br&gt;simulated examinee&quot; --&gt; engine
-    runner -- returns --&gt; result[SimulationResult]
-    </pre><p>A <a class="reference internal" href="api/engine.html#catsim.CatEngine" title="catsim.CatEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">CatEngine</span></code></a> holds an item bank and four strategies, one for each phase of the
-lifecycle above, and runs each examinee’s test one item at a time. An application asks it for each
-item and gives it each response (<a class="reference internal" href="live-sessions.html"><span class="doc">Live CAT Sessions</span></a>). A <a class="reference internal" href="api/simulation.html#catsim.SimulationRunner" title="catsim.SimulationRunner"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulationRunner</span></code></a> gives
-the same test to simulated examinees whose true abilities are known, and returns a
-<a class="reference internal" href="api/simulation.html#catsim.SimulationResult" title="catsim.SimulationResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulationResult</span></code></a> that compares the final estimates with those abilities
-(<a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a>). <a class="reference internal" href="reproducibility.html"><span class="doc">Reproducibility</span></a> shows how to seed a simulation study so that
-it repeats, and <a class="reference internal" href="extending.html"><span class="doc">Extending catsim</span></a> how to write a strategy of your own.
-<a class="reference internal" href="adr/0003-explicit-cat-engine.html"><span class="doc">ADR-0003: Adopt Explicit CAT Engine Architecture</span></a> records why catsim is built around the engine.</p>
+    app([Your application]) -- &quot;start, select, answer:&lt;br&gt;one session, step by step&quot; --&gt; engine
+    simulate[simulate] -- &quot;one session per&lt;br&gt;examinee&quot; --&gt; engine
+    simulate -- returns --&gt; result[SimulationResult]
+    </pre><ul class="simple">
+<li><p><strong>The item bank.</strong> An <a class="reference internal" href="api/item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code></a> holds the calibrated items, their parameters
+and their names, and never changes.</p></li>
+<li><p><strong>The engine and the session.</strong> A <a class="reference internal" href="api/engine.html#catsim.CatEngine" title="catsim.CatEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">CatEngine</span></code></a> holds an item bank and the
+strategies of a test. Its three steps follow the lifecycle above: <code class="docutils literal notranslate"><span class="pre">start</span></code> sets the initial
+estimate, <code class="docutils literal notranslate"><span class="pre">select</span></code> chooses the next item and <code class="docutils literal notranslate"><span class="pre">answer</span></code> records a response, updates the estimate
+and asks the stopper whether the test ends. <code class="docutils literal notranslate"><span class="pre">start</span></code> returns a <a class="reference internal" href="api/session.html#catsim.Session" title="catsim.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code></a>, the
+record of one examinee’s test so far, and <code class="docutils literal notranslate"><span class="pre">select</span></code> and <code class="docutils literal notranslate"><span class="pre">answer</span></code> take one and return the next.
+catsim keeps nothing between steps:
+an application that gives tests keeps its sessions and calls the steps as its examinees answer
+(<a class="reference internal" href="embedding-catsim.html"><span class="doc">Embedding catsim</span></a>).</p></li>
+<li><p><strong>The strategies.</strong> One for each phase, and an optional exposure control that may decline the
+item the selector proposes. The technique pages describe the built-in ones
+(<a class="reference internal" href="api/techniques/index.html"><span class="doc">Techniques</span></a>), and a method author can write others (<a class="reference internal" href="extending.html"><span class="doc">Extending catsim</span></a>).</p></li>
+<li><p><strong>Simulations and their results.</strong> <a class="reference internal" href="api/simulation.html#catsim.simulate" title="catsim.simulate"><code class="xref py py-func docutils literal notranslate"><span class="pre">simulate()</span></code></a> runs one session for each simulated
+examinee, given by a true ability or by recorded responses, and returns a
+<a class="reference internal" href="api/simulation.html#catsim.SimulationResult" title="catsim.SimulationResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulationResult</span></code></a>, whose tables and metrics compare the final estimates with
+the true abilities (<a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a>). <a class="reference internal" href="reproducibility.html"><span class="doc">Reproducibility</span></a> shows how to seed a study
+so that it repeats.</p></li>
+</ul>
+<p><a class="reference internal" href="adr/0006-steps-from-explicit-inputs.html"><span class="doc">ADR-0006: Each Step Is Computed From Explicit Inputs, and the Session Is a Value</span></a> records why each step takes everything it needs as an
+input.</p>
 </section>
 </section>
 
@@ -1100,7 +1119,7 @@ it repeats, and <a class="reference internal" href="extending.html"><span class=
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#architecture">Architecture</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim-s-parts">catsim’s Parts</a></li>
 </ul>
   </nav></div>
 

@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="_static/documentation_options.js?v=c4f92b34"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="_static/design-tabs.js?v=fcb327ea"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="_static/favicon.svg"/>
@@ -406,40 +408,40 @@
                   
   <section class="tex2jax_ignore mathjax_ignore" id="catsim-computerized-adaptive-testing-toolkit">
 <h1><code class="docutils literal notranslate"><span class="pre">catsim</span></code> - Computerized Adaptive Testing Toolkit<a class="headerlink" href="#catsim-computerized-adaptive-testing-toolkit" title="Link to this heading">#</a></h1>
-<p>catsim runs computerized adaptive tests based on item response theory: it chooses each examinee’s
-next item from an item bank, estimates the examinee’s ability after each response and decides when
-the test ends. One engine serves two kinds of work.</p>
-<div class="note admonition">
-<p class="admonition-title">Coming from catsim 0.x?</p>
-<p>catsim 1.0 has a different API, and code written for 0.x does not run unchanged. The
-<a class="reference external" href="https://github.com/douglasrizzo/catsim/releases/tag/1.0.0">1.0.0 release notes</a> say what to
-change, and the <a class="reference internal" href="getting-started.html"><span class="doc">guides</span></a> and <a class="reference internal" href="tutorials.html"><span class="doc">tutorials</span></a> teach the 1.0
-API. To keep running 0.x code, install it with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;catsim&lt;1&quot;</span></code>; its documentation is at
-the <a class="reference external" href="https://github.com/douglasrizzo/catsim/tree/0.21.0">0.21.0 tag</a> on GitHub.</p>
+<p>catsim computes and evaluates computerized adaptive tests based on item response theory: it
+chooses each examinee’s next item from an item bank, estimates the examinee’s ability after each
+response and decides when the test ends, and it runs simulation studies that compare the methods
+for each of these steps.</p>
+<div class="warning admonition">
+<p class="admonition-title">catsim 1.0 breaks 0.x code</p>
+<p>Code written for catsim 0.x needs changes to run on 1.0, and seeded simulations give different
+numbers. To keep using 0.x, install <code class="docutils literal notranslate"><span class="pre">catsim&lt;1</span></code>, documented at the
+<a class="reference external" href="https://github.com/douglasrizzo/catsim/tree/0.21.0">0.21.0 tag</a>. The
+<a class="reference external" href="https://github.com/douglasrizzo/catsim/releases/tag/1.0.0">1.0.0 release notes</a> list every change.</p>
 </div>
 <section id="run-a-simulation-study">
 <h2>Run a simulation study<a class="headerlink" href="#run-a-simulation-study" title="Link to this heading">#</a></h2>
-<p>Researchers give a test to simulated examinees whose true abilities are known, and compare how well
-different methods for starting the test, selecting items, estimating ability and stopping recover
-those abilities. <a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a> builds a test, runs it on a population, reads the
-results and compares strategies over replications.</p>
+<p>Researchers compare methods on simulated examinees: <a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a> builds a test, runs
+it and reads its metrics, and <a class="reference internal" href="reproducibility.html"><span class="doc">Reproducibility</span></a> seeds a study so that it repeats.</p>
 </section>
-<section id="run-cat-in-an-application">
-<h2>Run CAT in an application<a class="headerlink" href="#run-cat-in-an-application" title="Link to this heading">#</a></h2>
-<p>Application developers let catsim choose the items and end the test, while their application shows
-the items, collects the responses and stores the sessions. <a class="reference internal" href="live-sessions.html"><span class="doc">Live CAT Sessions</span></a> runs a session item
-by item, saves and resumes it, and shares item exposure across sessions.</p>
+<section id="write-a-strategy">
+<h2>Write a strategy<a class="headerlink" href="#write-a-strategy" title="Link to this heading">#</a></h2>
+<p>Method authors add a method of their own: <a class="reference internal" href="extending.html"><span class="doc">Extending catsim</span></a> writes one strategy of each kind and
+says what each must do.</p>
+</section>
+<section id="embed-catsim-in-an-application">
+<h2>Embed catsim in an application<a class="headerlink" href="#embed-catsim-in-an-application" title="Link to this heading">#</a></h2>
+<p>Developers let catsim compute each step of their application’s tests: <a class="reference internal" href="embedding-catsim.html"><span class="doc">Embedding catsim</span></a> runs
+a test step by step and says what the application owns.</p>
 </section>
 <section id="find-your-way">
 <h2>Find your way<a class="headerlink" href="#find-your-way" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p>New to adaptive testing? The <a class="reference internal" href="introduction.html"><span class="doc">Introduction</span></a> explains CAT and IRT, and
-<a class="reference internal" href="terms-and-notation.html"><span class="doc">Terms and Notation</span></a> lists the terms and symbols these pages use.</p></li>
-<li><p><a class="reference internal" href="api/techniques/index.html"><span class="doc">Techniques</span></a>: each method catsim implements, with its formulas, parameters and
-sources.</p></li>
-<li><p>The <a class="reference internal" href="tutorials.html"><span class="doc">Tutorials</span></a>: the guides as hands-on exercises, in notebooks that open in Colab.</p></li>
-<li><p><a class="reference internal" href="reproducibility.html"><span class="doc">Reproducibility</span></a> and <a class="reference internal" href="extending.html"><span class="doc">Extending catsim</span></a>: seeding a study, and writing your own strategies.</p></li>
-<li><p>The <a class="reference internal" href="api/index.html"><span class="doc">API Reference</span></a>: every public class and function.</p></li>
+<a class="reference internal" href="terms-and-notation.html"><span class="doc">Terms and Notation</span></a> lists the terms and symbols.</p></li>
+<li><p><a class="reference internal" href="api/techniques/index.html"><span class="doc">Techniques</span></a>: each method, with its formulas and sources.</p></li>
+<li><p>The <a class="reference internal" href="tutorials.html"><span class="doc">Tutorials</span></a>: notebooks that open in Colab.</p></li>
+<li><p>The <a class="reference internal" href="api/index.html"><span class="doc">API Reference</span></a> and the <a class="reference internal" href="architecture_decisions.html"><span class="doc">Architecture Decision Records</span></a>.</p></li>
 <li><p>The <a class="reference external" href="https://github.com/douglasrizzo/catsim#readme">README</a>: installation, a quickstart and how to
 cite catsim.</p></li>
 </ul>
@@ -487,7 +489,8 @@ cite catsim.</p></li>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-a-simulation-study">Run a simulation study</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-cat-in-an-application">Run CAT in an application</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#write-a-strategy">Write a strategy</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#embed-catsim-in-an-application">Embed catsim in an application</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#find-your-way">Find your way</a></li>
 </ul>
   </nav></div>

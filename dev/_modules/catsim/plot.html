@@ -30,6 +30,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -41,6 +42,7 @@
     <script src="../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../_static/design-tabs.js?v=fcb327ea"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 
@@ -787,10 +789,17 @@ window.runMermaid = runMermaid;</script>
 <span></span><span class="sd">"""Plots of items, exposure rates and CAT sessions, drawn with matplotlib.</span>
 
 <span class="sd">The module needs matplotlib, which the plot extra installs: ``pip install 'catsim[plot]'``. Each</span>
-<span class="sd">function takes its data first and its options as keyword-only arguments, draws on the ``ax`` it is</span>
-<span class="sd">given or on the axes of a new figure, and returns the axes it drew on.</span>
+<span class="sd">function takes its data first, as plain catsim objects, and its options as keyword-only arguments,</span>
+<span class="sd">draws on the ``ax`` it is given or on the axes of a new figure, and returns the axes it drew on</span>
+<span class="sd">(ADR-0022).</span>
+
+<span class="sd">Plots label items by their names in the item bank (ADR-0004), drawn as given: a dollar sign in a</span>
+<span class="sd">name does not start mathtext. An x axis with one tick per item names each item while it has at most</span>
+<span class="sd">30, the most names that stay apart at matplotlib's default figure width; a longer one ticks whole</span>
+<span class="sd">numbers, as each function's description says.</span>
 <span class="sd">"""</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">assert_never</span>
 
@@ -805,9 +814,13 @@ window.runMermaid = runMermaid;</script>
   <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">_missing</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.checks</span><span class="w"> </span><span class="kn">import</span> <span class="n">_check_in_bank</span><span class="p">,</span> <span class="n">_item</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatSessionSnapshot</span><span class="p">,</span> <span class="n">CatSessionState</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">Session</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">IntArray</span>
+
+<span class="c1"># The most items an x axis names, one tick each: at matplotlib's default figure width, more names overlap.</span>
+<span class="n">_MAX_NAMED_TICKS</span> <span class="o">=</span> <span class="mi">30</span>
 
 
 <div class="viewcode-block" id="PlotType">
@@ -834,7 +847,8 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="item_curve">
 <a class="viewcode-back" href="../../api/plot.html#catsim.plot.item_curve">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">item_curve</span><span class="p">(</span>
-  <span class="n">item</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span>
+  <span class="n">item</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+  <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
   <span class="o">*</span><span class="p">,</span>
   <span class="n">kind</span><span class="p">:</span> <span class="n">PlotType</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">PlotType</span><span class="o">.</span><span class="n">ICC</span><span class="p">,</span>
   <span class="n">max_info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -844,8 +858,8 @@ window.runMermaid = runMermaid;</script>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Plot an item's characteristic curve, its information curve, or both.</span>
 
 <span class="sd">  The curves span four units of ability on each side of the item's difficulty, and a box in the</span>
-<span class="sd">  upper left corner gives the item's parameters. With ``PlotType.BOTH`` the information curve has</span>
-<span class="sd">  its own y axis, on the right, and the plot has no grid.</span>
+<span class="sd">  upper left corner gives the item's name and parameters. With ``PlotType.BOTH`` the information</span>
+<span class="sd">  curve has its own y axis, on the right, and the plot has no grid.</span>
 
 <span class="sd">  .. plot::</span>
 <span class="sd">      :caption: One item's characteristic and information curves, apart and together. The dot marks its peak.</span>
@@ -853,18 +867,20 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      import matplotlib.pyplot as plt</span>
 <span class="sd">      from catsim import ItemBank</span>
 <span class="sd">      from catsim.plot import PlotType, item_curve</span>
-<span class="sd">      item = ItemBank.generate(1, rng=7).items[0]</span>
+<span class="sd">      item_bank = ItemBank.generate(1, rng=7)</span>
 <span class="sd">      fig, axes = plt.subplots(3, 1, figsize=(7, 15))</span>
-<span class="sd">      item_curve(item, kind=PlotType.ICC, ax=axes[0])</span>
-<span class="sd">      item_curve(item, kind=PlotType.IIC, ax=axes[1])</span>
-<span class="sd">      item_curve(item, kind=PlotType.BOTH, ax=axes[2])</span>
+<span class="sd">      item_curve(0, item_bank, kind=PlotType.ICC, ax=axes[0])</span>
+<span class="sd">      item_curve(0, item_bank, kind=PlotType.IIC, ax=axes[1])</span>
+<span class="sd">      item_curve(0, item_bank, kind=PlotType.BOTH, ax=axes[2])</span>
 <span class="sd">      plt.tight_layout()</span>
 <span class="sd">      plt.show()</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  item : numpy.ndarray</span>
-<span class="sd">      One item's parameters ``[a, b, c, d]``, such as a row of ``ItemBank.items``.</span>
+<span class="sd">  item : int</span>
+<span class="sd">      The item's index in ``item_bank``; ``item_bank.index(name)`` gives the index of a named item.</span>
+<span class="sd">  item_bank : ItemBank</span>
+<span class="sd">      The item bank that holds the item's name and parameters.</span>
 <span class="sd">  kind : PlotType or str, optional</span>
 <span class="sd">      Which curves to draw, as a :class:`PlotType` or its value (``"icc"``, ``"iic"`` or</span>
 <span class="sd">      ``"both"``). Default is ``PlotType.ICC``.</span>
@@ -884,25 +900,25 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If ``item`` is not an integer, before any figure is created.</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If ``item`` is not one row of four parameters or ``kind`` is neither a :class:`PlotType`</span>
-<span class="sd">      nor one of its values, before any figure is created.</span>
+<span class="sd">      If ``item`` is not an index of ``item_bank`` or ``kind`` is neither a :class:`PlotType` nor</span>
+<span class="sd">      one of its values, before any figure is created.</span>
 <span class="sd">  """</span>
-  <span class="n">item</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,):</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"item must be one row of four parameters [a, b, c, d], got shape </span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">."</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="n">item</span> <span class="o">=</span> <span class="n">_item</span><span class="p">(</span><span class="s2">"item"</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">)</span>
   <span class="n">kind</span> <span class="o">=</span> <span class="n">PlotType</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
+  <span class="n">parameters</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
   <span class="n">ax</span> <span class="o">=</span> <span class="n">_prepare_axes</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
-  <span class="n">thetas</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">161</span><span class="p">)</span>
+  <span class="n">thetas</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">parameters</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="n">parameters</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">161</span><span class="p">)</span>
 
   <span class="k">match</span> <span class="n">kind</span><span class="p">:</span>
     <span class="k">case</span> <span class="n">PlotType</span><span class="o">.</span><span class="n">ICC</span><span class="p">:</span>
-      <span class="n">_draw_icc</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">thetas</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+      <span class="n">_draw_icc</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">thetas</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
       <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
       <span class="n">box_axes</span> <span class="o">=</span> <span class="n">ax</span>
     <span class="k">case</span> <span class="n">PlotType</span><span class="o">.</span><span class="n">IIC</span><span class="p">:</span>
-      <span class="n">_draw_information</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">thetas</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">max_info</span><span class="o">=</span><span class="n">max_info</span><span class="p">)</span>
+      <span class="n">_draw_information</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">thetas</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">max_info</span><span class="o">=</span><span class="n">max_info</span><span class="p">)</span>
       <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
       <span class="n">box_axes</span> <span class="o">=</span> <span class="n">ax</span>
     <span class="k">case</span> <span class="n">PlotType</span><span class="o">.</span><span class="n">BOTH</span><span class="p">:</span>
@@ -910,13 +926,13 @@ window.runMermaid = runMermaid;</script>
       <span class="k">for</span> <span class="n">axes</span><span class="p">,</span> <span class="n">color</span> <span class="ow">in</span> <span class="p">((</span><span class="n">ax</span><span class="p">,</span> <span class="s2">"C0"</span><span class="p">),</span> <span class="p">(</span><span class="n">box_axes</span><span class="p">,</span> <span class="s2">"C3"</span><span class="p">)):</span>
         <span class="n">axes</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
         <span class="n">axes</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">"y"</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
-      <span class="n">_draw_icc</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">thetas</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"C0"</span><span class="p">)</span>
-      <span class="n">_draw_information</span><span class="p">(</span><span class="n">box_axes</span><span class="p">,</span> <span class="n">thetas</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">max_info</span><span class="o">=</span><span class="n">max_info</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"C3"</span><span class="p">)</span>
+      <span class="n">_draw_icc</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">thetas</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"C0"</span><span class="p">)</span>
+      <span class="n">_draw_information</span><span class="p">(</span><span class="n">box_axes</span><span class="p">,</span> <span class="n">thetas</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">max_info</span><span class="o">=</span><span class="n">max_info</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"C3"</span><span class="p">)</span>
     <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
       <span class="n">assert_never</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
 
   <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$\theta$"</span><span class="p">)</span>
-  <span class="n">_annotate_parameters</span><span class="p">(</span><span class="n">box_axes</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+  <span class="n">_annotate_item</span><span class="p">(</span><span class="n">box_axes</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="n">item</span><span class="p">],</span> <span class="n">parameters</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">ax</span></div>
 
 
@@ -930,33 +946,47 @@ window.runMermaid = runMermaid;</script>
   <span class="k">return</span> <span class="n">ax</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_draw_icc</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span><span class="p">,</span> <span class="n">thetas</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_label_items</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span><span class="p">,</span> <span class="n">positions</span><span class="p">:</span> <span class="n">IntArray</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""Tick the x axis at ``positions`` with the ``names`` of the items there, or at whole numbers if there are too many.</span>
+
+<span class="sd">  Names are drawn as given, vertically so that long ones fit. With more than ``_MAX_NAMED_TICKS`` names, matplotlib</span>
+<span class="sd">  picks the ticks among the whole numbers, which also holds in a view zoomed in to a few positions.</span>
+<span class="sd">  """</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">_MAX_NAMED_TICKS</span><span class="p">:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">parse_math</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">MaxNLocator</span><span class="p">(</span><span class="n">integer</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_draw_icc</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span><span class="p">,</span> <span class="n">thetas</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Draw the item's characteristic curve, in ``color`` or the next colour of the axes' cycle."""</span>
-  <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">thetas</span><span class="p">,</span> <span class="n">irt</span><span class="o">.</span><span class="n">icc</span><span class="p">(</span><span class="n">thetas</span><span class="p">,</span> <span class="n">item</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">"$P(\theta)$"</span><span class="p">)</span>
+  <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">thetas</span><span class="p">,</span> <span class="n">irt</span><span class="o">.</span><span class="n">icc</span><span class="p">(</span><span class="n">thetas</span><span class="p">,</span> <span class="n">parameters</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">"$P(\theta)$"</span><span class="p">)</span>
   <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$P(\theta)$"</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_draw_information</span><span class="p">(</span>
-  <span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span><span class="p">,</span> <span class="n">thetas</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">max_info</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+  <span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span><span class="p">,</span> <span class="n">thetas</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">max_info</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Draw the item's information curve and, with ``max_info``, a dot of the curve's colour at its peak."""</span>
-  <span class="p">(</span><span class="n">line</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">thetas</span><span class="p">,</span> <span class="n">irt</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">thetas</span><span class="p">,</span> <span class="n">item</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">"$I(\theta)$"</span><span class="p">)</span>
+  <span class="p">(</span><span class="n">line</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">thetas</span><span class="p">,</span> <span class="n">irt</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">thetas</span><span class="p">,</span> <span class="n">parameters</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">"$I(\theta)$"</span><span class="p">)</span>
   <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$I(\theta)$"</span><span class="p">)</span>
   <span class="k">if</span> <span class="n">max_info</span><span class="p">:</span>
-    <span class="n">peak</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">max_info_theta</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">irt</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">item</span><span class="p">),</span> <span class="s2">"o"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">line</span><span class="o">.</span><span class="n">get_color</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Maximum information"</span><span class="p">)</span>
+    <span class="n">peak</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">max_info_theta</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">irt</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">parameters</span><span class="p">),</span> <span class="s2">"o"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">line</span><span class="o">.</span><span class="n">get_color</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Maximum information"</span><span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_annotate_parameters</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Write the item parameters, to three significant digits, in a box in the upper left corner of the axes.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_annotate_item</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""Write the item's name and parameters, to three significant digits, in a box in the upper left corner of the axes.</span>
 
 <span class="sd">  The curves of typical items keep clear of that corner: at the low end of the ability range the ICC is near its</span>
 <span class="sd">  lower asymptote and the IIC near zero. A very flat item (a of 0.2 or less) with c = 0 and d &lt; 1 is the exception:</span>
 <span class="sd">  its information curve falls from the left edge of the plot, under the box.</span>
 <span class="sd">  """</span>
-  <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">item</span>
+  <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">parameters</span>
+  <span class="c1"># The parameters are mathtext, so a dollar sign in the name would pair up with theirs.</span>
+  <span class="n">shown_name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"$"</span><span class="p">,</span> <span class="sa">r</span><span class="s2">"\$"</span><span class="p">)</span>
   <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">"$a = </span><span class="si">{</span><span class="n">a</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">$</span><span class="se">\n</span><span class="s2">$b = </span><span class="si">{</span><span class="n">b</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">$</span><span class="se">\n</span><span class="s2">$c = </span><span class="si">{</span><span class="n">c</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">$</span><span class="se">\n</span><span class="s2">$d = </span><span class="si">{</span><span class="n">d</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">$"</span><span class="p">,</span>
+    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">shown_name</span><span class="si">}</span><span class="se">\n</span><span class="s2">$a = </span><span class="si">{</span><span class="n">a</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">$</span><span class="se">\n</span><span class="s2">$b = </span><span class="si">{</span><span class="n">b</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">$</span><span class="se">\n</span><span class="s2">$c = </span><span class="si">{</span><span class="n">c</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">$</span><span class="se">\n</span><span class="s2">$d = </span><span class="si">{</span><span class="n">d</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">$"</span><span class="p">,</span>
     <span class="n">bbox</span><span class="o">=</span><span class="p">{</span><span class="s2">"facecolor"</span><span class="p">:</span> <span class="s2">"white"</span><span class="p">,</span> <span class="s2">"alpha"</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
     <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.97</span><span class="p">),</span>
     <span class="n">xycoords</span><span class="o">=</span><span class="s2">"axes fraction"</span><span class="p">,</span>
@@ -978,8 +1008,8 @@ window.runMermaid = runMermaid;</script>
 <a class="viewcode-back" href="../../api/plot.html#catsim.plot.item_exposure">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">item_exposure</span><span class="p">(</span>
   <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span>
+  <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
   <span class="o">*</span><span class="p">,</span>
-  <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="n">par</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="n">hist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
   <span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -987,16 +1017,18 @@ window.runMermaid = runMermaid;</script>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Plot the exposure rate of each item: in item order, against an item parameter, or as a histogram.</span>
 
+<span class="sd">  In item order, the x axis names each item, or ticks item indices in a bank of more than 30 items.</span>
 <span class="sd">  With ``par``, the items are sorted by that parameter and each item's exposure rate is drawn at its</span>
-<span class="sd">  value, which shows which items a selector favours. With ``hist=True``, the plot counts the items</span>
-<span class="sd">  in each range of exposure rates.</span>
+<span class="sd">  value, which shows which items a selector favours; items of close parameters crowd together there,</span>
+<span class="sd">  so their names are left out. With ``hist=True``, the plot counts the items in each range of</span>
+<span class="sd">  exposure rates.</span>
 
 <span class="sd">  .. plot::</span>
 <span class="sd">      :caption: The exposure rates of a simulation, as a histogram and against the item difficulty.</span>
 
 <span class="sd">      import matplotlib.pyplot as plt</span>
 <span class="sd">      import numpy</span>
-<span class="sd">      from catsim import CatEngine, ItemBank, SimulationRunner</span>
+<span class="sd">      from catsim import CatEngine, ItemBank, simulate</span>
 <span class="sd">      from catsim import plot</span>
 <span class="sd">      from catsim.estimation import NumericalSearchEstimator</span>
 <span class="sd">      from catsim.initialization import UniformInitializer</span>
@@ -1011,19 +1043,21 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">          StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),</span>
 <span class="sd">      )</span>
 <span class="sd">      true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)</span>
-<span class="sd">      result = SimulationRunner(engine).run(true_thetas, rng=0)</span>
+<span class="sd">      result = simulate(engine, true_thetas=true_thetas, rng=0)</span>
 <span class="sd">      fig, axes = plt.subplots(2, 1, figsize=(7, 12))</span>
-<span class="sd">      plot.item_exposure(result.exposure_rates, hist=True, ax=axes[0], title="Exposure rates")</span>
-<span class="sd">      plot.item_exposure(result.exposure_rates, item_bank=result.item_bank, par="b", ax=axes[1])</span>
+<span class="sd">      rates = result.exposure_rates().value</span>
+<span class="sd">      plot.item_exposure(rates, result.item_bank, hist=True, ax=axes[0], title="Exposure rates")</span>
+<span class="sd">      plot.item_exposure(rates, result.item_bank, par="b", ax=axes[1])</span>
 <span class="sd">      plt.tight_layout()</span>
 <span class="sd">      plt.show()</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  exposure_rates : numpy.ndarray</span>
-<span class="sd">      The exposure rate of each item, in item bank order, such as ``SimulationResult.exposure_rates``.</span>
-<span class="sd">  item_bank : ItemBank or None, optional</span>
-<span class="sd">      The item bank the rates belong to, needed with ``par``. Default is None.</span>
+<span class="sd">      The exposure rate of each item, in item bank order, such as the value of a</span>
+<span class="sd">      :class:`~catsim.SimulationResult`'s :meth:`~catsim.SimulationResult.exposure_rates`.</span>
+<span class="sd">  item_bank : ItemBank</span>
+<span class="sd">      The item bank the rates belong to, which holds the items' names and parameters.</span>
 <span class="sd">  par : str or None, optional</span>
 <span class="sd">      The item parameter to plot the rates against: ``"a"``, ``"b"``, ``"c"`` or ``"d"``. Default is</span>
 <span class="sd">      None, which plots the rates in item bank order.</span>
@@ -1042,9 +1076,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If ``exposure_rates`` is not one-dimensional, ``par`` is not one of ``"a"``, ``"b"``, ``"c"``</span>
-<span class="sd">      and ``"d"``, ``par`` is given with ``hist=True`` or without ``item_bank``, or the rates and</span>
-<span class="sd">      the item bank differ in length; always before any figure is created.</span>
+<span class="sd">      If ``exposure_rates`` is not one rate per item of ``item_bank``, ``par`` is not one of</span>
+<span class="sd">      ``"a"``, ``"b"``, ``"c"`` and ``"d"``, or ``par`` is given with ``hist=True``; always before</span>
+<span class="sd">      any figure is created.</span>
 <span class="sd">  """</span>
   <span class="n">exposure_rates</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
   <span class="n">_check_exposure_inputs</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">hist</span><span class="o">=</span><span class="n">hist</span><span class="p">)</span>
@@ -1056,29 +1090,29 @@ window.runMermaid = runMermaid;</script>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Items"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ax</span>
 
-  <span class="k">if</span> <span class="n">par</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">values</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">))</span>
-    <span class="n">xlabel</span> <span class="o">=</span> <span class="s2">"Items"</span>
+  <span class="k">if</span> <span class="n">par</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">exposure_rates</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">"o"</span><span class="p">)</span>
+    <span class="n">_label_items</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Items"</span><span class="p">)</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">column</span><span class="p">,</span> <span class="n">xlabel</span> <span class="o">=</span> <span class="n">_ITEM_PARAMETERS</span><span class="p">[</span><span class="n">par</span><span class="p">]</span>
     <span class="n">values</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">items</span><span class="p">[:,</span> <span class="n">column</span><span class="p">]</span>
-  <span class="n">order</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">"stable"</span><span class="p">)</span>
-  <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">order</span><span class="p">],</span> <span class="n">exposure_rates</span><span class="p">[</span><span class="n">order</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="s2">"o"</span><span class="p">)</span>
-  <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">)</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">"stable"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">order</span><span class="p">],</span> <span class="n">exposure_rates</span><span class="p">[</span><span class="n">order</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="s2">"o"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">)</span>
   <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Exposure rate"</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">ax</span></div>
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_check_exposure_inputs</span><span class="p">(</span>
-  <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">par</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">hist</span><span class="p">:</span> <span class="nb">bool</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_exposure_inputs</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">par</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">hist</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Raise ValueError for inputs of :func:`item_exposure` that cannot give a true plot."""</span>
-  <span class="k">if</span> <span class="n">exposure_rates</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"exposure_rates must hold one rate per item, got an array of shape </span><span class="si">{</span><span class="n">exposure_rates</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">."</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">)</span> <span class="o">!=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"exposure_rates has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">)</span><span class="si">}</span><span class="s2"> values but the item bank has </span><span class="si">{</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="si">}</span><span class="s2"> items."</span>
+  <span class="k">if</span> <span class="n">exposure_rates</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+      <span class="sa">f</span><span class="s2">"exposure_rates has shape </span><span class="si">{</span><span class="n">exposure_rates</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">; there must be one exposure rate per item of the bank "</span>
+      <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="si">}</span><span class="s2">)"</span>
+    <span class="p">)</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
   <span class="k">if</span> <span class="n">par</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">return</span>
@@ -1088,34 +1122,34 @@ window.runMermaid = runMermaid;</script>
   <span class="k">if</span> <span class="n">hist</span><span class="p">:</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"A histogram of exposure rates has no parameter axis: pass par=</span><span class="si">{</span><span class="n">par</span><span class="si">!r}</span><span class="s2"> or hist=True, not both."</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"item_bank must be passed to plot exposure rates against parameter </span><span class="si">{</span><span class="n">par</span><span class="si">!r}</span><span class="s2">."</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="session_progress">
 <a class="viewcode-back" href="../../api/plot.html#catsim.plot.session_progress">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">session_progress</span><span class="p">(</span>
-  <span class="n">session</span><span class="p">:</span> <span class="n">CatSessionState</span> <span class="o">|</span> <span class="n">CatSessionSnapshot</span><span class="p">,</span>
+  <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">,</span>
   <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
   <span class="o">*</span><span class="p">,</span>
+  <span class="n">true_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Plot how a session's ability estimate and its standard error change as items are administered.</span>
 
-<span class="sd">  The x axis counts the items administered. The left y axis shows the ability estimate after each</span>
-<span class="sd">  response, with a band of one standard error on each side, the difficulty of each administered</span>
-<span class="sd">  item and, when the session has one, the true ability. The right y axis shows the standard error</span>
-<span class="sd">  each estimate was recorded with, the one precision-based stoppers judge. Infinite standard</span>
-<span class="sd">  errors, such as the initial estimate's, are left out.</span>
+<span class="sd">  The x axis counts the items administered. While the session has at most 30 items, its ticks name</span>
+<span class="sd">  the item given at each step instead, and the initial estimate, at 0, has none, so a session with</span>
+<span class="sd">  no items has no ticks. The left y axis shows the ability estimate after each response, with a</span>
+<span class="sd">  band of one standard error on each side, the difficulty of each administered item and, when it is</span>
+<span class="sd">  given, the true ability. The right y axis shows the standard error each estimate was recorded</span>
+<span class="sd">  with, the one precision-based stoppers judge. Infinite standard errors, such as the initial</span>
+<span class="sd">  estimate's, are left out.</span>
 
 <span class="sd">  .. plot::</span>
 <span class="sd">      :caption: One simulated session: the ability estimate after each item, with its standard error.</span>
 
 <span class="sd">      import matplotlib.pyplot as plt</span>
 <span class="sd">      import numpy</span>
-<span class="sd">      from catsim import CatEngine, ItemBank, SimulationRunner</span>
+<span class="sd">      from catsim import CatEngine, ItemBank, simulate</span>
 <span class="sd">      from catsim import plot</span>
 <span class="sd">      from catsim.estimation import NumericalSearchEstimator</span>
 <span class="sd">      from catsim.initialization import UniformInitializer</span>
@@ -1130,17 +1164,20 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">          StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),</span>
 <span class="sd">      )</span>
 <span class="sd">      true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)</span>
-<span class="sd">      result = SimulationRunner(engine).run(true_thetas, rng=0)</span>
+<span class="sd">      result = simulate(engine, true_thetas=true_thetas, rng=0)</span>
 <span class="sd">      fig, ax = plt.subplots(figsize=(8, 5))</span>
-<span class="sd">      plot.session_progress(result.sessions[0], result.item_bank, ax=ax)</span>
+<span class="sd">      plot.session_progress(result.sessions[0], result.item_bank, true_theta=result.true_thetas[0], ax=ax)</span>
 <span class="sd">      plt.show()</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  session : CatSessionState or CatSessionSnapshot</span>
-<span class="sd">      The session to plot, such as an entry of ``SimulationResult.sessions`` or a live session.</span>
+<span class="sd">  session : Session</span>
+<span class="sd">      The session to plot, such as an entry of ``SimulationResult.sessions``.</span>
 <span class="sd">  item_bank : ItemBank</span>
 <span class="sd">      The item bank the session's items come from.</span>
+<span class="sd">  true_theta : float or None, optional</span>
+<span class="sd">      The examinee's true ability, drawn as a horizontal line, such as an entry of</span>
+<span class="sd">      ``SimulationResult.true_thetas``. Default is None, which draws none.</span>
 <span class="sd">  ax : matplotlib.axes.Axes or None, optional</span>
 <span class="sd">      The axes to draw on. Default is None, which draws on the axes of a new figure.</span>
 <span class="sd">  title : str or None, optional</span>
@@ -1154,15 +1191,12 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
-<span class="sd">  IndexError</span>
-<span class="sd">      If an administered item is not in ``item_bank``, before any figure is created.</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If an administered item is not an item of ``item_bank``, before any figure is created.</span>
 <span class="sd">  """</span>
+  <span class="c1"># The session checked its indices when it was built, but it does not know the bank.</span>
+  <span class="n">_check_in_bank</span><span class="p">(</span><span class="s2">"administered_items"</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">)</span>
   <span class="n">administered</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-  <span class="c1"># checked by hand: numpy indexing would wrap a negative index around to the bank's last items</span>
-  <span class="n">outside</span> <span class="o">=</span> <span class="n">administered</span><span class="p">[(</span><span class="n">administered</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">administered</span> <span class="o">&gt;=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">)]</span>
-  <span class="k">if</span> <span class="n">outside</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Items </span><span class="si">{</span><span class="n">outside</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2"> of the session are not items of the bank, which has </span><span class="si">{</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="si">}</span><span class="s2"> items"</span>
-    <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
   <span class="n">difficulties</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">difficulty</span><span class="p">[</span><span class="n">administered</span><span class="p">]</span>
   <span class="n">thetas</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">theta_history</span><span class="p">)</span>
   <span class="n">ses</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">estimate</span><span class="o">.</span><span class="n">se</span> <span class="k">for</span> <span class="n">estimate</span> <span class="ow">in</span> <span class="n">session</span><span class="o">.</span><span class="n">estimates</span><span class="p">])</span>
@@ -1179,12 +1213,12 @@ window.runMermaid = runMermaid;</script>
     <span class="n">xs</span><span class="p">[</span><span class="n">finite</span><span class="p">],</span> <span class="p">(</span><span class="n">thetas</span> <span class="o">-</span> <span class="n">ses</span><span class="p">)[</span><span class="n">finite</span><span class="p">],</span> <span class="p">(</span><span class="n">thetas</span> <span class="o">+</span> <span class="n">ses</span><span class="p">)[</span><span class="n">finite</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"C0"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">"$\hat{\theta} \pm SE$"</span>
   <span class="p">)</span>
   <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">difficulties</span><span class="p">,</span> <span class="s2">"o"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"C1"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Item difficulty"</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">true_theta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">true_theta</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"black"</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">"True ability $\theta$"</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">true_theta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">true_theta</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"black"</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">"True ability $\theta$"</span><span class="p">)</span>
   <span class="n">se_axes</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="n">finite</span><span class="p">],</span> <span class="n">ses</span><span class="p">[</span><span class="n">finite</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"C2"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Standard error"</span><span class="p">)</span>
 
   <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Items administered"</span><span class="p">)</span>
-  <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">MaxNLocator</span><span class="p">(</span><span class="n">integer</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+  <span class="n">_label_items</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">xs</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="p">[</span><span class="n">item_bank</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">session</span><span class="o">.</span><span class="n">administered_items</span><span class="p">])</span>
   <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$\theta$"</span><span class="p">)</span>
   <span class="n">se_axes</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Standard error"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"C2"</span><span class="p">)</span>
   <span class="n">se_axes</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">"y"</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s2">"C2"</span><span class="p">)</span>

@@ -30,6 +30,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -41,6 +42,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 
@@ -788,8 +790,7 @@ window.runMermaid = runMermaid;</script>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">operator</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">..compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span><span class="p">,</span> <span class="n">best_pool</span><span class="p">,</span> <span class="n">remaining</span>
 
@@ -797,10 +798,11 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="RandomSelector">
 <a class="viewcode-back" href="../../../api/techniques/selection/random-selector.html#catsim.selection.RandomSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RandomSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">"""Selector that randomly selects items for application.</span>
+<span class="w">  </span><span class="sd">"""Draw each item uniformly at random from the remaining items, a non-adaptive baseline.</span>
 
-<span class="sd">  This selector is useful for baseline comparisons or for studying the impact of</span>
-<span class="sd">  item selection strategies.</span>
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/random-selector`.</span>
 <span class="sd">  """</span>
 
   <span class="nd">@override</span>
@@ -922,6 +924,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      If ``bin_size`` is not an integer.</span>
 <span class="sd">  ValueError</span>
 <span class="sd">      If ``bin_size`` is smaller than 1.</span>
+
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/randomesque-selector`.</span>
 <span class="sd">  """</span>
 
   <span class="nd">@override</span>

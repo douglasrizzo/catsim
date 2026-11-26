@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/techniques/stopping/standard-error-stopper';</script>
@@ -470,7 +472,7 @@
 <dd class="field-odd"><p><a class="reference internal" href="#catsim.stopping.StandardErrorStopper" title="catsim.stopping.StandardErrorStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.StandardErrorStopper</span></code></a></p>
 </dd>
 <dt class="field-even">Sources<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="bibtex-citation" id="id1">Samejima [<a class="reference internal" href="#id59" title="F. Samejima. A use of the information function in tailored testing. Applied Psychological Measurement, 1(2):233–247, 1977. Open copy: https://hdl.handle.net/11299/98492. doi:10.1177/014662167700100209.">1977</a>]</span>; <span class="bibtex-citation" id="id2">Thissen [<a class="reference internal" href="#id11" title="D. Thissen. Reliability and measurement precision. In H. Wainer, editor, Computerized Adaptive Testing: A Primer, 159–184. Lawrence Erlbaum Associates, 2000. Not openly available.">2000</a>]</span>; <span class="bibtex-citation" id="id3">Magis and Raîche [<a class="reference internal" href="#id20" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">2012</a>]</span></p>
+<dd class="field-even"><p><span class="bibtex-citation" id="id1">Samejima [<a class="reference internal" href="#id58" title="F. Samejima. A use of the information function in tailored testing. Applied Psychological Measurement, 1(2):233–247, 1977. Open copy: https://hdl.handle.net/11299/98492. doi:10.1177/014662167700100209.">1977</a>]</span>; <span class="bibtex-citation" id="id2">Thissen [<a class="reference internal" href="#id10" title="D. Thissen. Reliability and measurement precision. In H. Wainer, editor, Computerized Adaptive Testing: A Primer, 159–184. Lawrence Erlbaum Associates, 2000. Not openly available.">2000</a>]</span>; <span class="bibtex-citation" id="id3">Magis and Raîche [<a class="reference internal" href="#id19" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">2012</a>]</span></p>
 </dd>
 </dl>
 <section id="motivation">
@@ -478,21 +480,20 @@
 <p>Variable-length CATs are usually justified by precision: once the current test
 is informative enough, continuing to administer items yields diminishing returns.
 The standard-error stopper operationalizes that idea by terminating the test when
-the standard error of estimation falls to a target value.</p>
-<p>This is one of the most common adaptive stopping rules because its threshold is
-easy to interpret on the theta scale and directly reflects the information
-accumulated by the current administered set. catR calls it the precision
-criterion <span class="bibtex-citation" id="id4">[<a class="reference internal" href="#id20" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, p. 10]</span>.</p>
+standard error of the ability estimate falls to a target value.</p>
+<p>This is one of the most common stopping criteria of adaptive tests because its
+threshold is easy to interpret on the ability scale and directly reflects the information
+accumulated by the current administered set.</p>
 </section>
 <section id="definition">
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
 <p>The stopper judges the standard error the estimator reported with the current
 estimate, the context’s <code class="docutils literal notranslate"><span class="pre">se</span></code>
-(<a class="reference internal" href="../../../adr/0005-explicit-strategy-contracts.html"><span class="doc">ADR-0005</span></a>). It stops when</p>
+(<a class="reference internal" href="../../../adr/0007-strategy-contracts.html"><span class="doc">ADR-0007</span></a>). It stops when</p>
 <div class="math notranslate nohighlight">
 \[SE(\hat{\theta}) \le \tau,\]</div>
 <p>where <span class="math notranslate nohighlight">\(\tau\)</span> is the configured <code class="docutils literal notranslate"><span class="pre">max_se</span></code>. Each estimator computes that error by
-its own formula, as catR does <span class="bibtex-citation" id="id5">[<a class="reference internal" href="#id20" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, pp. 4-6]</span>. For
+its own formula <span class="bibtex-citation" id="id4">[<a class="reference internal" href="#id19" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, pp. 4-6]</span>. For
 <a class="reference internal" href="../estimation/numerical-search-estimator.html"><span class="doc">maximum likelihood</span></a>
 and the <a class="reference internal" href="../estimation/warm-wle.html"><span class="doc">WLE</span></a> it is the Fisher
 standard error, <span class="math notranslate nohighlight">\(1/\sqrt{I(\hat{\theta})}\)</span>, with <span class="math notranslate nohighlight">\(I(\hat{\theta})\)</span> the
@@ -504,10 +505,10 @@ prior’s negative curvature. Before any response the standard error is
 infinite, so the test does not stop. To ask
 <a class="reference internal" href="index.html#catsim.stopping.StopRule.satisfied" title="catsim.stopping.StopRule.satisfied"><code class="xref py py-meth docutils literal notranslate"><span class="pre">satisfied()</span></code></a> about a finished session, pass it
 <a class="reference internal" href="../../engine.html#catsim.CatEngine.context" title="catsim.CatEngine.context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">engine.context(session)</span></code></a>, which carries the session’s
-standard error. As in catR, items are
+standard error. The comparison includes the target: items are
 administered “until the standard error of the provisional ability estimate gets
-smaller than or equal to that threshold” <span class="bibtex-citation" id="id6">[<a class="reference internal" href="#id20" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, p. 11]</span>.</p>
-<p><span class="bibtex-citation" id="id7">Samejima [<a class="reference internal" href="#id59" title="F. Samejima. A use of the information function in tailored testing. Applied Psychological Measurement, 1(2):233–247, 1977. Open copy: https://hdl.handle.net/11299/98492. doi:10.1177/014662167700100209.">1977</a>, p. 238]</span> suggests terminating an adaptive test when the test
+smaller than or equal to that threshold” <span class="bibtex-citation" id="id5">[<a class="reference internal" href="#id19" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, p. 11]</span>.</p>
+<p><span class="bibtex-citation" id="id6">Samejima [<a class="reference internal" href="#id58" title="F. Samejima. A use of the information function in tailored testing. Applied Psychological Measurement, 1(2):233–247, 1977. Open copy: https://hdl.handle.net/11299/98492. doi:10.1177/014662167700100209.">1977</a>, p. 238]</span> suggests terminating an adaptive test when the test
 information function reaches a criterion value, or equivalently when the
 standard error of estimation falls to a small value, which can be constant
 across ability or depend on it; catsim uses a constant. She argues that the
@@ -544,8 +545,21 @@ same estimate, so the same threshold ends EAP and MAP tests sooner.</p>
 <p>A target that some examinees cannot reach with the bank keeps their tests
 going until the bank runs out, so the stopper is usually combined with a
 <a class="reference internal" href="max-length-stopper.html#catsim.stopping.MaxLengthStopper" title="catsim.stopping.MaxLengthStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxLengthStopper</span></code></a> cap, and often with a minimum length,
-in a <a class="reference internal" href="index.html#catsim.stopping.StopRule" title="catsim.stopping.StopRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopRule</span></code></a> (see <a class="reference internal" href="index.html#combining-stopping-rules"><span class="std std-ref">Combining stopping rules</span></a>).</p>
-</section>
+in a <a class="reference internal" href="index.html#catsim.stopping.StopRule" title="catsim.stopping.StopRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopRule</span></code></a> (see <a class="reference internal" href="index.html#combining-stopping-rules"><span class="std std-ref">Combining stoppers</span></a>).</p>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Comparison with catR</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">The stopper is catR’s <code class="docutils literal notranslate"><span class="pre">precision</span></code> rule. The parity tests
+(<a class="reference internal" href="../../../adr/0020-catr-as-the-reference.html"><span class="doc">ADR-0020</span></a>) find catR’s decisions with
+the standard error just above, at and just below the threshold and before any
+response, alone and with a length rule, and catR’s test lengths in whole tests
+on recorded responses with each estimator. They find no departure in the
+stopper; the standard error it judges is the estimator’s, and the
+<a class="reference internal" href="../estimation/numerical-search-estimator.html"><span class="doc">maximum likelihood estimator’s page</span></a>
+states how its error after all-correct or all-incorrect responses departs from
+catR’s.</p>
+</div>
+</details></section>
 <section id="guarantees">
 <h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
@@ -555,19 +569,19 @@ in a <a class="reference internal" href="index.html#catsim.stopping.StopRule" ti
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<div class="docutils container" id="id8">
+<div class="docutils container" id="id7">
 <div role="list" class="citation-list">
-<div class="citation" id="id20" role="doc-biblioentry">
+<div class="citation" id="id19" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span>MR12<span class="fn-bracket">]</span></span>
-<span class="backrefs">(<a role="doc-backlink" href="#id3">1</a>,<a role="doc-backlink" href="#id4">2</a>,<a role="doc-backlink" href="#id5">3</a>,<a role="doc-backlink" href="#id6">4</a>)</span>
+<span class="backrefs">(<a role="doc-backlink" href="#id3">1</a>,<a role="doc-backlink" href="#id4">2</a>,<a role="doc-backlink" href="#id5">3</a>)</span>
 <p>D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8):1–31, 2012. Open access. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">doi:10.18637/jss.v048.i08</a>.</p>
 </div>
-<div class="citation" id="id59" role="doc-biblioentry">
+<div class="citation" id="id58" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span>Sam77<span class="fn-bracket">]</span></span>
-<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id7">2</a>)</span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id6">2</a>)</span>
 <p>F. Samejima. A use of the information function in tailored testing. <em>Applied Psychological Measurement</em>, 1(2):233–247, 1977. Open copy: <a class="reference external" href="https://hdl.handle.net/11299/98492">https://hdl.handle.net/11299/98492</a>. <a class="reference external" href="https://doi.org/10.1177/014662167700100209">doi:10.1177/014662167700100209</a>.</p>
 </div>
-<div class="citation" id="id11" role="doc-biblioentry">
+<div class="citation" id="id10" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">Thi00</a><span class="fn-bracket">]</span></span>
 <p>D. Thissen. Reliability and measurement precision. In H. Wainer, editor, <em>Computerized Adaptive Testing: A Primer</em>, 159–184. Lawrence Erlbaum Associates, 2000. Not openly available.</p>
 </div>

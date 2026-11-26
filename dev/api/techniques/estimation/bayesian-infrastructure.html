@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/techniques/estimation/bayesian-infrastructure';</script>
@@ -487,7 +489,7 @@ posterior-weighted selectors (MPWI, KLP, MEPV) would reuse its posterior.</p>
 </section>
 <section id="definition">
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
-<p>For a response vector <span class="math notranslate nohighlight">\(\mathbf{u}\)</span> on administered items with parameters
+<p>For responses <span class="math notranslate nohighlight">\(\mathbf{u}\)</span> to administered items with parameters
 <span class="math notranslate nohighlight">\(\boldsymbol{\xi}\)</span>, the posterior is</p>
 <div class="math notranslate nohighlight">
 \[p(\theta \mid \mathbf{u})
@@ -504,8 +506,8 @@ w_q\,p(\theta_q)\,L(\mathbf{u}\mid\theta_q),
 \sum_{q=1}^{Q}\tilde{p}(\theta_q \mid \mathbf{u}) = 1.\]</div>
 <p>The log-likelihoods are summed at each node, as <span class="bibtex-citation" id="id3">Bock and Mislevy [<a class="reference internal" href="#id37" title="R. D. Bock and R. J. Mislevy. Adaptive EAP estimation of ability in a microcomputer environment. Applied Psychological Measurement, 6(4):431–444, 1982. Open copy: https://hdl.handle.net/11299/101546. doi:10.1177/014662168200600405.">1982</a>, p. 432]</span>
 recommend for adaptive testing, and the posterior is normalized after
-subtracting the largest log-posterior value, so long response vectors do not
-underflow. Downstream techniques reuse the same posterior moments:</p>
+subtracting the largest log-posterior value, so the posterior after many
+responses does not underflow. Downstream techniques reuse the same posterior moments:</p>
 <div class="math notranslate nohighlight">
 \[\hat{\theta}_{\mathrm{EAP}}
 =
@@ -588,12 +590,21 @@ changing the shared kernel.</p></td>
 <h2>Behavior and Comparison<a class="headerlink" href="#behavior-and-comparison" title="Link to this heading">#</a></h2>
 <p>As informative items accumulate, the posterior variance generally contracts
 rather than expands without bound.</p>
-</section>
+<p>A grid’s weights may be any positive numbers, such as those of the trapezoid
+rule, which halves the weights of the two end nodes.</p>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Comparison with catR</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">catR integrates by the trapezoid rule, so a grid with its weights gives catR’s
+posterior on the same nodes; the
+<a class="reference internal" href="eap-estimator.html"><span class="doc">EAP page</span></a> shows one.</p>
+</div>
+</details></section>
 <section id="guarantees">
 <h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
 <li><p>The posterior probabilities on the quadrature grid sum to 1.</p></li>
-<li><p>The posterior of a long response vector has no NaNs and no all-zero weights from exponentiation underflow.</p></li>
+<li><p>The posterior after many responses has no NaNs and no all-zero weights from exponentiation underflow.</p></li>
 <li><p>With no responses, the posterior is the prior times the grid weights, normalized.</p></li>
 </ol>
 </section>
@@ -701,8 +712,9 @@ default bounds.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>LogPrior</dt><dd><p>A vectorized function mapping ability values to their log-density under
-<span class="math notranslate nohighlight">\(\mathcal{N}(\text{mean}, \text{sd}^2)\)</span>.</p>
+<dt>LogPrior</dt><dd><p>A vectorized callable mapping ability values to their log-density under
+<span class="math notranslate nohighlight">\(\mathcal{N}(\text{mean}, \text{sd}^2)\)</span>. It pickles, equals any prior this function
+returns for the same arguments, and its repr is the call that builds it.</p>
 </dd>
 </dl>
 </dd>
@@ -730,8 +742,9 @@ default bounds.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>LogPrior</dt><dd><p>A vectorized function returning <span class="math notranslate nohighlight">\(-\log(\text{high} - \text{low})\)</span> inside the
-bounds and <span class="math notranslate nohighlight">\(-\infty\)</span> outside them.</p>
+<dt>LogPrior</dt><dd><p>A vectorized callable returning <span class="math notranslate nohighlight">\(-\log(\text{high} - \text{low})\)</span> inside the
+bounds and <span class="math notranslate nohighlight">\(-\infty\)</span> outside them. It pickles, equals any prior this function returns
+for the same arguments, and its repr is the call that builds it.</p>
 </dd>
 </dl>
 </dd>
@@ -754,7 +767,8 @@ responses does not underflow.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>responses</strong><span class="classifier">Sequence[bool]</span></dt><dd><p>Responses to the administered items, in the same order as <code class="docutils literal notranslate"><span class="pre">items</span></code>.</p>
+<dt><strong>responses</strong><span class="classifier">Sequence[bool]</span></dt><dd><p>Responses to the administered items, in the same order as <code class="docutils literal notranslate"><span class="pre">items</span></code>: each a Boolean or the
+integer 0 or 1.</p>
 </dd>
 <dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>Parameter matrix of the administered items, one row per item.</p>
 </dd>
@@ -773,9 +787,10 @@ responses does not underflow.</p>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt>ValueError</dt><dd><p>If the log-prior or log-likelihood is NaN or <span class="math notranslate nohighlight">\(+\infty\)</span> at any node, if every node has
-zero posterior mass, or if <code class="docutils literal notranslate"><span class="pre">responses</span></code> and <code class="docutils literal notranslate"><span class="pre">items</span></code> differ in length.</p>
+zero posterior mass, if <code class="docutils literal notranslate"><span class="pre">responses</span></code> and <code class="docutils literal notranslate"><span class="pre">items</span></code> differ in length, or if an integer response
+is not 0 or 1.</p>
 </dd>
-<dt>TypeError</dt><dd><p>If a response is not a <code class="docutils literal notranslate"><span class="pre">bool</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy.bool_</span></code>.</p>
+<dt>TypeError</dt><dd><p>If a response is neither a Boolean nor an integer.</p>
 </dd>
 </dl>
 </dd>

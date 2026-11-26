@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/techniques/selection/stratified-selector';</script>
@@ -582,20 +584,20 @@ into <span class="math notranslate nohighlight">\(S\)</span> contiguous strata o
 <span class="math notranslate nohighlight">\(M \bmod S\)</span> of them holding one item more. This is the a-stratified procedure
 of <span class="bibtex-citation" id="id12">Chang and Ying [<a class="reference internal" href="#id33" title="H.-H. Chang and Z. Ying. a-stratified multistage computerized adaptive testing. Applied Psychological Measurement, 23(3):211–222, 1999. Not openly available; Barrada et al. (2006) describe the method. doi:10.1177/01466219922031338.">1999</a>]</span>, as described step by step by
 <span class="bibtex-citation" id="id13">Barrada <em>et al.</em> [<a class="reference internal" href="#id34" title="Juan Ramón Barrada, Paloma Mazuela, and Julio Olea. Maximum information stratification method for controlling item exposure in computerized adaptive testing. Psicothema, 18(1):156–159, 2006. Open access. URL: https://www.psicothema.com/pdf/3191.pdf.">2006</a>, p. 157]</span>.</p>
-<figure class="align-default" id="id71">
+<figure class="align-default" id="id77">
 <a class="reference internal image-reference" href="../../../_images/alpha-strat.svg"><img alt="A row of strata numbered 1 to k under an arrow labelled a, shading darker from stratum 1 to stratum k." src="../../../_images/alpha-strat.svg" style="width: 400px;" />
 </a>
 <figcaption>
 <p><span class="caption-number">Fig. 3 </span><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">AStratSelector</span></code>: the item bank sorted by increasing <span class="math notranslate nohighlight">\(a\)</span> and split into strata
-<span class="math notranslate nohighlight">\(1, \dots, k\)</span>.</span><a class="headerlink" href="#id71" title="Link to this image">#</a></p>
+<span class="math notranslate nohighlight">\(1, \dots, k\)</span>.</span><a class="headerlink" href="#id77" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<figure class="align-default" id="id72">
+<figure class="align-default" id="id78">
 <a class="reference internal image-reference" href="../../../_images/mis.svg"><img alt="A row of strata numbered 1 to k under an arrow labelled maximum information, shading darker from stratum 1 to stratum k." src="../../../_images/mis.svg" style="width: 400px;" />
 </a>
 <figcaption>
 <p><span class="caption-number">Fig. 4 </span><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">MaxInfoStratSelector</span></code>: the item bank sorted by increasing <span class="math notranslate nohighlight">\(I_i^{\max}\)</span> and split
-into strata <span class="math notranslate nohighlight">\(1, \dots, k\)</span>.</span><a class="headerlink" href="#id72" title="Link to this image">#</a></p>
+into strata <span class="math notranslate nohighlight">\(1, \dots, k\)</span>.</span><a class="headerlink" href="#id78" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <p><strong>Strata with blocking</strong> <span class="bibtex-citation" id="id14">[<a class="reference internal" href="#id32" title="H.-H. Chang, J. Qian, and Z. Ying. a-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. Not openly available; Barrada et al. (2006) describe the method. doi:10.1177/01466210122032181.">Chang <em>et al.</em>, 2001</a>]</span>;
@@ -608,23 +610,23 @@ stratum, so each stratum spans the locations those blocks cover, while the
 strata still ascend in <span class="math notranslate nohighlight">\(k_i\)</span>. A trailing block of <span class="math notranslate nohighlight">\(r &lt; S\)</span> items, those of
 highest location, gives its items, in the same order, to the first <span class="math notranslate nohighlight">\(r\)</span> strata, so
 the strata have the sizes they would have without blocking.</p>
-<figure class="align-default" id="id73">
+<figure class="align-default" id="id79">
 <a class="reference internal image-reference" href="../../../_images/b-blocking.svg"><img alt="Blocks 1 to k under an arrow labelled b, each block sorted along its own arrow labelled a. The first items of blocks 1 to k are gathered into the first cell of a new row of strata." src="../../../_images/b-blocking.svg" style="width: 400px;" />
 </a>
 <figcaption>
 <p><span class="caption-number">Fig. 5 </span><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">AStratBBlockSelector</span></code>: items sorted by <span class="math notranslate nohighlight">\(b\)</span> into <span class="math notranslate nohighlight">\(k\)</span> blocks of <span class="math notranslate nohighlight">\(S\)</span> items, each
 block sorted by <span class="math notranslate nohighlight">\(a\)</span>. The first item of every block, <span class="math notranslate nohighlight">\(\{1_1, 2_1, \dots, k_1\}\)</span>,
-forms the first stratum, the second items the second stratum, and so on.</span><a class="headerlink" href="#id73" title="Link to this image">#</a></p>
+forms the first stratum, the second items the second stratum, and so on.</span><a class="headerlink" href="#id79" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<figure class="align-default" id="id74">
+<figure class="align-default" id="id80">
 <a class="reference internal image-reference" href="../../../_images/mis-b.svg"><img alt="Blocks 1 to k under an arrow labelled theta max, each block sorted along its own arrow labelled maximum information. The first items of blocks 1 to k are gathered into the first cell of a new row of strata." src="../../../_images/mis-b.svg" style="width: 400px;" />
 </a>
 <figcaption>
 <p><span class="caption-number">Fig. 6 </span><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">MaxInfoBBlockSelector</span></code>: items sorted by <span class="math notranslate nohighlight">\(\theta_i^{\max}\)</span> into <span class="math notranslate nohighlight">\(k\)</span> blocks of <span class="math notranslate nohighlight">\(S\)</span>
 items, each block sorted by <span class="math notranslate nohighlight">\(I_i^{\max}\)</span>. The first item of every block,
 <span class="math notranslate nohighlight">\(\{1_1, 2_1, \dots, k_1\}\)</span>, forms the first stratum, the second items the second
-stratum, and so on.</span><a class="headerlink" href="#id74" title="Link to this image">#</a></p>
+stratum, and so on.</span><a class="headerlink" href="#id80" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <p><strong>Stages.</strong> The test’s positions are split, in order, into <span class="math notranslate nohighlight">\(S\)</span> stages of
@@ -717,7 +719,7 @@ items.</p></li>
 raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> naming both numbers, so a stopper that allows longer tests
 than <code class="docutils literal notranslate"><span class="pre">test_size</span></code> fails loudly rather than end sessions as if the bank were
 exhausted.</p></li>
-<li><p>It applies no exposure cap: the run’s exposure rates do not change its choice.
+<li><p>It applies no exposure cap: the exposure rates do not change its choice.
 The strata are its exposure control.</p></li>
 </ol>
 </section>

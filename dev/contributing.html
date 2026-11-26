@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,13 +43,14 @@
     <script src="_static/documentation_options.js?v=c4f92b34"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="_static/design-tabs.js?v=fcb327ea"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'contributing';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="_static/favicon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Bibliography" href="references.html" />
-    <link rel="prev" title="ADR-0014: Plotting as an Optional Extra" href="adr/0014-plotting-as-an-optional-extra.html" />
+    <link rel="prev" title="ADR-0023: Public Import Paths and One Name per Concept" href="adr/0023-public-import-paths-and-names.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -447,7 +449,7 @@
   <section class="tex2jax_ignore mathjax_ignore" id="contributing">
 <h1>Contributing<a class="headerlink" href="#contributing" title="Link to this heading">#</a></h1>
 <p><strong>catsim</strong> is built in an object-oriented paradigm (or as object-oriented as Python allows) so it is rather simple to extend it. You can write new <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/initialization/index.html">initializers</a>, <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/selection/index.html">selectors</a>, <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/estimation/index.html">estimators</a> or <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/stopping/index.html">stopping criteria</a> by extending the base classes that are present in each of the corresponding modules. You can also write new <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/irt.html">IRT-related functions</a>, as long as you have the right academic papers to prove they are relevant.</p>
-<p>If you think the <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/engine.html">CAT engine</a> or the <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/simulation.html">simulation runner</a> could be doing something it is currently not doing, feel free to study it and make a contribution.</p>
+<p>If you think the <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/engine.html">CAT engine</a> or <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/simulation.html"><code class="docutils literal notranslate"><span class="pre">simulate</span></code></a> could be doing something it is not doing, feel free to study it and make a contribution.</p>
 <p>If you know a better way to present all the data collected during simulation, feel free to contribute with your own <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/plot.html">plots</a>.</p>
 <section id="psychometrics">
 <h2>Psychometrics<a class="headerlink" href="#psychometrics" title="Link to this heading">#</a></h2>
@@ -469,14 +471,13 @@ uv<span class="w"> </span>run<span class="w"> </span>pre-commit<span class="w"> 
 </section>
 <section id="quality-gate">
 <h2>Quality gate<a class="headerlink" href="#quality-gate" title="Link to this heading">#</a></h2>
-<p>Changes that alter behavior come with new or updated tests in <code class="docutils literal notranslate"><span class="pre">tests/</span></code>. Before you send a pull request, run the checks listed in <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/AGENTS.md">AGENTS.md</a>:</p>
+<p>Changes that alter behavior come with new or updated tests in <code class="docutils literal notranslate"><span class="pre">tests/</span></code>. Before you send a pull request, run the tests and every pre-commit hook, as CI does:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-q
-uv<span class="w"> </span>run<span class="w"> </span>ruff<span class="w"> </span>check<span class="w"> </span>src/catsim<span class="w"> </span>tests
-uv<span class="w"> </span>run<span class="w"> </span>pylint<span class="w"> </span>src/catsim
-uv<span class="w"> </span>run<span class="w"> </span>ty<span class="w"> </span>check
+uv<span class="w"> </span>run<span class="w"> </span>pre-commit<span class="w"> </span>run<span class="w"> </span>--all-files
 </pre></div>
 </div>
-<p>The tutorials are <code class="docutils literal notranslate"><span class="pre">.ipynb</span></code> files in <code class="docutils literal notranslate"><span class="pre">notebooks/</span></code>, versioned with the package so that they open from GitHub and Colab and are checked as the API changes. Commit them without outputs: pre-commit strips the outputs (nbstripout) and runs the notebooks a commit changes (nbmake), and CI runs every notebook, so a notebook that no longer runs fails the gate like a failing test. If you change a notebook, run the notebooks too:</p>
+<p>pytest also runs the docstring examples in <code class="docutils literal notranslate"><span class="pre">src/catsim</span></code>, and turns warnings into errors. The hooks run Ruff, ty, pylint, import-linter (the layer contracts in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>), vulture, typos and the notebooks.</p>
+<p>The tutorials are <code class="docutils literal notranslate"><span class="pre">.ipynb</span></code> files in <code class="docutils literal notranslate"><span class="pre">notebooks/</span></code>, versioned with the package so that they open from GitHub and Colab and are checked as the API changes. Commit them without outputs: pre-commit strips the outputs (nbstripout) and runs the notebooks a commit changes (nbmake), and CI runs every notebook, so a notebook that fails to run fails the gate like a failing test. If you change a notebook, run the notebooks too:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>--nbmake<span class="w"> </span>--nbmake-timeout<span class="o">=</span><span class="m">300</span><span class="w"> </span>notebooks/*.ipynb
 </pre></div>
 </div>
@@ -492,11 +493,30 @@ uv<span class="w"> </span>run<span class="w"> </span>ty<span class="w"> </span>c
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>sphinx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>p<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">python</span><span class="o">=</span>https://docs.python.org/3/<span class="w"> </span><span class="nv">numpy</span><span class="o">=</span>https://numpy.org/doc/stable/<span class="w"> </span><span class="nv">matplotlib</span><span class="o">=</span>https://matplotlib.org/stable/<span class="w"> </span><span class="nv">scipy</span><span class="o">=</span>https://docs.scipy.org/doc/scipy/<span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>curl<span class="w"> </span>-fsSL<span class="w"> </span>-o<span class="w"> </span><span class="s2">"_inventories/</span><span class="si">${</span><span class="nv">p</span><span class="p">%%=*</span><span class="si">}</span><span class="s2">.inv"</span><span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">p</span><span class="p">#*=</span><span class="si">}</span><span class="s2">objects.inv"</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
 </pre></div>
 </div>
-<p>A release is ready only when its documentation is online, so a documentation deployment gates every publication, in the same workflow run as the publication (a job cannot wait for a job in another run): the <code class="docutils literal notranslate"><span class="pre">dev</span></code> → <code class="docutils literal notranslate"><span class="pre">main</span></code> pull request deploys the dev documentation and then publishes a release candidate to TestPyPI, and a GitHub release deploys the production documentation and then publishes to PyPI. These are the only two publishing paths; there is no manual publish. The production documentation goes live before the PyPI upload waits for the maintainer’s approval in the <code class="docutils literal notranslate"><span class="pre">pypi</span></code> environment, so a rejected upload leaves documentation online for a version that is not on PyPI until the next deployment.</p>
+</section>
+<section id="releasing">
+<h2>Releasing<a class="headerlink" href="#releasing" title="Link to this heading">#</a></h2>
+<p>Bump the version with <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">version</span></code>: <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> is its only source. A release is ready only when its documentation is online, so a documentation deployment gates every publication, in the same workflow run as the publication (a job cannot wait for a job in another run): the <code class="docutils literal notranslate"><span class="pre">dev</span></code> → <code class="docutils literal notranslate"><span class="pre">main</span></code> pull request deploys the dev documentation and then publishes a release candidate to TestPyPI, and a GitHub release deploys the production documentation and then publishes to PyPI. These are the only two publishing paths; there is no manual publish. The production documentation goes live before the PyPI upload waits for the maintainer’s approval in the <code class="docutils literal notranslate"><span class="pre">pypi</span></code> environment, so a rejected upload leaves documentation online for a version that is not on PyPI until the next deployment.</p>
+<p>Each GitHub release has a hand-written summary (the highlights, the breaking changes with what users must do, and the results that change for the same seed), followed by GitHub’s generated list of pull requests. The release notes are the only record of what changed: there is no CHANGELOG file.</p>
 </section>
 <section id="adding-a-technique">
 <h2>Adding a technique<a class="headerlink" href="#adding-a-technique" title="Link to this heading">#</a></h2>
 <p>Each implemented technique has a page under <code class="docutils literal notranslate"><span class="pre">sphinx/api/techniques/</span></code> with its definition, its parameters and its Guarantees section. A new technique starts as a spec in <a class="reference external" href="https://github.com/douglasrizzo/catsim/tree/dev/specs"><code class="docutils literal notranslate"><span class="pre">specs/</span></code></a>, written from the <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/_template.md">spec template</a>; <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/README.md"><code class="docutils literal notranslate"><span class="pre">specs/README.md</span></code></a> explains how a spec is revalidated, implemented and then promoted into the documentation. The template’s Definition and References sections set the citation convention: cite the page, equation, table or figure of each formula where the formula appears, cite only locations you have read, say where the implementation departs from its sources, and give every reference its DOI and an open copy when one exists. A spec writes its references by hand; a technique page generates them from <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/sphinx/references.bib"><code class="docutils literal notranslate"><span class="pre">sphinx/references.bib</span></code></a>. On a technique page, cite with <code class="docutils literal notranslate"><span class="pre">{cite:t}`key{p.</span> <span class="pre">N}`</span></code> (or <code class="docutils literal notranslate"><span class="pre">{cite:p}</span></code> in parentheses), add each source to <code class="docutils literal notranslate"><span class="pre">references.bib</span></code> with its DOI and an <code class="docutils literal notranslate"><span class="pre">Open</span> <span class="pre">copy:</span> <span class="pre">\url{...}</span></code>, <code class="docutils literal notranslate"><span class="pre">Open</span> <span class="pre">access</span></code> or <code class="docutils literal notranslate"><span class="pre">Not</span> <span class="pre">openly</span> <span class="pre">available;</span> <span class="pre">...</span></code> note, and end the page’s References section with a <code class="docutils literal notranslate"><span class="pre">{bibliography}</span></code> filtered to the page (<code class="docutils literal notranslate"><span class="pre">:filter:</span> <span class="pre">docname</span> <span class="pre">in</span> <span class="pre">docnames</span></code>), as the <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/sphinx/api/techniques/_template.md">technique-page template</a> shows.</p>
+</section>
+<section id="parity-tests">
+<h2>Parity tests<a class="headerlink" href="#parity-tests" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">tests/test_parity_catr.py</span></code> checks catsim against the R package <a class="reference external" href="https://cran.r-project.org/package=catR">catR</a> on fixed cases (<a class="reference internal" href="adr/0020-catr-as-the-reference.html"><span class="std std-doc">ADR-0020</span></a>). It runs with the rest of the suite and needs no R: catR’s outputs are JSON files in <code class="docutils literal notranslate"><span class="pre">tests/parity/catr/</span></code>, written with the R and catR versions by the R scripts beside them. The cases are at three levels:</p>
+<ol class="arabic simple">
+<li><p>single computations (<code class="docutils literal notranslate"><span class="pre">irt.R</span></code>, <code class="docutils literal notranslate"><span class="pre">estimation.R</span></code>, <code class="docutils literal notranslate"><span class="pre">selection.R</span></code>, <code class="docutils literal notranslate"><span class="pre">stopping.R</span></code>);</p></li>
+<li><p>whole tests on recorded responses (<code class="docutils literal notranslate"><span class="pre">whole_tests.R</span></code>), which must give the same items in the same order and the same estimates;</p></li>
+<li><p>simulations of the randomized selectors (<code class="docutils literal notranslate"><span class="pre">simulations.R</span></code>), whose metrics must agree within their Monte Carlo error, since R and NumPy draw different numbers.</p></li>
+</ol>
+<p>Each case records catR’s settings, and the test builds the catsim strategy that matches them. A deliberate departure that no setting reproduces is a strict expected failure, listed with its reason in the test’s <code class="docutils literal notranslate"><span class="pre">_DEPARTURES</span></code>, and the technique page’s catR dropdown states it: if catsim comes to agree with catR there, the run fails until the departure is removed from both. A new technique with a catR counterpart comes with its parity cases.</p>
+<p>Regenerate the files when the cases change or the pinned catR version (<code class="docutils literal notranslate"><span class="pre">CATR_VERSION</span></code> in <code class="docutils literal notranslate"><span class="pre">generate.R</span></code>) moves, and review the diff of the JSON files:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Rscript<span class="w"> </span>tests/parity/catr/generate.R
+</pre></div>
+</div>
+<p>The script needs R and takes about two minutes. It installs the pinned catR into <code class="docutils literal notranslate"><span class="pre">~/.cache/catsim-parity/R-lib</span></code>, outside the repository and your own R library; set <code class="docutils literal notranslate"><span class="pre">CATSIM_CATR_LIB</span></code> to use another directory. Every run writes the same files.</p>
 </section>
 <section id="how-to-contribute">
 <h2>How to contribute<a class="headerlink" href="#how-to-contribute" title="Link to this heading">#</a></h2>
@@ -512,7 +532,7 @@ uv<span class="w"> </span>run<span class="w"> </span>ty<span class="w"> </span>c
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="barr2010" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
-<p>Barrada, J. R., Olea, J., Ponsoda, V., &amp; Abad, F. J. (2010). A Method for the Comparison of Item Selection Rules in Computerized Adaptive Testing. Applied Psychological Measurement, 34(6), 438–452. <a class="reference external" href="http://doi.org/10.1177/0146621610370152">http://doi.org/10.1177/0146621610370152</a></p>
+<p>Barrada, J. R., Olea, J., Ponsoda, V., &amp; Abad, F. J. (2010). A Method for the Comparison of Item Selection Rules in Computerized Adaptive Testing. Applied Psychological Measurement, 34(6), 438–452. <a class="reference external" href="https://doi.org/10.1177/0146621610370152">https://doi.org/10.1177/0146621610370152</a></p>
 </aside>
 <aside class="footnote brackets" id="lind2010" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
@@ -531,12 +551,12 @@ uv<span class="w"> </span>run<span class="w"> </span>ty<span class="w"> </span>c
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adr/0014-plotting-as-an-optional-extra.html"
+       href="adr/0023-public-import-paths-and-names.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ADR-0014: Plotting as an Optional Extra</p>
+        <p class="prev-next-title">ADR-0023: Public Import Paths and One Name per Concept</p>
       </div>
     </a>
     <a class="right-next"
@@ -571,7 +591,9 @@ uv<span class="w"> </span>run<span class="w"> </span>ty<span class="w"> </span>c
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#development-setup">Development setup</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quality-gate">Quality gate</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#building-the-documentation">Building the documentation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#releasing">Releasing</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-a-technique">Adding a technique</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parity-tests">Parity tests</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-contribute">How to contribute</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
 </ul>

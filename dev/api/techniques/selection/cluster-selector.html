@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/techniques/selection/cluster-selector';</script>
@@ -518,7 +520,7 @@ remaining items. The package supports three cluster-scoring rules:</p>
 administered. The selector first picks the best cluster according to the
 configured scoring rule among clusters that still contain remaining items
 (neither administered nor excluded); clusters whose scores tie exactly are chosen between uniformly at random,
-as tied items are (see <a class="reference internal" href="../../../adr/0011-random-tie-breaking.html"><span class="doc">ADR-0011: Break Ties Between Items Uniformly at Random</span></a>). It then chooses an
+as tied items are (see <a class="reference internal" href="../../../adr/0017-random-tie-breaking.html"><span class="doc">ADR-0017: Break Ties Between Items Uniformly at Random</span></a>). It then chooses an
 item inside that cluster:</p>
 <div class="math notranslate nohighlight">
 \[i^*

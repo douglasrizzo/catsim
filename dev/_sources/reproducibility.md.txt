@@ -1,140 +1,188 @@
 # Reproducibility
 
 A simulation study is reproducible when running its code again gives the same numbers. This guide
-shows how to seed one run, a study of many replications and a study split across processes.
-{doc}`running-simulations` shows how to build and run the test itself.
+seeds one run, says how the examinees of a run depend on each other, seeds a study of many
+replications and runs a study on several processes. {doc}`running-simulations` shows how to build
+and run the test itself.
 
 ## One Seed per Run
 
-{py:meth}`SimulationRunner.run <catsim.SimulationRunner.run>` takes `rng`, the source of every
-random draw of the run: the initializer's starting points, the selectors' random choices and
-tie-breaks, the decisions of the engine's exposure control, if it has one, and every simulated
-response. Custom strategies draw from it too ({doc}`extending`). It can be:
+{py:func}`~catsim.simulate` takes `rng`, the source of every random draw of the run: each
+examinee's answers, the initializer's starting points, the selectors' random choices and
+tie-breaks, and the decisions of the engine's exposure control, if it has one. It can be:
 
-- `None`, the default: the run draws fresh randomness, so every call gives other tests and none can
-  be repeated;
-- an int: a seed, so the same seed and the same true abilities give the same result every time,
-  however many times the runner has run, and on any runner built with the same item bank and
-  strategies;
-- a {py:class}`numpy.random.Generator`: the run draws from it as it is and advances it, so passing
-  the same generator to a second run gives other tests.
-
-A seeded run repeats on the same versions of catsim and NumPy. Seeded results can change between
-catsim versions, when a strategy changes how many random numbers it draws, so record the versions
-with a study's seeds.
+- `None`, the default: the run draws fresh entropy, so every call gives other tests and none can be
+  repeated;
+- an int: a seed, so the same seed and the same examinees give the same result every time;
+- a {py:class}`numpy.random.Generator`: the run draws its seed from it, which advances it, so
+  passing the same generator to a second run gives other tests.
 
 ```pycon
 >>> import numpy
->>> from catsim import CatEngine, ItemBank, SimulationRunner
+>>> from catsim import CatEngine, ItemBank, simulate
 >>> from catsim.estimation import NumericalSearchEstimator
 >>> from catsim.initialization import UniformInitializer
 >>> from catsim.selection import MaxInfoSelector
 >>> from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
->>> engine = CatEngine(
-...     ItemBank.generate(500, rng=42),
-...     UniformInitializer(),
-...     MaxInfoSelector(),
-...     NumericalSearchEstimator(),
-...     StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),
-... )
+>>> item_bank = ItemBank.generate(500, rng=42)
+>>> stopper = StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20))
+>>> engine = CatEngine(item_bank, UniformInitializer(), MaxInfoSelector(), NumericalSearchEstimator(), stopper)
 >>> true_thetas = numpy.random.default_rng(7).normal(0, 1, 10)
->>> runner = SimulationRunner(engine)
->>> first = runner.run(true_thetas, rng=42).final_thetas
->>> numpy.array_equal(first, runner.run(true_thetas, rng=42).final_thetas)
+>>> first = simulate(engine, true_thetas=true_thetas, rng=42)
+>>> first.sessions == simulate(engine, true_thetas=true_thetas, rng=42).sessions
 True
->>> numpy.array_equal(first, runner.run(true_thetas, rng=43).final_thetas)
+>>> first.sessions == simulate(engine, true_thetas=true_thetas, rng=43).sessions
 False
->>> numpy.array_equal(runner.run(true_thetas).final_thetas, runner.run(true_thetas).final_thetas)
+>>> simulate(engine, true_thetas=true_thetas).sessions == simulate(engine, true_thetas=true_thetas).sessions
 False
 >>> generator = numpy.random.default_rng(42)
->>> numpy.array_equal(first, runner.run(true_thetas, rng=generator).final_thetas)
-True
->>> numpy.array_equal(first, runner.run(true_thetas, rng=generator).final_thetas)
+>>> simulate(engine, true_thetas=true_thetas, rng=generator).sessions == simulate(
+...     engine, true_thetas=true_thetas, rng=generator
+... ).sessions
 False
 ```
 
-The same seed gives the same estimates, another seed or no seed other ones. A generator built from
-seed 42 gives the run of seed 42 the first time, and other tests the second time, because the first
-run advanced it.
+A seeded run repeats on the same versions of catsim and NumPy, and across platforms its results
+agree up to floating-point rounding. Seeded results can change between catsim versions, when a
+strategy changes how many random numbers it draws, so record the versions with a study's seeds.
 
 {py:meth}`ItemBank.generate <catsim.ItemBank.generate>` takes an `rng` of its own, with the same
-rules: pass it a seed to draw the same bank every time. A calibrated bank read from a file needs
-none.
+rules, so a generated bank depends on no run. A calibrated bank read from a file needs none.
 
 ## The Population Is an Input
 
-The runner never draws the examinees: their true abilities are an input to `run`. To simulate a
-population, draw the abilities with a generator of your own, as
+`simulate` never draws the examinees: their true abilities, or their recorded responses, are an
+input. To simulate a population, draw the abilities with a generator of your own, as
 `numpy.random.default_rng(7).normal(0, 1, 10)` does above, and pass the same array to every engine
 you compare, so that every strategy meets the same examinees. Seeding the population apart from the
 run also lets a study hold the examinees fixed while it varies the run's seed, or the reverse.
-Abilities from elsewhere, such as the estimates of a calibration sample, work the same way.
 
-## Sessions Run in Sequence
+## Each Examinee Draws on Its Own
 
-A run gives its tests one examinee after another, in the order of `true_thetas`, and every session
-draws from the one generator in turn. Each session's draws therefore depend on all the sessions
-before it:
+An examinee's answers and test depend on the run's seed and the examinee's position in the run, not
+on the tests of the examinees before it:
 
-- reordering the examinees, or adding or removing one, changes the tests of every examinee after
-  it, even under the same seed;
-- with an exposure cap, the items a session may be given also depend on the items given to the
-  examinees before it.
+```pycon
+>>> first.sessions[:4] == simulate(engine, true_thetas=true_thetas[:4], rng=42).sessions
+True
+>>> first.sessions[4:] == simulate(engine, true_thetas=true_thetas[4:], rng=42).sessions
+False
+```
 
-To compare one examinee's test across two runs, keep the population array identical. Why catsim
-runs the sessions in sequence and draws from one generator is in
-{doc}`/adr/0010-random-numbers-and-reproducibility`.
+The first four examinees take the same tests in a run of their own. What counts is the position,
+though: in a run without the first four, every later examinee has another position, and so other
+draws. Reordering, adding or removing examinees changes the tests of those after them, so keep the
+population array identical to compare one examinee across runs.
+
+Two engines run on the same seed and examinees give every examinee the same answer to every item,
+whichever items each engine chooses. Here an engine with randomesque selection gives the first
+examinee 14 of the items the first engine gave, and the answers to them agree:
+
+```pycon
+>>> from catsim.selection import RandomesqueSelector
+>>> other = CatEngine(item_bank, UniformInitializer(), RandomesqueSelector(bin_size=5), NumericalSearchEstimator(), stopper)
+>>> second = simulate(other, true_thetas=true_thetas, rng=42)
+>>> answers = dict(zip(first.sessions[0].administered_items, first.sessions[0].responses))
+>>> others = dict(zip(second.sessions[0].administered_items, second.sessions[0].responses))
+>>> shared = answers.keys() & others.keys()
+>>> len(shared), all(answers[item] == others[item] for item in shared)
+(14, True)
+```
+
+These are *common random numbers*: the difference between two strategies run on the same seed is
+not blurred by examinees who happened to answer differently, so it carries less Monte Carlo error
+than either strategy's own metrics ({doc}`running-simulations` compares selectors this way).
+
+The one way a test depends on the tests before it is the exposure feedback of a selector with an
+`r_max` cap: the items an examinee may be given depend on how often they were given to the
+examinees before. {doc}`/adr/0013-random-numbers-and-reproducibility` explains why catsim draws
+this way.
 
 ## Replications
 
-The metrics of one run depend on its draws. To measure their spread, run each configuration several
-times, each replication with a seed of its own, spawned from one root seed with
-{py:class}`numpy.random.SeedSequence`:
+The metrics of one run depend on its draws. To measure their spread, run each configuration
+several times, each replication with a seed of its own:
 
 ```python
-replications = numpy.random.SeedSequence(2026).spawn(10)
-results = [runner.run(true_thetas, rng=numpy.random.default_rng(seed)) for seed in replications]
-print(numpy.mean([result.rmse for result in results]), numpy.std([result.rmse for result in results], ddof=1))
+results = [simulate(engine, true_thetas=true_thetas, rng=seed) for seed in range(10)]
+rmses = [result.rmse().value for result in results]
+print(f"RMSE {numpy.mean(rmses):.3f}, standard deviation over replications {numpy.std(rmses, ddof=1):.3f}")
+print(f"Monte Carlo error of the first replication's RMSE {results[0].rmse().mc_se:.3f}")
 ```
 
-The whole study repeats from the root seed, and the spawned seeds give independent streams. Give
-every configuration you compare the same spawned seeds; {doc}`running-simulations` compares
-selectors this way. Unseeded replications would differ from each other too, but the study could not
-be repeated.
+```text
+RMSE 0.472, standard deviation over replications 0.116
+Monte Carlo error of the first replication's RMSE 0.108
+```
 
-## Parallel Studies
+The whole study repeats from its seeds. Give every configuration you compare the same seeds, so that
+the comparison uses common random numbers. Each run's metrics come with Monte Carlo errors, which
+estimate this spread from the run alone: 0.108 for the first replication, against 0.116 over the
+ten. Under an exposure cap the errors are approximations, and replications give the exact spread.
 
-A run's sessions do not run in parallel: their draws would then depend on which session drew first.
-To use several processes, split the study into parts that do not share a generator, each with a
-seed of its own. Independent replications are such parts, and so is a population split in pieces:
+## Parts and Workers
+
+`simulate(..., parts=4, workers=4)` splits the examinees, in order, into four contiguous parts of
+near-equal size, and runs the parts on four processes. The result depends on the engine, the
+examinees, the seed and `parts`, never on `workers`, on which process runs which part, or on
+timing, so a run repeats on any machine from its seed and its number of parts. `parts=1`, the
+default, is the sequential run.
+
+Each part runs its tests in order, and counts exposure for its own examinees. Without an exposure
+cap, the parts change nothing, since every examinee draws from its own streams. With a cap, an
+examinee sees the exposure of the earlier examinees of its part only, so the result differs from
+the sequential one; the cap still holds over the whole run. Record `parts`, which the result keeps
+as `result.parts`, with the seed.
+
+A script that runs on workers calls `simulate` under `if __name__ == "__main__":`, as every process
+pool of Python requires: each worker imports the script, and without the guard each would start the
+study again, which fails.
 
 ```python
-from catsim import SimulationResult
+# study.py
+import numpy
 
-parts = numpy.array_split(true_thetas, 2)
-seeds = numpy.random.SeedSequence(2026).spawn(len(parts))
-results = [runner.run(part, rng=numpy.random.default_rng(seed)) for part, seed in zip(parts, seeds)]
-combined = SimulationResult(
-    runner.engine.item_bank,
-    sessions=[session for result in results for session in result.sessions],
-    exposure_counts=sum(result.exposure_counts for result in results),
-    duration=sum(result.duration for result in results),
-    proposal_counts=sum(result.proposal_counts for result in results),
-)
-print(combined.rmse, combined.exposure_rates.max())
+from catsim import CatEngine, ItemBank, simulate
+from catsim.estimation import EAPEstimator
+from catsim.initialization import FixedPointInitializer
+from catsim.selection import MaxInfoSelector
+from catsim.stopping import MaxLengthStopper
+
+
+def main() -> None:
+    item_bank = ItemBank.generate(300, "3PL", rng=1)
+    true_thetas = numpy.random.default_rng(2).normal(0, 1, 2000)
+    for r_max in (1.0, 0.2):
+        selector = MaxInfoSelector(r_max=r_max)
+        engine = CatEngine(item_bank, FixedPointInitializer(0.0), selector, EAPEstimator(), MaxLengthStopper(20))
+        sequential = simulate(engine, true_thetas=true_thetas, rng=3)
+        in_parts = simulate(engine, true_thetas=true_thetas, rng=3, parts=4)
+        on_workers = simulate(engine, true_thetas=true_thetas, rng=3, parts=4, workers=4)
+        print(
+            f"r_max={r_max}: parts change the tests: {in_parts.sessions != sequential.sessions}, "
+            f"workers change them: {on_workers.sessions != in_parts.sessions}, "
+            f"highest exposure rate {in_parts.exposure_rates().value.max():.2f}"
+        )
+
+
+if __name__ == "__main__":
+    main()
 ```
 
-Each part depends only on its own abilities and seed, so the parts can run in separate processes,
-for example with {py:class}`concurrent.futures.ProcessPoolExecutor`, in any order, and give the same
-results. Building one {py:class}`~catsim.SimulationResult` from their sessions and counts gives the
-metrics and exposure rates of the whole population. They differ from those of one sequential run of
-the same population: each part draws from its own stream, and with an exposure cap, each part's
-sessions see the exposure of that part alone.
+```text
+r_max=1.0: parts change the tests: False, workers change them: False, highest exposure rate 1.00
+r_max=0.2: parts change the tests: True, workers change them: False, highest exposure rate 0.20
+```
 
-Two fields of the combined result describe the parts, not one run. Its `duration` is the sum of the
-parts' run times: compute time, longer than the wall-clock time when the parts run in parallel. Its
-session ids repeat, since each run numbers its sessions from 0, so tell the parts' sessions apart by
-their position in `sessions`.
+The built-in strategies run on workers from anywhere, notebooks included. A custom strategy class, a
+lambda such as a custom prior, or a function defined inside another function must come from a `.py`
+module that the notebook or script imports: one defined in the notebook or script itself cannot
+reach the workers, and `simulate` raises before any part runs, naming what to move
+({doc}`extending`). For the same reason, a script read from standard input, such as
+`python - <<EOF`, cannot run on workers.
 
-In a live deployment the application builds the {py:class}`~catsim.RunContext`, and so the
-generator, that its sessions draw from; {doc}`live-sessions` shows how.
+A result's `duration` is wall-clock time, which depends on `workers` and on the machine; its tests
+do not.
+
+In an application, each step of a test takes the generator of its call, and the application
+chooses how its sessions draw ({doc}`embedding-catsim`).

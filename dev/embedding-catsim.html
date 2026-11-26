@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Embedding catsim &#8212; catsim 0.21.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=6a604523" />
+    <link rel="stylesheet" type="text/css" href="_static/mermaid.css?v=3d2a72d1" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="_static/documentation_options.js?v=c4f92b34"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="_static/design-tabs.js?v=fcb327ea"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'embedding-catsim';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="_static/favicon.svg"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorials" href="tutorials.html" />
+    <link rel="prev" title="Extending catsim" href="extending.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.21.0" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/horizontal-light.svg" class="logo__image only-light" alt="catsim 0.21.0 documentation - Home"/>
+    <img src="_static/horizontal-dark.svg" class="logo__image only-dark pst-js-only" alt="catsim 0.21.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="getting-started.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api/techniques/index.html">
+    Techniques
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="planned-techniques.html">
+    Planned techniques
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="architecture_decisions.html">
+    Architecture decisions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="references.html">
+    Bibliography
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="getting-started.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api/techniques/index.html">
+    Techniques
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="planned-techniques.html">
+    Planned techniques
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="architecture_decisions.html">
+    Architecture decisions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="references.html">
+    Bibliography
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terms-and-notation.html">Terms and Notation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-simulations.html">Running Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reproducibility.html">Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending.html">Extending catsim</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Embedding catsim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="getting-started.html" class="nav-link">Getting started</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Embedding catsim</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="embedding-catsim">
+<h1>Embedding catsim<a class="headerlink" href="#embedding-catsim" title="Link to this heading">#</a></h1>
+<p>An application that gives adaptive tests can let catsim compute each step: the next item, the
+ability estimate after each response and whether the test ends. It computes them from inputs the
+application passes and keeps nothing between calls. It does not run, store or serve
+tests: the sessions, the item on screen, the exposure counts, concurrency, persistence and audits
+belong to the application (<a class="reference internal" href="adr/0001-compute-and-evaluate-not-serve.html"><span class="doc">ADR-0001: catsim Computes and Evaluates Adaptive Tests and Does Not Serve Them</span></a>). This guide runs a test
+step by step, then lists what catsim checks in its inputs and what stays with the application. The
+<a class="reference internal" href="introduction.html"><span class="doc">Introduction</span></a> explains the CAT loop, and <a class="reference internal" href="terms-and-notation.html"><span class="doc">Terms and Notation</span></a> lists the terms used here.</p>
+<section id="configure-the-test-once">
+<h2>Configure the Test Once<a class="headerlink" href="#configure-the-test-once" title="Link to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">ItemBank</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">EAPEstimator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">FixedPointInitializer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxInfoSelector</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLengthStopper</span><span class="p">,</span> <span class="n">StandardErrorStopper</span><span class="p">,</span> <span class="n">StopRule</span>
+
+<span class="n">item_bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="s2">"3PL"</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">stopper</span> <span class="o">=</span> <span class="n">StopRule</span><span class="p">(</span><span class="n">StandardErrorStopper</span><span class="p">(</span><span class="mf">0.4</span><span class="p">),</span> <span class="n">MaxLengthStopper</span><span class="p">(</span><span class="mi">25</span><span class="p">),</span> <span class="n">min_items</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">engine</span> <span class="o">=</span> <span class="n">CatEngine</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">FixedPointInitializer</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">MaxInfoSelector</span><span class="p">(</span><span class="n">r_max</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span> <span class="n">EAPEstimator</span><span class="p">(),</span> <span class="n">stopper</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A <a class="reference internal" href="api/engine.html#catsim.CatEngine" title="catsim.CatEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">CatEngine</span></code></a> holds the item bank and the strategies that make up the test:
+where it starts, how it chooses items, how it estimates ability and when it stops. Here the test
+starts at an ability of 0, gives the most informative item at the current estimate, and stops once
+the standard error of the estimate is at most 0.4, after at least 5 and at most 25 items.
+<a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a> shows how to compare such choices before going live.</p>
+<p>The generated bank stands in for yours: read a calibrated bank with
+<a class="reference internal" href="api/item_bank.html#catsim.ItemBank.from_csv" title="catsim.ItemBank.from_csv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ItemBank.from_csv</span></code></a>, or pass its parameters to
+<a class="reference internal" href="api/item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code></a>. catsim refers to an item by its row in the bank, its <em>index</em>, counted
+from 0, and each item also has a name, <code class="docutils literal notranslate"><span class="pre">item_bank.names[item]</span></code>. Mapping indices or names to the
+application’s own item records is the application’s.</p>
+<p>An engine never changes, and neither does its bank: build them once, when the application starts,
+and share them between requests, threads and processes.</p>
+</section>
+<section id="run-a-test-step-by-step">
+<h2>Run a Test Step by Step<a class="headerlink" href="#run-a-test-step-by-step" title="Link to this heading">#</a></h2>
+<p>A test takes three methods: <a class="reference internal" href="api/engine.html#catsim.CatEngine.start" title="catsim.CatEngine.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start()</span></code></a> begins a
+<a class="reference internal" href="api/session.html#catsim.Session" title="catsim.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code></a>, <a class="reference internal" href="api/engine.html#catsim.CatEngine.select" title="catsim.CatEngine.select"><code class="xref py py-meth docutils literal notranslate"><span class="pre">select()</span></code></a> proposes its next item and
+<a class="reference internal" href="api/engine.html#catsim.CatEngine.answer" title="catsim.CatEngine.answer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">answer()</span></code></a> records the response to it. A session never changes: each
+method returns a new one, <code class="docutils literal notranslate"><span class="pre">select</span></code> within a <a class="reference internal" href="api/engine.html#catsim.Selection" title="catsim.Selection"><code class="xref py py-class docutils literal notranslate"><span class="pre">Selection</span></code></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rng</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span>
+<span class="n">session</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+<span class="n">selection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">selection</span><span class="o">.</span><span class="n">item</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="n">selection</span><span class="o">.</span><span class="n">item</span><span class="p">])</span>
+<span class="n">session</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="n">selection</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="n">selection</span><span class="o">.</span><span class="n">item</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">current_theta</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">current_se</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">session</span><span class="o">.</span><span class="n">stop_reason</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>51 item_051
+0.35 0.95 None
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">select</span></code> returns a <a class="reference internal" href="api/engine.html#catsim.Selection" title="catsim.Selection"><code class="xref py py-class docutils literal notranslate"><span class="pre">Selection</span></code></a>: the item to show, the session to answer it in
+and the items an exposure control declined, if the engine has one. Answer the item in
+<code class="docutils literal notranslate"><span class="pre">selection.session</span></code>, which holds those exclusions. The response is <code class="docutils literal notranslate"><span class="pre">True</span></code> or 1 for a correct answer,
+<code class="docutils literal notranslate"><span class="pre">False</span></code> or 0 for an incorrect one. The new session holds the updated estimate and its standard error,
+and its <code class="docutils literal notranslate"><span class="pre">stop_reason</span></code> stays <code class="docutils literal notranslate"><span class="pre">None</span></code> while the test runs.</p>
+<p>Every step takes <code class="docutils literal notranslate"><span class="pre">rng</span></code>, the random source of the strategies it calls: the initializer, the selector’s
+tie-breaks and random choices, and the exposure control. It may be a
+<a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>, a seed, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for fresh entropy at each call. How the
+sessions draw is the application’s choice: one generator for all of them, one per session, or
+fresh entropy at every step.</p>
+<p>A whole test is a loop that ends when <code class="docutils literal notranslate"><span class="pre">select</span></code> has no item to offer. Here a function stands in for
+the examinee:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">respond</span><span class="p">(</span><span class="n">item</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Answer correctly the items whose difficulty is below 0.5."""</span>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">difficulty</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">)</span>
+
+
+<span class="n">session</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="n">selection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+    <span class="n">session</span> <span class="o">=</span> <span class="n">selection</span><span class="o">.</span><span class="n">session</span>
+    <span class="k">if</span> <span class="n">selection</span><span class="o">.</span><span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">break</span>
+    <span class="n">session</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">selection</span><span class="o">.</span><span class="n">item</span><span class="p">,</span> <span class="n">respond</span><span class="p">(</span><span class="n">selection</span><span class="o">.</span><span class="n">item</span><span class="p">),</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">administered_items</span><span class="p">),</span> <span class="n">session</span><span class="o">.</span><span class="n">stop_reason</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">current_theta</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>17 stopper 0.57
+</pre></div>
+</div>
+<p>In an application the loop is spread over requests: one calls <code class="docutils literal notranslate"><span class="pre">select</span></code> and shows the item, a later
+one receives the answer and calls <code class="docutils literal notranslate"><span class="pre">answer</span></code>. Between the two, the application keeps the session and
+the item on screen.</p>
+</section>
+<section id="read-why-a-test-ended">
+<h2>Read Why a Test Ended<a class="headerlink" href="#read-why-a-test-ended" title="Link to this heading">#</a></h2>
+<p>Once a test ends, <code class="docutils literal notranslate"><span class="pre">session.stop_reason</span></code> is a <a class="reference internal" href="api/session.html#catsim.StopReason" title="catsim.StopReason"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopReason</span></code></a>:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">stop_reason</span></code></p></th>
+<th class="head"><p>The test ended because</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">StopReason.STOPPER</span></code> (<code class="docutils literal notranslate"><span class="pre">&quot;stopper&quot;</span></code>)</p></td>
+<td><p>the stopper is satisfied: here, the standard error reached 0.4 or the test reached 25 items</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">StopReason.NO_ITEMS</span></code> (<code class="docutils literal notranslate"><span class="pre">&quot;no_items&quot;</span></code>)</p></td>
+<td><p>the selector had no item left to offer, or none that the exposure control accepted</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Each reason equals its string, so <code class="docutils literal notranslate"><span class="pre">session.stop_reason</span> <span class="pre">==</span> <span class="pre">&quot;stopper&quot;</span></code> holds. <code class="docutils literal notranslate"><span class="pre">NO_ITEMS</span></code> does not
+always mean that the bank ran out: a selector that follows a fixed list or works through strata can
+run out first, and so can a session whose remaining items are all excluded. A session that has
+ended takes no more responses: <code class="docutils literal notranslate"><span class="pre">select</span></code> returns no item and the same session, and <code class="docutils literal notranslate"><span class="pre">answer</span></code> raises
+<code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p>
+<p>To tell which criteria of a <a class="reference internal" href="api/techniques/stopping/index.html#catsim.stopping.StopRule" title="catsim.stopping.StopRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopRule</span></code></a> hold as a test ends, ask the rule
+about the session as <a class="reference internal" href="api/engine.html#catsim.CatEngine.context" title="catsim.CatEngine.context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">context()</span></code></a> gives it
+(<a class="reference internal" href="api/techniques/stopping/index.html#combining-stopping-rules"><span class="std std-ref">Combining stoppers</span></a>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">stopper</span><span class="o">.</span><span class="n">satisfied</span><span class="p">(</span><span class="n">engine</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="n">session</span><span class="p">)))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>(StandardErrorStopper(max_se=0.4),)
+</pre></div>
+</div>
+<p>The standard error reached its target before the test reached 25 items.</p>
+</section>
+<section id="what-catsim-checks">
+<h2>What catsim Checks<a class="headerlink" href="#what-catsim-checks" title="Link to this heading">#</a></h2>
+<p>The application passes catsim its own data at every call: a session it stored, an item, a
+response, exposure rates. catsim checks them when a <code class="docutils literal notranslate"><span class="pre">Session</span></code> is built and when <code class="docutils literal notranslate"><span class="pre">start</span></code>, <code class="docutils literal notranslate"><span class="pre">select</span></code>
+or <code class="docutils literal notranslate"><span class="pre">answer</span></code> is called:</p>
+<ul class="simple">
+<li><p>item indices are integers, in the bank, with no repeats, and no item is both administered and
+excluded;</p></li>
+<li><p>there is one response per administered item, each a Boolean or the integer 0 or 1;</p></li>
+<li><p>the estimates are finite, and their standard errors positive or infinite;</p></li>
+<li><p>exposure rates hold one value per item, each between 0 and 1;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">answer</span></code> takes no response for a session that has ended, or for an item the session has had or
+excluded.</p></li>
+</ul>
+<p>A failed check raises <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> or <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> and changes nothing. The message names the input,
+the position, the value and the rule, and an item by its index and name:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">running</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="n">engine</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">),</span> <span class="mi">51</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">item</span><span class="p">,</span> <span class="n">response</span> <span class="ow">in</span> <span class="p">[(</span><span class="mf">3.7</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span> <span class="p">(</span><span class="mi">51</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span> <span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="s2">"yes"</span><span class="p">)]:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">engine</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="n">running</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>item is 3.7; item indices must be integers
+item is 51 ('item_051'); the session has already been given that item
+response is 'yes'; responses must be bools or the integers 0 and 1
+</pre></div>
+</div>
+<p>catsim does not check whether a stored estimate is the one the responses give, or whether the
+exposure rates are the application’s real ones: those are the application’s
+(<a class="reference internal" href="adr/0009-checking-explicit-inputs.html"><span class="doc">ADR-0009: Explicit Inputs Are Checked Where They Enter</span></a> says why).</p>
+</section>
+<section id="what-the-application-owns">
+<h2>What the Application Owns<a class="headerlink" href="#what-the-application-owns" title="Link to this heading">#</a></h2>
+<p><strong>Sessions and their storage.</strong> A <a class="reference internal" href="api/session.html#catsim.Session" title="catsim.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code></a> is plain data: its items, its
+responses, every estimate from the initial one, its excluded items and its stop reason.
+It holds no identifier, no examinee and no engine, which the application keeps beside it. How and
+where to store sessions is the application’s; catsim defines no format for them. A session built
+from stored fields with <code class="docutils literal notranslate"><span class="pre">Session(...)</span></code> is checked like any other.</p>
+<p><strong>The item on screen.</strong> Each call to <code class="docutils literal notranslate"><span class="pre">select</span></code> selects anew. A selector or an exposure control that
+draws at random, or exposure rates that changed, can make a second call propose another item. Keep
+the item shown and <code class="docutils literal notranslate"><span class="pre">selection.session</span></code> until the answer arrives, and pass both to <code class="docutils literal notranslate"><span class="pre">answer</span></code>.</p>
+<p><strong>Exposure counts and rates.</strong> catsim keeps no exposure counts. A selector with an exposure cap,
+such as <code class="docutils literal notranslate"><span class="pre">MaxInfoSelector(r_max=0.3)</span></code>, passes over the items whose rate has reached the cap, and the
+rates are an input of <code class="docutils literal notranslate"><span class="pre">select</span></code>: one value per item, between 0 and 1, or <code class="docutils literal notranslate"><span class="pre">None</span></code>, under which no cap
+applies. The application counts how often it gives each item and computes the rates by whatever rule
+suits sessions that run side by side; <a class="reference internal" href="api/simulation.html#catsim.simulate" title="catsim.simulate"><code class="xref py py-func docutils literal notranslate"><span class="pre">simulate()</span></code></a> documents the rule a simulation
+uses. Here the item proposed first is passed over when its rate, 0.5, is above the cap of 0.3:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">session</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+<span class="n">first</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span><span class="o">.</span><span class="n">item</span>
+<span class="n">rates</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">)</span>
+<span class="n">rates</span><span class="p">[</span><span class="n">first</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">engine</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span> <span class="n">exposure_rates</span><span class="o">=</span><span class="n">rates</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>51 173
+</pre></div>
+</div>
+<p>An application that keeps proposal counts, for example to calibrate an exposure control, adds each
+selection’s <code class="docutils literal notranslate"><span class="pre">declined</span></code> items and its item. An application that keeps items from an examinee, such
+as those of an earlier attempt, passes them as <code class="docutils literal notranslate"><span class="pre">start(rng=rng,</span> <span class="pre">excluded_items=...)</span></code>.</p>
+<p><strong>Concurrency.</strong> Engines, banks and sessions never change, so threads and processes share them
+safely. Two requests that answer the same session both succeed, each with a session of its own:
+which one counts is the application’s to decide.</p>
+<p><strong>Persistence and audits.</strong> A stored session is the record of the test, from the initial estimate
+on. Keeping it, with whatever the application ties to it, such as the examinee, the attempt, the
+time of each answer or the item on screen, and auditing it are the application’s.
+<a class="reference internal" href="adr/0006-steps-from-explicit-inputs.html"><span class="doc">ADR-0006: Each Step Is Computed From Explicit Inputs, and the Session Is a Value</span></a> explains why each step takes everything as an input.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="extending.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Extending catsim</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="tutorials.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Tutorials</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#configure-the-test-once">Configure the Test Once</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-a-test-step-by-step">Run a Test Step by Step</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#read-why-a-test-ended">Read Why a Test Ended</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-catsim-checks">What catsim Checks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-the-application-owns">What the Application Owns</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/embedding-catsim.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2015-2026, Douglas De Rizzo Meneghetti.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

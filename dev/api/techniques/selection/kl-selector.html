@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/techniques/selection/kl-selector';</script>
@@ -481,7 +483,7 @@
 <dd class="field-odd"><p><a class="reference internal" href="#catsim.selection.KLSelector" title="catsim.selection.KLSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.KLSelector</span></code></a></p>
 </dd>
 <dt class="field-even">Sources<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="bibtex-citation" id="id1">Chang and Ying [<a class="reference internal" href="#id20" title="H.-H. Chang and Z. Ying. A global information approach to computerized adaptive testing. Applied Psychological Measurement, 20(3):213–229, 1996. Open copy: https://hdl.handle.net/11299/119092. doi:10.1177/014662169602000303.">1996</a>]</span></p>
+<dd class="field-even"><p><span class="bibtex-citation" id="id1">Chang and Ying [<a class="reference internal" href="#id21" title="H.-H. Chang and Z. Ying. A global information approach to computerized adaptive testing. Applied Psychological Measurement, 20(3):213–229, 1996. Open copy: https://hdl.handle.net/11299/119092. doi:10.1177/014662169602000303.">1996</a>]</span></p>
 </dd>
 </dl>
 <section id="motivation">
@@ -497,7 +499,7 @@ so the method behaves more globally early in the test and more locally later on.
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
 <p>For candidate item <span class="math notranslate nohighlight">\(i\)</span>, current estimate <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>, and a
 comparison point <span class="math notranslate nohighlight">\(\theta\)</span>, the item-level divergence
-<span class="bibtex-citation" id="id2">[<a class="reference internal" href="#id20" title="H.-H. Chang and Z. Ying. A global information approach to computerized adaptive testing. Applied Psychological Measurement, 20(3):213–229, 1996. Open copy: https://hdl.handle.net/11299/119092. doi:10.1177/014662169602000303.">Chang and Ying, 1996</a>, p. 217, Definition 2.1]</span> is</p>
+<span class="bibtex-citation" id="id2">[<a class="reference internal" href="#id21" title="H.-H. Chang and Z. Ying. A global information approach to computerized adaptive testing. Applied Psychological Measurement, 20(3):213–229, 1996. Open copy: https://hdl.handle.net/11299/119092. doi:10.1177/014662169602000303.">Chang and Ying, 1996</a>, p. 217, Definition 2.1]</span> is</p>
 <div class="math notranslate nohighlight">
 \[K_i(\theta \,\|\, \hat{\theta})
 =
@@ -520,8 +522,8 @@ parameter, is a positive schedule constant. For a small window the criterion is 
 curvature, that is, by the Fisher information; for a large one, by the tails of
 the divergence (p. 220). Before the first item, catsim uses <span class="math notranslate nohighlight">\(n = 1\)</span>, so the
 window is <span class="math notranslate nohighlight">\(\hat{\theta} \pm c\)</span>. Chang and Ying also define a Bayesian version
-that weights the divergence by the posterior (p. 222), a planned extension,
-KLP. The selector chooses the item, neither administered nor excluded, with the
+that weights the divergence by the posterior (p. 222), KLP, a
+<a class="reference internal" href="../../../planned-techniques.html"><span class="doc">planned technique</span></a>. The selector chooses the item, neither administered nor excluded, with the
 largest value of <span class="math notranslate nohighlight">\(K_i(\hat{\theta})\)</span>.</p>
 <section id="computation">
 <h3>Computation<a class="headerlink" href="#computation" title="Link to this heading">#</a></h3>
@@ -555,7 +557,7 @@ nodes and the error grows, to about <span class="math notranslate nohighlight">\
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">window</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">3.0</span></code></p></td>
 <td><p>Positive constant <span class="math notranslate nohighlight">\(c\)</span> controlling the half-width <span class="math notranslate nohighlight">\(\delta_n = c/\sqrt{n}\)</span>.
-<span class="bibtex-citation" id="id1">Chang and Ying [<a class="reference internal" href="#id20" title="H.-H. Chang and Z. Ying. A global information approach to computerized adaptive testing. Applied Psychological Measurement, 20(3):213–229, 1996. Open copy: https://hdl.handle.net/11299/119092. doi:10.1177/014662169602000303.">1996</a>]</span> chose <span class="math notranslate nohighlight">\(c\)</span> from the coverage probability of a
+<span class="bibtex-citation" id="id1">Chang and Ying [<a class="reference internal" href="#id21" title="H.-H. Chang and Z. Ying. A global information approach to computerized adaptive testing. Applied Psychological Measurement, 20(3):213–229, 1996. Open copy: https://hdl.handle.net/11299/119092. doi:10.1177/014662169602000303.">1996</a>]</span> chose <span class="math notranslate nohighlight">\(c\)</span> from the coverage probability of a
 confidence interval for <span class="math notranslate nohighlight">\(\theta\)</span> (p. 221) and used <span class="math notranslate nohighlight">\(c = 3\)</span> in
 their simulation (p. 223).</p></td>
 </tr>
@@ -568,6 +570,28 @@ out before the KL scores are computed, unless every remaining item is.</p></td>
 </table>
 </div>
 </section>
+<section id="behavior-and-comparison">
+<h2>Behavior and Comparison<a class="headerlink" href="#behavior-and-comparison" title="Link to this heading">#</a></h2>
+<p>Since the window narrows as <span class="math notranslate nohighlight">\(1/\sqrt{n}\)</span>, the criterion comes to be governed by
+the curvature of the divergence as the test goes on, and its choices approach
+those of the <a class="reference internal" href="max-info-selector.html"><span class="doc">maximum-information selector</span></a>.</p>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Comparison with catR</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">catR’s <code class="docutils literal notranslate"><span class="pre">nextItem</span></code> with <code class="docutils literal notranslate"><span class="pre">criterion</span> <span class="pre">=</span> <span class="pre">&quot;KL&quot;</span></code> departs from this definition: it weights
+the divergence by the likelihood of the responses so far and integrates it over
+its whole grid, <code class="docutils literal notranslate"><span class="pre">parInt</span></code>, by default 33 nodes on <span class="math notranslate nohighlight">\([-4, 4]\)</span>
+(<a class="reference external" href="https://github.com/cran/catR/blob/master/R/nextItem.R"><code class="docutils literal notranslate"><span class="pre">nextItem.R</span></code></a>). catsim
+integrates the divergence unweighted over the window, the index of
+<span class="bibtex-citation" id="id3">Chang and Ying [<a class="reference internal" href="#id21" title="H.-H. Chang and Z. Ying. A global information approach to computerized adaptive testing. Applied Psychological Measurement, 20(3):213–229, 1996. Open copy: https://hdl.handle.net/11299/119092. doi:10.1177/014662169602000303.">1996</a>, pp. 219–220, Equation 17]</span>, and no <code class="docutils literal notranslate"><span class="pre">KLSelector</span></code> setting weights
+it. The parity tests (<a class="reference internal" href="../../../adr/0020-catr-as-the-reference.html"><span class="doc">ADR-0020</span></a>) therefore
+compare the integral itself: over catsim’s window, catR’s <code class="docutils literal notranslate"><span class="pre">KL()</span></code> with the
+likelihood set to 1 gives catsim’s values and ranking in five contexts, one of
+which picks another item under the windows of one item more or one item fewer.
+catR’s own KL ranking, in a context after two responses, differs, and the tests
+keep it as an expected failure.</p>
+</div>
+</details></section>
 <section id="guarantees">
 <h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
@@ -579,18 +603,18 @@ remaining item with the largest KL integral.</p></li>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<div class="docutils container" id="id3">
+<div class="docutils container" id="id4">
 <div role="list" class="citation-list">
-<div class="citation" id="id20" role="doc-biblioentry">
+<div class="citation" id="id21" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span>CY96<span class="fn-bracket">]</span></span>
-<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>,<a role="doc-backlink" href="#id1">3</a>)</span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>,<a role="doc-backlink" href="#id1">3</a>,<a role="doc-backlink" href="#id3">4</a>)</span>
 <p>H.-H. Chang and Z. Ying. A global information approach to computerized adaptive testing. <em>Applied Psychological Measurement</em>, 20(3):213–229, 1996. Open copy: <a class="reference external" href="https://hdl.handle.net/11299/119092">https://hdl.handle.net/11299/119092</a>. <a class="reference external" href="https://doi.org/10.1177/014662169602000303">doi:10.1177/014662169602000303</a>.</p>
 </div>
 </div>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Posterior-weighted variant: a planned extension, KLP.</p>
+<p>Posterior-weighted variant: KLP, among the <a class="reference internal" href="../../../planned-techniques.html"><span class="doc">Planned techniques</span></a>.</p>
 </div>
 </section>
 <section id="api-reference">
@@ -600,7 +624,7 @@ remaining item with the largest KL integral.</p></li>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">KLSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/kl.html#KLSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.KLSelector" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="index.html#catsim.selection.BaseSelector" title="catsim.selection.base.BaseSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></a></p>
 <p>Select the item with the most Kullback-Leibler information around the current estimate.</p>
-<p>Each candidate’s KL divergence between the response distributions at the estimate and at nearby
+<p>Each candidate item’s KL divergence between the response distributions at the estimate and at nearby
 abilities is integrated over a window around the estimate, which narrows as items are
 administered, and the item with the largest integral is selected.</p>
 <dl class="field-list simple">
@@ -713,6 +737,7 @@ unless no other items are available. Default is 1 (no restriction).</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavior-and-comparison">Behavior and Comparison</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#guarantees">Guarantees</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">

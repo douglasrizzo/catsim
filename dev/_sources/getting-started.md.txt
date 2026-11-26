@@ -1,9 +1,10 @@
 # Getting started
 
 Read the {doc}`introduction` first if computerized adaptive testing is new to you;
-{doc}`terms-and-notation` lists the terms and symbols every page uses. Researchers continue with the
-simulation and reproducibility guides, application developers with live sessions, and method
-authors with extending catsim. The {doc}`tutorials` teach the same tasks hands-on, as notebooks.
+{doc}`terms-and-notation` lists the terms and symbols every page uses. Then follow the guide for
+your task: researchers continue with the simulation and reproducibility guides, method authors with
+extending catsim, and developers who embed catsim's computations in an application with embedding
+catsim. The {doc}`tutorials` teach the same tasks hands-on, as notebooks.
 
 ```{toctree}
 :maxdepth: 1
@@ -11,8 +12,8 @@ authors with extending catsim. The {doc}`tutorials` teach the same tasks hands-o
 introduction
 terms-and-notation
 running-simulations
-live-sessions
 reproducibility
 extending
+embedding-catsim
 tutorials
 ```

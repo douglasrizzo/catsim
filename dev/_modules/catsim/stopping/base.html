@@ -30,6 +30,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -41,6 +42,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 
@@ -802,7 +804,8 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">  Stoppers are pure: the same context always gives the same answer. A stopper holds its</span>
 <span class="sd">  configuration and caches derived from the item bank, never per-session state: one stopper serves</span>
-<span class="sd">  every session of a run, which an application may interleave.</span>
+<span class="sd">  every session of a run, which an application may interleave. The :doc:`/extending` guide writes</span>
+<span class="sd">  one.</span>
 <span class="sd">  """</span>
 
 <div class="viewcode-block" id="BaseStopper.stop">
@@ -814,7 +817,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    context : StepContext</span>
-<span class="sd">        The session to check, with ``theta`` its current estimate.</span>
+<span class="sd">        The session to check, with ``theta`` its current estimate. Its generator is the one made</span>
+<span class="sd">        from the ``rng`` given to :meth:`CatEngine.start &lt;catsim.CatEngine.start&gt;` or</span>
+<span class="sd">        :meth:`CatEngine.answer &lt;catsim.CatEngine.answer&gt;`, whichever asks.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>

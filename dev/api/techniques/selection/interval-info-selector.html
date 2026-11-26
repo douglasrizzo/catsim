@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/techniques/selection/interval-info-selector';</script>
@@ -537,9 +539,10 @@ define each estimator’s standard error.</p>
 <p>Before the first response the standard error is infinite and the interval is
 the whole ability scale (p. 11, Equation 16). The report keeps this unbounded
 interval while the total score is zero or perfect; catsim keeps it only while
-the standard error is infinite. A standard error of zero, or nearly zero, collapses
-the interval onto <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>; catsim then selects by the items’ information at
-<span class="math notranslate nohighlight">\(\hat{\theta}\)</span>, the limit of the information averaged over the interval. With a
+the standard error is infinite. A standard error so small that the interval’s
+half-width is below about <span class="math notranslate nohighlight">\(10^{-8}\)</span> collapses the interval onto <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>;
+catsim then selects by the items’ information at <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>, the limit of the
+information averaged over the interval. With a
 fixed <code class="docutils literal notranslate"><span class="pre">interval</span></code> <span class="math notranslate nohighlight">\(\delta\)</span>, the interval is <span class="math notranslate nohighlight">\([\hat{\theta} - \delta, \hat{\theta} + \delta]\)</span>
 throughout the test.</p>
 <p>The integral has a closed form, which <a class="reference internal" href="../../irt.html#catsim.irt.info_integral" title="catsim.irt.info_integral"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.info_integral()</span></code></a>
@@ -578,6 +581,13 @@ confidence interval above is used.</p></td>
 </table>
 </div>
 </section>
+<section id="behavior-and-comparison">
+<h2>Behavior and Comparison<a class="headerlink" href="#behavior-and-comparison" title="Link to this heading">#</a></h2>
+<p>With the default interval, the selector judges the estimate by the standard error
+its estimator reports, so the same responses usually give a narrower interval, and
+more local choices, under EAP or MAP than under maximum likelihood (see the
+<a class="reference internal" href="../estimation/index.html"><span class="doc">estimation index</span></a>).</p>
+</section>
 <section id="guarantees">
 <h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
@@ -585,7 +595,7 @@ confidence interval above is used.</p></td>
 is largest.</p></li>
 <li><p>It never returns an item that was already administered or excluded.</p></li>
 <li><p>When no item remains, it raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>.</p></li>
-<li><p>It applies no exposure cap: the run’s exposure rates do not change its choice.</p></li>
+<li><p>It applies no exposure cap: the exposure rates do not change its choice.</p></li>
 </ol>
 </section>
 <section id="references">
@@ -614,8 +624,8 @@ is largest.</p></li>
 <p>Select the item whose information, integrated over an interval around the estimate, is largest.</p>
 <p>By default the interval is a confidence interval for the estimate, built from the estimator’s
 standard error (<code class="docutils literal notranslate"><span class="pre">context.se</span></code>) <span class="bibtex-citation" id="id1">[<a class="reference internal" href="#id11" title="Wim J. J. Veerkamp and Martijn P. F. Berger. Some new item selection criteria for adaptive testing. Journal of Educational and Behavioral Statistics, 22(2):203–226, 1997. Not openly available; the 1994 research report of the same title is the open version. doi:10.3102/10769986022002203.">Veerkamp and Berger, 1997</a>]</span>. It spans the whole ability scale before the
-first response and narrows as the standard error falls; a standard error of zero, or nearly zero,
-selects by the items’ information at the estimate. Setting <code class="docutils literal notranslate"><span class="pre">interval</span></code> fixes the half-width. The
+first response and narrows as the standard error falls; a standard error so small that the interval
+vanishes selects by the items’ information at the estimate. Setting <code class="docutils literal notranslate"><span class="pre">interval</span></code> fixes the half-width. The
 selector applies no exposure cap: <code class="docutils literal notranslate"><span class="pre">context.exposure_rates</span></code> is ignored.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -726,6 +736,7 @@ confidence interval.</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavior-and-comparison">Behavior and Comparison</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#guarantees">Guarantees</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">

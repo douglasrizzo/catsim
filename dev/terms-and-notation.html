@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="_static/documentation_options.js?v=c4f92b34"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'terms-and-notation';</script>
@@ -394,9 +396,9 @@
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Terms and Notation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-simulations.html">Running Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="live-sessions.html">Live CAT Sessions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reproducibility.html">Reproducibility</a></li>
 <li class="toctree-l1"><a class="reference internal" href="extending.html">Extending catsim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="embedding-catsim.html">Embedding catsim</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 </ul>
 </div>
@@ -466,21 +468,22 @@ that the formulas use.</p>
 <section id="examinees-and-items">
 <h2>Examinees and items<a class="headerlink" href="#examinees-and-items" title="Link to this heading">#</a></h2>
 <dl class="simple myst">
-<dt>examinee</dt><dd><p>The person who takes a test. Also called <em>respondent</em>, <em>test taker</em> or <em>candidate</em>.</p>
+<dt>examinee</dt><dd><p>The person who takes a test. Also called <em>respondent</em> or <em>test taker</em>.</p>
 </dd>
 <dt>ability <span class="math notranslate nohighlight">\(\theta\)</span></dt><dd><p>The latent trait a test measures, on a continuous scale. Also called <em>proficiency</em>, <em>latent
-trait</em> or <em>person parameter</em>. A simulation knows each examinee’s true ability: the
-<code class="docutils literal notranslate"><span class="pre">true_thetas</span></code> it is run with.</p>
+trait</em> or <em>person parameter</em>. A simulation knows each examinee’s true ability when it is run
+with <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code>.</p>
 </dd>
 <dt>ability estimate <span class="math notranslate nohighlight">\(\hat{\theta}\)</span></dt><dd><p>The estimate of an examinee’s ability from the responses so far: <em>provisional</em> while the test
-runs, <em>final</em> when it ends. In the API: <code class="docutils literal notranslate"><span class="pre">theta</span></code> in a strategy’s context, <code class="docutils literal notranslate"><span class="pre">current_theta</span></code> on a
-session, <code class="docutils literal notranslate"><span class="pre">final_thetas</span></code> in a simulation result.</p>
+runs, <em>final</em> when it ends. In the API: <code class="docutils literal notranslate"><span class="pre">theta</span></code> in an <code class="docutils literal notranslate"><span class="pre">Estimate</span></code> and in a strategy’s context,
+<code class="docutils literal notranslate"><span class="pre">current_theta</span></code> on a session, the <code class="docutils literal notranslate"><span class="pre">theta</span></code> column of a simulation result’s tables.</p>
 </dd>
 <dt>item</dt><dd><p>One question of a test, scored correct or incorrect. In the API an item is its row in the item
-bank, counted from 0.</p>
+bank, its <em>index</em>, counted from 0 (<code class="docutils literal notranslate"><span class="pre">item</span></code>). Each item also has a <em>name</em>, unique in its bank
+(<code class="docutils literal notranslate"><span class="pre">name</span></code>), which results, plots and error messages show.</p>
 </dd>
 <dt>item bank</dt><dd><p>The calibrated items a test draws from. Also called <em>item pool</em>. In the API: <code class="docutils literal notranslate"><span class="pre">ItemBank</span></code>, which
-holds <span class="math notranslate nohighlight">\(M\)</span> items, <code class="docutils literal notranslate"><span class="pre">n_items</span></code>.</p>
+holds <span class="math notranslate nohighlight">\(M\)</span> items, <code class="docutils literal notranslate"><span class="pre">n_items</span></code>, and their <code class="docutils literal notranslate"><span class="pre">names</span></code>.</p>
 </dd>
 <dt>logistic models</dt><dd><p>The item response models catsim supports: the one-, two-, three- and four-parameter logistic
 models (1PL to 4PL). The 1PL with every discrimination equal to 1 is the <em>Rasch model</em>.
@@ -514,8 +517,8 @@ standard error. The functions for these quantities are in the <code class="docut
 <section id="the-adaptive-test">
 <h2>The adaptive test<a class="headerlink" href="#the-adaptive-test" title="Link to this heading">#</a></h2>
 <dl class="simple myst">
-<dt>response <span class="math notranslate nohighlight">\(u_i\)</span></dt><dd><p>The examinee’s answer to item <span class="math notranslate nohighlight">\(i\)</span>, scored correct (<span class="math notranslate nohighlight">\(u_i = 1\)</span>, <code class="docutils literal notranslate"><span class="pre">True</span></code> in the API) or incorrect
-(<span class="math notranslate nohighlight">\(u_i = 0\)</span>, <code class="docutils literal notranslate"><span class="pre">False</span></code>).</p>
+<dt>response <span class="math notranslate nohighlight">\(u_i\)</span></dt><dd><p>The examinee’s answer to item <span class="math notranslate nohighlight">\(i\)</span>, scored correct (<span class="math notranslate nohighlight">\(u_i = 1\)</span>, <code class="docutils literal notranslate"><span class="pre">True</span></code> or 1 in the API) or
+incorrect (<span class="math notranslate nohighlight">\(u_i = 0\)</span>, <code class="docutils literal notranslate"><span class="pre">False</span></code> or 0).</p>
 </dd>
 <dt>responses <span class="math notranslate nohighlight">\(\mathbf{u}\)</span></dt><dd><p>The responses to the administered items, in the order they were given. Also called a <em>response
 pattern</em> or <em>response vector</em>. In the API: <code class="docutils literal notranslate"><span class="pre">responses</span></code>.</p>
@@ -525,14 +528,17 @@ pattern</em> or <em>response vector</em>. In the API: <code class="docutils lite
 <dt>excluded items</dt><dd><p>Items a session must not be given although it has not had them, such as the items its exposure
 control declined. They do not count toward the test length. In the API: <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code>.</p>
 </dd>
-<dt>test length <span class="math notranslate nohighlight">\(n\)</span></dt><dd><p>The number of administered items. In the API: <code class="docutils literal notranslate"><span class="pre">test_lengths</span></code> in a simulation result. A
-<code class="docutils literal notranslate"><span class="pre">MaxLengthStopper</span></code> ends the test at <code class="docutils literal notranslate"><span class="pre">max_items</span></code>; a selector that plans its schedule for a test of
-known length takes it as <code class="docutils literal notranslate"><span class="pre">test_size</span></code>.</p>
+<dt>candidate items</dt><dd><p>The items a selector may still choose: those neither administered nor excluded. A selector may
+narrow them further, for example to the items below its exposure cap. In these pages a
+<em>candidate</em> is always an item, never an examinee. In the API: the <code class="docutils literal notranslate"><span class="pre">candidates</span></code> of the selection
+helpers.</p>
 </dd>
-<dt>session</dt><dd><p>One examinee’s test, from the first item to the stop. Its state is a <code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code>.</p>
+<dt>test length <span class="math notranslate nohighlight">\(n\)</span></dt><dd><p>The number of administered items. In the API: the <code class="docutils literal notranslate"><span class="pre">test_length</span></code> column and metric of a simulation
+result. A <code class="docutils literal notranslate"><span class="pre">MaxLengthStopper</span></code> ends the test at <code class="docutils literal notranslate"><span class="pre">max_items</span></code>; a selector that plans its schedule for a
+test of known length takes it as <code class="docutils literal notranslate"><span class="pre">test_size</span></code>.</p>
 </dd>
-<dt>simulation</dt><dd><p>A batch of sessions, one for each true ability, run by a <code class="docutils literal notranslate"><span class="pre">SimulationRunner</span></code>, which returns a
-<code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code>.</p>
+<dt>session</dt><dd><p>One examinee’s test, from the initial estimate to the stop. In the API: <code class="docutils literal notranslate"><span class="pre">Session</span></code>, the record of
+the test so far, which each step of <code class="docutils literal notranslate"><span class="pre">CatEngine</span></code> returns anew.</p>
 </dd>
 <dt>initializer</dt><dd><p>The strategy that sets the ability estimate before the first response, the <em>starting point</em>
 or <em>initial ability estimate</em> of the literature.</p>
@@ -560,29 +566,58 @@ when its selector had no item to offer, or none that the exposure control accept
 <dt>standard error <span class="math notranslate nohighlight">\(SE(\hat{\theta})\)</span></dt><dd><p>The uncertainty of an ability estimate, on the scale of <span class="math notranslate nohighlight">\(\theta\)</span>. Also called the <em>standard
 error of estimation</em> (SEE) or <em>standard error of measurement</em> (SEM). Each estimator computes it
 by its own formula; for maximum likelihood it is <span class="math notranslate nohighlight">\(1/\sqrt{I(\hat{\theta})}\)</span>. In the API: <code class="docutils literal notranslate"><span class="pre">se</span></code> in
-an <code class="docutils literal notranslate"><span class="pre">Estimate</span></code> and in a strategy’s context, <code class="docutils literal notranslate"><span class="pre">current_se</span></code> on a session, <code class="docutils literal notranslate"><span class="pre">final_ses</span></code> in a
-simulation result.</p>
+an <code class="docutils literal notranslate"><span class="pre">Estimate</span></code> and in a strategy’s context, <code class="docutils literal notranslate"><span class="pre">current_se</span></code> on a session, the <code class="docutils literal notranslate"><span class="pre">se</span></code> column of a
+simulation result’s tables.</p>
 </dd>
 </dl>
 </section>
-<section id="simulation-results">
-<h2>Simulation results<a class="headerlink" href="#simulation-results" title="Link to this heading">#</a></h2>
+<section id="simulations">
+<h2>Simulations<a class="headerlink" href="#simulations" title="Link to this heading">#</a></h2>
 <dl class="simple myst">
-<dt>exposure rate <span class="math notranslate nohighlight">\(r_i\)</span></dt><dd><p>The share of examinees who were given item <span class="math notranslate nohighlight">\(i\)</span>. In the API: <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code> in a simulation
-result. Exposure-control selectors limit it with a cap, <code class="docutils literal notranslate"><span class="pre">r_max</span></code>. While a run is in progress the
-rates are counted over the examinees tested so far; <code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code> says how.</p>
+<dt>simulation</dt><dd><p>A run of one session per examinee, by <code class="docutils literal notranslate"><span class="pre">simulate</span></code>, which returns a <code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code>. A run is
+one <em>condition</em>; a study compares several.</p>
+</dd>
+<dt>generated examinee</dt><dd><p>A simulated examinee given by a true ability, who answers each item correctly with probability
+<span class="math notranslate nohighlight">\(P_i(\theta)\)</span>. In the API: an entry of <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code>.</p>
+</dd>
+<dt>recorded examinee</dt><dd><p>A simulated examinee whose answers come from data, as in a <em>post-hoc</em> study of a test given
+linearly. In the API: a row of the <em>response matrix</em> <code class="docutils literal notranslate"><span class="pre">responses</span></code>, one column per item of the bank,
+with NaN where an answer is missing.</p>
+</dd>
+<dt>replication</dt><dd><p>One of several runs of the same condition with other seeds, which together show how much its
+metrics vary.</p>
+</dd>
+<dt>common random numbers</dt><dd><p>Running the conditions a study compares on the same random draws, so that their difference
+carries less Monte Carlo error. Run on the same seed, catsim’s simulated examinees give every
+engine the same answer to each item.</p>
+</dd>
+<dt>part, worker</dt><dd><p>A <em>part</em> is a contiguous share of a simulation’s examinees, whose sessions run in order with
+exposure counts of their own (<code class="docutils literal notranslate"><span class="pre">parts</span></code>). A <em>worker</em> is a process that runs parts (<code class="docutils literal notranslate"><span class="pre">workers</span></code>).</p>
+</dd>
+<dt>exposure rate <span class="math notranslate nohighlight">\(r_i\)</span></dt><dd><p>The share of examinees who were given item <span class="math notranslate nohighlight">\(i\)</span>. In the API: <code class="docutils literal notranslate"><span class="pre">exposure_rates()</span></code> of a simulation
+result, and the <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code> a selector is given at each step. Exposure-control selectors
+limit it with a cap, <code class="docutils literal notranslate"><span class="pre">r_max</span></code>. <code class="docutils literal notranslate"><span class="pre">simulate</span></code> gives the rule for the rates each session sees.</p>
+</dd>
+<dt>exposure feedback</dt><dd><p>The dependence of a session on the sessions before it through the exposure rates it sees, under a
+selector’s <code class="docutils literal notranslate"><span class="pre">r_max</span></code> cap.</p>
 </dd>
 <dt>proposal rate</dt><dd><p>The share of examinees for whom the selector proposed item <span class="math notranslate nohighlight">\(i\)</span>: the item was given or the
-exposure control declined it. In the API: <code class="docutils literal notranslate"><span class="pre">proposal_rates</span></code> in a simulation result. Without an
+exposure control declined it. In the API: <code class="docutils literal notranslate"><span class="pre">proposal_rates()</span></code> of a simulation result. Without an
 exposure control it equals the exposure rate.</p>
 </dd>
-<dt>overlap rate</dt><dd><p>The expected share of items that two examinees have in common. In the API: <code class="docutils literal notranslate"><span class="pre">overlap_rate</span></code> in a
+<dt>overlap rate</dt><dd><p>The expected share of items that two examinees have in common. In the API: <code class="docutils literal notranslate"><span class="pre">overlap_rate()</span></code> of a
 simulation result, <code class="docutils literal notranslate"><span class="pre">None</span></code> unless every session has the same test length.</p>
 </dd>
 <dt>bias, MSE, RMSE</dt><dd><p>How far the final estimates are from the true abilities, over the examinees: the mean of
 <span class="math notranslate nohighlight">\(\hat{\theta} - \theta\)</span>, the mean of <span class="math notranslate nohighlight">\((\hat{\theta} - \theta)^2\)</span>, and its square root. A positive
-bias means abilities are overestimated. In the API: <code class="docutils literal notranslate"><span class="pre">bias</span></code>, <code class="docutils literal notranslate"><span class="pre">mse</span></code> and <code class="docutils literal notranslate"><span class="pre">rmse</span></code> in a simulation
-result.</p>
+bias means abilities are overestimated. In the API: <code class="docutils literal notranslate"><span class="pre">bias()</span></code>, <code class="docutils literal notranslate"><span class="pre">mse()</span></code> and <code class="docutils literal notranslate"><span class="pre">rmse()</span></code> of a
+simulation result.</p>
+</dd>
+<dt>Monte Carlo standard error</dt><dd><p>How much a metric would vary over replications: the uncertainty that the finite number of
+simulated examinees leaves in it. Each metric of a simulation result comes with it, as <code class="docutils literal notranslate"><span class="pre">mc_se</span></code>.</p>
+</dd>
+<dt>decile</dt><dd><p>One tenth of a simulation’s examinees by true ability, from decile 0, the lowest abilities, to 9.
+In the API: <code class="docutils literal notranslate"><span class="pre">deciles()</span></code> of a simulation result, and the <code class="docutils literal notranslate"><span class="pre">decile</span></code> argument of its metrics.</p>
 </dd>
 </dl>
 </section>
@@ -602,11 +637,11 @@ result.</p>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\hat{\theta}\)</span></p></td>
 <td><p>ability estimate</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">theta</span></code>, <code class="docutils literal notranslate"><span class="pre">current_theta</span></code>, <code class="docutils literal notranslate"><span class="pre">final_thetas</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">theta</span></code>, <code class="docutils literal notranslate"><span class="pre">current_theta</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(i\)</span></p></td>
 <td><p>item index</p></td>
-<td><p>an item’s row in the <code class="docutils literal notranslate"><span class="pre">ItemBank</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">item</span></code>, an item’s row in the <code class="docutils literal notranslate"><span class="pre">ItemBank</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(a_i\)</span>, <span class="math notranslate nohighlight">\(b_i\)</span>, <span class="math notranslate nohighlight">\(c_i\)</span>, <span class="math notranslate nohighlight">\(d_i\)</span></p></td>
 <td><p>discrimination, difficulty, guessing parameter and upper asymptote of item <span class="math notranslate nohighlight">\(i\)</span></p></td>
@@ -630,7 +665,7 @@ result.</p>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(SE(\hat{\theta})\)</span></p></td>
 <td><p>standard error of the estimate</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">se</span></code>, <code class="docutils literal notranslate"><span class="pre">current_se</span></code>, <code class="docutils literal notranslate"><span class="pre">final_ses</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">se</span></code>, <code class="docutils literal notranslate"><span class="pre">current_se</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(u_i\)</span></p></td>
 <td><p>response to item <span class="math notranslate nohighlight">\(i\)</span>: 1 if correct, 0 if not</p></td>
@@ -646,15 +681,15 @@ result.</p>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(n\)</span></p></td>
 <td><p>test length, the number of administered items</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">test_lengths</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_length</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(N\)</span></p></td>
 <td><p>number of examinees</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">len(true_thetas)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">len(result.sessions)</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(j\)</span></p></td>
 <td><p>examinee index</p></td>
-<td><p>a session’s position in a simulation result</p></td>
+<td><p>the <code class="docutils literal notranslate"><span class="pre">session</span></code> column of a simulation result’s tables</p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(M\)</span></p></td>
 <td><p>bank size, the number of items in the item bank</p></td>
@@ -725,7 +760,7 @@ a letter of its own, such as <span class="math notranslate nohighlight">\(R\)</s
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examinees-and-items">Examinees and items</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-adaptive-test">The adaptive test</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#simulation-results">Simulation results</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#simulations">Simulations</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#notation">Notation</a></li>
 </ul>
   </nav></div>

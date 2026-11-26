@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
@@ -820,10 +822,10 @@ window.runMermaid = runMermaid;</script>
                   
   <section class="tex2jax_ignore mathjax_ignore" id="module-catsim.stopping">
 <span id="stopping-criteria"></span><h1>Stopping Criteria<a class="headerlink" href="#module-catsim.stopping" title="Link to this heading">#</a></h1>
-<p>Stopping criteria determine when an adaptive test should terminate. A stopper
-evaluates the current session state after each item and signals whether testing
-should continue or stop. Each stopper checks one criterion, and a
-<a class="reference internal" href="#catsim.stopping.StopRule" title="catsim.stopping.StopRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopRule</span></code></a> combines several.</p>
+<p>Stopping criteria determine when an adaptive test should terminate. The engine
+asks its stopper about the session before the first item and after each
+response, and the stopper says whether the test ends there. Each stopper checks
+one criterion, and a <a class="reference internal" href="#catsim.stopping.StopRule" title="catsim.stopping.StopRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopRule</span></code></a> combines several.</p>
 <section id="implemented">
 <h2>Implemented<a class="headerlink" href="#implemented" title="Link to this heading">#</a></h2>
 <div class="toctree-wrapper compound">
@@ -835,15 +837,15 @@ should continue or stop. Each stopper checks one criterion, and a
 </div>
 </section>
 <section id="combining-stopping-rules">
-<span id="id1"></span><h2>Combining stopping rules<a class="headerlink" href="#combining-stopping-rules" title="Link to this heading">#</a></h2>
+<span id="combining-stoppers"></span><h2>Combining stoppers<a class="headerlink" href="#combining-stopping-rules" title="Link to this heading">#</a></h2>
 <p>A variable-length test usually needs more than one criterion: a precision or
 classification target that ends the test once it is met, a cap on the test length
 for the examinees who never meet it, and often a minimum length, so that no test
 ends after a handful of responses. <a class="reference internal" href="#catsim.stopping.StopRule" title="catsim.stopping.StopRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopRule</span></code></a> holds such a
-combination. With <span class="math notranslate nohighlight">\(m\)</span> administered items, a minimum length <span class="math notranslate nohighlight">\(m_{\min}\)</span> and stoppers
+combination. With <span class="math notranslate nohighlight">\(n\)</span> administered items, a minimum length <span class="math notranslate nohighlight">\(n_{\min}\)</span> and stoppers
 <span class="math notranslate nohighlight">\(S_1, \dots, S_K\)</span>, it stops when</p>
 <div class="math notranslate nohighlight">
-\[m \ge m_{\min} \quad\text{and}\quad S_k \text{ holds for some } k.\]</div>
+\[n \ge n_{\min} \quad\text{and}\quad S_k \text{ holds for some } k.\]</div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLengthStopper</span><span class="p">,</span> <span class="n">StandardErrorStopper</span><span class="p">,</span> <span class="n">StopRule</span>
 
 <span class="c1"># a standard error of at most 0.3 or 40 items, whichever comes first, and never fewer than 5 items</span>
@@ -852,10 +854,19 @@ combination. With <span class="math notranslate nohighlight">\(m\)</span> admini
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">min_items</span></code> holds back every stopper in the rule, the length cap included. A rule
 is itself a stopper, so it goes wherever a stopper does, another rule included.</p>
-<p>catR caps its stopping rule the same way: its <code class="docutils literal notranslate"><span class="pre">maxItems</span></code> meta-argument “imposes a
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Comparison with catR</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">catR caps its stopping criteria the same way: its <code class="docutils literal notranslate"><span class="pre">maxItems</span></code> meta-argument “imposes a
 maximal test length and forces the test to stop if this length is reached, even
-though the stopping rule is not yet satisfied” <span class="bibtex-citation" id="id2">[<a class="reference internal" href="#id15" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, p. 18]</span>.</p>
-<p>Stoppers are pure, so a rule can be asked again after a run.
+though the stopping rule is not yet satisfied” <span class="bibtex-citation" id="id1">[<a class="reference internal" href="#id14" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, p. 18]</span>. catR
+also stops as soon as any rule of its <code class="docutils literal notranslate"><span class="pre">stop</span></code> list holds, as a rule of the
+matching stoppers does; the parity tests
+(<a class="reference internal" href="../../../adr/0020-catr-as-the-reference.html"><span class="doc">ADR-0020</span></a>) find catR’s decisions for a
+length and a precision rule together and for two classification thresholds, and
+each stopper’s page says which catR rule it is.</p>
+</div>
+</details><p>Stoppers are pure, so a rule can be asked again after a run.
 <a class="reference internal" href="#catsim.stopping.StopRule.satisfied" title="catsim.stopping.StopRule.satisfied"><code class="xref py py-meth docutils literal notranslate"><span class="pre">satisfied()</span></code></a> returns the stoppers that hold for a
 session’s final items, estimate and standard error, which tells, for example,
 whether a session met its precision target or ran to the cap.</p>
@@ -974,10 +985,10 @@ otherwise.</p>
     </pre></section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<div class="docutils container" id="id3">
+<div class="docutils container" id="id2">
 <div role="list" class="citation-list">
-<div class="citation" id="id15" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">MR12</a><span class="fn-bracket">]</span></span>
+<div class="citation" id="id14" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">MR12</a><span class="fn-bracket">]</span></span>
 <p>D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8):1–31, 2012. Open access. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">doi:10.18637/jss.v048.i08</a>.</p>
 </div>
 </div>
@@ -994,7 +1005,8 @@ estimate, against what a <a class="reference internal" href="../../context.html#
 <a class="reference internal" href="#catsim.stopping.StopRule" title="catsim.stopping.StopRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopRule</span></code></a> combines several of them.</p>
 <p>Stoppers are pure: the same context always gives the same answer. A stopper holds its
 configuration and caches derived from the item bank, never per-session state: one stopper serves
-every session of a run, which an application may interleave.</p>
+every session of a run, which an application may interleave. The <a class="reference internal" href="../../../extending.html"><span class="doc">Extending catsim</span></a> guide writes
+one.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.stopping.BaseStopper.stop">
 <span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/stopping/base.html#BaseStopper.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.stopping.BaseStopper.stop" title="Link to this definition">#</a></dt>
@@ -1002,7 +1014,9 @@ every session of a run, which an application may interleave.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>context</strong><span class="classifier">StepContext</span></dt><dd><p>The session to check, with <code class="docutils literal notranslate"><span class="pre">theta</span></code> its current estimate.</p>
+<dt><strong>context</strong><span class="classifier">StepContext</span></dt><dd><p>The session to check, with <code class="docutils literal notranslate"><span class="pre">theta</span></code> its current estimate. Its generator is the one made
+from the <code class="docutils literal notranslate"><span class="pre">rng</span></code> given to <a class="reference internal" href="../../engine.html#catsim.CatEngine.start" title="catsim.CatEngine.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CatEngine.start</span></code></a> or
+<a class="reference internal" href="../../engine.html#catsim.CatEngine.answer" title="catsim.CatEngine.answer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CatEngine.answer</span></code></a>, whichever asks.</p>
 </dd>
 </dl>
 </dd>
@@ -1068,7 +1082,7 @@ every session of a run, which an application may interleave.</p>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implemented">Implemented</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#combining-stopping-rules">Combining stopping rules</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#combining-stopping-rules">Combining stoppers</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.stopping.StopRule"><code class="docutils literal notranslate"><span class="pre">StopRule</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.stopping.StopRule.satisfied"><code class="docutils literal notranslate"><span class="pre">StopRule.satisfied()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.stopping.StopRule.stop"><code class="docutils literal notranslate"><span class="pre">StopRule.stop()</span></code></a></li>

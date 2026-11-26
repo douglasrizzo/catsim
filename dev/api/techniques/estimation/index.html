@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
@@ -822,8 +824,8 @@ window.runMermaid = runMermaid;</script>
                   
   <section class="tex2jax_ignore mathjax_ignore" id="module-catsim.estimation">
 <span id="estimation-techniques"></span><h1>Estimation Techniques<a class="headerlink" href="#module-catsim.estimation" title="Link to this heading">#</a></h1>
-<p>Ability estimation techniques compute the examinee’s latent trait estimate
-<span class="math notranslate nohighlight">\(\hat{\theta}\)</span> after each item response. The choice of estimator affects
+<p>Ability estimation techniques compute the examinee’s ability estimate
+<span class="math notranslate nohighlight">\(\hat{\theta}\)</span> after each response. The choice of estimator affects
 accuracy, bias, and the availability of uncertainty quantification.</p>
 <p>Every estimator returns a <a class="reference internal" href="../../context.html#catsim.Estimate" title="catsim.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a>: the estimate,
 its standard error by the estimator’s own formula, which the precision stoppers
@@ -837,16 +839,16 @@ per step.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><a class="reference internal" href="numerical-search-estimator.html#catsim.estimation.NumericalSearchEstimator" title="catsim.estimation.NumericalSearchEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericalSearchEstimator</span></code></a></p></td>
-<td><p><span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta)}\)</span>, the Fisher standard error <span class="bibtex-citation" id="id1">[<a class="reference internal" href="#id14" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, Eq. 3, p. 4]</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta)}\)</span>, the Fisher standard error <span class="bibtex-citation" id="id1">[<a class="reference internal" href="#id16" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, Eq. 3, p. 4]</span></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="eap-estimator.html#catsim.estimation.EAPEstimator" title="catsim.estimation.EAPEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EAPEstimator</span></code></a></p></td>
-<td><p>the posterior standard deviation (Eq. 11, p. 6)</p></td>
+<td><p>the posterior standard deviation <span class="bibtex-citation" id="id2">[<a class="reference internal" href="#id16" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, Eq. 11, p. 6]</span></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="map-estimator.html#catsim.estimation.MAPEstimator" title="catsim.estimation.MAPEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">MAPEstimator</span></code></a></p></td>
-<td><p><span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta) - (\log p)''(\hat\theta)}\)</span>, where <span class="math notranslate nohighlight">\(\log p\)</span> is the prior’s log-density; <span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta) + 1/\sigma^2}\)</span> for a normal prior of variance <span class="math notranslate nohighlight">\(\sigma^2\)</span> (Eq. 6, p. 5)</p></td>
+<td><p><span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta) - (\log p)''(\hat\theta)}\)</span>, where <span class="math notranslate nohighlight">\(\log p\)</span> is the prior’s log-density; <span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta) + 1/\sigma^2}\)</span> for a normal prior of variance <span class="math notranslate nohighlight">\(\sigma^2\)</span> <span class="bibtex-citation" id="id3">[<a class="reference internal" href="#id16" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>, Eq. 6, p. 5]</span></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="warm-wle.html#catsim.estimation.WarmLikelihoodEstimator" title="catsim.estimation.WarmLikelihoodEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">WarmLikelihoodEstimator</span></code></a></p></td>
-<td><p><span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta)}\)</span>, catR’s default</p></td>
+<td><p><span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta)}\)</span>, the Fisher standard error at the estimate</p></td>
 </tr>
 </tbody>
 </table>
@@ -857,6 +859,31 @@ their tests sooner than the Fisher standard error would. On 200 simulated EAP
 sessions, the Fisher standard error at the estimate was a median 26% above the
 posterior standard deviation after 3 items and 4% above after 20, and with a 0.4
 threshold the stopping decision after 20 items differed in 47 sessions.</p>
+<section id="estimation-scale">
+<span id="ability-scale-and-constant-responses"></span><h2>Ability scale and constant responses<a class="headerlink" href="#estimation-scale" title="Link to this heading">#</a></h2>
+<p>Once an item has been administered, every estimator returns a finite estimate
+inside its range, whatever the responses
+(<a class="reference internal" href="../../../adr/0018-ability-scale-and-extreme-patterns.html"><span class="doc">ADR-0018</span></a>). The range is
+<code class="docutils literal notranslate"><span class="pre">bounds</span></code> for the estimators that search the scale, and the quadrature grid for
+EAP; both span <span class="math notranslate nohighlight">\([-6, 6]\)</span> by default, six standard deviations either side of the
+mean of a standard normal population. Narrower bounds restrict mixed responses
+too: where the likelihood’s maximum, or the posterior’s mode, lies beyond a
+bound, the estimate is that bound.</p>
+<p>After all-correct or all-incorrect responses the maximum likelihood estimate is
+infinite, and each estimator handles them its own way:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="numerical-search-estimator.html#catsim.estimation.NumericalSearchEstimator" title="catsim.estimation.NumericalSearchEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericalSearchEstimator</span></code></a> takes Dodd’s step from
+the current estimate toward the bank’s hardest or easiest item;</p></li>
+<li><p><a class="reference internal" href="eap-estimator.html#catsim.estimation.EAPEstimator" title="catsim.estimation.EAPEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EAPEstimator</span></code></a> and
+<a class="reference internal" href="map-estimator.html#catsim.estimation.MAPEstimator" title="catsim.estimation.MAPEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">MAPEstimator</span></code></a> return the posterior mean and mode,
+which the prior draws toward its center; with
+<a class="reference internal" href="bayesian-infrastructure.html#catsim.estimation.uniform_log_prior" title="catsim.estimation.uniform_log_prior"><code class="xref py py-func docutils literal notranslate"><span class="pre">uniform_log_prior()</span></code></a>, the MAP estimate is the bound
+the responses point to, the maximum likelihood estimate within the bounds;</p></li>
+<li><p><a class="reference internal" href="warm-wle.html#catsim.estimation.WarmLikelihoodEstimator" title="catsim.estimation.WarmLikelihoodEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">WarmLikelihoodEstimator</span></code></a> returns the root of
+Warm’s modified score, which is finite for these responses, or the bound it
+points to.</p></li>
+</ul>
+</section>
 <section id="implemented">
 <h2>Implemented<a class="headerlink" href="#implemented" title="Link to this heading">#</a></h2>
 <div class="toctree-wrapper compound">
@@ -880,10 +907,11 @@ threshold the stopping decision after 20 items differed in 47 sessions.</p>
     </pre></section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<div class="docutils container" id="id2">
+<div class="docutils container" id="id4">
 <div role="list" class="citation-list">
-<div class="citation" id="id14" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">MR12</a><span class="fn-bracket">]</span></span>
+<div class="citation" id="id16" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>MR12<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>,<a role="doc-backlink" href="#id3">3</a>)</span>
 <p>D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8):1–31, 2012. Open access. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">doi:10.18637/jss.v048.i08</a>.</p>
 </div>
 </div>
@@ -901,25 +929,27 @@ standard error by the estimator’s own formula, which the stoppers judge, and h
 evaluations it took.</p>
 <p>An estimator holds its configuration and caches derived from the item bank, never per-session
 state: one estimator serves every session of a run, which an application may interleave, and
-look-ahead selectors such as MEI call it with hypothetical responses.</p>
+look-ahead selectors such as MEI call it with hypothetical responses. The <a class="reference internal" href="../../../extending.html"><span class="doc">Extending catsim</span></a> guide
+lists what an estimator receives and returns.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.estimation.BaseEstimator.estimate">
 <span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../context.html#catsim.Estimate" title="catsim.context.Estimate"><span class="pre">Estimate</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/estimation/base.html#BaseEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.BaseEstimator.estimate" title="Link to this definition">#</a></dt>
 <dd><p>Return the updated ability estimate given the responses so far, with its standard error.</p>
 <p>Once an item has been administered, the estimate is finite and lies within the estimator’s
-bounds, whatever the response pattern, all correct and all incorrect included.</p>
+bounds, whatever the responses, all correct and all incorrect included.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>context</strong><span class="classifier">StepContext</span></dt><dd><p>The session to estimate for, with the newest item and response, and with <code class="docutils literal notranslate"><span class="pre">theta</span></code> the
-estimate before them.</p>
+estimate before them. When <a class="reference internal" href="../../engine.html#catsim.CatEngine.answer" title="catsim.CatEngine.answer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CatEngine.answer</span></code></a> calls the
+estimator, the context’s generator is the one made from the <code class="docutils literal notranslate"><span class="pre">rng</span></code> given to <code class="docutils literal notranslate"><span class="pre">answer</span></code>.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>Estimate</dt><dd><p>The updated ability estimate <span class="math notranslate nohighlight">\(\hat\theta\)</span>, its standard error (finite, or
-<code class="docutils literal notranslate"><span class="pre">math.inf</span></code>, never NaN) and the number of objective evaluations it took.</p>
+<dt>Estimate</dt><dd><p>The updated ability estimate <span class="math notranslate nohighlight">\(\hat\theta\)</span>, its standard error (positive, possibly
+<code class="docutils literal notranslate"><span class="pre">math.inf</span></code>) and the number of objective evaluations it took.</p>
 </dd>
 </dl>
 </dd>
@@ -978,6 +1008,7 @@ estimate before them.</p>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#estimation-scale">Ability scale and constant responses</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implemented">Implemented</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#class-hierarchy">Class Hierarchy</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>

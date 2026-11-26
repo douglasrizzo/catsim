@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
@@ -844,7 +846,8 @@ distribution.</p>
 simulation studies, and workflows that should not introduce randomness before
 the first item is selected. Random initialization is useful when simulations
 should vary the starting point across examinees while remaining reproducible
-through the engine or runner random number generator.</p>
+through the generator that <a class="reference internal" href="../../engine.html#catsim.CatEngine.start" title="catsim.CatEngine.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CatEngine.start</span></code></a>
+takes, which <a class="reference internal" href="../../simulation.html#catsim.simulate" title="catsim.simulate"><code class="xref py py-func docutils literal notranslate"><span class="pre">simulate()</span></code></a> gives each examinee.</p>
 </section>
 <section id="definition">
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
@@ -904,14 +907,33 @@ estimate from it for examinees simulated from <span class="math notranslate nohi
 default, <span class="math notranslate nohighlight">\(\mathcal{N}(0, 1)\)</span>, is not taken from a source; it matches the
 ability distribution those studies simulate.</p>
 </section>
+<section id="behavior-and-comparison">
+<h2>Behavior and Comparison<a class="headerlink" href="#behavior-and-comparison" title="Link to this heading">#</a></h2>
+<p>With a fixed start and a selector that draws nothing at random, every examinee gets
+the same first item. The random initializers spread the first items over the
+bank, at the cost of starting some examinees further from their ability.</p>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Comparison with catR</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">catR starts a test differently: before the first estimate, its <code class="docutils literal notranslate"><span class="pre">startItems</span></code>
+gives one or more early items, chosen at given abilities, by default one item at
+ability 0, and it draws no starting ability. A
+<a class="reference internal" href="#catsim.initialization.FixedPointInitializer" title="catsim.initialization.FixedPointInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">FixedPointInitializer</span></code></a> at 0, followed by the
+test’s selector, gives catR’s start with no early item (<code class="docutils literal notranslate"><span class="pre">nrItems</span> <span class="pre">=</span> <span class="pre">0</span></code>), which the
+whole-test parity tests use (<a class="reference internal" href="../../../adr/0020-catr-as-the-reference.html"><span class="doc">ADR-0020</span></a>);
+the script that records them also checks that catR’s default start gives the
+same tests under MFI and bOpt selection. No parity test covers the random
+initializers.</p>
+</div>
+</details></section>
 <section id="guarantees">
 <h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
 <li><p>A fixed-point initializer starts every examinee at <code class="docutils literal notranslate"><span class="pre">start</span></code>, as a <code class="docutils literal notranslate"><span class="pre">float</span></code>,
 whatever the seed.</p></li>
 <li><p>A uniform initializer’s draws lie between <code class="docutils literal notranslate"><span class="pre">low</span></code> and <code class="docutils literal notranslate"><span class="pre">high</span></code>.</p></li>
-<li><p>The random initializers draw from the run’s random generator, so the same
-seed gives the same initial estimates.</p></li>
+<li><p>The random initializers draw from the generator given to <code class="docutils literal notranslate"><span class="pre">CatEngine.start</span></code>,
+so the same seed gives the same initial estimates.</p></li>
 </ol>
 </section>
 <section id="references">
@@ -1096,7 +1118,8 @@ seed gives the same initial estimates.</p></li>
 administered. It takes the item bank and the random generator alone, not a
 <a class="reference internal" href="../../context.html#catsim.StepContext" title="catsim.StepContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">StepContext</span></code></a>, because no session state exists yet.</p>
 <p>An initializer holds its configuration and caches derived from the item bank, never per-session
-state: one initializer starts every session of a run.</p>
+state: one initializer starts every session of a run. The <a class="reference internal" href="../../../extending.html"><span class="doc">Extending catsim</span></a> guide lists what each
+strategy receives and returns.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.initialization.BaseInitializer.initialize">
 <span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../item_bank.html#catsim.ItemBank" title="catsim.item_bank.ItemBank"><span class="pre">ItemBank</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><span class="pre">Generator</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/initialization/base.html#BaseInitializer.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.BaseInitializer.initialize" title="Link to this definition">#</a></dt>
@@ -1106,7 +1129,9 @@ state: one initializer starts every session of a run.</p>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>Item bank used by the session.</p>
 </dd>
-<dt><strong>rng</strong><span class="classifier">numpy.random.Generator</span></dt><dd><p>The run’s random generator, for initializers that draw the estimate.</p>
+<dt><strong>rng</strong><span class="classifier">numpy.random.Generator</span></dt><dd><p>The generator of the call, for initializers that draw the estimate. When
+<a class="reference internal" href="../../engine.html#catsim.CatEngine.start" title="catsim.CatEngine.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CatEngine.start</span></code></a> calls the initializer, it is the generator
+made from the <code class="docutils literal notranslate"><span class="pre">rng</span></code> given to <code class="docutils literal notranslate"><span class="pre">start</span></code>, which is that <code class="docutils literal notranslate"><span class="pre">rng</span></code> itself when it is a generator.</p>
 </dd>
 </dl>
 </dd>
@@ -1175,6 +1200,7 @@ state: one initializer starts every session of a run.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#motivation">Motivation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#definition">Definition</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavior-and-comparison">Behavior and Comparison</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#guarantees">Guarantees</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">

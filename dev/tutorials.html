@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,13 +43,14 @@
     <script src="_static/documentation_options.js?v=c4f92b34"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="_static/design-tabs.js?v=fcb327ea"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="_static/favicon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Techniques" href="api/techniques/index.html" />
-    <link rel="prev" title="Extending catsim" href="extending.html" />
+    <link rel="prev" title="Embedding catsim" href="embedding-catsim.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -392,9 +394,9 @@
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="terms-and-notation.html">Terms and Notation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-simulations.html">Running Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="live-sessions.html">Live CAT Sessions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reproducibility.html">Reproducibility</a></li>
 <li class="toctree-l1"><a class="reference internal" href="extending.html">Extending catsim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="embedding-catsim.html">Embedding catsim</a></li>
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Tutorials</a></li>
 </ul>
 </div>
@@ -466,37 +468,41 @@ run it from a clone of the repository as the
 <section id="getting-started">
 <h2>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading">#</a></h2>
 <p><strong>For</strong> researchers new to catsim. <strong>Level:</strong> beginner.</p>
-<p>Build an item bank, generated or from your own calibrated parameters, and plot what its items
-measure. Run a simulation whose precision target ends most tests, read its result, follow one
-examinee’s test item by item, and repeat the run from one seed. The reference is
-<a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a>.</p>
+<p>Build an item bank, generated or read from a CSV file of calibrated parameters, and plot what its
+items measure. Run a simulation whose precision target ends most tests, read its metrics with their
+Monte Carlo errors and its tables by examinee, by step and by decile, follow one examinee’s test item
+by item, and repeat the run from its seed. The reference is <a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a>.</p>
 <p><a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/main/notebooks/01_getting_started.ipynb">View on GitHub</a> ·
 <a class="reference external" href="https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/01_getting_started.ipynb">Open in Colab</a></p>
 </section>
 <section id="comparing-strategies">
 <h2>Comparing strategies<a class="headerlink" href="#comparing-strategies" title="Link to this heading">#</a></h2>
 <p><strong>For</strong> researchers who have run a first simulation. <strong>Level:</strong> intermediate.</p>
-<p>Compare strategies on one bank and one population over seeded replications, by their paired
-differences: four estimators, three selectors, four kinds of exposure control and two
-variable-length stoppers, with the metrics that tell them apart and which criterion ended each
-test. The references are <a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a> and <a class="reference internal" href="reproducibility.html"><span class="doc">Reproducibility</span></a>.</p>
+<p>Compare strategies on one bank and one population, every design on the same seed, by differences
+paired examinee by examinee and judged against their Monte Carlo errors: four estimators, three
+selectors, four kinds of exposure control and two variable-length stoppers. Check one run’s Monte
+Carlo error against replications, and run a design in parts on several processes. The references are
+<a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a> and <a class="reference internal" href="reproducibility.html"><span class="doc">Reproducibility</span></a>.</p>
 <p><a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/main/notebooks/02_comparing_strategies.ipynb">View on GitHub</a> ·
 <a class="reference external" href="https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/02_comparing_strategies.ipynb">Open in Colab</a></p>
 </section>
-<section id="live-sessions">
-<h2>Live sessions<a class="headerlink" href="#live-sessions" title="Link to this heading">#</a></h2>
-<p><strong>For</strong> application developers. <strong>Level:</strong> intermediate.</p>
-<p>Run a test one response at a time, as an application does: choose each item, record the response,
-read why the session stopped, save the session as JSON and resume it, and share item exposure
-across sessions. The reference is <a class="reference internal" href="live-sessions.html"><span class="doc">Live CAT Sessions</span></a>.</p>
-<p><a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/main/notebooks/03_live_sessions.ipynb">View on GitHub</a> ·
-<a class="reference external" href="https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/03_live_sessions.ipynb">Open in Colab</a></p>
+<section id="a-test-step-by-step">
+<h2>A test step by step<a class="headerlink" href="#a-test-step-by-step" title="Link to this heading">#</a></h2>
+<p><strong>For</strong> researchers who want to see inside one test, and integrators who use catsim’s computations
+in an application. <strong>Level:</strong> intermediate.</p>
+<p>Run one test with the engine’s three steps, <code class="docutils literal notranslate"><span class="pre">start</span></code>, <code class="docutils literal notranslate"><span class="pre">select</span></code> and <code class="docutils literal notranslate"><span class="pre">answer</span></code>, read the session they
+return, see why it ended and what an ended session does, end a test whose selector runs out of
+items, pass exposure rates to the selector, and check that a simulation runs the same steps. The
+reference is <a class="reference internal" href="embedding-catsim.html"><span class="doc">Embedding catsim</span></a>.</p>
+<p><a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/main/notebooks/03_a_test_step_by_step.ipynb">View on GitHub</a> ·
+<a class="reference external" href="https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/03_a_test_step_by_step.ipynb">Open in Colab</a></p>
 </section>
 <section id="custom-strategies">
 <h2>Custom strategies<a class="headerlink" href="#custom-strategies" title="Link to this heading">#</a></h2>
 <p><strong>For</strong> method authors. <strong>Level:</strong> advanced.</p>
-<p>Write a strategy of your own by subclassing one of catsim’s base classes, reading the session from
-its context and, for an estimator, returning an estimate. The reference is <a class="reference internal" href="extending.html"><span class="doc">Extending catsim</span></a>.</p>
+<p>Write a selector, a stopper and an exposure control of your own by subclassing catsim’s base
+classes, call one directly on a session, run them in a simulation, and see why a strategy that runs
+on several processes must live in a module. The reference is <a class="reference internal" href="extending.html"><span class="doc">Extending catsim</span></a>.</p>
 <p><a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/main/notebooks/04_custom_strategies.ipynb">View on GitHub</a> ·
 <a class="reference external" href="https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/04_custom_strategies.ipynb">Open in Colab</a></p>
 </section>
@@ -513,12 +519,12 @@ its context and, for an estimator, returning an estimate. The reference is <a cl
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="extending.html"
+       href="embedding-catsim.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Extending catsim</p>
+        <p class="prev-next-title">Embedding catsim</p>
       </div>
     </a>
     <a class="right-next"
@@ -551,7 +557,7 @@ its context and, for an estimator, returning an estimate. The reference is <a cl
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-started">Getting started</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comparing-strategies">Comparing strategies</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#live-sessions">Live sessions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-test-step-by-step">A test step by step</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-strategies">Custom strategies</a></li>
 </ul>
   </nav></div>

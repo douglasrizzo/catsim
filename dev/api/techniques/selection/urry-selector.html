@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/techniques/selection/urry-selector';</script>
@@ -502,7 +504,7 @@ chooses</p>
 \arg\min_{i \in R_k} \left| b_i - \hat{\theta} \right|,\]</div>
 <p>where <span class="math notranslate nohighlight">\(R_k\)</span> is the set of items neither administered nor excluded. Items at
 exactly the same distance tie, and one of them is drawn at random
-(<a class="reference internal" href="../../../adr/0011-random-tie-breaking.html"><span class="doc">ADR-0011: Break Ties Between Items Uniformly at Random</span></a>).</p>
+(<a class="reference internal" href="../../../adr/0017-random-tie-breaking.html"><span class="doc">ADR-0017: Break Ties Between Items Uniformly at Random</span></a>).</p>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
@@ -518,14 +520,26 @@ b-matching remains a simple and interpretable heuristic.
 <span class="bibtex-citation" id="id3">Magis and Raîche [<a class="reference internal" href="#id16" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the R package catR. Journal of Statistical Software, 48(8):1–31, 2012. Open access. doi:10.18637/jss.v048.i08.">2012</a>, p. 10]</span> describe Urry’s criterion the same way: completely equivalent to
 maximum information under the 1PL model, slightly different under other models.
 They attribute it to Urry (1970), an earlier work than the article cited below.</p>
-</section>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Comparison with catR</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">The selector is catR’s <code class="docutils literal notranslate"><span class="pre">nextItem</span></code> with <code class="docutils literal notranslate"><span class="pre">criterion</span> <span class="pre">=</span> <span class="pre">&quot;bOpt&quot;</span></code>, and, as in catR,
+items tie only when their distances to the estimate are exactly equal
+(<a class="reference internal" href="../../../adr/0017-random-tie-breaking.html"><span class="doc">ADR-0017: Break Ties Between Items Uniformly at Random</span></a>). The parity tests
+(<a class="reference internal" href="../../../adr/0020-catr-as-the-reference.html"><span class="doc">ADR-0020</span></a>) find catR’s ranking of every
+remaining item in four contexts, from before the first response to an
+all-correct pattern, and catR’s items in whole tests on recorded responses with
+the maximum likelihood, Bayes modal, EAP and weighted likelihood estimators.
+They find no departure.</p>
+</div>
+</details></section>
 <section id="guarantees">
 <h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
 <li><p>It returns the remaining item whose difficulty is closest to the current
 estimate.</p></li>
 <li><p>It never returns an item that was already administered or excluded.</p></li>
-<li><p>It applies no exposure cap: the run’s exposure rates do not change its choice.</p></li>
+<li><p>It applies no exposure cap: the exposure rates do not change its choice.</p></li>
 <li><p>Under the 1PL, the chosen item coincides with a maximum-information choice,
 because information is maximized near <span class="math notranslate nohighlight">\(b_i = \hat{\theta}\)</span>.</p></li>
 <li><p>When no item remains, it raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>.</p></li>

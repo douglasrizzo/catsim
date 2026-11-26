@@ -30,6 +30,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -41,6 +42,7 @@
     <script src="../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../_static/design-tabs.js?v=fcb327ea"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 
@@ -799,6 +801,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.special</span><span class="w"> </span><span class="kn">import</span> <span class="n">expit</span><span class="p">,</span> <span class="n">log_expit</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">.checks</span><span class="w"> </span><span class="kn">import</span> <span class="n">_response</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 
 <span class="n">THETA_MIN_TYPICAL</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.0</span>
@@ -1320,8 +1323,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      from catsim.plot import PlotType, item_curve</span>
 <span class="sd">      item_bank = ItemBank.generate(2, rng=0)</span>
 <span class="sd">      fig, axes = plt.subplots(2, 1, figsize=(6.4, 8))</span>
-<span class="sd">      for item, ax in zip(item_bank.items, axes):</span>
-<span class="sd">        item_curve(item, kind=PlotType.IIC, ax=ax)</span>
+<span class="sd">      for item, ax in enumerate(axes):</span>
+<span class="sd">        item_curve(item, item_bank, kind=PlotType.IIC, ax=ax)</span>
 <span class="sd">      plt.tight_layout()</span>
 <span class="sd">      plt.show()</span>
 
@@ -1410,9 +1413,17 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">  They are the logarithms of the :py:func:`icc` :math:`P_i` and of its complement :math:`Q_i = 1 - P_i`,</span>
 <span class="sd">  computed from the logit :math:`a_i(\theta - b_i)`, never from a :math:`P_i` that has rounded to 0 or</span>
-<span class="sd">  1. They are exact at any distance from the difficulty: far below it :math:`\log P_i` tends to</span>
+<span class="sd">  1, so they stay finite at any distance from the difficulty: far below it :math:`\log P_i` tends to</span>
 <span class="sd">  :math:`\log c_i`, far above it :math:`\log Q_i` tends to :math:`\log(1 - d_i)`, and without guessing</span>
 <span class="sd">  or slipping they keep falling linearly in the logit.</span>
+
+<span class="sd">  Each value is accurate to about :math:`10^{-16}` in absolute terms, so :math:`P_i` and :math:`Q_i`</span>
+<span class="sd">  are accurate to that relative error. :math:`\log P_i` is also accurate in relative terms when</span>
+<span class="sd">  :math:`c_i = 0`, and :math:`\log Q_i` when :math:`d_i = 1`. Otherwise, where a probability nears 1,</span>
+<span class="sd">  its logarithm is accurate in absolute terms only, and can round to 0 or just above it, such as</span>
+<span class="sd">  :math:`5.6 \times 10^{-17}`: :math:`\log P_i` far above the difficulty of an item with</span>
+<span class="sd">  :math:`c_i &gt; 0` and :math:`d_i = 1`, and :math:`\log Q_i` far below that of an item with</span>
+<span class="sd">  :math:`c_i = 0` and :math:`d_i &lt; 1`.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -1469,8 +1480,9 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">  where :math:`u_i` is 1 for a correct response and 0 otherwise, :math:`P_i` is the :py:func:`icc`</span>
 <span class="sd">  and :math:`Q_i = 1 - P_i` :cite:p:`Ayala2009`. Both logarithms are computed as in</span>
-<span class="sd">  :py:func:`log_response_probabilities`, exact at any distance from the difficulty: far from</span>
-<span class="sd">  it, a correct guess costs :math:`\log c_i` and a slip :math:`\log(1 - d_i)`. With no items the</span>
+<span class="sd">  :py:func:`log_response_probabilities`: finite at any distance from the difficulty, and accurate to</span>
+<span class="sd">  about :math:`10^{-16}` in absolute terms, the accuracy a sum needs. Far from the difficulty, a</span>
+<span class="sd">  correct guess costs :math:`\log c_i` and a slip :math:`\log(1 - d_i)`. With no items the</span>
 <span class="sd">  log-likelihood is 0.</span>
 
 <span class="sd">  Parameters</span>
@@ -1478,7 +1490,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  theta : float or numpy.ndarray</span>
 <span class="sd">      An ability, or an array of abilities.</span>
 <span class="sd">  responses : Sequence[bool]</span>
-<span class="sd">      One response per item, True for a correct one.</span>
+<span class="sd">      One response per item: True or 1 for a correct one, False or 0 for an incorrect one.</span>
 <span class="sd">  items : numpy.ndarray</span>
 <span class="sd">      The answered items, a matrix of shape ``(n, 4)`` whose items satisfy</span>
 <span class="sd">      :math:`0 \leq c &lt; d \leq 1`, as :py:class:`~catsim.ItemBank` validates.</span>
@@ -1492,9 +1504,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If ``responses`` does not hold one response per item.</span>
+<span class="sd">      If ``responses`` does not hold one response per item, or an integer response is not 0 or 1.</span>
 <span class="sd">  TypeError</span>
-<span class="sd">      If a response is not a ``bool`` or ``numpy.bool_``.</span>
+<span class="sd">      If a response is neither a Boolean nor an integer.</span>
 
 <span class="sd">  Examples</span>
 <span class="sd">  --------</span>
@@ -1521,7 +1533,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  responses : Sequence[bool]</span>
-<span class="sd">      One response per item, True for a correct one.</span>
+<span class="sd">      One response per item: True or 1 for a correct one, False or 0 for an incorrect one.</span>
 <span class="sd">  items : numpy.ndarray</span>
 <span class="sd">      The answered items, a matrix of shape ``(n, 4)`` whose items satisfy</span>
 <span class="sd">      :math:`0 \leq c &lt; d \leq 1`, as :py:class:`~catsim.ItemBank` validates.</span>
@@ -1535,9 +1547,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If ``items`` is not an ``(n, 4)`` matrix or ``responses`` does not hold one response per item.</span>
+<span class="sd">      If ``items`` is not an ``(n, 4)`` matrix, ``responses`` does not hold one response per item,</span>
+<span class="sd">      or an integer response is not 0 or 1.</span>
 <span class="sd">  TypeError</span>
-<span class="sd">      If a response is not a ``bool`` or ``numpy.bool_``.</span>
+<span class="sd">      If a response is neither a Boolean nor an integer.</span>
 
 <span class="sd">  Examples</span>
 <span class="sd">  --------</span>
@@ -1573,33 +1586,31 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="validate_response_vector">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.validate_response_vector">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">validate_response_vector</span><span class="p">(</span><span class="n">responses</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span> <span class="n">n_items</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Check that ``responses`` holds one Boolean answer per administered item.</span>
+<span class="w">  </span><span class="sd">"""Check that ``responses`` holds one answer per administered item, each a Boolean or the integer 0 or 1.</span>
 
-<span class="sd">  An answer must be a ``bool`` or a ``numpy.bool_``, such as an element of a NumPy Boolean array;</span>
-<span class="sd">  1, 0, 1.0 and 0.0 are rejected.</span>
+<span class="sd">  An answer is a ``bool``, a ``numpy.bool_``, such as an element of a NumPy Boolean array, or the</span>
+<span class="sd">  integer 0 or 1, as the engine takes them (ADR-0009). Floats such as 1.0, and anything else, are</span>
+<span class="sd">  rejected rather than converted.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  responses : Sequence[bool]</span>
-<span class="sd">      The examinee's answers, where True indicates a correct response.</span>
+<span class="sd">      The examinee's answers, where True or 1 indicates a correct response.</span>
 <span class="sd">  n_items : int</span>
 <span class="sd">      Number of administered items the answers belong to.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If ``responses`` does not have ``n_items`` elements.</span>
+<span class="sd">      If ``responses`` does not have ``n_items`` elements, or an integer answer is not 0 or 1.</span>
 <span class="sd">  TypeError</span>
-<span class="sd">      If an element of ``responses`` is not a ``bool`` or ``numpy.bool_``.</span>
+<span class="sd">      If an answer is neither a Boolean nor an integer.</span>
 <span class="sd">  """</span>
+  <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">response</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">responses</span><span class="p">):</span>
+    <span class="n">_response</span><span class="p">(</span><span class="sa">f</span><span class="s2">"responses[</span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2">]"</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">responses</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n_items</span><span class="p">:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"responses and items must have the same length, got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">responses</span><span class="p">)</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">n_items</span><span class="si">}</span><span class="s2">"</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-  <span class="c1"># Rejected rather than converted: bool(1.0), bool("no") or bool(None) would silently misscore.</span>
-  <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">bool_</span><span class="p">)):</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"a response must be a bool or a numpy.bool_, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">response</span><span class="si">!r}</span><span class="s2">"</span>
-      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"responses has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">responses</span><span class="p">)</span><span class="si">}</span><span class="s2"> entries and items </span><span class="si">{</span><span class="n">n_items</span><span class="si">}</span><span class="s2"> rows; there must be one response per item"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 
 </pre></div>
 

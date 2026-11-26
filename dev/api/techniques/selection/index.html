@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 
@@ -833,8 +835,8 @@ window.runMermaid = runMermaid;</script>
 step of an adaptive test. The choice of selector affects both measurement precision
 and practical properties such as item exposure and content coverage.</p>
 <p>A selector reads the session from a <a class="reference internal" href="../../context.html#catsim.StepContext" title="catsim.StepContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">StepContext</span></code></a>: the
-administered items and their responses, the current estimate <code class="docutils literal notranslate"><span class="pre">theta</span></code>, the run’s random
-generator and exposure rates, and <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code>, items it must pass over although they
+administered items and their responses, the current estimate <code class="docutils literal notranslate"><span class="pre">theta</span></code>, the random generator
+of the call, the exposure rates, and <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code>, items it must pass over although they
 have not been administered, such as those the engine’s exposure control
 (<a class="reference internal" href="../../exposure.html#catsim.exposure.BaseExposureControl" title="catsim.exposure.BaseExposureControl"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseExposureControl</span></code></a>) declined. Where the pages below speak of remaining items, they
 mean the items that are neither administered nor excluded. Excluded items do not count
@@ -871,14 +873,34 @@ toward the test position, the number of administered items.</p>
 <section id="selection-ties">
 <span id="ties"></span><h2>Ties<a class="headerlink" href="#selection-ties" title="Link to this heading">#</a></h2>
 <p>When several candidate items share the best score exactly, every selector that picks by a score
-breaks the tie the same way: it draws one of them uniformly at random with the session’s random
-generator, as catR does. <code class="docutils literal notranslate"><span class="pre">ClusterSelector</span></code> applies the same rule to its choice of cluster.
+breaks the tie the same way: it draws one of them uniformly at random with the generator of the
+call. <code class="docutils literal notranslate"><span class="pre">ClusterSelector</span></code> applies the same rule to its choice of cluster.
 Ties are exact equality of the selector’s own score, so items that are equally good in exact
 arithmetic tie only if their scores also round to the same value.
-The Randomesque and 5-4-3-2-1 bins also take in every item tied with their least informative item.
+The randomesque and 5-4-3-2-1 bins also take in every item tied with their least informative item.
 No random number is drawn when nothing ties, so seeded results on banks without ties do not depend
-on this rule. See <a class="reference internal" href="../../../adr/0011-random-tie-breaking.html"><span class="doc">ADR-0011: Break Ties Between Items Uniformly at Random</span></a>.</p>
+on this rule. See <a class="reference internal" href="../../../adr/0017-random-tie-breaking.html"><span class="doc">ADR-0017: Break Ties Between Items Uniformly at Random</span></a>.</p>
 </section>
+<section id="selection-exposure-cap">
+<span id="exposure-cap"></span><h2>Exposure cap<a class="headerlink" href="#selection-exposure-cap" title="Link to this heading">#</a></h2>
+<p>Several selectors take an exposure cap, <code class="docutils literal notranslate"><span class="pre">r_max</span></code>. They prefer the remaining items whose exposure rate
+is below it, and when every remaining item is at or above it they choose among all the remaining
+items, so the cap never ends a test; the cluster selector applies its cap inside the cluster it
+chooses, as its page says. The default of 1 applies no cap. The rates are those of the context:
+<a class="reference internal" href="../../simulation.html#catsim.simulate" title="catsim.simulate"><code class="xref py py-func docutils literal notranslate"><span class="pre">simulate()</span></code></a> gives each session each item’s administrations over the sessions before
+it (<a class="reference internal" href="../../../adr/0012-exposure-rates.html"><span class="doc">ADR-0012: Exposure Rates Are an Input, Counted Over the Sessions Before Each One</span></a>), and an application passes its own to
+<a class="reference internal" href="../../engine.html#catsim.CatEngine.select" title="catsim.CatEngine.select"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CatEngine.select</span></code></a>. A selector that takes no cap says so on its
+page.</p>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Comparison with catR</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">catR caps exposure only in <code class="docutils literal notranslate"><span class="pre">simulateRespondents</span></code>, with <code class="docutils literal notranslate"><span class="pre">rmax</span></code>. Under its default rule,
+<code class="docutils literal notranslate"><span class="pre">Mrmax</span> <span class="pre">=</span> <span class="pre">&quot;restricted&quot;</span></code>, every item at or above the cap is unavailable to the next examinee, with no
+fallback; under <code class="docutils literal notranslate"><span class="pre">Mrmax</span> <span class="pre">=</span> <span class="pre">&quot;IE&quot;</span></code>, the item-eligibility method, each item is available with a
+probability that the run updates from the exposure rates. No parity test covers the cap
+(<a class="reference internal" href="../../../adr/0020-catr-as-the-reference.html"><span class="doc">ADR-0020: Parity Tests Check catsim Against catR</span></a>).</p>
+</div>
+</details></section>
 <section id="class-hierarchy">
 <h2>Class Hierarchy<a class="headerlink" href="#class-hierarchy" title="Link to this heading">#</a></h2>
 <pre  class="mermaid">
@@ -912,13 +934,13 @@ rules the built-in selectors share, for custom selectors that should behave alik
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">BaseSelector</span></span><a class="reference internal" href="../../../_modules/catsim/selection/base.html#BaseSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.BaseSelector" title="Link to this definition">#</a></dt>
 <dd><p>Base class for item selectors.</p>
 <p>A selector chooses the next item to administer from what a <a class="reference internal" href="../../context.html#catsim.StepContext" title="catsim.StepContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">StepContext</span></code></a> tells it
-about the session. A custom selector behaves like the built-in ones when it draws its candidates
+about the session. A custom selector behaves like the built-in ones when it draws its candidate items
 with <a class="reference internal" href="#catsim.selection.remaining" title="catsim.selection.remaining"><code class="xref py py-func docutils literal notranslate"><span class="pre">remaining()</span></code></a>, applies its exposure cap with <a class="reference internal" href="#catsim.selection.below_cap" title="catsim.selection.below_cap"><code class="xref py py-func docutils literal notranslate"><span class="pre">below_cap()</span></code></a>, and chooses with
 <a class="reference internal" href="#catsim.selection.pick_best" title="catsim.selection.pick_best"><code class="xref py py-func docutils literal notranslate"><span class="pre">pick_best()</span></code></a> or <a class="reference internal" href="#catsim.selection.best_pool" title="catsim.selection.best_pool"><code class="xref py py-func docutils literal notranslate"><span class="pre">best_pool()</span></code></a>, which break ties the same way.</p>
 <p>A selector that passes a changed context to another adds to its excluded items, never replaces
 them. A selector holds its configuration and caches derived from the item bank, never
 per-session state: one selector serves every session of a run, which an application may
-interleave.</p>
+interleave. The <a class="reference internal" href="../../../extending.html"><span class="doc">Extending catsim</span></a> guide writes one.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.selection.BaseSelector.select">
 <span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/selection/base.html#BaseSelector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.BaseSelector.select" title="Link to this definition">#</a></dt>
@@ -978,7 +1000,7 @@ order.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.selection.below_cap">
 <span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">below_cap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.integer" title="(in NumPy v2.5)"><span class="pre">integer</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_rates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.integer" title="(in NumPy v2.5)"><span class="pre">integer</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/catsim/selection/base.html#below_cap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.below_cap" title="Link to this definition">#</a></dt>
-<dd><p>Return the candidates whose exposure rate is below <code class="docutils literal notranslate"><span class="pre">r_max</span></code>, or all of them if none is.</p>
+<dd><p>Return the candidate items whose exposure rate is below <code class="docutils literal notranslate"><span class="pre">r_max</span></code>, or all of them if none is.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -1004,7 +1026,7 @@ applies no cap.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.selection.pick_best">
 <span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">pick_best</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.integer" title="(in NumPy v2.5)"><span class="pre">integer</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><span class="pre">Generator</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/selection/base.html#pick_best"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.pick_best" title="Link to this definition">#</a></dt>
-<dd><p>Return the candidate with the highest score, breaking exact ties uniformly at random.</p>
+<dd><p>Return the candidate item with the highest score, breaking exact ties uniformly at random.</p>
 <p>This is the package’s single tie-breaking rule: the candidates whose score equals the best score
 exactly are tied, and one of them is drawn uniformly with <code class="docutils literal notranslate"><span class="pre">rng</span></code>. With a single best candidate,
 <code class="docutils literal notranslate"><span class="pre">rng</span></code> is not used, so untied selections consume no random numbers.</p>
@@ -1038,7 +1060,7 @@ distance to the ability estimate, pass its negation.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.selection.best_pool">
 <span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">best_pool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.integer" title="(in NumPy v2.5)"><span class="pre">integer</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.integer" title="(in NumPy v2.5)"><span class="pre">integer</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/catsim/selection/base.html#best_pool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.best_pool" title="Link to this definition">#</a></dt>
-<dd><p>Return the candidates scoring at least the <code class="docutils literal notranslate"><span class="pre">size</span></code>-th best score, best first.</p>
+<dd><p>Return the candidate items scoring at least the <code class="docutils literal notranslate"><span class="pre">size</span></code>-th best score, best first.</p>
 <p>Every candidate tied with the <code class="docutils literal notranslate"><span class="pre">size</span></code>-th best score joins the pool, so the pool holds more than
 <code class="docutils literal notranslate"><span class="pre">size</span></code> items only when items tie at the cutoff. Tied candidates keep
 their order in <code class="docutils literal notranslate"><span class="pre">candidates</span></code>.</p>
@@ -1175,6 +1197,7 @@ integer is accepted.</p>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#selection-ties">Ties</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#selection-exposure-cap">Exposure cap</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#class-hierarchy">Class Hierarchy</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#base-class-and-helpers">Base Class and Helpers</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.BaseSelector"><code class="docutils literal notranslate"><span class="pre">BaseSelector</span></code></a><ul class="nav section-nav flex-column">

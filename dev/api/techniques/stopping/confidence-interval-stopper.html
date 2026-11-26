@@ -31,6 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
@@ -42,6 +43,7 @@
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/techniques/stopping/confidence-interval-stopper';</script>
@@ -483,7 +485,7 @@ predefined ability band, because the classification is then stable.</p>
 classification-oriented precision rule. An examinee whose ability lies close to a
 boundary may never be classified, so the stopper is usually combined with a
 <a class="reference internal" href="max-length-stopper.html#catsim.stopping.MaxLengthStopper" title="catsim.stopping.MaxLengthStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxLengthStopper</span></code></a> cap in a <a class="reference internal" href="index.html#catsim.stopping.StopRule" title="catsim.stopping.StopRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopRule</span></code></a>
-(see <a class="reference internal" href="index.html#combining-stopping-rules"><span class="std std-ref">Combining stopping rules</span></a>).</p>
+(see <a class="reference internal" href="index.html#combining-stopping-rules"><span class="std std-ref">Combining stoppers</span></a>).</p>
 </section>
 <section id="definition">
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
@@ -498,7 +500,7 @@ boundary may never be classified, so the stopper is usually combined with a
 <p>where <span class="math notranslate nohighlight">\(\gamma\)</span> is the configured confidence level, <span class="math notranslate nohighlight">\(z_{(1+\gamma)/2}\)</span> the
 standard normal quantile, and <span class="math notranslate nohighlight">\(SE(\hat{\theta})\)</span> the standard error the
 estimator reported with the current estimate, the context’s <code class="docutils literal notranslate"><span class="pre">se</span></code>
-(<a class="reference internal" href="../../../adr/0005-explicit-strategy-contracts.html"><span class="doc">ADR-0005</span></a>). Each estimator
+(<a class="reference internal" href="../../../adr/0007-strategy-contracts.html"><span class="doc">ADR-0007</span></a>). Each estimator
 computes it by its own formula: the Fisher standard error
 <span class="math notranslate nohighlight">\(1/\sqrt{I(\hat{\theta})}\)</span> for maximum likelihood and the WLE, the posterior
 standard deviation for EAP, and for MAP the information plus the prior’s
@@ -549,7 +551,23 @@ usually classified sooner than they would be on the Fisher error.</p>
 single ability threshold: a confidence interval for ability is built after every
 item, and the test stops once the threshold is no longer inside it. catsim
 generalizes this to several boundaries; with one boundary the two rules agree.</p>
-</section>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Comparison with catR</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">With one boundary the stopper is catR’s <code class="docutils literal notranslate"><span class="pre">classification</span></code> rule, with
+<code class="docutils literal notranslate"><span class="pre">confidence</span></code> equal to 1 minus catR’s <code class="docutils literal notranslate"><span class="pre">alpha</span></code>. The parity tests
+(<a class="reference internal" href="../../../adr/0020-catr-as-the-reference.html"><span class="doc">ADR-0020</span></a>) find catR’s decisions with
+the interval above, across and below the threshold, at <code class="docutils literal notranslate"><span class="pre">alpha</span></code> of 0.05, 0.1 and
+0.01, before any response, and with the interval’s end <span class="math notranslate nohighlight">\(10^{-9}\)</span> either side of
+the threshold. catR’s <code class="docutils literal notranslate"><span class="pre">stop</span></code> list can hold several classification rules, and
+stops once the interval clears any one threshold: that is a
+<a class="reference internal" href="index.html#catsim.stopping.StopRule" title="catsim.stopping.StopRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopRule</span></code></a> of one-boundary stoppers, such as
+<code class="docutils literal notranslate"><span class="pre">StopRule(ConfidenceIntervalStopper([-1.0]),</span> <span class="pre">ConfidenceIntervalStopper([1.0]))</span></code>,
+whose decisions the tests also find, and not one stopper with both boundaries,
+which waits until the interval lies within one band. No whole test compares the
+rule.</p>
+</div>
+</details></section>
 <section id="guarantees">
 <h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
