@@ -39,7 +39,7 @@ gives the better design (`AGENTS.md`).
 
 <!-- backlog-index:start -->
 
-54 cards: 25 ready, 6 needs-research, 9 needs-decision, 2 blocked, 12 parked.
+47 cards: 26 ready, 6 needs-research, 9 needs-decision, 2 blocked, 4 parked.
 
 ## Waiting for the maintainer
 
@@ -92,6 +92,7 @@ gives the better design (`AGENTS.md`).
 | [Choose the WLE's standard error (Warm's corrected SE, the sandwich SE)](estimation/wle-standard-errors.md) | estimation | technique | needs-research | S |  | Wang & Vispoel (1998) walkthrough |
 | [Owen Sequential Bayesian Estimator](estimation/owen-estimator.md) | estimation | technique | ready | M |  |  |
 | [Starting rules (catR `randomCAT`'s `start` list)](initialization/starting-rules.md) | initialization | technique | needs-research | M |  | catR comparison |
+| [Compute normal quantiles with scipy.special instead of importing scipy.stats](maintenance/normal-quantile-import.md) | maintenance | maintenance | ready | XS |  | import-time measurement of 2026-11-26 |
 | [Editorial review of every document against the charter, and drift checks](maintenance/editorial-review.md) | maintenance | maintenance | ready | M |  | documentation charter |
 | [Give the worker tests a timeout, so a hang fails fast?](maintenance/worker-test-timeout.md) | maintenance | decision | needs-decision | XS |  | parallel parts (#222) |
 | [Make the stratified selectors' strata cache one attribute](maintenance/strata-cache-thread-race.md) | maintenance | fix | ready | XS |  | ADR audit (#225) |
@@ -125,19 +126,10 @@ gives the better design (`AGENTS.md`).
 | [Machine-learning / reinforcement-learning CAT selectors](scope/ml-rl-selectors.md) | scope | XL |
 | [Multidimensional CAT (MCAT) family](scope/multidimensional-cat.md) | scope | XL |
 | [Polytomous item response models](scope/polytomous-models.md) | scope | XL |
-| [Bayesian MCMC calibration](scope/calibration/bayesian-mcmc.md) | scope/calibration | L |
-| [Conditional Maximum Likelihood for Rasch/1PL](scope/calibration/cml-rasch.md) | scope/calibration | S |
-| [ICC analytic gradients w.r.t. item parameters](scope/calibration/icc-gradients.md) | scope/calibration | S |
-| [Item fit statistics](scope/calibration/item-fit.md) | scope/calibration | S |
-| [Joint Maximum Likelihood (JML) estimator](scope/calibration/jml.md) | scope/calibration | S |
-| [MML-EM calibrator for 1PL and 2PL](scope/calibration/mml-em.md) | scope/calibration | M |
-| [MML-EM extension for 3PL](scope/calibration/mml-em-3pl.md) | scope/calibration | S |
-| [MML-EM for 4PL](scope/calibration/mml-em-4pl.md) | scope/calibration | L |
 
 ## Background
 
 - [Discovery: walkthroughs that find what catsim lacks](discovery/README.md)
-- [Literature Review: Item Parameter Estimation (Calibration) for catsim](scope/calibration/literature-review.md)
 
 <!-- backlog-index:end -->
 
