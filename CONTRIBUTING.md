@@ -52,6 +52,12 @@ uv run --group docs sphinx-build -b html -W --keep-going sphinx sphinx/_build/ht
 
 `-W` turns warnings into errors.
 
+External links are checked once a week by the "Link check" workflow (`.github/workflows/linkcheck.yml`), not in pull requests, and a broken link fails that run. To check them yourself, which takes several minutes because github.com rate-limits automated clients:
+
+```bash
+uv run --group docs sphinx-build -b linkcheck sphinx sphinx/_build/linkcheck
+```
+
 Links to the Python, NumPy, Matplotlib and SciPy documentation come from those projects' intersphinx inventories. The build downloads each inventory and, when a site cannot be reached, reads the copy stored in `sphinx/_inventories/`. Refresh the stored copies with:
 
 ```bash

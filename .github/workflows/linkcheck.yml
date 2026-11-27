@@ -1,0 +1,43 @@
+# Checks every external link in the documentation once a week, outside pull requests: github.com
+# rate-limits automated clients, and waiting out its limits took most of a docs build's time. A
+# broken link fails the run, and GitHub notifies whoever last edited the schedule.
+name: Link check
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays at 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  UV_VERSION: "0.13.9" # keep equal to ci-cd.yml's
+
+jobs:
+  linkcheck:
+    name: Check for broken links
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: uv sync --locked --group docs
+
+      - name: Check for broken links
+        working-directory: sphinx
+        run: uv run sphinx-build -b linkcheck . ../docs/build/linkcheck

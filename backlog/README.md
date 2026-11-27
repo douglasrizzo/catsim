@@ -49,9 +49,9 @@ gives the better design (`AGENTS.md`).
 | [Build a live-testing package on catsim's public API](discovery/live-package.md) | discovery | 2 |
 | [Generate banks of a chosen shape, and document the scaling constant D where users look](item-bank/bank-generation.md) | item-bank | 2 |
 | [Save and load simulation results, and the cost of unpickling them](analysis/saving-results.md) | analysis | 3 |
+| [Give the worker tests a timeout, so a hang fails fast?](maintenance/worker-test-timeout.md) | maintenance | 3 |
 | [One annotation for responses across the package?](maintenance/responses-annotation.md) | maintenance | 3 |
 | [Simplify SimulationResult's constructor checks and other small duplication?](maintenance/result-constructor-checks.md) | maintenance | 3 |
-| [Two CI choices - a timeout for the worker tests, and whether a broken link fails CI](maintenance/ci-decisions.md) | maintenance | 3 |
 | [When to delete the rescoping's reference baseline?](maintenance/reference-baseline-removal.md) | maintenance | 3 |
 | [A stability and versioning policy?](maintenance/stability-policy.md) | maintenance | 4 |
 
@@ -93,12 +93,12 @@ gives the better design (`AGENTS.md`).
 | [Owen Sequential Bayesian Estimator](estimation/owen-estimator.md) | estimation | technique | ready | M |  |  |
 | [Starting rules (catR `randomCAT`'s `start` list)](initialization/starting-rules.md) | initialization | technique | needs-research | M |  | catR comparison |
 | [Editorial review of every document against the charter, and drift checks](maintenance/editorial-review.md) | maintenance | maintenance | ready | M |  | documentation charter |
+| [Give the worker tests a timeout, so a hang fails fast?](maintenance/worker-test-timeout.md) | maintenance | decision | needs-decision | XS |  | parallel parts (#222) |
 | [Make the stratified selectors' strata cache one attribute](maintenance/strata-cache-thread-race.md) | maintenance | fix | ready | XS |  | ADR audit (#225) |
 | [One annotation for responses across the package?](maintenance/responses-annotation.md) | maintenance | decision | needs-decision | S |  | ADR audit (#225) |
 | [Release the next version](maintenance/release-checklist.md) | maintenance | maintenance | blocked | M |  | rescoping plan |
 | [Simplify SimulationResult's constructor checks and other small duplication?](maintenance/result-constructor-checks.md) | maintenance | decision | needs-decision | S |  | ADR audit (#225) |
 | [Tighter and wider catR parity tests](maintenance/parity-extensions.md) | maintenance | maintenance | ready | M |  | catR parity whole tests (#223); technique pages (#226) |
-| [Two CI choices - a timeout for the worker tests, and whether a broken link fails CI](maintenance/ci-decisions.md) | maintenance | decision | needs-decision | XS |  | parallel parts (#222); documentation sync (#226) |
 | [When to delete the rescoping's reference baseline?](maintenance/reference-baseline-removal.md) | maintenance | decision | needs-decision | XS |  | reference baseline (#218) |
 | [Check a-stratified selection's test size against the stopper](selection/astrat-test-length.md) | selection | feature | ready | S |  | Chang & Ying (1999) walkthrough |
 | [Maximum Posterior Weighted Information Selector](selection/mpwi-selector.md) | selection | technique | ready | M |  |  |
