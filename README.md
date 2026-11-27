@@ -15,11 +15,10 @@ computes each step of an adaptive test and runs simulation studies that compare 
 selection, ability estimation and stopping, and applications can use the same computations to give
 adaptive tests.
 
-> ⚠️ **catsim 1.0 breaks 0.x code.** Code written for catsim 0.x needs changes to run on 1.0,
-> and seeded simulations give different numbers. To keep using 0.x, install `catsim<1`, documented
-> at the [0.21.0 tag](https://github.com/douglasrizzo/catsim/tree/0.21.0). The
-> [1.0.0 release notes](https://github.com/douglasrizzo/catsim/releases/tag/1.0.0) list every
-> change.
+> ⚠️ **This version of catsim breaks code written for catsim 0.21.0 and earlier.** That code
+> needs changes to run, and seeded simulations give different numbers. To keep using it, install
+> `catsim==0.21.0`, documented at the [0.21.0 tag](https://github.com/douglasrizzo/catsim/tree/0.21.0).
+> The [release notes](https://github.com/douglasrizzo/catsim/releases) list every change.
 
 ## Installation
 

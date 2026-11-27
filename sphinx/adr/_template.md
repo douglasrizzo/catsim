@@ -9,8 +9,8 @@ Budget: 300-600 words. Write in a timeless voice; only Context describes the cod
 decision. Show code only to state an interface, in a few lines. Reference tables, study data and
 release-note material belong elsewhere (see sphinx/AGENTS.md).
 
-Status: "Accepted YYYY-MM-DD" on acceptance. From 1.0.0 on an accepted ADR is not rewritten: a
-changed decision gets a new ADR, and this one's Status becomes "Superseded YYYY-MM-DD by ADR-NNNN".
+Status: "Accepted YYYY-MM-DD" on acceptance. When the decision changes, edit this ADR in place; when
+it no longer holds, delete it. Git keeps the earlier text.
 -->
 
 ## Status

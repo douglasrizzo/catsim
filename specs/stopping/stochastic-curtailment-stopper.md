@@ -2,7 +2,7 @@
 **Module:** `catsim.stopping.classification.StochasticCurtailmentStopper` (planned)
 **Reference:** Finkelman (2008, 2010)
 **Last validated:** 2026-11-23, against Huebner & Finkelman (2016) and Sie, Finkelman, Bartroff & Thompson (2015) (PubMed Central full texts), the abstracts of Finkelman (2008, 2010) and catR 3.17.
-**Implementation guidance:** written against the 1.0 strategy contract (`StepContext` in, a pure `classify(context)`, a single criterion for `StopRule`) on 2026-11-26.
+**Implementation guidance:** written against the strategy contract of ADR-0007 (`StepContext` in, a pure `classify(context)`, a single criterion for `StopRule`) on 2026-11-26.
 
 # Stochastic Curtailment Stopper
 

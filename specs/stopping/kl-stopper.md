@@ -2,7 +2,7 @@
 **Module:** `catsim.stopping.bank.KLInfoStopper` (planned)
 **Reference:** Chang and Ying (1996); Choi, Grady, and Dodd (2011)
 **Last validated:** 2026-11-23, against Chang & Ying (1996) and Choi, Grady & Dodd (2011, PubMed Central author manuscript).
-**Implementation guidance:** written against the 1.0 strategy contract (`StepContext` in, a single criterion for `StopRule`) on 2026-11-26.
+**Implementation guidance:** written against the strategy contract of ADR-0007 (`StepContext` in, a single criterion for `StopRule`) on 2026-11-26.
 
 # Kullback-Leibler Information Stopper
 

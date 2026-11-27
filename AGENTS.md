@@ -61,8 +61,9 @@ architecture is centered on:
   `missing-override-decorator` enforces it in both.
 - Closed option sets are `StrEnum`s, like `IrtModel`; code that branches on one uses `match`, with
   a final `case _`.
-- No backward-compatibility aliases or deprecation shims before 1.0: a renamed or removed name is
-  gone.
+- Breaking an interface is fine when it gives the better design. A renamed or removed name is gone,
+  with no backward-compatibility alias or deprecation shim; the same PR updates every caller, test,
+  doc and notebook.
 - Randomness comes only from an `rng: int | numpy.random.Generator | None` argument, passed through
   `numpy.random.default_rng`, where None draws fresh entropy (strategies draw from the generator
   they are given). No global NumPy random state, no stdlib `random`.
@@ -98,7 +99,7 @@ Hard rules:
 
 - A docstring is the call contract: no method math, design rationale or history.
 - History ("now", "no longer", "replaces", card IDs, PR numbers) goes only in the GitHub release
-  notes, the 1.0 notice and the Context section of an ADR. There is no CHANGELOG file.
+  notes, the compatibility notice and the Context section of an ADR. There is no CHANGELOG file.
 - Use the terms and symbols of `sphinx/terms-and-notation.md`.
 - No internal names or design rationale in user pages: link the ADR.
 - One home per topic; other documents link to it.
