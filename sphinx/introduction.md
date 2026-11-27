@@ -88,6 +88,7 @@ figure draws both curves for one item: the item is most informative near its dif
 
 ```{eval-rst}
 .. plot::
+    :filename-prefix: introduction-item-curves
     :caption: Item characteristic and information curves for an item. The dot represents the point at which the item is most informative.
 
     import matplotlib.pyplot as plt
@@ -151,7 +152,33 @@ Computerized adaptive testing emerged in the 1970s as *tailored testing* {cite:p
 test estimates an examinee's ability once, at the end. A computerized adaptive test (CAT) updates the
 estimate after each response. Knowing more about the ability at each step lets the test
 choose more informative items *during* the test, so the standard error of the estimate falls
-faster.
+faster. The figure compares the two on one simulated population: as items accumulate, the adaptive
+test's estimates come closer to the true abilities than the linear test's.
+
+```{eval-rst}
+.. plot::
+    :filename-prefix: introduction-adaptive-and-linear
+    :caption: The RMSE of 300 simulated examinees' estimates after each item, from one 200-item bank. The adaptive test chooses each examinee's items by maximum information; the linear test gives everyone the 30 items most informative at the population's mean.
+
+    import matplotlib.pyplot as plt
+    import numpy
+    from catsim import CatEngine, ItemBank, simulate
+    from catsim.estimation import EAPEstimator
+    from catsim.initialization import FixedPointInitializer
+    from catsim.plot import metric_by_length
+    from catsim.selection import LinearSelector, MaxInfoSelector
+    from catsim.stopping import MaxLengthStopper
+
+    item_bank = ItemBank.generate(200, rng=0)
+    true_thetas = numpy.random.default_rng(1).normal(0, 1, 300)
+    linear_items = numpy.argsort(-item_bank.information(0.0))[:30].tolist()
+    fig, ax = plt.subplots()
+    for label, selector in [("Adaptive", MaxInfoSelector()), ("Linear", LinearSelector(linear_items))]:
+        engine = CatEngine(item_bank, FixedPointInitializer(0.0), selector, EAPEstimator(), MaxLengthStopper(30))
+        metric_by_length(simulate(engine, true_thetas=true_thetas, rng=3), "rmse", ax=ax, label=label)
+    ax.legend()
+    plt.show()
+```
 
 ### The CAT Lifecycle
 
