@@ -47,7 +47,7 @@ curvature, that is, by the Fisher information; for a large one, by the tails of
 the divergence (p. 220). Before the first item, catsim uses $n = 1$, so the
 window is $\hat{\theta} \pm c$. Chang and Ying also define a Bayesian version
 that weights the divergence by the posterior (p. 222), KLP, a
-{doc}`planned technique </planned-techniques>`. The selector chooses the item, neither administered nor excluded, with the
+[planned technique](https://github.com/douglasrizzo/catsim/blob/dev/backlog/selection/klp-selector.md). The selector chooses the item, neither administered nor excluded, with the
 largest value of $K_i(\hat{\theta})$.
 
 ### Computation
@@ -121,7 +121,7 @@ keep it as an expected failure.
 ```
 
 :::{seealso}
-Posterior-weighted variant: KLP, among the {doc}`/planned-techniques`.
+Posterior-weighted variant: [KLP](https://github.com/douglasrizzo/catsim/blob/dev/backlog/selection/klp-selector.md), a planned technique.
 :::
 
 ## API Reference
