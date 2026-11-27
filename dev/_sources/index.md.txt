@@ -45,7 +45,6 @@ a test step by step and says what the application owns.
 
 getting-started
 api/techniques/index
-planned-techniques
 API reference <api/index>
 Architecture decisions <architecture_decisions>
 contributing

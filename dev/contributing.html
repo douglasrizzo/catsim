@@ -157,13 +157,6 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="planned-techniques.html">
-    Planned techniques
-  </a>
-</li>
-
-
-<li class="nav-item ">
   <a class="nav-link nav-internal" href="api/index.html">
     API reference
   </a>
@@ -295,13 +288,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="api/techniques/index.html">
     Techniques
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="planned-techniques.html">
-    Planned techniques
   </a>
 </li>
 
@@ -501,7 +487,7 @@ uv<span class="w"> </span>run<span class="w"> </span>pre-commit<span class="w"> 
 </section>
 <section id="adding-a-technique">
 <h2>Adding a technique<a class="headerlink" href="#adding-a-technique" title="Link to this heading">#</a></h2>
-<p>Each implemented technique has a page under <code class="docutils literal notranslate"><span class="pre">sphinx/api/techniques/</span></code> with its definition, its parameters and its Guarantees section. A new technique starts as a spec in <a class="reference external" href="https://github.com/douglasrizzo/catsim/tree/dev/specs"><code class="docutils literal notranslate"><span class="pre">specs/</span></code></a>, written from the <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/_template.md">spec template</a>; <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/README.md"><code class="docutils literal notranslate"><span class="pre">specs/README.md</span></code></a> explains how a spec is revalidated, implemented and then promoted into the documentation. The template’s Definition and References sections set the citation convention: cite the page, equation, table or figure of each formula where the formula appears, cite only locations you have read, say where the implementation departs from its sources, and give every reference its DOI and an open copy when one exists. A spec writes its references by hand; a technique page generates them from <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/sphinx/references.bib"><code class="docutils literal notranslate"><span class="pre">sphinx/references.bib</span></code></a>. On a technique page, cite with <code class="docutils literal notranslate"><span class="pre">{cite:t}`key{p.</span> <span class="pre">N}`</span></code> (or <code class="docutils literal notranslate"><span class="pre">{cite:p}</span></code> in parentheses), add each source to <code class="docutils literal notranslate"><span class="pre">references.bib</span></code> with its DOI and an <code class="docutils literal notranslate"><span class="pre">Open</span> <span class="pre">copy:</span> <span class="pre">\url{...}</span></code>, <code class="docutils literal notranslate"><span class="pre">Open</span> <span class="pre">access</span></code> or <code class="docutils literal notranslate"><span class="pre">Not</span> <span class="pre">openly</span> <span class="pre">available;</span> <span class="pre">...</span></code> note, and end the page’s References section with a <code class="docutils literal notranslate"><span class="pre">{bibliography}</span></code> filtered to the page (<code class="docutils literal notranslate"><span class="pre">:filter:</span> <span class="pre">docname</span> <span class="pre">in</span> <span class="pre">docnames</span></code>), as the <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/sphinx/api/techniques/_template.md">technique-page template</a> shows.</p>
+<p>Each implemented technique has a page under <code class="docutils literal notranslate"><span class="pre">sphinx/api/techniques/</span></code> with its definition, its parameters and its Guarantees section. A new technique starts as a technique card in the <a class="reference external" href="https://github.com/douglasrizzo/catsim/tree/dev/backlog">backlog</a>, written from the <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/backlog/_template.md">card template</a>; the <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/backlog/README.md">backlog’s README</a> explains how a technique card is researched, revalidated, implemented and then promoted into the documentation. The template’s Definition and References sections set the citation convention: cite the page, equation, table or figure of each formula where the formula appears, cite only locations you have read, say where the implementation departs from its sources, and give every reference its DOI and an open copy when one exists. A card writes its references by hand; a technique page generates them from <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/sphinx/references.bib"><code class="docutils literal notranslate"><span class="pre">sphinx/references.bib</span></code></a>. On a technique page, cite with <code class="docutils literal notranslate"><span class="pre">{cite:t}`key{p.</span> <span class="pre">N}`</span></code> (or <code class="docutils literal notranslate"><span class="pre">{cite:p}</span></code> in parentheses), add each source to <code class="docutils literal notranslate"><span class="pre">references.bib</span></code> with its DOI and an <code class="docutils literal notranslate"><span class="pre">Open</span> <span class="pre">copy:</span> <span class="pre">\url{...}</span></code>, <code class="docutils literal notranslate"><span class="pre">Open</span> <span class="pre">access</span></code> or <code class="docutils literal notranslate"><span class="pre">Not</span> <span class="pre">openly</span> <span class="pre">available;</span> <span class="pre">...</span></code> note, and end the page’s References section with a <code class="docutils literal notranslate"><span class="pre">{bibliography}</span></code> filtered to the page (<code class="docutils literal notranslate"><span class="pre">:filter:</span> <span class="pre">docname</span> <span class="pre">in</span> <span class="pre">docnames</span></code>), as the <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/sphinx/api/techniques/_template.md">technique-page template</a> shows.</p>
 </section>
 <section id="parity-tests">
 <h2>Parity tests<a class="headerlink" href="#parity-tests" title="Link to this heading">#</a></h2>
