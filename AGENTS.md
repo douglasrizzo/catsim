@@ -93,7 +93,8 @@ charter. Each kind of document has one job and audience:
 - ADRs (`sphinx/adr/`): why the architecture is shaped this way; contributors.
 - Notebooks: learning by doing, one level per notebook. They are `.ipynb` files in `notebooks/`,
   edited directly, with no generated-notebook workflow.
-- `specs/`: planned methods with implementation sketches; contributors.
+- `backlog/`: every piece of planned work, as cards with frontmatter, whose index the README
+  generates; contributors and agents. A PR that does a card's work deletes the card.
 
 Hard rules:
 
@@ -184,17 +185,17 @@ Hard rules:
   - `papers/`
   - other tool caches or scratch directories
 - A pre-commit hook rejects staged paths under `.claude/`, `.plans/`, `.pre-commit-cache/` and
-  `papers/`, even when added with `git add -f`.
-- `.plans/` is local working space and is gitignored.
-  - Do not treat `.plans/` as durable project documentation.
+  `papers/`, even when added with `git add -f`. `.plans/` is a retired planning folder: planned work
+  is a card in `backlog/`.
 - Preserve user changes in a dirty worktree. Do not revert unrelated modifications.
 
-## Plans vs ADRs
+## Planned Work vs ADRs
 
-- Use `.plans/` only for temporary execution planning.
-- Use ADRs in `sphinx/adr/` for durable architectural decisions.
-- If a plan has been fully implemented and its rationale matters long term, summarize the lasting
-  decision in an ADR instead of keeping the plan as the canonical record.
+- Planned work is a card in `backlog/` (`backlog/README.md`): new techniques, features, fixes,
+  decisions for the maintainer and research. Follow-ups found during a task become cards too, never
+  GitHub issues unless the maintainer asks.
+- Use ADRs in `sphinx/adr/` for durable architectural decisions. A card's lasting rationale goes
+  into an ADR when the card's work lands; the card itself is deleted.
 
 ## Practical Commands
 

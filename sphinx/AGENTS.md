@@ -1,7 +1,7 @@
 # Documentation charter
 
 These rules govern every document in catsim: the Sphinx pages under `sphinx/`, the docstrings they
-render, `README.md`, the notebooks, `specs/`, `CONTRIBUTING.md` and the GitHub release notes. They
+render, `README.md`, the notebooks, `backlog/`, `CONTRIBUTING.md` and the GitHub release notes. They
 are instructions for coding agents and contributors, not website content: `sphinx/conf.py` excludes
 this file from the build. Read it before writing or reviewing documentation of any kind.
 
@@ -115,14 +115,14 @@ do not re-explain it. The map names ADRs by topic.
 | Tie-breaking and exposure control in selection | selection index page | the tie-breaking ADR for why |
 | A quantity's formula | its `catsim.irt` function's docstring | technique pages |
 | A metric's formula (bias, MSE, RMSE, overlap rate) | the metric function's docstring | "Running simulations" |
-| Planned methods | Planned techniques page | their specs in `specs/` |
+| Planned methods, and all other planned work | its card in `backlog/` | the backlog's generated index |
 | How to contribute; the gate; the release process | `CONTRIBUTING.md` | |
 | How catsim is checked against catR (the parity tests) | `CONTRIBUTING.md` | the catR ADR for why; each technique page's catR dropdown states its departures |
 | Why the architecture is shaped this way | the ADR | guides, technique pages |
 | What changed in a release | the GitHub release notes | the compatibility notice |
 
-Some homes in this map are still to be written (the guides, the Planned techniques page). Until a
-home exists, leave the material where it is and do not start a second copy.
+When a home in this map does not exist yet, leave the material where it is and do not start a second
+copy.
 
 ## Kinds of documents
 
@@ -203,7 +203,7 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
   Guarantees, References, API Reference.
 - **Belongs:**
   - the method's formulas, each cited where it appears, with the source's page and equation, as the
-    citation convention in `specs/README.md` sets out;
+    citation convention in `backlog/README.md` sets out;
   - every departure from the sources, stated;
   - in a closed "Comparison with catR" dropdown at the end of Behavior and Comparison, the matching
     catR function and settings, what the parity tests find and each departure from catR; no
@@ -307,31 +307,26 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
   - Does every number in the prose follow from the code shown?
   - Does it reach into anything the package does not export?
 
-### Planned techniques page
+### Backlog cards (`backlog/`)
 
-- **Job:** which methods catsim plans to add, why each matters, its key source and a link to its spec
-  on GitHub. One table, under a sentence saying these methods are not yet available. No dates or
-  order.
-- **Audience and level:** researchers; intermediate.
-- **Not here:** implementation sketches (`specs/`).
-- **Length:** the sentence and one row per planned method.
-- **Review:** Does every spec have a row, and every row a spec? Is every reference one the spec's
-  revalidation checked?
-
-### Specs (`specs/`)
-
-- **Job:** contributor specifications for planned methods. Each keeps its implementation sketch,
-  written against the current API.
-- **Audience and level:** contributors; advanced.
-- **Template:** `specs/_template.md`. Its user-facing sections match the technique-page template, so
-  promoting a spec drops the contributor-only sections (Tests, Open Questions, Implementation
-  Guidance) and adds the API Reference. `specs/README.md` holds the workflow, the citation convention
-  and the revalidation checklist.
-- **Rules:** a PR that renames something a sketch calls renames it in the sketch too. The sketch is
-  the first `python` block under `## Implementation Guidance`. A spec writes its citations and its
-  References list by hand, since GitHub does not render the citation roles; promoting it moves
-  each source into `sphinx/references.bib`.
-- **Review:** Does the sketch still run against the current API? Does the spec say when it was last
+- **Job:** one card per piece of planned work: a technique with its full design, a feature, a fix, a
+  decision for the maintainer, research. Its frontmatter feeds the index in `backlog/README.md`,
+  which `backlog/_index.py` generates; the README defines every field.
+- **Audience and level:** contributors and agents; advanced.
+- **Template:** `backlog/_template.md`. A technique card adds the sections of the technique-page
+  template, so promoting it drops the contributor-only sections (Tests, Open Questions,
+  Implementation Guidance) and adds the API Reference. `backlog/README.md` holds the technique
+  workflow, the citation convention and the revalidation checklist.
+- **Rules:**
+  - A card is working material, so it may cite its evidence: measurements, the walkthrough or PR
+    that raised it, dates. The history rule above does not apply to cards.
+  - A PR that does a card's work deletes the card; a lasting rationale goes into an ADR.
+  - A PR that renames something a technique card's sketch calls renames it in the sketch too. The
+    sketch is the first `python` block under `## Implementation Guidance`.
+  - A technique card writes its citations and its References list by hand, since GitHub does not
+    render the citation roles; promoting it moves each source into `sphinx/references.bib`.
+- **Review:** Does the card say what is wrong, with evidence, and what would show the fix works? Does a
+  technique card's sketch still run against the current API, and does it say when it was last
   validated, and against which sources?
 
 ### CONTRIBUTING (`CONTRIBUTING.md`)

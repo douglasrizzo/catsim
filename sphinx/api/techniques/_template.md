@@ -6,7 +6,7 @@
 % TECHNIQUE PAGE TEMPLATE. Copy this file into sphinx/api/techniques/<family>/, fill in each
 % section, delete these comments and add the page to the toctree of the family's index.md.
 % The rules for technique pages are in sphinx/AGENTS.md ("Technique pages"); the citation
-% convention is in specs/README.md. The header is a MyST field list, which needs "fieldlist" in
+% convention is in backlog/README.md. The header is a MyST field list, which needs "fieldlist" in
 % myst_enable_extensions (sphinx/conf.py). Give one :Class: line per class the page documents.
 % Every source is an entry of sphinx/references.bib, cited by its key: {cite:t} in a sentence,
 % {cite:p} in parentheses, one role per source when it carries a location, and :cite:t: (reST)
