@@ -16,7 +16,7 @@ concurrency:
 
 env:
   # The uv release every setup-uv step installs. Dependabot does not update it: bump it by hand.
-  UV_VERSION: "0.13.9"
+  UV_VERSION: "0.13.9" # keep equal to linkcheck.yml's
 
 jobs:
   pre-commit:
@@ -317,12 +317,6 @@ jobs:
         working-directory: sphinx
         # -W fails the build on any warning; --keep-going reports all of them before failing
         run: uv run sphinx-build -b html -W --keep-going . ../docs/build/html
-
-      - name: Check for broken links
-        run: |
-          cd sphinx
-          uv run sphinx-build -b linkcheck . ../docs/build/linkcheck
-        continue-on-error: true # Don't fail the build on external link issues
 
       - name: Upload documentation artifacts
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

@@ -17,7 +17,8 @@ maintainer is satisfied with the package.
 
 - Bump the version with `uv version` only; `pyproject.toml` is its single source.
 - The release tag equals the version exactly, with no `v`.
-- Bump the publishing workflow's `UV_VERSION` (0.13.9 when this card was written) by hand.
+- Bump `UV_VERSION` by hand in `ci-cd.yml` and `linkcheck.yml`, which must stay equal (0.13.9 when
+  this card was written).
 - On the first dev → main PR, watch the "Protect main" ruleset's
   `require_extra_approval_for_unattributed_changes`: its effect with 0 required approvals is
   unverified.
