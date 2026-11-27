@@ -33,12 +33,32 @@ into cards.
   Note which ones rest on polytomous or multidimensional models, which ADR-0002 excludes
   ([scope](../scope/)).
 
+## Leads to check
+
+> **Needs detailing.** The coordinator recalled these from memory of catR and never checked them.
+> Confirm each one in catR's source and manual. Turn a real gap into a card with its sources, and
+> drop a wrong claim.
+
+- **Jeffreys prior.** `priorDist = "Jeffreys"` in catR's Bayesian estimators. It depends on the items
+  given (the square root of the test information), so a fixed log-prior callable cannot express it.
+  For the 1PL and 2PL it equals catsim's WLE; under the 3PL the two differ.
+- **Robust estimation.** catR's `thetaEst` may have a `"ROB"` method, possibly Schuster & Yuan
+  (2011).
+- **Item-eligibility exposure control.** `Mrmax = "IE"` in `randomCAT` and `simulateRespondents`,
+  van der Linden & Veldkamp (2004). Each item is eligible with a probability updated from its
+  observed exposure, often presented as a way around Sympson–Hetter's calibration. Check that it
+  fits `BaseExposureControl` with exposure rates from the caller (ADR-0006, ADR-0012).
+- **GDI and GDIP selection.** `criterion = "GDI"`/`"GDIP"` in `nextItem`, from Kaplan, de la Torre &
+  Barrada (2015), proposed for cognitive diagnosis. The gap is in scope only if catR applies it to
+  unidimensional IRT banks; otherwise it belongs to [cd-cat](../scope/cd-cat.md). GDIP may share a
+  posterior grid with the planned MPWI and KLP selectors.
+
 ## How
 
 - Read each package's manual and source. Run shared cases in R where catsim has the method, and
   record disagreements.
 - Write findings into the existing cards where they fit, such as
-  [content-balancing](../content/content-balancing.md) and
+  [content-constrained-selection](../content/content-constrained-selection.md) and
   [starting-rules](../initialization/starting-rules.md).
 - Write new cards for the rest, with `raised_by: [catR and mirtCAT audit]`.
 

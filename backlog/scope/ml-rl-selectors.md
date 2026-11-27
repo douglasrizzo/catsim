@@ -10,7 +10,9 @@ raised_by: []
 
 # ML / RL CAT family (BOBCAT, NCAT, DQN-CAT, BECAT, GMOCAT, EMC, …)
 
-> Background: [the literature review §2.1.E](../literature-review.md)
+> **Needs detailing before it leaves `parked`.** An agent wrote this card in April 2026 from an
+> unverified literature survey, against the API from before the rescoping. Check its sources and
+> redo its design against ADR-0002 and ADR-0007 before any work.
 
 ## Why this is a discussion card
 

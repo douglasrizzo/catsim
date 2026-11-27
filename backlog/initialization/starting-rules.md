@@ -13,6 +13,10 @@ raised_by: [catR comparison]
 **Family:** initialization. **Confidence the gap is real:** medium: catsim starts differently, and
 part of catR's options may have catsim equivalents.
 
+> **Needs detailing before work starts.** catR's options here were recalled from memory, not read in
+> its source. Confirm them in catR's `startItems.R` and the manual, and expand the card, before
+> designing anything.
+
 ## What is known
 
 - catR starts a test with one or more items chosen before the first estimate: the `start` list of
@@ -31,4 +35,4 @@ part of catR's options may have catsim equivalents.
 - Which of catR's starting options catsim cannot already express, and whether they belong to the
   initializer (a starting ability), a selector (the first items) or a new strategy type.
 - How catR estimates after several starting items with constant responses, which overlaps with
-  `estimation-options.md`.
+  [constant-patterns-and-hybrid](../estimation/constant-patterns-and-hybrid.md).

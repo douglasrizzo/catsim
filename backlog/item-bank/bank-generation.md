@@ -40,8 +40,9 @@ Found by all three replications of the research walkthrough ([the research walkt
 - State the absent D in the `ItemBank` constructor's docstring and in `catsim.irt`'s module docstring,
   as part of what the parameters mean. Give the rescaling once, in the guide or the terms page, and
   link to it from the others (one home per topic).
-- This covers the "Scaling constant" item of the estimation cards. A `D`
-  argument, as catR has, stays a decision recorded there.
+- The alternative is a `D` argument: on `ItemBank`, which would rescale a once, or on every IRT
+  function and strategy, as catR has. Prefer the documentation: the item matrix stays the one thing
+  that defines an item (ADR-0003), and every caller would otherwise have to pass the same D.
 
 ## Tests
 

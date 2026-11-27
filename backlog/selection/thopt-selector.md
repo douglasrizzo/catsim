@@ -12,6 +12,10 @@ raised_by: [catR comparison]
 
 **Family:** selection. **Confidence the gap is real:** high.
 
+> **Needs detailing before work starts.** catR's options here were recalled from memory, not read in
+> its source. Confirm them in catR's `nextItem.R` and `startItems.R`, and expand the card, before
+> designing anything.
+
 ## What is known
 
 - catR's `thOpt` criterion selects the item whose ability of maximum information is closest to the

@@ -39,7 +39,7 @@ gives the better design (`AGENTS.md`).
 
 <!-- backlog-index:start -->
 
-69 cards: 28 ready, 13 needs-research, 14 needs-decision, 2 blocked, 12 parked.
+54 cards: 25 ready, 6 needs-research, 9 needs-decision, 2 blocked, 12 parked.
 
 ## Waiting for the maintainer
 
@@ -49,16 +49,11 @@ gives the better design (`AGENTS.md`).
 | [Build a live-testing package on catsim's public API](discovery/live-package.md) | discovery | 2 |
 | [Generate banks of a chosen shape, and document the scaling constant D where users look](item-bank/bank-generation.md) | item-bank | 2 |
 | [Save and load simulation results, and the cost of unpickling them](analysis/saving-results.md) | analysis | 3 |
-| [ItemBank metadata schema for content, enemies, word count](content/item-bank-metadata-schema.md) | content | 3 |
-| [Should catsim's IRT functions take a scaling constant D?](estimation/scaling-constant-d.md) | estimation | 3 |
-| [Give the worker tests a timeout, so a hang fails fast?](maintenance/worker-test-timeout.md) | maintenance | 3 |
 | [One annotation for responses across the package?](maintenance/responses-annotation.md) | maintenance | 3 |
-| [Resolve N, the number of examinees and the planned test length](maintenance/notation-n-collision.md) | maintenance | 3 |
-| [Should a broken link fail CI?](maintenance/linkcheck-policy.md) | maintenance | 3 |
 | [Simplify SimulationResult's constructor checks and other small duplication?](maintenance/result-constructor-checks.md) | maintenance | 3 |
+| [Two CI choices - a timeout for the worker tests, and whether a broken link fails CI](maintenance/ci-decisions.md) | maintenance | 3 |
 | [When to delete the rescoping's reference baseline?](maintenance/reference-baseline-removal.md) | maintenance | 3 |
 | [A stability and versioning policy?](maintenance/stability-policy.md) | maintenance | 4 |
-| [Should catsim export override for custom strategies?](maintenance/export-override.md) | maintenance | 4 |
 
 ## Priority 1
 
@@ -93,28 +88,19 @@ gives the better design (`AGENTS.md`).
 | [Comparable exposure histograms and more metrics in the plots](analysis/plot-options.md) | analysis | feature | ready | S |  | Chang & Ying (1999) walkthrough; Babcock & Weiss (2012) walkthrough |
 | [Evaluate stopping rules post hoc on a maximum-length run](analysis/post-hoc-stopping.md) | analysis | feature | blocked | M | [derived-results](analysis/derived-results.md) | Babcock & Weiss (2012) walkthrough |
 | [Save and load simulation results, and the cost of unpickling them](analysis/saving-results.md) | analysis | decision | needs-decision | M |  | Wang & Vispoel (1998) walkthrough; Babcock & Weiss (2012) walkthrough; Chang & Ying (1999) walkthrough |
-| [Content balancing (catR `cbControl`)](content/content-balancing.md) | content | technique | needs-research | L |  | catR comparison |
-| [ItemBank metadata schema for content, enemies, word count](content/item-bank-metadata-schema.md) | content | decision | needs-decision | L |  |  |
+| [Content-constrained selection (content balancing, WDM, Sympson-Hetter with content, shadow tests)](content/content-constrained-selection.md) | content | technique | needs-research | L |  | catR comparison; strategies literature review (April 2026) |
 | [Choose the WLE's standard error (Warm's corrected SE, the sandwich SE)](estimation/wle-standard-errors.md) | estimation | technique | needs-research | S |  | Wang & Vispoel (1998) walkthrough |
-| [Jeffreys prior and robust ability estimation](estimation/jeffreys-and-robust.md) | estimation | technique | needs-research | M |  | catR comparison |
 | [Owen Sequential Bayesian Estimator](estimation/owen-estimator.md) | estimation | technique | ready | M |  |  |
-| [Should catsim's IRT functions take a scaling constant D?](estimation/scaling-constant-d.md) | estimation | decision | needs-decision | S |  | catR comparison; Babcock & Weiss (2012) walkthrough |
-| [Item-eligibility exposure control (catR `Mrmax = "IE"`, unverified)](exposure/item-eligibility.md) | exposure | technique | needs-research | M |  | catR comparison |
 | [Starting rules (catR `randomCAT`'s `start` list)](initialization/starting-rules.md) | initialization | technique | needs-research | M |  | catR comparison |
 | [Editorial review of every document against the charter, and drift checks](maintenance/editorial-review.md) | maintenance | maintenance | ready | M |  | documentation charter |
-| [Fill in the missing notes in the bibliography](maintenance/bibliography-notes.md) | maintenance | maintenance | needs-research | XS |  | documentation sync (#226) |
-| [Give the worker tests a timeout, so a hang fails fast?](maintenance/worker-test-timeout.md) | maintenance | decision | needs-decision | XS |  | parallel parts (#222) |
 | [Make the stratified selectors' strata cache one attribute](maintenance/strata-cache-thread-race.md) | maintenance | fix | ready | XS |  | ADR audit (#225) |
 | [One annotation for responses across the package?](maintenance/responses-annotation.md) | maintenance | decision | needs-decision | S |  | ADR audit (#225) |
 | [Release the next version](maintenance/release-checklist.md) | maintenance | maintenance | blocked | M |  | rescoping plan |
-| [Reshape the technique cards to the technique-page template](maintenance/technique-cards-to-template.md) | maintenance | maintenance | ready | M |  | technique pages (#226) |
-| [Resolve N, the number of examinees and the planned test length](maintenance/notation-n-collision.md) | maintenance | decision | needs-decision | XS |  | documentation sync (#226) |
-| [Should a broken link fail CI?](maintenance/linkcheck-policy.md) | maintenance | decision | needs-decision | XS |  | documentation sync (#226) |
 | [Simplify SimulationResult's constructor checks and other small duplication?](maintenance/result-constructor-checks.md) | maintenance | decision | needs-decision | S |  | ADR audit (#225) |
 | [Tighter and wider catR parity tests](maintenance/parity-extensions.md) | maintenance | maintenance | ready | M |  | catR parity whole tests (#223); technique pages (#226) |
+| [Two CI choices - a timeout for the worker tests, and whether a broken link fails CI](maintenance/ci-decisions.md) | maintenance | decision | needs-decision | XS |  | parallel parts (#222); documentation sync (#226) |
 | [When to delete the rescoping's reference baseline?](maintenance/reference-baseline-removal.md) | maintenance | decision | needs-decision | XS |  | reference baseline (#218) |
 | [Check a-stratified selection's test size against the stopper](selection/astrat-test-length.md) | selection | feature | ready | S |  | Chang & Ying (1999) walkthrough |
-| [GDI and GDIP selection (catR `criterion = "GDI"`, `"GDIP"`)](selection/gdi-selectors.md) | selection | technique | needs-research | M |  | catR comparison |
 | [Maximum Posterior Weighted Information Selector](selection/mpwi-selector.md) | selection | technique | ready | M |  |  |
 | [Minimum Expected Posterior Variance Selector](selection/mepv-selector.md) | selection | technique | ready | M |  |  |
 | [Posterior Kullback-Leibler Selector](selection/klp-selector.md) | selection | technique | ready | M |  |  |
@@ -129,13 +115,7 @@ gives the better design (`AGENTS.md`).
 
 | Card | Area | Kind | Status | Effort | Blocked by | Raised by |
 |---|---|---|---|---|---|---|
-| [Shadow-Test Approach (STA) constrained CAT](content/shadow-test.md) | content | technique | needs-research | L | [item-bank-metadata-schema](content/item-bank-metadata-schema.md) |  |
-| [Weighted Deviations Method (WDM) content-balancing selector](content/weighted-deviations.md) | content | technique | needs-research | M | [item-bank-metadata-schema](content/item-bank-metadata-schema.md) |  |
-| [Sympson–Hetter with Content (SHC) exposure control](exposure/sympson-hetter-with-content.md) | exposure | technique | needs-research | M | [sympson-hetter](exposure/sympson-hetter.md), [item-bank-metadata-schema](content/item-bank-metadata-schema.md) |  |
 | [A stability and versioning policy?](maintenance/stability-policy.md) | maintenance | decision | needs-decision | S |  | rescoping requirements |
-| [Check the Mermaid diagrams in Firefox](maintenance/firefox-mermaid-check.md) | maintenance | maintenance | ready | XS |  | Mermaid diagrams (#126) |
-| [Should catsim export override for custom strategies?](maintenance/export-override.md) | maintenance | decision | needs-decision | XS |  | notebook rewrite (#226) |
-| [Stop the running parts when one part of a parallel run fails](maintenance/stop-parts-on-failure.md) | maintenance | maintenance | ready | S |  | parallel parts (#222) |
 
 ## Parked: outside the scope an ADR sets
 
@@ -157,7 +137,6 @@ gives the better design (`AGENTS.md`).
 ## Background
 
 - [Discovery: walkthroughs that find what catsim lacks](discovery/README.md)
-- [Literature Review: New CAT Strategies for catsim](literature-review.md)
 - [Literature Review: Item Parameter Estimation (Calibration) for catsim](scope/calibration/literature-review.md)
 
 <!-- backlog-index:end -->
@@ -195,6 +174,8 @@ No test runs the sketches.
    and for its "Tests" section, and a parity case against catR where catR implements the method
    (ADR-0020).
 4. **Promote** the card into the documentation, in the same PR:
+   - split a "Behavioral Contracts" section, which the cards from `specs/` still have, into
+     Guarantees (what a user observes) and Tests (what only an implementation sees);
    - move its sections from Motivation to References to `sphinx/api/techniques/<family>/`, and add
      the page to the toctree of that family's `index.md`;
    - replace the status lines with the header of the technique-page template,
