@@ -26,7 +26,7 @@ and may not know software design; integrators know Python and may not know IRT.
 - Write in the present tense. Describe what is, never what changed.
 - Do not write "now", "no longer", "replaces", "instead of" or "previously" about an earlier
   version, "new" for something just added, card IDs, or PR and issue numbers. The ban covers every
-  page, docstring and notebook. The exceptions are the Context section of an ADR and the 1.0 notice.
+  page, docstring and notebook. The exceptions are the Context section of an ADR and the compatibility notice.
 - Put plain language first. Use a symbol only after the text has introduced it in words.
 - Describe what users observe, not how catsim computes it, unless the computation is the point, as
   on a technique page.
@@ -54,9 +54,9 @@ citation, not a mention: cite it like any other source.
 - The GitHub release notes are the only place for "what changed". Each release gets a hand-written
   summary (highlights, breaking changes, results that change for the same seed), followed by
   GitHub's generated list of pull requests. There is no CHANGELOG file and no migration page.
-- The 1.0 notice, in the README and on the landing page, is a warning: 0.x code needs changes and
-  seeded results differ. It points to `catsim<1` and the 1.0.0 release notes, and lists no changes:
-  those are in the release notes.
+- The compatibility notice, in the README and on the landing page, is a warning: code written for
+  catsim 0.21.0 and earlier needs changes, and seeded results differ. It points to `catsim==0.21.0`
+  and the release notes, and lists no changes: those are in the release notes.
 
 ### Where a formula lives
 
@@ -119,7 +119,7 @@ do not re-explain it. The map names ADRs by topic.
 | How to contribute; the gate; the release process | `CONTRIBUTING.md` | |
 | How catsim is checked against catR (the parity tests) | `CONTRIBUTING.md` | the catR ADR for why; each technique page's catR dropdown states its departures |
 | Why the architecture is shaped this way | the ADR | guides, technique pages |
-| What changed in a release | the GitHub release notes | the 1.0 notice |
+| What changed in a release | the GitHub release notes | the compatibility notice |
 
 Some homes in this map are still to be written (the guides, the Planned techniques page). Until a
 home exists, leave the material where it is and do not start a second copy.
@@ -275,8 +275,8 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
   - Write in a timeless voice. Only Context may describe the code before the decision.
   - The Status line is dated: "Accepted 2026-11-24".
   - Show code only to state an interface, in a few lines.
-  - From 1.0.0 on, an accepted ADR is not rewritten: a changed decision gets a new ADR that
-    supersedes it, and the old one's Status becomes "Superseded YYYY-MM-DD by ADR-NNNN".
+  - When a decision changes, its ADR is edited in place, and an ADR whose decision no longer holds
+    is deleted: git keeps the earlier text.
 - **Length:** 300-600 words.
 - **Review:**
   - Does it record a decision, or does it describe code?
@@ -353,12 +353,12 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
 - **Review:** Is every breaking change listed, with what to change? Is every change to seeded results
   named?
 
-### The 1.0 notice (README and landing page)
+### The compatibility notice (README and landing page)
 
-- **Job:** warn 0.x users that their code needs changes and their seeded results differ, and point
-  them to `catsim<1` and the 1.0.0 release notes. A warning box on the landing page, a blockquote in
-  the README.
-- **Audience and level:** 0.x users; introductory.
+- **Job:** warn users of catsim 0.21.0 and earlier that their code needs changes and their seeded
+  results differ, and point them to `catsim==0.21.0` and the release notes. A warning box on the
+  landing page, a blockquote in the README.
+- **Audience and level:** users of 0.21.0 and earlier; introductory.
 - **Not here:** any list of changes, including the API's new shape (the release notes).
 - **Length:** two or three sentences.
 
@@ -386,7 +386,7 @@ Beyond the checklist of its kind, a docs review (and the review of any PR that t
 asks:
 
 1. **Voice:** does anything tell history ("now", "no longer", "replaces", "instead of",
-   "previously", a card ID, a PR number) outside an ADR's Context and the 1.0 notice?
+   "previously", a card ID, a PR number) outside an ADR's Context and the compatibility notice?
 2. **Audience:** is there anything the page's reader does not need, such as an internal name or
    design rationale?
 3. **One home:** does it re-explain a topic whose home is elsewhere, rather than link it?

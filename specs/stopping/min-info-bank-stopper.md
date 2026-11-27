@@ -2,7 +2,7 @@
 **Module:** `catsim.stopping.bank.MinInfoInBankStopper` (planned)
 **Reference:** Dodd, Koch, and De Ayala (1989); Choi, Grady, and Dodd (2011)
 **Last validated:** 2026-11-23, against Dodd, Koch & De Ayala (1989), Choi, Grady & Dodd (2011, PubMed Central author manuscript) and catR 3.17.
-**Implementation guidance:** written against the 1.0 strategy contract (`StepContext` in, a single criterion for `StopRule`) on 2026-11-26.
+**Implementation guidance:** written against the strategy contract of ADR-0007 (`StepContext` in, a single criterion for `StopRule`) on 2026-11-26.
 
 # Minimum Information in Bank Stopper
 

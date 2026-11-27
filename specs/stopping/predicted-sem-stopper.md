@@ -2,7 +2,7 @@
 **Module:** `catsim.stopping.bank.PredictedSEMStopper` (planned)
 **Reference:** Choi, Grady, and Dodd (2011)
 **Last validated:** 2026-11-23, against Choi, Grady & Dodd (2011, PubMed Central author manuscript).
-**Implementation guidance:** written against the 1.0 strategy contract (`StepContext` in, a single criterion for `StopRule`) on 2026-11-26.
+**Implementation guidance:** written against the strategy contract of ADR-0007 (`StepContext` in, a single criterion for `StopRule`) on 2026-11-26.
 
 # Predicted-SEM Stopper
 
@@ -128,7 +128,7 @@ To be answered before the stopper is implemented, and removed from the spec when
 
 1. **How to predict the next standard error.** This spec predicts it from Fisher information, as
    stated above; Choi et al. predict it from the predictive posterior variance, the MEPV kernel.
-   The choice interacts with the 1.0 strategy contract, under which stoppers read the standard
+   The choice interacts with the strategy contract (ADR-0007), under which stoppers read the standard
    error the estimator reports (the step context's `se`). With EAP or MAP that is a posterior
    standard deviation, so the posterior-variance prediction would be the consistent one; with the
    likelihood estimators it would be the Fisher-information one. The options are:

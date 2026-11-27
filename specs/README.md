@@ -26,7 +26,7 @@ that syntax and breaks the `$$` math.
 
 The specs' citations, cited locations, definitions and catR comparisons were last revalidated
 against their sources in November 2026 (checklist steps 1-4 and 6 below); each spec's status lines
-say when and against which sources. Their implementation sketches follow the catsim 1.0 strategy
+say when and against which sources. Their implementation sketches follow the strategy
 contract and the revalidated definitions (step 5), and the Sympson-Hetter sketch is an exposure
 control of the engine. The sketches are illustrative and no test runs them; the specs with open
 questions show the option each spec assumes. Every sketch was last run on 2026-11-26: each
@@ -90,7 +90,7 @@ Check each spec against its sources before it is implemented or its references a
    the minimum-information stopper): the spec says where it agrees and where it departs, which the
    promoted page puts in its closed "Comparison with catR" dropdown, and its testing notes name the
    parity cases the implementation adds (ADR-0020). A spec never says what catR lacks.
-5. **Implementation guidance** follows the 1.0 strategy contract:
+5. **Implementation guidance** follows the strategy contract of ADR-0007:
    - per-step strategies take a `StepContext`, and estimators return an `Estimate`, whose
      standard error is positive or `math.inf`;
    - Sympson-Hetter is an exposure control (`BaseExposureControl.accept(context, item)`), whose

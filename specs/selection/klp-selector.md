@@ -2,7 +2,7 @@
 **Module:** `catsim.selection.kl.KLPSelector` (planned)
 **Reference:** Chang and Ying (1996)
 **Last validated:** 2026-11-23, against Chang & Ying (1996); Magis & Barrada (2017); catR 3.17 (`KL.R`, `nextItem.R`).
-**Implementation guidance:** written against the 1.0 strategy contract (`StepContext` in) on 2026-11-26.
+**Implementation guidance:** written against the strategy contract of ADR-0007 (`StepContext` in) on 2026-11-26.
 
 # Posterior Kullback-Leibler Selector
 

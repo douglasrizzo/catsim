@@ -10,7 +10,7 @@ catsim promised two things: the computations and simulation studies of computeri
 testing (CAT), and the running of live tests in applications. A live session was a first-class use
 of the engine, so catsim's objects had to survive across requests and restarts, keep the item on
 screen, share exposure counts between sessions run side by side, and support audit replay. A review
-of the API before 1.0 found that this promise drove most of its complexity, and that every result
+of the API found that this promise drove most of its complexity, and that every result
 it found silently wrong came from catsim's state outliving one run.
 
 The two can live apart: the Concerto testing platform, for one, serves live tests and leaves their
@@ -38,8 +38,7 @@ catsim does not calibrate items, and it has no graphical or web interface.
   one page on the boundary, with no serving recipes (`sphinx/AGENTS.md`).
 - Every design question is settled for the computations and the studies. A need that only serving
   has, such as resuming a test after a restart, is the application's, or a separate package's.
-- A separate live package, built on catsim's public API only, checks that the boundary holds before
-  1.0.
+- A separate live package, built on catsim's public API only, checks that the boundary holds.
 - Item parameters are an input, from whatever software calibrated them.
 
 ## Alternatives Considered

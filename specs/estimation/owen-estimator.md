@@ -2,7 +2,7 @@
 **Module:** `catsim.estimation.bayesian.OwenEstimator` (planned)
 **Reference:** Owen (1975)
 **Last validated:** 2026-11-23, against Jensema (1977), McBride (1977) and Weiss & McBride (1984).
-**Implementation guidance:** written against the 1.0 strategy contract (`StepContext` in, `Estimate` out) on 2026-11-26.
+**Implementation guidance:** written against the strategy contract of ADR-0007 (`StepContext` in, `Estimate` out) on 2026-11-26.
 
 # Owen Sequential Bayesian Estimator
 

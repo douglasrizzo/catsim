@@ -2,7 +2,7 @@
 **Module:** `catsim.selection.weighted_info.MPWISelector` (planned)
 **Reference:** van der Linden (1998)
 **Last validated:** 2026-11-23, against van der Linden (1996, RR 96-01); Choi & Swartz (2009); Magis & Raîche (2012); catR 3.17 (`MWI.R`, `nextItem.R`).
-**Implementation guidance:** written against the 1.0 strategy contract (`StepContext` in) on 2026-11-26.
+**Implementation guidance:** written against the strategy contract of ADR-0007 (`StepContext` in) on 2026-11-26.
 
 # Maximum Posterior Weighted Information Selector
 
