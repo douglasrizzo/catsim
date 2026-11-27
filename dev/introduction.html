@@ -895,7 +895,7 @@ estimate near <span class="math notranslate nohighlight">\(\theta\)</span>, is <
 <p>where <span class="math notranslate nohighlight">\(Q_i(\theta) = 1 - P_i(\theta)\)</span> is the probability of an incorrect response. The following
 figure draws both curves for one item: the item is most informative near its difficulty.</p>
 <figure class="align-default" id="id9">
-<img alt="_images/introduction-1.svg" class="plot-directive" src="_images/introduction-1.svg" />
+<img alt="_images/introduction-item-curves.svg" class="plot-directive" src="_images/introduction-item-curves.svg" />
 <figcaption>
 <p><span class="caption-number">Fig. 1 </span><span class="caption-text">Item characteristic and information curves for an item. The dot represents the point at which the item is most informative.</span><a class="headerlink" href="#id9" title="Link to this image">#</a></p>
 </figcaption>
@@ -944,7 +944,14 @@ can say which item is which; a calibrated bank and its names can be read from a 
 test estimates an examinee’s ability once, at the end. A computerized adaptive test (CAT) updates the
 estimate after each response. Knowing more about the ability at each step lets the test
 choose more informative items <em>during</em> the test, so the standard error of the estimate falls
-faster.</p>
+faster. The figure compares the two on one simulated population: as items accumulate, the adaptive
+test’s estimates come closer to the true abilities than the linear test’s.</p>
+<figure class="align-default" id="id11">
+<img alt="_images/introduction-adaptive-and-linear.svg" class="plot-directive" src="_images/introduction-adaptive-and-linear.svg" />
+<figcaption>
+<p><span class="caption-number">Fig. 3 </span><span class="caption-text">The RMSE of 300 simulated examinees’ estimates after each item, from one 200-item bank. The adaptive test chooses each examinee’s items by maximum information; the linear test gives everyone the 30 items most informative at the population’s mean.</span><a class="headerlink" href="#id11" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
 <section id="the-cat-lifecycle">
 <h3>The CAT Lifecycle<a class="headerlink" href="#the-cat-lifecycle" title="Link to this heading">#</a></h3>
 <p>A computerized adaptive test follows a well-defined lifecycle:</p>
