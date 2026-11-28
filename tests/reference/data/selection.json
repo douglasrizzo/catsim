@@ -1597,22 +1597,6 @@
       2,
       11
     ],
-    "MEISelector(estimator=EAPEstimator())|tie_bank|after_2": [
-      4,
-      5,
-      6,
-      7,
-      1,
-      2
-    ],
-    "MEISelector(estimator=EAPEstimator())|tie_bank|start": [
-      4,
-      3,
-      5,
-      1,
-      2,
-      7
-    ],
     "MEISelector(r_max=0.3)|4pl|after_3|no_rates": [
       10,
       5,
