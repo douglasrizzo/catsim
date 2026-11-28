@@ -14,7 +14,7 @@ from irtlib import ItemBank
 from irtlib.typing import FloatArray
 
 from catsim import CatEngine, Estimate, Session, SimulationResult, StepContext, StopReason, simulate
-from catsim.estimation import EAPEstimator, NumericalSearchEstimator
+from catsim.estimation import EAPEstimator, MLEstimator
 from catsim.exposure import BaseExposureControl
 from catsim.initialization import BaseInitializer, FixedPointInitializer, UniformInitializer
 from catsim.selection import BaseSelector, MaxInfoSelector, ProgressiveSelector, RandomesqueSelector, RandomSelector
@@ -68,7 +68,7 @@ def make_engine(
     item_bank,
     initializer or FixedPointInitializer(0.0),
     selector,
-    NumericalSearchEstimator(),
+    MLEstimator(),
     MaxLengthStopper(stopper) if isinstance(stopper, int) else stopper,
     exposure_control=exposure_control,
   )

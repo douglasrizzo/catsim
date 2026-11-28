@@ -10,7 +10,7 @@ from hypothesis.strategies import DrawFn, composite
 from irtlib import ItemBank
 
 from catsim import CatEngine, NoItemsAvailableError, StopReason, simulate
-from catsim.estimation import NumericalSearchEstimator
+from catsim.estimation import MLEstimator
 from catsim.initialization import FixedPointInitializer
 from catsim.selection import AStratBBlockSelector, AStratSelector, MaxInfoBBlockSelector, MaxInfoStratSelector
 from catsim.stopping import MaxLengthStopper
@@ -202,7 +202,7 @@ def test_a_session_administers_test_size_items(
     ItemBank.generate(n_items, rng=seed),
     FixedPointInitializer(0.0),
     selector_class(test_size=test_size, n_strata=n_strata),
-    NumericalSearchEstimator(),
+    MLEstimator(),
     MaxLengthStopper(test_size),
   )
   session = simulate(engine, true_thetas=[true_theta], rng=seed).sessions[0]

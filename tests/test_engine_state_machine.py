@@ -12,7 +12,7 @@ from hypothesis.stateful import RuleBasedStateMachine, initialize, invariant, ru
 from irtlib import ItemBank
 
 from catsim import CatEngine, Estimate, NoItemsAvailableError, Session, StepContext, StopReason
-from catsim.estimation import BaseEstimator, NumericalSearchEstimator
+from catsim.estimation import BaseEstimator, MLEstimator
 from catsim.exposure import BaseExposureControl
 from catsim.initialization import FixedPointInitializer
 from catsim.selection import BaseSelector, MaxInfoSelector
@@ -150,7 +150,7 @@ class StubbedEngineMachine(SteppedSessionMachine):
 
 
 class RealStrategiesMachine(SteppedSessionMachine):
-  """The maximum-information selector and the numerical estimator on random banks."""
+  """The maximum-information selector and the ML estimator on random banks."""
 
   @initialize(bank_seed=st.integers(min_value=0, max_value=500), max_items=st.integers(min_value=3, max_value=5))
   def init_engine(self, bank_seed: int, max_items: int) -> None:
@@ -160,7 +160,7 @@ class RealStrategiesMachine(SteppedSessionMachine):
       ItemBank.generate(12, rng=bank_seed),
       FixedPointInitializer(0.0),
       MaxInfoSelector(),
-      NumericalSearchEstimator(),
+      MLEstimator(),
       MaxLengthStopper(max_items),
     )
     self.begin()
@@ -260,7 +260,7 @@ def test_stepping_a_session_with_stub_strategies_keeps_its_history_in_line() -> 
 
 
 def test_stepping_a_session_with_real_strategies_keeps_its_history_in_line() -> None:
-  """The same invariants hold with the real maximum-information selector and numerical estimator.
+  """The same invariants hold with the real maximum-information selector and ML estimator.
 
   Fails if a real strategy makes a step record an item without its response or estimate, give an item twice or a
   non-finite estimate, or change a session that has already stopped.

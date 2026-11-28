@@ -25,14 +25,14 @@ from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,
   MAPEstimator,
-  NumericalSearchEstimator,
+  MLEstimator,
   WarmLikelihoodEstimator,
 )
 from tests.contexts import make_context
 
 
-class TestNumericalSearchEstimatorEstimate:
-  """Tests for NumericalSearchEstimator.estimate() method."""
+class TestMLEstimatorEstimate:
+  """Tests for MLEstimator.estimate() method."""
 
   def test_estimate_is_the_maximum_of_the_likelihood_on_the_ability_scale(self) -> None:
     """A 4PL pattern is estimated at its likelihood's maximum, 0.5816, inside [-6, 6].
@@ -52,7 +52,7 @@ class TestNumericalSearchEstimatorEstimate:
     log_lik = np.sum(np.where(np.array(responses)[:, None], np.log(p), np.log1p(-p)), axis=0)
     reference = grid[np.argmax(log_lik)]
 
-    theta = NumericalSearchEstimator().estimate(make_context(item_bank, administered_items, responses, theta=0.0)).theta
+    theta = MLEstimator().estimate(make_context(item_bank, administered_items, responses, theta=0.0)).theta
 
     assert reference == pytest.approx(0.5816, abs=1e-4)
     assert theta == pytest.approx(reference, abs=1e-4)
@@ -65,7 +65,7 @@ class TestNumericalSearchEstimatorEstimate:
     """
     item_bank = ItemBank.generate(10, rng=42)
 
-    estimate = NumericalSearchEstimator().estimate(make_context(item_bank, [], [], theta=1.7, se=0.8))
+    estimate = MLEstimator().estimate(make_context(item_bank, [], [], theta=1.7, se=0.8))
 
     assert estimate == Estimate(theta=1.7, se=0.8, evaluations=0)
 
@@ -89,7 +89,7 @@ class TestNumericalSearchEstimatorEstimate:
     """
     item_bank = ItemBank(np.array([[1.0, -3.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 2.0, 0.0, 1.0]]))
 
-    estimate = NumericalSearchEstimator().estimate(make_context(item_bank, [1], [correct], theta=theta))
+    estimate = MLEstimator().estimate(make_context(item_bank, [1], [correct], theta=theta))
 
     assert estimate.theta == expected
     assert estimate.se == pytest.approx(1.0 / np.sqrt(expit(expected) * expit(-expected)), rel=1e-12)
@@ -115,7 +115,7 @@ class TestNumericalSearchEstimatorEstimate:
     """
     item_bank = ItemBank(np.array([[1.0, -3.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 2.0, 0.0, 1.0]]))
 
-    estimate = NumericalSearchEstimator(bounds=bounds).estimate(make_context(item_bank, [1], [correct], theta=theta))
+    estimate = MLEstimator(bounds=bounds).estimate(make_context(item_bank, [1], [correct], theta=theta))
 
     assert estimate.theta == expected
 
@@ -130,7 +130,7 @@ class TestNumericalSearchEstimatorEstimate:
       method="bounded",
       options={"xatol": 1e-12},
     ).x
-    coarse, fine = NumericalSearchEstimator(tol=1e-2), NumericalSearchEstimator(tol=1e-10)
+    coarse, fine = MLEstimator(tol=1e-2), MLEstimator(tol=1e-10)
 
     estimates = [
       estimator.estimate(make_context(item_bank, administered_items, responses, theta=0.0))
@@ -152,7 +152,7 @@ class TestNumericalSearchEstimatorEstimate:
     """
     item_bank = ItemBank(np.tile([1.0, 0.0, 0.0, 1.0], (16, 1)))
 
-    estimate = NumericalSearchEstimator().estimate(make_context(item_bank, range(16), [True, False] * 8, theta=1.0))
+    estimate = MLEstimator().estimate(make_context(item_bank, range(16), [True, False] * 8, theta=1.0))
 
     assert estimate.theta == pytest.approx(0.0, abs=1e-5)
     assert estimate.se == pytest.approx(0.5, rel=1e-9)
@@ -170,7 +170,7 @@ class TestNumericalSearchEstimatorEstimate:
       [responses], item_bank.get_items(administered_items), bounds=(-3.0, 3.0), tol=1e-6
     )
 
-    estimate = NumericalSearchEstimator(tol=1e-6, bounds=(-3.0, 3.0)).estimate(
+    estimate = MLEstimator(tol=1e-6, bounds=(-3.0, 3.0)).estimate(
       make_context(item_bank, administered_items, responses, theta=0.0)
     )
 
@@ -178,7 +178,7 @@ class TestNumericalSearchEstimatorEstimate:
 
 
 ESTIMATORS = [
-  pytest.param(NumericalSearchEstimator, id="mle"),
+  pytest.param(MLEstimator, id="mle"),
   pytest.param(EAPEstimator, id="eap"),
   pytest.param(MAPEstimator, id="map"),
   pytest.param(WarmLikelihoodEstimator, id="wle"),
@@ -203,7 +203,7 @@ def test_estimate_takes_a_minimal_context(make_estimator: Callable[[], BaseEstim
 
 
 ESTIMATOR_REPRS = {
-  "NumericalSearchEstimator": "NumericalSearchEstimator(tol=0.001, bounds=(-4.0, 4.0))",
+  "MLEstimator": "MLEstimator(tol=0.001, bounds=(-4.0, 4.0))",
   "EAPEstimator": "EAPEstimator(grid=None, log_prior=None)",
   "MAPEstimator": "MAPEstimator(log_prior=None, tol=0.001, bounds=(-4.0, 4.0))",
   "WarmLikelihoodEstimator": "WarmLikelihoodEstimator(tol=0.001, bounds=(-4.0, 4.0))",
@@ -293,17 +293,17 @@ def test_estimators_accept_numpy_item_indices(
   assert from_array.theta == pytest.approx(from_list.theta, abs=1e-15)
 
 
-@pytest.mark.parametrize("estimator_class", [NumericalSearchEstimator, MAPEstimator, WarmLikelihoodEstimator])
+@pytest.mark.parametrize("estimator_class", [MLEstimator, MAPEstimator, WarmLikelihoodEstimator])
 @pytest.mark.parametrize("tol", [0.0, -1e-6, float("nan")])
 def test_estimators_reject_a_tolerance_that_is_not_positive(
-  estimator_class: type[NumericalSearchEstimator | MAPEstimator | WarmLikelihoodEstimator], tol: float
+  estimator_class: type[MLEstimator | MAPEstimator | WarmLikelihoodEstimator], tol: float
 ) -> None:
   """A tol that is not positive fails at construction, not mid-session inside SciPy (WLE's brentq raised there)."""
   with pytest.raises(ValueError, match="tol must be positive"):
     estimator_class(tol=tol)
 
 
-@pytest.mark.parametrize("estimator_class", [NumericalSearchEstimator, MAPEstimator, WarmLikelihoodEstimator])
+@pytest.mark.parametrize("estimator_class", [MLEstimator, MAPEstimator, WarmLikelihoodEstimator])
 @pytest.mark.parametrize(
   "bounds",
   [
@@ -314,7 +314,7 @@ def test_estimators_reject_a_tolerance_that_is_not_positive(
   ],
 )
 def test_estimators_reject_bounds_that_are_not_a_finite_interval(
-  estimator_class: type[NumericalSearchEstimator | MAPEstimator | WarmLikelihoodEstimator], bounds: tuple[float, float]
+  estimator_class: type[MLEstimator | MAPEstimator | WarmLikelihoodEstimator], bounds: tuple[float, float]
 ) -> None:
   """Bounds that are not a finite interval with low < high fail at construction, not inside SciPy."""
   with pytest.raises(ValueError, match="bounds must be finite with low < high"):
@@ -324,7 +324,7 @@ def test_estimators_reject_bounds_that_are_not_a_finite_interval(
 @pytest.mark.parametrize(
   "make_estimator",
   [
-    pytest.param(partial(NumericalSearchEstimator, bounds=(0.5, 2.0)), id="mle"),
+    pytest.param(partial(MLEstimator, bounds=(0.5, 2.0)), id="mle"),
     pytest.param(partial(MAPEstimator, bounds=(0.5, 2.0)), id="map"),
     pytest.param(partial(WarmLikelihoodEstimator, bounds=(0.5, 2.0)), id="wle"),
   ],
@@ -347,7 +347,7 @@ def test_estimators_search_only_inside_their_bounds(make_estimator: Callable[[],
 @pytest.mark.parametrize(
   ("make_estimator", "expected"),
   [
-    pytest.param(partial(NumericalSearchEstimator, bounds=(-1.0, 1.0)), 1.0, id="mle"),
+    pytest.param(partial(MLEstimator, bounds=(-1.0, 1.0)), 1.0, id="mle"),
     pytest.param(
       partial(EAPEstimator, grid=QuadratureGrid.uniform(n_nodes=3, low=-1.0, high=1.0)),
       np.exp(-0.5) * np.tanh(0.5) / (np.exp(-0.5) + 0.5),

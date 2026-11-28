@@ -76,6 +76,7 @@ maintainer is satisfied with the package.
   `item_exposure(rates, item_bank, ...)`, `session_progress(session, item_bank, *, true_theta=None)`.
 - **Custom strategies** must be picklable classes defined in a module to run on workers.
   `override` comes from `typing`.
+- **`NumericalSearchEstimator` is `MLEstimator`**, in `catsim.estimation`, with no alias.
 - **Python 3.12 or later.** catsim builds on irtlib (ADR-0024), which requires 3.12.
 - **The item response theory comes from irtlib.** `ItemBank` and `IrtModel` are imported from
   `irtlib`, the functions of `catsim.irt` from `irtlib.irt`, and `FloatArray` and `IntArray` from
@@ -95,7 +96,7 @@ maintainer is satisfied with the package.
   one 128-bit seed from it.
 - Runs on recorded responses without randomization give the same items and estimates as before
   (the reference baseline in `tests/reference/`), to rounding: the estimators are irtlib's
-  (ADR-0024). `NumericalSearchEstimator` and `MAPEstimator` under a normal prior search 101 or
+  (ADR-0024). `MLEstimator` and `MAPEstimator` under a normal prior search 101 or
   more points on 3PL and 4PL items before refining the best by Newton's method, and on 1PL and 2PL
   items Newton's method alone. Their estimates move within `tol`, ML finds the highest maximum
   where Brent's search alone could stop at a lower one, and the evaluation counts are 7 to 10 on

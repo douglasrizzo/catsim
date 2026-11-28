@@ -52,7 +52,7 @@ def _dodd(theta: float, item_bank: ItemBank, *, correct: bool, bounds: tuple[flo
   return float(min(max(estimate, low), high))
 
 
-class NumericalSearchEstimator(BaseEstimator):
+class MLEstimator(BaseEstimator):
   """Estimate ability by numerically maximizing the IRT log-likelihood.
 
   The maximum is irtlib's maximum likelihood estimate within ``bounds``, ``irtlib.ability.maximum_likelihood``,
@@ -74,7 +74,7 @@ class NumericalSearchEstimator(BaseEstimator):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/api/techniques/estimation/numerical-search-estimator`.
+  For full algorithmic details, see :doc:`/api/techniques/estimation/ml-estimator`.
   """
 
   def __init__(

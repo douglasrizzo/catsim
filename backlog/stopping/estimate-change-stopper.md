@@ -19,7 +19,7 @@ Stopping when the estimate changes by less than Δ is a standard termination cri
 it re-estimates the previous estimate by passing the estimator the context without the newest item,
 built with `dataclasses.replace`. That context still holds the newest estimate as `theta`.
 
-With `NumericalSearchEstimator`, while every response is correct or every response is incorrect, the
+With `MLEstimator`, while every response is correct or every response is incorrect, the
 estimate is Dodd's step from `context.theta`. The re-estimate then steps from the *new* estimate, not
 the one before it, so the stopper sees the wrong change. The notebook's warning covers only estimators
 that "start their search" from the current estimate. Dodd's step is not a search, so a reader using ML
@@ -51,7 +51,7 @@ convergence. That is the method's behaviour, not a bug; the technique page shoul
 ## What to do
 
 1. **Now (docs):** correct the notebook's explanation. The recipe is exact only for an estimator that
-   ignores `context.theta`. `NumericalSearchEstimator` uses it for Dodd's step, so under ML the recipe
+   ignores `context.theta`. `MLEstimator` uses it for Dodd's step, so under ML the recipe
    is wrong while all responses are the same. Point to the built-in once it exists. Run the notebook
    with nbmake.
 2. **The real fix (architecture):** a stopper needs the estimate before the newest response. Options:

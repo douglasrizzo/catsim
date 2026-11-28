@@ -9,7 +9,7 @@
 # chooses at ability 0 by the test's own criterion (startSelect = "MFI" or "bOpt"), is checked to
 # give the same tests for the MFI and bOpt cases with ML and EAP on the small bank, so those cases
 # stand for it too. ML takes constantPatt = "var", Dodd's step from the previous estimate toward
-# the bank's range of difficulties, which catsim's NumericalSearchEstimator always takes
+# the bank's range of difficulties, which catsim's MLEstimator always takes
 # (ADR-0018); the other estimators keep catR's default, their own estimate for constant patterns.
 #
 # "thetas" are the estimates in order, the starting ability first, "ses" the standard error after

@@ -7,7 +7,7 @@ import pytest
 from irtlib import ItemBank
 
 from catsim import Estimate, StepContext
-from catsim.estimation import BaseEstimator, NumericalSearchEstimator
+from catsim.estimation import BaseEstimator, MLEstimator
 from catsim.selection import MaxInfoSelector, MEISelector
 from tests.contexts import make_context
 
@@ -99,7 +99,7 @@ class TestMEISelector:
     responses = [True]
     theta = 0.0
 
-    mei = MEISelector(estimator=NumericalSearchEstimator())
+    mei = MEISelector(estimator=MLEstimator())
     max_info = MaxInfoSelector()
 
     mei_choice = mei.select(

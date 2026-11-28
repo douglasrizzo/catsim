@@ -8,7 +8,7 @@ from irtlib import irt
 
 from ..context import StepContext
 from ..estimation.base import BaseEstimator
-from ..estimation.numerical import NumericalSearchEstimator
+from ..estimation.ml import MLEstimator
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 
@@ -24,7 +24,7 @@ class MEISelector(BaseSelector):
   ----------
   estimator : BaseEstimator or None, optional
       Estimator used for the one-step-ahead ability updates. Default is a new
-      :py:class:`catsim.estimation.NumericalSearchEstimator`. It may be the engine's own
+      :py:class:`catsim.estimation.MLEstimator`. It may be the engine's own
       estimator: the look-ahead estimates are never recorded in the session.
   r_max : float, optional
       Maximum exposure rate for items. Items with exposure rates >= r_max are only selected when no
@@ -42,7 +42,7 @@ class MEISelector(BaseSelector):
 
   def __init__(self, estimator: BaseEstimator | None = None, r_max: float = 1.0) -> None:
     super().__init__()
-    self._estimator = estimator if estimator is not None else NumericalSearchEstimator()
+    self._estimator = estimator if estimator is not None else MLEstimator()
     self._r_max = check_r_max(r_max)
 
   @override

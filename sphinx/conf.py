@@ -171,6 +171,7 @@ redirects = {
   "api/techniques/selection/max-info-strat-selector": "stratified-selector.html",
   "api/techniques/stopping/min-error-stopper": "standard-error-stopper.html",
   "api/techniques/stopping/test-length-stopper": "max-length-stopper.html",
+  "api/techniques/estimation/numerical-search-estimator": "ml-estimator.html",
   # Planned work, including the planned techniques, is a card in backlog/ on GitHub.
   "planned-techniques": "https://github.com/douglasrizzo/catsim/tree/dev/backlog",
   "api/techniques/estimation/bayesian-infrastructure": "eap-estimator.html",

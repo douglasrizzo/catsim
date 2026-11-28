@@ -32,7 +32,7 @@ from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,
   MAPEstimator,
-  NumericalSearchEstimator,
+  MLEstimator,
   WarmLikelihoodEstimator,
 )
 from catsim.initialization import FixedPointInitializer
@@ -90,7 +90,7 @@ _DODD_SE = (
 )
 _CONSTANT_DEFAULT = (
   "catR's default for all-correct and all-incorrect patterns (constantPatt = NULL) returns the bound of its range; "
-  "catsim's NumericalSearchEstimator always takes Dodd's step (ADR-0018), which catR's constantPatt = 'var' matches"
+  "catsim's MLEstimator always takes Dodd's step (ADR-0018), which catR's constantPatt = 'var' matches"
 )
 _ML_MINIMUM = (
   "the likelihood has a local minimum inside the range; catR's thetaEst solves the likelihood equation with uniroot, "
@@ -254,7 +254,7 @@ def _estimator(case: Case) -> BaseEstimator:
     return MAPEstimator(log_prior=_log_prior(case["prior"]), bounds=bounds)
   if method == "WL":
     return WarmLikelihoodEstimator(bounds=bounds)
-  return NumericalSearchEstimator(bounds=bounds)
+  return MLEstimator(bounds=bounds)
 
 
 def _estimation_context(case: Case) -> StepContext:
@@ -271,7 +271,7 @@ def _estimation_context(case: Case) -> StepContext:
 class TestEstimators:
   """catR's thetaEst and semTheta, with ML, BM, EAP and WL, against the matching catsim estimator.
 
-  ML is NumericalSearchEstimator, BM is MAPEstimator, EAP is EAPEstimator on catR's grid with its trapezoid weights,
+  ML is MLEstimator, BM is MAPEstimator, EAP is EAPEstimator on catR's grid with its trapezoid weights,
   and WL is WarmLikelihoodEstimator, each on catR's range. EAP is a quadrature on the same nodes, so it is compared as a
   closed form; the others search, and are compared within the estimates' tolerance.
   """

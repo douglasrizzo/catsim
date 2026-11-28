@@ -15,7 +15,7 @@ from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,
   MAPEstimator,
-  NumericalSearchEstimator,
+  MLEstimator,
   WarmLikelihoodEstimator,
 )
 from catsim.exposure import BaseExposureControl
@@ -91,8 +91,8 @@ STRATEGIES = [
   pytest.param(MEISelector(estimator=EAPEstimator(), r_max=0.3), id="MEISelector-eap"),
   pytest.param(MLWISelector(), id="MLWISelector"),
   pytest.param(MLWISelector(n_nodes=21, bounds=(-4.0, 4.0), r_max=0.3), id="MLWISelector-settings"),
-  pytest.param(NumericalSearchEstimator(), id="NumericalSearchEstimator"),
-  pytest.param(NumericalSearchEstimator(tol=1e-3, bounds=(-4.0, 4.0)), id="NumericalSearchEstimator-settings"),
+  pytest.param(MLEstimator(), id="MLEstimator"),
+  pytest.param(MLEstimator(tol=1e-3, bounds=(-4.0, 4.0)), id="MLEstimator-settings"),
   pytest.param(EAPEstimator(), id="EAPEstimator"),
   pytest.param(
     EAPEstimator(grid=QuadratureGrid.uniform(31, -4.0, 4.0), log_prior=normal_log_prior(0.5, 2.0)),

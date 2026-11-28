@@ -23,7 +23,7 @@ from catsim import (
   StepContext,
   StopReason,
 )
-from catsim.estimation import BaseEstimator, NumericalSearchEstimator
+from catsim.estimation import BaseEstimator, MLEstimator
 from catsim.exposure import BaseExposureControl
 from catsim.initialization import BaseInitializer
 from catsim.selection import BaseSelector, LinearSelector, MaxInfoSelector, MEISelector, RandomSelector, remaining
@@ -258,7 +258,7 @@ def test_start_gives_the_initializer_the_bank_and_generator_and_begins_at_its_es
   estimate, a finite standard error (precision stoppers would judge it) or a stop reason.
   """
   initializer = RecordingInitializer(theta=1.25)
-  engine = CatEngine(item_bank, initializer, RandomSelector(), NumericalSearchEstimator(), MaxLengthStopper(5))
+  engine = CatEngine(item_bank, initializer, RandomSelector(), MLEstimator(), MaxLengthStopper(5))
   rng = np.random.default_rng(123)
 
   session = engine.start(rng=rng)
@@ -897,7 +897,7 @@ def test_a_session_records_the_estimate_the_estimator_returns_for_each_step(item
   the session or the estimator's lifetime, or another theta or SE than the estimator's. The first answer alone takes
   Dodd's step, which evaluates nothing; every later step searches, so its count is not 0.
   """
-  estimator = NumericalSearchEstimator()
+  estimator = MLEstimator()
   session = _scripted_session(item_bank, MaxInfoSelector(), estimator)
   items, responses, estimates = session.administered_items, session.responses, session.estimates
 
@@ -920,7 +920,7 @@ def test_mei_look_ahead_adds_nothing_to_the_recorded_estimates(item_bank: ItemBa
   estimates add to the evaluation counts the session records, as they did to the estimator's shared counters, or
   change the recorded estimates.
   """
-  estimator = NumericalSearchEstimator()
+  estimator = MLEstimator()
   mei = _scripted_session(item_bank, MEISelector(estimator=estimator), estimator)
 
   replay = _scripted_session(item_bank, LinearSelector(list(mei.administered_items)), estimator)

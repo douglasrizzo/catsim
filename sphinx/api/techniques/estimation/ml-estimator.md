@@ -1,12 +1,12 @@
-# Numerical Search Estimator (MLE)
+# Maximum Likelihood Estimator
 
-:Class: {py:class}`catsim.estimation.NumericalSearchEstimator`
+:Class: {py:class}`catsim.estimation.MLEstimator`
 :Sources: {cite:t}`Birnbaum1968`; {cite:t}`Lord1980`; {cite:t}`Dod90`
 
 ## Motivation
 
-The numerical-search estimator is the package's frequentist maximum-likelihood
-ability estimator. Given administered items and observed binary responses, it
+The maximum likelihood (ML) estimator is the package's frequentist ability
+estimator. Given administered items and observed binary responses, it
 finds the ability value that maximizes the item-response-theory log-likelihood.
 
 It searches the ability scale for the highest maximum of the likelihood,
@@ -173,7 +173,7 @@ places, which the parity tests keep as expected failures:
 ## API Reference
 
 ```{eval-rst}
-.. autoclass:: catsim.estimation.NumericalSearchEstimator
+.. autoclass:: catsim.estimation.MLEstimator
    :members:
    :show-inheritance:
 ```

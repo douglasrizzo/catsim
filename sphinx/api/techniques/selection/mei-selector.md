@@ -66,7 +66,7 @@ selection.
      - Default
      - Description
    * - ``estimator``
-     - ``NumericalSearchEstimator()``
+     - ``MLEstimator()``
      - Estimator used to compute the hypothetical one-step-ahead ability updates. Any estimator can be
        passed; EAP, MAP or WLE avoid the limitation described below. It may be the engine's own
        estimator: the selector reads only ``.theta`` from its look-ahead estimates, and the session

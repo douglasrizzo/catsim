@@ -4529,7 +4529,7 @@
         }
       ]
     },
-    "Linear(10 items)|NumericalSearch|MaxLength(15)": {
+    "Linear(10 items)|ML|MaxLength(15)": {
       "bias": null,
       "exposure_counts": [
         0,
@@ -7185,7 +7185,7 @@
         }
       ]
     },
-    "MaxInfoBBlock(10, 5)|NumericalSearch|MaxLength(10)": {
+    "MaxInfoBBlock(10, 5)|ML|MaxLength(10)": {
       "bias": null,
       "exposure_counts": [
         7,
@@ -10987,7 +10987,7 @@
         }
       ]
     },
-    "MaxInfo|NumericalSearch|MaxLength(10)": {
+    "MaxInfo|ML|MaxLength(10)": {
       "bias": null,
       "exposure_counts": [
         0,
@@ -11771,7 +11771,7 @@
         }
       ]
     },
-    "MaxInfo|NumericalSearch|MaxLength(12)|missing responses": {
+    "MaxInfo|ML|MaxLength(12)|missing responses": {
       "bias": null,
       "exposure_counts": [
         4,
