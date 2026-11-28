@@ -139,7 +139,6 @@ administered items.
 ```
 
 :::{seealso}
-{doc}`/api/techniques/estimation/bayesian-infrastructure`,
 {doc}`/api/techniques/estimation/eap-estimator`
 :::
 

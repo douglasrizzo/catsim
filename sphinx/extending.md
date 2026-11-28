@@ -126,8 +126,8 @@ Look-ahead selectors, such as MEI, also call the estimator with responses the ex
 given, which is one more reason for it to keep nothing about a session. For the likelihood,
 `irtlib.irt.log_likelihood_function` returns the log-likelihood of each row of responses as a
 function of the ability, and `irtlib.irt.log_response_probabilities` returns
-$\log P_i(\theta)$ and $\log Q_i(\theta)$. A Bayesian estimator can build on the priors and the
-posterior of {doc}`/api/techniques/estimation/bayesian-infrastructure`.
+$\log P_i(\theta)$ and $\log Q_i(\theta)$. A Bayesian estimator can build on irtlib's quadrature
+grid, priors and posterior, in `irtlib.quadrature`.
 
 ## A Selector
 

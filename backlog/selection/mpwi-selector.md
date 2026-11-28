@@ -25,9 +25,8 @@ likelihood-weighted information whose advantage is that the prior can carry
 what is known about the examinee in advance, such as background variables
 related to ability.
 
-Once Bayesian infrastructure exists, this criterion is attractive because it
-builds on the same `posterior()` helper as EAP and the other posterior-based
-selectors. Choi and Swartz (2009, Equation 5 and Appendix) also prove that the
+This criterion builds on the same posterior over a grid, irtlib's `posterior`, as EAP and the
+other posterior-based selectors. Choi and Swartz (2009, Equation 5 and Appendix) also prove that the
 maximum expected posterior weighted information criterion, which averages
 posterior-weighted information over the possible responses to the candidate,
 always selects the same item as MPWI, so the simpler criterion gives the same
@@ -135,10 +134,10 @@ from typing import override
 
 import numpy
 from irtlib import ItemBank, irt
+from irtlib.quadrature import LogPrior, QuadratureGrid, normal_log_prior, posterior
 from irtlib.typing import FloatArray
 
 from ..context import StepContext
-from ..estimation import LogPrior, QuadratureGrid, normal_log_prior, posterior
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 
@@ -215,7 +214,9 @@ class MPWISelector(BaseSelector):
     """
     candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
     item_bank = context.item_bank
-    post = posterior(context.responses, item_bank.get_items(context.administered_items), self._grid, self._log_prior)
+    administered = item_bank.get_items(context.administered_items)
+    log_likelihood = irt.log_likelihood(self._grid.nodes, [context.responses], administered)
+    post = posterior(log_likelihood, self._grid, self._log_prior)[0]
     table = self._table
     if table is None or table[0] is not item_bank:
       table = self._table = (item_bank, _table_at_nodes(item_bank, self._grid.nodes, irt.information))
@@ -234,12 +235,10 @@ class MPWISelector(BaseSelector):
   reads one bank's table for another. MEPV computes its probability table through the same
   helper, with `irt.icc`, and caches it the same way.
 - The posterior comes from the context's responses at every call: estimators keep no per-session
-  posterior ({doc}`ADR-0007 </adr/0007-strategy-contracts>`), and `posterior()` is one
+  posterior ({doc}`ADR-0007 </adr/0007-strategy-contracts>`), and irtlib's `posterior` is one
   vectorized pass over the grid. With no responses it is the prior on the grid (Contract 2).
-- The selection and estimation layers do not import each other (`[tool.importlinter]` in
-  `pyproject.toml`), except where that contract's `ignore_imports` allows it. Its entry
-  `"catsim.selection.weighted_info -> catsim.estimation"`, which `MLWISelector` needs for the same
-  helpers, covers this selector, as long as it imports them from `catsim.estimation`.
+- The grid, the priors and the posterior are irtlib's, in `irtlib.quadrature` (ADR-0024), which
+  every layer may import, as `MLWISelector` does.
 - catR's 33 nodes on $[-4, 4]$ with the trapezoidal rule are a `QuadratureGrid` with trapezoid
   weights, for comparisons with catR; the normalizing constant does not change the ranking.
 

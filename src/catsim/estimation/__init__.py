@@ -2,31 +2,14 @@
 
 # Import concrete implementations to expose them
 from .base import BaseEstimator
-from .bayesian import (
-  EAPEstimator,
-  LogPrior,
-  MAPEstimator,
-  QuadratureGrid,
-  normal_log_prior,
-  posterior,
-  posterior_mean,
-  posterior_variance,
-  uniform_log_prior,
-)
+from .bayesian import EAPEstimator, MAPEstimator
 from .numerical import NumericalSearchEstimator
 from .wle import WarmLikelihoodEstimator
 
 __all__ = [
   "BaseEstimator",
   "EAPEstimator",
-  "LogPrior",
   "MAPEstimator",
   "NumericalSearchEstimator",
-  "QuadratureGrid",
   "WarmLikelihoodEstimator",
-  "normal_log_prior",
-  "posterior",
-  "posterior_mean",
-  "posterior_variance",
-  "uniform_log_prior",
 ]

@@ -139,10 +139,10 @@ from typing import override
 
 import numpy
 from irtlib import ItemBank, irt
+from irtlib.quadrature import LogPrior, QuadratureGrid, normal_log_prior, posterior
 from irtlib.typing import FloatArray
 
 from ..context import StepContext
-from ..estimation import LogPrior, QuadratureGrid, normal_log_prior, posterior
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 
@@ -230,7 +230,9 @@ class MEPVSelector(BaseSelector):
     """
     candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
     item_bank = context.item_bank
-    post = posterior(context.responses, item_bank.get_items(context.administered_items), self._grid, self._log_prior)
+    administered = item_bank.get_items(context.administered_items)
+    log_likelihood = irt.log_likelihood(self._grid.nodes, [context.responses], administered)
+    post = posterior(log_likelihood, self._grid, self._log_prior)[0]
     table = self._table
     if table is None or table[0] is not item_bank:
       table = self._table = (item_bank, _table_at_nodes(item_bank, self._grid.nodes, irt.icc))

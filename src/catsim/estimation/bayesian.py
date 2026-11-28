@@ -1,323 +1,30 @@
-"""Shared Bayesian helpers for ability estimation in CAT.
-
-For the full posterior specification and quadrature contract, see
-:doc:`/api/techniques/estimation/bayesian-infrastructure`.
-"""
+"""The Bayesian ability estimators, EAP and MAP, over irtlib's quadrature grid, priors and posterior."""
 
 from __future__ import annotations
 
 import math
-from collections.abc import Callable, Sequence
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, override
 
 import numpy
 from irtlib import irt
 from irtlib.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
-from irtlib.typing import FloatArray
+from irtlib.quadrature import LogPrior, QuadratureGrid, normal_log_prior, posterior, posterior_mean, posterior_variance
 from scipy.optimize import minimize_scalar
 
-from ..checks import _responses
 from ..context import Estimate
 from .base import BaseEstimator
 
 if TYPE_CHECKING:
+  from collections.abc import Callable
+
+  from irtlib.typing import FloatArray
+
   from ..context import StepContext
 
-LogPrior = Callable[[FloatArray], FloatArray]
-"""A log prior density: maps an array of abilities to their log-densities, elementwise."""
-
-_MIN_QUADRATURE_NODES = 2
 # Step of the central difference that gives a prior's curvature at the MAP estimate.
 _CURVATURE_STEP = 1e-4
 
-__all__ = [
-  "EAPEstimator",
-  "LogPrior",
-  "MAPEstimator",
-  "QuadratureGrid",
-  "normal_log_prior",
-  "posterior",
-  "posterior_mean",
-  "posterior_variance",
-  "uniform_log_prior",
-]
-
-
-def normal_log_prior(mean: float = 0.0, sd: float = 1.0) -> LogPrior:
-  r"""Return the log-density of a normal prior.
-
-  Parameters
-  ----------
-  mean : float, optional
-      Mean of the prior. Default is 0.
-  sd : float, optional
-      Standard deviation of the prior. Default is 1.
-
-  Returns
-  -------
-  LogPrior
-      A vectorized callable mapping ability values to their log-density under
-      :math:`\mathcal{N}(\text{mean}, \text{sd}^2)`. It pickles, equals any prior this function
-      returns for the same arguments, and its repr is the call that builds it.
-
-  Raises
-  ------
-  ValueError
-      If ``mean`` is not finite, or ``sd`` is not finite and positive.
-  """
-  if not math.isfinite(mean):
-    msg = f"mean must be finite, got {mean}"
-    raise ValueError(msg)
-  if not (math.isfinite(sd) and sd > 0):
-    msg = f"sd must be positive and finite, got {sd}"
-    raise ValueError(msg)
-  return _NormalLogPrior(float(mean), float(sd))
-
-
-# The priors are module-level classes rather than closures so that an estimator holding one pickles, as an engine sent
-# to a worker process must (ADR-0015).
-@dataclass(frozen=True, slots=True)
-class _NormalLogPrior:
-  """The normal log-density that :func:`normal_log_prior` returns."""
-
-  mean: float
-  sd: float
-
-  def __call__(self, theta: FloatArray) -> FloatArray:
-    """Return the log-density at each ability."""
-    var = self.sd * self.sd
-    return -0.5 * numpy.log(2.0 * numpy.pi * var) - 0.5 * (theta - self.mean) ** 2 / var
-
-  @override
-  def __repr__(self) -> str:
-    """Return the call to :func:`normal_log_prior` that builds this prior."""
-    return f"normal_log_prior(mean={self.mean!r}, sd={self.sd!r})"
-
-
-def uniform_log_prior(low: float = THETA_MIN_EXTENDED, high: float = THETA_MAX_EXTENDED) -> LogPrior:
-  r"""Return the log-density of a uniform prior on ``[low, high]``.
-
-  Parameters
-  ----------
-  low : float, optional
-      Lower bound of the prior's support. Default is ``THETA_MIN_EXTENDED``.
-  high : float, optional
-      Upper bound of the prior's support. Default is ``THETA_MAX_EXTENDED``.
-
-  Returns
-  -------
-  LogPrior
-      A vectorized callable returning :math:`-\log(\text{high} - \text{low})` inside the
-      bounds and :math:`-\infty` outside them. It pickles, equals any prior this function returns
-      for the same arguments, and its repr is the call that builds it.
-
-  Raises
-  ------
-  ValueError
-      If either bound is not finite or ``high <= low``.
-  """
-  if not (math.isfinite(low) and math.isfinite(high)):
-    msg = f"low and high must be finite, got low={low}, high={high}"
-    raise ValueError(msg)
-  if high <= low:
-    msg = f"high must be greater than low, got low={low}, high={high}"
-    raise ValueError(msg)
-  return _UniformLogPrior(float(low), float(high))
-
-
-@dataclass(frozen=True, slots=True)
-class _UniformLogPrior:
-  """The uniform log-density that :func:`uniform_log_prior` returns."""
-
-  low: float
-  high: float
-
-  def __call__(self, theta: FloatArray) -> FloatArray:
-    """Return the log-density at each ability: minus the log of the width inside the bounds, -inf outside."""
-    inside = (theta >= self.low) & (theta <= self.high)
-    return numpy.where(inside, float(numpy.log(1.0 / (self.high - self.low))), -numpy.inf)
-
-  @override
-  def __repr__(self) -> str:
-    """Return the call to :func:`uniform_log_prior` that builds this prior."""
-    return f"uniform_log_prior(low={self.low!r}, high={self.high!r})"
-
-
-# eq=False: generated equality and hashing would compare the arrays, which raises; a grid is compared by identity
-@dataclass(frozen=True, slots=True, eq=False)
-class QuadratureGrid:
-  r"""A fixed quadrature grid for posterior computations.
-
-  A node's posterior mass is proportional to its weight times the prior density and the likelihood
-  there, so the weights take part in the posterior itself; equal weights, as :meth:`uniform` builds,
-  cancel in the normalization. Two grids are equal only if they are the same object, and a grid can
-  be a set member or a dictionary key.
-
-  Parameters
-  ----------
-  nodes : numpy.ndarray
-      One-dimensional array of finite ability values.
-  weights : numpy.ndarray
-      One-dimensional array of finite, positive quadrature weights, one per node.
-
-  Raises
-  ------
-  ValueError
-      If the arrays are not one-dimensional, differ in length, have fewer than
-      two entries, or hold non-finite nodes or non-positive weights.
-  """
-
-  nodes: FloatArray
-  weights: FloatArray
-
-  def __post_init__(self) -> None:
-    """Validate the nodes and weights."""
-    if self.nodes.ndim != 1 or self.weights.ndim != 1:
-      msg = "nodes and weights must be one-dimensional"
-      raise ValueError(msg)
-    if self.nodes.shape != self.weights.shape:
-      msg = f"nodes and weights must have the same length, got {self.nodes.size} and {self.weights.size}"
-      raise ValueError(msg)
-    if self.nodes.size < _MIN_QUADRATURE_NODES:
-      msg = f"a grid needs at least {_MIN_QUADRATURE_NODES} nodes, got {self.nodes.size}"
-      raise ValueError(msg)
-    if not numpy.isfinite(self.nodes).all():
-      msg = "nodes must be finite"
-      raise ValueError(msg)
-    if not (numpy.isfinite(self.weights).all() and (self.weights > 0).all()):
-      msg = "weights must be finite and positive"
-      raise ValueError(msg)
-
-  @classmethod
-  def uniform(
-    cls,
-    n_nodes: int = 121,
-    low: float = THETA_MIN_EXTENDED,
-    high: float = THETA_MAX_EXTENDED,
-  ) -> QuadratureGrid:
-    """Create a grid of equally spaced nodes with equal weights spanning ``[low, high]``.
-
-    Parameters
-    ----------
-    n_nodes : int, optional
-        Number of nodes, including both bounds. Default is 121, a spacing of 0.1 on the
-        default bounds.
-    low : float, optional
-        First node. Default is ``THETA_MIN_EXTENDED``.
-    high : float, optional
-        Last node. Default is ``THETA_MAX_EXTENDED``.
-
-    Returns
-    -------
-    QuadratureGrid
-        The grid, with every weight equal to the node spacing.
-
-    Raises
-    ------
-    ValueError
-        If ``n_nodes < 2`` or ``high <= low``.
-    """
-    if n_nodes < _MIN_QUADRATURE_NODES:
-      msg = f"n_nodes must be at least {_MIN_QUADRATURE_NODES}, got {n_nodes}"
-      raise ValueError(msg)
-    if high <= low:
-      msg = f"high must be greater than low, got low={low}, high={high}"
-      raise ValueError(msg)
-
-    nodes = numpy.linspace(low, high, n_nodes, dtype=float)
-    weights = numpy.full(n_nodes, (high - low) / (n_nodes - 1), dtype=float)
-    return cls(nodes=nodes, weights=weights)
-
-
-def posterior(
-  responses: Sequence[bool],
-  items: FloatArray,
-  grid: QuadratureGrid,
-  log_prior: LogPrior,
-) -> FloatArray:
-  r"""Compute the normalized discrete posterior over ``grid.nodes``.
-
-  Each node's mass is proportional to its weight times the prior density and the likelihood there,
-  computed in log space and shifted by its maximum before exponentiating, so the likelihood of many
-  responses does not underflow.
-
-  Parameters
-  ----------
-  responses : Sequence[bool]
-      Responses to the administered items, in the same order as ``items``: each a Boolean or the
-      integer 0 or 1.
-  items : numpy.ndarray
-      Parameter matrix of the administered items, one row per item.
-  grid : QuadratureGrid
-      Nodes and weights of the discrete approximation.
-  log_prior : LogPrior
-      Vectorized log-density of the prior.
-
-  Returns
-  -------
-  numpy.ndarray
-      Posterior probabilities, one per node, summing to 1.
-
-  Raises
-  ------
-  ValueError
-      If the log-prior or log-likelihood is NaN or :math:`+\infty` at any node, if every node has
-      zero posterior mass, if ``responses`` and ``items`` differ in length, or if an integer response
-      is not 0 or 1.
-  TypeError
-      If a response is neither a Boolean nor an integer.
-  """
-  log_lik = irt.log_likelihood(grid.nodes, [_responses(responses, len(items))], items)[0]
-  log_post = log_prior(grid.nodes) + log_lik + numpy.log(grid.weights)
-  if numpy.isnan(log_post).any() or numpy.isposinf(log_post).any():
-    msg = "posterior is undefined: the log-prior or log-likelihood is NaN or +inf at some node"
-    raise ValueError(msg)
-  finite = numpy.isfinite(log_post)
-  if not finite.any():
-    msg = "posterior is undefined on the provided grid: every node has zero mass"
-    raise ValueError(msg)
-
-  unnorm = numpy.exp(log_post - float(numpy.max(log_post[finite])))
-  return unnorm / float(unnorm.sum())
-
-
-def posterior_mean(post: FloatArray, nodes: FloatArray) -> float:
-  r"""Return the mean of a discrete posterior.
-
-  Parameters
-  ----------
-  post : numpy.ndarray
-      Normalized posterior probabilities, as returned by :func:`posterior`.
-  nodes : numpy.ndarray
-      The nodes the probabilities refer to.
-
-  Returns
-  -------
-  float
-      The probability-weighted mean of the nodes.
-  """
-  return float(numpy.sum(nodes * post))
-
-
-def posterior_variance(post: FloatArray, nodes: FloatArray) -> float:
-  r"""Return the variance of a discrete posterior.
-
-  Parameters
-  ----------
-  post : numpy.ndarray
-      Normalized posterior probabilities, as returned by :func:`posterior`.
-  nodes : numpy.ndarray
-      The nodes the probabilities refer to.
-
-  Returns
-  -------
-  float
-      The probability-weighted mean of the squared distances between the nodes and
-      :func:`posterior_mean`.
-  """
-  mean = posterior_mean(post, nodes)
-  return float(numpy.sum(((nodes - mean) ** 2) * post))
+__all__ = ["EAPEstimator", "MAPEstimator"]
 
 
 class EAPEstimator(BaseEstimator):
@@ -325,15 +32,16 @@ class EAPEstimator(BaseEstimator):
 
   The mean of the ability's posterior over a quadrature grid, with the posterior standard deviation
   as its standard error; see :doc:`/api/techniques/estimation/eap-estimator`. The estimator keeps no
-  posterior between calls: :py:func:`posterior` computes a session's posterior when it is needed.
+  posterior between calls: it computes a session's posterior when it is needed.
 
   Parameters
   ----------
   grid : QuadratureGrid or None, optional
-      Quadrature grid over which the posterior is evaluated. Default is
-      ``QuadratureGrid.uniform()``.
+      irtlib's quadrature grid over which the posterior is evaluated. Default is
+      ``QuadratureGrid.uniform()``, 121 nodes on [-6, 6].
   log_prior : LogPrior or None, optional
-      Vectorized log-density of the prior. Default is ``normal_log_prior()``, the standard normal.
+      Vectorized log-density of the prior, such as irtlib's ``normal_log_prior`` or
+      ``uniform_log_prior``. Default is ``normal_log_prior()``, the standard normal.
   """
 
   def __init__(
@@ -369,13 +77,20 @@ class EAPEstimator(BaseEstimator):
     Estimate
         The posterior mean of :math:`\theta`, the posterior standard deviation and the number of
         grid nodes.
+
+    Raises
+    ------
+    ValueError
+        If the prior is NaN or :math:`+\infty` at a node of the grid, or the posterior has no mass at
+        any node: a prior whose support misses the grid, or responses whose likelihood is 0 at every
+        node.
     """
     items = context.item_bank.get_items(context.administered_items)
     nodes = self._grid.nodes
-    post = posterior(context.responses, items, self._grid, self._log_prior)
+    post = posterior(irt.log_likelihood(nodes, [context.responses], items), self._grid, self._log_prior)
     return Estimate(
-      theta=posterior_mean(post, nodes),
-      se=math.sqrt(posterior_variance(post, nodes)),
+      theta=float(posterior_mean(post, nodes)[0]),
+      se=math.sqrt(posterior_variance(post, nodes)[0]),
       evaluations=int(nodes.size),
     )
 
@@ -441,7 +156,7 @@ class MAPEstimator(BaseEstimator):
   def _standard_error(self, theta: float, items: FloatArray) -> float:
     r"""Return the standard error of a posterior mode, :math:`1/\sqrt{I(\hat\theta) - (\log p)''(\hat\theta)}`.
 
-    The prior's curvature is a central difference, so any :data:`LogPrior` works. Where it is not
+    The prior's curvature is a central difference, so any ``LogPrior`` works. Where it is not
     finite, as at the edge of a bounded prior's support, the prior adds nothing and the error is
     the Fisher one. Where the sum is not positive, the error is ``math.inf``.
 

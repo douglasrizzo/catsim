@@ -61,7 +61,19 @@ RETIRED_EXPORTS = {
 }
 # The item response theory that catsim takes from irtlib (ADR-0024): no catsim package exports these names, and no
 # catsim module of these names exists.
-IRTLIB_NAMES = {"IrtModel", "ItemBank", "irt", "typing"}
+IRTLIB_NAMES = {
+  "IrtModel",
+  "ItemBank",
+  "LogPrior",
+  "QuadratureGrid",
+  "irt",
+  "normal_log_prior",
+  "posterior",
+  "posterior_mean",
+  "posterior_variance",
+  "typing",
+  "uniform_log_prior",
+}
 IRTLIB_MODULES = {"catsim.irt", "catsim.item_bank", "catsim.typing"}
 # The members that the classes catsim keeps lost: the engine's methods that changed a session in place (ADR-0006); the
 # session's identifier and true ability, which the caller keeps beside it (ADR-0006), and its flags and counts, which

@@ -8,7 +8,7 @@ out here, never derived from catsim's reprs, so a changed repr leaves the data a
 The families:
 
 - ``estimation``: every estimator, with default and non-default settings, on fixed response patterns
-  of every length up to the bank's, constant patterns included; and the Bayesian helpers.
+  of every length up to the bank's, constant patterns included.
 - ``selection``: every selector's choices in fixed contexts, with a seeded generator, with and
   without exposure rates and an ``r_max`` cap, and with excluded items; and the selection helpers.
   Each case records the selector's order of preference: its choice, then its choice with that item
@@ -40,6 +40,11 @@ from typing import TYPE_CHECKING, Any
 
 import numpy
 from irtlib import ItemBank
+from irtlib.quadrature import (
+  QuadratureGrid,
+  normal_log_prior,
+  uniform_log_prior,
+)
 
 from catsim import NoItemsAvailableError, SimulationResult
 from catsim.estimation import (
@@ -47,13 +52,7 @@ from catsim.estimation import (
   EAPEstimator,
   MAPEstimator,
   NumericalSearchEstimator,
-  QuadratureGrid,
   WarmLikelihoodEstimator,
-  normal_log_prior,
-  posterior,
-  posterior_mean,
-  posterior_variance,
-  uniform_log_prior,
 )
 from catsim.exposure import BaseExposureControl
 from catsim.initialization import BaseInitializer, FixedPointInitializer, NormalInitializer, UniformInitializer
@@ -210,54 +209,15 @@ def _estimates(make: Callable[[], BaseEstimator], bank: ItemBank) -> dict[str, l
   return outputs
 
 
-PRIOR_NODES = numpy.array([-7.0, -6.0, -4.0, -3.3, -1.0, -0.25, 0.0, 0.8, 2.5, 4.0, 6.0, 7.0])
-
-
-def _posteriors(bank: ItemBank) -> dict[str, object]:
-  """Return each pattern's posterior over a 33-node grid under a standard normal prior, with its mean and variance."""
-  grid = QuadratureGrid.uniform(33, -4.0, 4.0)
-  items = bank.get_items(ITEM_ORDER)
-  outputs: dict[str, object] = {}
-  for name, pattern in PATTERNS.items():
-    for length in (1, 4, 12):
-      post = posterior(pattern[:length], items[:length], grid, normal_log_prior())
-      outputs[f"{name}|L{length:02d}"] = {
-        "posterior": post,
-        "posterior_mean": posterior_mean(post, grid.nodes),
-        "posterior_variance": posterior_variance(post, grid.nodes),
-      }
-  return outputs
-
-
-def _grid(grid: QuadratureGrid) -> dict[str, object]:
-  return {"nodes": grid.nodes, "weights": grid.weights}
-
-
 def _estimation_cases() -> dict[str, Case]:
-  cases: dict[str, Case] = {
+  return {
     f"{label}|{bank}": functools.partial(_estimates, make, BANKS[bank])
     for label, make in ESTIMATORS.items()
     for bank in MODEL_BANKS
   }
-  cases |= {
-    "QuadratureGrid.uniform()": lambda: _grid(QuadratureGrid.uniform()),
-    "QuadratureGrid.uniform(33, -4, 4)": lambda: _grid(QuadratureGrid.uniform(33, -4.0, 4.0)),
-    "QuadratureGrid.uniform(2, -1, 1)": lambda: _grid(QuadratureGrid.uniform(2, -1.0, 1.0)),
-    "normal_log_prior()": lambda: normal_log_prior()(PRIOR_NODES),
-    "normal_log_prior(0.5, 1.5)": lambda: normal_log_prior(0.5, 1.5)(PRIOR_NODES),
-    "uniform_log_prior()": lambda: uniform_log_prior()(PRIOR_NODES),
-    "uniform_log_prior(-2, 2)": lambda: uniform_log_prior(-2.0, 2.0)(PRIOR_NODES),
-  }
-  cases |= {f"posterior|{bank}": functools.partial(_posteriors, BANKS[bank]) for bank in MODEL_BANKS}
-  return cases
 
 
-ESTIMATION_EXEMPT = {
-  "BaseEstimator": "abstract",
-  "LogPrior": "a type alias",
-  "posterior_mean": "recorded with each posterior in the posterior cases",
-  "posterior_variance": "recorded with each posterior in the posterior cases",
-}
+ESTIMATION_EXEMPT = {"BaseEstimator": "abstract"}
 
 # The selection family.
 
@@ -370,8 +330,9 @@ def _selection_contexts(selector: str) -> dict[str, tuple[ItemBank, dict[str, An
       contexts[f"4pl|{name}|{rates}"] = (BANKS["4pl"], {**settings, "exposure_rates": EXPOSURE_RATES[rates]})
   # KL integrates its divergence over quadrature nodes in node order, so an item mirrored around the
   # estimate adds the same terms in reverse order, and whether the two tie depends on how the sums
-  # round (ADR-0017). That differs between platforms, so the tie bank leaves KL out.
-  if not selector.startswith("KLSelector"):
+  # round (ADR-0017). MEI with EAP does too, through each posterior's mean over the nodes. That
+  # differs between platforms, so the tie bank leaves both out.
+  if not selector.startswith(("KLSelector", "MEISelector(estimator=EAPEstimator())")):
     for name, settings in TIE_CONTEXTS.items():
       contexts[f"tie_bank|{name}"] = (TIE_BANK, settings)
   return contexts
@@ -815,11 +776,6 @@ FAMILIES: dict[str, dict[str, Case]] = {
 # The estimators whose estimate ends a numerical search, so that it is defined only to within the
 # search's tolerance (see tests/reference/records.py).
 SEARCHING_ESTIMATORS = (NumericalSearchEstimator, MAPEstimator, WarmLikelihoodEstimator)
-# Cases whose floats are logarithms of probabilities or densities.
-_LOG_SCALE = (
-  "normal_log_prior",
-  "uniform_log_prior",
-)
 
 
 @dataclass(frozen=True, slots=True)
@@ -829,9 +785,8 @@ class Comparison:
   Parameters
   ----------
   unit : float
-      1 for abilities, standard errors, the accuracy of estimates, log-probabilities and
-      log-densities, which can cancel to rounding noise near 0; 0 for every other float, which
-      compares relatively.
+      1 for abilities, standard errors and the accuracy of estimates, which can cancel to rounding
+      noise near 0; 0 for every other float, which compares relatively.
   searched : bool
       Whether the floats come from an estimator's numerical search, which is defined only to
       within its tolerance.
@@ -861,7 +816,7 @@ def comparison(family: str, name: str) -> Comparison:
     return Comparison(unit=1.0, searched=isinstance(ESTIMATORS[head](), SEARCHING_ESTIMATORS))
   if family == "whole_tests" and name in WHOLE_TESTS:
     return Comparison(unit=1.0, searched=isinstance(WHOLE_TESTS[name]()["estimator"], SEARCHING_ESTIMATORS))
-  on_scale = (family == "metrics" and head in {"bias", "mse", "rmse"}) or name.startswith(_LOG_SCALE)
+  on_scale = family == "metrics" and head in {"bias", "mse", "rmse"}
   return Comparison(unit=1.0 if on_scale else 0.0, searched=False)
 
 
