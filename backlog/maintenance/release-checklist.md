@@ -95,9 +95,11 @@ maintainer is satisfied with the package.
   one 128-bit seed from it.
 - Runs on recorded responses without randomization give the same items and estimates as before
   (the reference baseline in `tests/reference/`), to rounding: the estimators are irtlib's
-  (ADR-0024). `NumericalSearchEstimator` searches 201 points before refining the best, so its
-  estimates move within `tol`, it finds the highest maximum where Brent's search alone could stop
-  at a lower one, and its evaluation counts are 201 or more where they were about 11.
+  (ADR-0024). `NumericalSearchEstimator` and `MAPEstimator` under a normal prior search 101 or
+  more points on 3PL and 4PL items before refining the best by Newton's method, and on 1PL and 2PL
+  items Newton's method alone. Their estimates move within `tol`, ML finds the highest maximum
+  where Brent's search alone could stop at a lower one, and the evaluation counts are 7 to 10 on
+  the 1PL and 2PL and about 105 on the 3PL and 4PL, where ML's were about 11.
 - Simulations run slower than on 0.21's code at the same seed, for the estimators irtlib computes:
   measure them again against irtlib's release before writing a number here.
 

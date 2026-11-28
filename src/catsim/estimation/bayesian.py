@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, override
 
 from irtlib import ability
 from irtlib.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
-from irtlib.quadrature import LogPrior, QuadratureGrid, normal_log_prior
+from irtlib.quadrature import GridPrior, LogPrior, QuadratureGrid, normal_log_prior
 
 from .base import BaseEstimator, _session_estimate
 
@@ -17,11 +17,13 @@ __all__ = ["EAPEstimator", "MAPEstimator"]
 
 
 class EAPEstimator(BaseEstimator):
-  """Expected a Posteriori ability estimator.
+  r"""Expected a Posteriori ability estimator.
 
   The mean of the ability's posterior over a quadrature grid, with the posterior standard deviation
-  as its standard error; see :doc:`/api/techniques/estimation/eap-estimator`. The estimator keeps no
-  posterior between calls: it computes a session's posterior when it is needed.
+  as its standard error; see :doc:`/api/techniques/estimation/eap-estimator`. The estimator copies
+  the grid's nodes and evaluates the prior on them once, when it is built, so changing the grid's
+  arrays afterwards does not change it. It keeps no posterior between calls: it computes a session's
+  posterior when it is needed.
 
   Parameters
   ----------
@@ -31,6 +33,12 @@ class EAPEstimator(BaseEstimator):
   log_prior : LogPrior or None, optional
       Vectorized log-density of the prior, such as irtlib's ``normal_log_prior`` or
       ``uniform_log_prior``. Default is ``normal_log_prior()``, the standard normal.
+
+  Raises
+  ------
+  ValueError
+      If the prior is NaN or :math:`+\infty` at a node of the grid, or has no mass at any node: a
+      prior whose support misses the grid.
   """
 
   def __init__(
@@ -41,8 +49,10 @@ class EAPEstimator(BaseEstimator):
     # Kept as given for the repr, where a default shows as None: the default grid's repr would list every node.
     self._grid_argument = grid
     self._log_prior_argument = log_prior
-    self._grid = grid if grid is not None else QuadratureGrid.uniform()
-    self._log_prior = log_prior if log_prior is not None else normal_log_prior()
+    self._grid_prior = GridPrior(
+      grid if grid is not None else QuadratureGrid.uniform(),
+      log_prior if log_prior is not None else normal_log_prior(),
+    )
 
   @override
   def __repr__(self) -> str:
@@ -70,18 +80,16 @@ class EAPEstimator(BaseEstimator):
     Raises
     ------
     ValueError
-        If the prior is NaN or :math:`+\infty` at a node of the grid, or the posterior has no mass at
-        any node: a prior whose support misses the grid, or responses whose likelihood is 0 at every
-        node.
+        If the posterior has no mass at any node: responses whose likelihood is 0 at every node.
     """
     items = context.item_bank.get_items(context.administered_items)
-    estimates = ability.expected_a_posteriori([context.responses], items, grid=self._grid, log_prior=self._log_prior)
+    estimates = ability.expected_a_posteriori([context.responses], items, grid_prior=self._grid_prior)
     return _session_estimate(estimates)
 
   @property
   def grid(self) -> QuadratureGrid:
     """Return the quadrature grid used by the estimator."""
-    return self._grid
+    return self._grid_prior.grid
 
 
 class MAPEstimator(BaseEstimator):
@@ -129,8 +137,8 @@ class MAPEstimator(BaseEstimator):
 
     The standard error is the inverse square root of the test information plus the prior's negative
     curvature at the mode, which a central difference gives for any prior; inside a uniform prior's
-    support it is the Fisher standard error. The evaluation count is the number of search points
-    plus the refinement's posterior evaluations.
+    support it is the Fisher standard error. The evaluation count is the number of evaluations of
+    the log-posterior or of its derivatives.
 
     Parameters
     ----------
@@ -142,7 +150,7 @@ class MAPEstimator(BaseEstimator):
     -------
     Estimate
         The posterior mode of :math:`\theta` within the search bounds, its standard error and the
-        number of posterior evaluations.
+        number of evaluations of the log-posterior or of its derivatives.
 
     Raises
     ------

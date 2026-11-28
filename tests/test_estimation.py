@@ -388,14 +388,11 @@ class TestEAPEstimator:
       pytest.param(lambda nodes: np.full_like(nodes, np.nan), "NaN or \\+inf", id="nan_prior"),
     ],
   )
-  def test_estimate_rejects_a_prior_that_gives_no_posterior(self, log_prior: LogPrior, message: str) -> None:
-    """An estimator that returned NaN, or the prior's mean, for a prior with no mass on its grid would hand the
-    engine an estimate no posterior supports."""
-    item_bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0]]))
-    estimator = EAPEstimator(log_prior=log_prior)
-
+  def test_constructor_rejects_a_prior_that_gives_no_posterior(self, log_prior: LogPrior, message: str) -> None:
+    """An estimator that accepted a prior with no mass on its grid, or a NaN one, would fail only at a session's
+    first estimate, or hand the engine an estimate no posterior supports."""
     with pytest.raises(ValueError, match=message):
-      estimator.estimate(make_context(item_bank, (0,), (True,)))
+      EAPEstimator(log_prior=log_prior)
 
   @pytest.mark.parametrize(
     ("log_prior", "expected"),

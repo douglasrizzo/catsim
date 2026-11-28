@@ -5,7 +5,7 @@ from typing import override
 
 from irtlib import irt
 from irtlib.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
-from irtlib.quadrature import QuadratureGrid, posterior, uniform_log_prior
+from irtlib.quadrature import GridPrior, QuadratureGrid, uniform_log_prior
 from irtlib.typing import FloatArray, IntArray
 
 from ..context import StepContext
@@ -60,8 +60,7 @@ class MLWISelector(BaseSelector):
     super().__init__()
     self._n_nodes = n_nodes
     self._bounds = (float(bounds[0]), float(bounds[1]))
-    self._grid = QuadratureGrid.uniform(n_nodes, *self._bounds)
-    self._log_prior = uniform_log_prior(*self._bounds)
+    self._grid_prior = GridPrior(QuadratureGrid.uniform(n_nodes, *self._bounds), uniform_log_prior(*self._bounds))
     self._r_max = check_r_max(r_max)
 
   @override
@@ -89,9 +88,9 @@ class MLWISelector(BaseSelector):
     item_bank = context.item_bank
     # under a flat prior the posterior over the grid is the likelihood, normalized to sum to 1
     administered = item_bank.get_items(context.administered_items)
-    log_likelihood = irt.log_likelihood(self._grid.nodes, [context.responses], administered)
-    weights = posterior(log_likelihood, self._grid, self._log_prior)[0]
-    information = irt.information(self._grid.nodes, item_bank.get_items(candidates))
+    nodes = self._grid_prior.nodes
+    weights = self._grid_prior.posterior(irt.log_likelihood(nodes, [context.responses], administered))[0]
+    information = irt.information(nodes, item_bank.get_items(candidates))
     # a sum over the node axis adds each column in the same order, so identical items tie exactly
     # (ADR-0017); a matrix product may round columns differently
     return (weights[:, None] * information).sum(axis=0)

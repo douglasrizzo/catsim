@@ -63,7 +63,7 @@ class NumericalSearchEstimator(BaseEstimator):
   Parameters
   ----------
   tol : float, optional
-      Absolute tolerance of the search's refinement, in the ability scale. Default is 1e-6.
+      Absolute tolerance of the search, in the ability scale. Default is 1e-6.
   bounds : tuple[float, float], optional
       Range of the estimate. Default is ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``.
 
@@ -95,10 +95,9 @@ class NumericalSearchEstimator(BaseEstimator):
     r"""Return the maximum likelihood estimate, or Dodd's step from ``context.theta`` while every response is the same.
 
     The standard error is the inverse square root of the test information at the estimate, or
-    ``math.inf`` where the information is 0. The evaluation count is the number of abilities the
-    log-likelihood was evaluated at, the search's points and its refinement's; Dodd's step makes
-    none. With no administered item, the estimate is ``context.theta`` and ``context.se``,
-    unchanged, after no evaluation.
+    ``math.inf`` where the information is 0. The evaluation count is the number of evaluations of
+    the log-likelihood or of its derivatives; Dodd's step makes none. With no administered item,
+    the estimate is ``context.theta`` and ``context.se``, unchanged, after no evaluation.
 
     Parameters
     ----------
@@ -109,7 +108,7 @@ class NumericalSearchEstimator(BaseEstimator):
     -------
     Estimate
         The updated ability estimate :math:`\hat\theta`, inside ``bounds``, its standard error and
-        the number of log-likelihood evaluations.
+        the number of evaluations of the log-likelihood or of its derivatives.
     """
     responses = context.responses
     if not responses:

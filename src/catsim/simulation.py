@@ -1023,8 +1023,8 @@ class SimulationResult:
         - ``response`` (bool): the examinee's response;
         - ``theta`` (float): the ability estimate after the response;
         - ``se`` (float): its standard error;
-        - ``evaluations`` (float): how many times the estimator evaluated its objective for that
-          estimate, NaN where the estimator gave no count (:class:`~catsim.Estimate`);
+        - ``evaluations`` (float): how many times the estimator evaluated its objective, or its
+          derivatives, for that estimate, NaN where the estimator gave no count (:class:`~catsim.Estimate`);
         - ``true_theta`` (float): the examinee's true ability, a column only when the result has
           true abilities.
 
