@@ -13,13 +13,14 @@ from typing import TYPE_CHECKING, override
 
 import numpy as np
 import pytest
+from irtlib import ItemBank
+from irtlib.typing import FloatArray
 
-from catsim import CatEngine, ItemBank, StepContext, simulate
+from catsim import CatEngine, StepContext, simulate
 from catsim.estimation import EAPEstimator, MAPEstimator
 from catsim.initialization import FixedPointInitializer, UniformInitializer
 from catsim.selection import BaseSelector, MaxInfoSelector, MEISelector, ProgressiveSelector
 from catsim.stopping import MaxLengthStopper
-from catsim.typing import FloatArray
 
 if TYPE_CHECKING:
   from collections.abc import Iterator
@@ -250,7 +251,8 @@ def test_a_class_defined_in_an_interactive_session_raises_before_any_part_runs()
   """
   code = textwrap.dedent(
     """
-    from catsim import CatEngine, ItemBank, simulate
+    from catsim import CatEngine, simulate
+    from irtlib import ItemBank
     from catsim.estimation import EAPEstimator
     from catsim.initialization import FixedPointInitializer
     from catsim.selection import MaxInfoSelector

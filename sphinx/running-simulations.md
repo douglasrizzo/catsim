@@ -20,24 +20,25 @@ A test is an item bank and four strategies: an *initializer* gives the first abi
 
     import numpy
 
-    from catsim import CatEngine, ItemBank, simulate
+    from catsim import CatEngine, simulate
     from catsim.estimation import EAPEstimator
     from catsim.initialization import FixedPointInitializer
     from catsim.selection import MaxInfoSelector
     from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
+    from irtlib import ItemBank
 
     item_bank = ItemBank.generate(300, "3PL", rng=1)
     stopper = StopRule(StandardErrorStopper(0.35), MaxLengthStopper(30))
     engine = CatEngine(item_bank, FixedPointInitializer(0.0), MaxInfoSelector(), EAPEstimator(), stopper)
 ```
 
-{py:meth}`ItemBank.generate <catsim.ItemBank.generate>` draws 300 items of the three-parameter
+`ItemBank.generate` draws 300 items of the three-parameter
 logistic model, and its seed gives the same bank every time. A calibrated bank comes from a CSV
 file, `ItemBank.from_csv("items.csv")`, with the columns `a`, `b`, `c` and `d` and an optional
 `name` column, or from an array of parameters, `ItemBank(items, names=...)`. Every item has a name,
 generated as `item_000` to `item_299` when none is given, and `item_bank.to_csv("items.csv")` saves
-a bank, names included, to repeat or share a study. {py:class}`~catsim.ItemBank` gives the file
-format.
+a bank, names included, to repeat or share a study. The bank is irtlib's `ItemBank`, whose docstring
+gives the file format.
 
 Each strategy is a choice of method. The technique pages define each method and say when to choose
 it: {doc}`initializers </api/techniques/initialization/index>`,
@@ -66,7 +67,7 @@ otherwise give them every item in the bank.
 never draws the abilities itself: draw them with a generator of your own, as above, so that the
 same population can be passed to every engine you compare. Each examinee answers an item correctly
 with the probability that the item's characteristic curve gives at their true ability,
-$P_i(\theta)$ ({py:func}`catsim.irt.icc`), and on the same seed answers it the same way whichever
+$P_i(\theta)$ (`irtlib.irt.icc`), and on the same seed answers it the same way whichever
 engine gives it, and whenever.
 
 `rng` seeds every random draw of the run, so the same seed and the same true abilities give the

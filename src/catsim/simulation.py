@@ -12,11 +12,11 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, NamedTuple, cast, override
 
 import numpy
+from irtlib import ItemBank
 
 from . import metrics
 from .checks import _named
 from .engine import CatEngine
-from .item_bank import ItemBank
 from .metrics import Metric
 from .session import Session
 from .workers import _payload, _run_on_workers
@@ -25,8 +25,7 @@ if TYPE_CHECKING:
   from collections.abc import Callable, Iterable, Iterator, Sequence
 
   import numpy.typing as npt
-
-  from .typing import FloatArray, IntArray
+  from irtlib.typing import FloatArray, IntArray
 
 
 class _Stream(enum.IntEnum):
@@ -158,7 +157,8 @@ def simulate(  # noqa: PLR0913 - the engine, two ways to give examinees, the see
   Generated examinees, drawn from a standard normal population:
 
   >>> import numpy
-  >>> from catsim import CatEngine, ItemBank, simulate
+  >>> from catsim import CatEngine, simulate
+  >>> from irtlib import ItemBank
   >>> from catsim.estimation import EAPEstimator
   >>> from catsim.initialization import FixedPointInitializer
   >>> from catsim.selection import MaxInfoSelector
@@ -903,7 +903,7 @@ class SimulationResult:
   Raises
   ------
   TypeError
-      If ``item_bank`` is not an :class:`~catsim.ItemBank`, ``duration`` is not a number, a session
+      If ``item_bank`` is not an ``irtlib.ItemBank``, ``duration`` is not a number, a session
       is not a :class:`~catsim.Session`, the proposal counts are not integers, or ``parts`` is not
       an integer.
   ValueError
@@ -915,7 +915,8 @@ class SimulationResult:
   Examples
   --------
   >>> import numpy
-  >>> from catsim import CatEngine, ItemBank, simulate
+  >>> from catsim import CatEngine, simulate
+  >>> from irtlib import ItemBank
   >>> from catsim.estimation import EAPEstimator
   >>> from catsim.initialization import FixedPointInitializer
   >>> from catsim.selection import MaxInfoSelector

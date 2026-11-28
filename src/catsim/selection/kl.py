@@ -4,10 +4,10 @@ import functools
 from typing import override
 
 import numpy
+from irtlib import irt
+from irtlib.typing import FloatArray
 
-from .. import irt
 from ..context import StepContext
-from ..typing import FloatArray
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 # The integrand's complex singularities lie about pi / a from the real axis, so the Gauss-Legendre

@@ -6,8 +6,8 @@ import math
 
 import numpy as np
 import pytest
+from irtlib import ItemBank
 
-from catsim import ItemBank
 from catsim.initialization import BaseInitializer, FixedPointInitializer, NormalInitializer, UniformInitializer
 
 NAN = float("nan")

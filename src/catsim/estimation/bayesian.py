@@ -12,12 +12,13 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, override
 
 import numpy
+from irtlib import irt
+from irtlib.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
+from irtlib.typing import FloatArray
 from scipy.optimize import minimize_scalar
 
-from .. import irt
+from ..checks import _responses
 from ..context import Estimate
-from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
-from ..typing import FloatArray
 from .base import BaseEstimator
 
 if TYPE_CHECKING:
@@ -267,7 +268,7 @@ def posterior(
   TypeError
       If a response is neither a Boolean nor an integer.
   """
-  log_lik = irt.log_likelihood(grid.nodes, responses, items)
+  log_lik = irt.log_likelihood(grid.nodes, [_responses(responses, len(items))], items)[0]
   log_post = log_prior(grid.nodes) + log_lik + numpy.log(grid.weights)
   if numpy.isnan(log_post).any() or numpy.isposinf(log_post).any():
     msg = "posterior is undefined: the log-prior or log-likelihood is NaN or +inf at some node"
@@ -489,7 +490,11 @@ class MAPEstimator(BaseEstimator):
         If the log-posterior has no finite maximum within the search bounds.
     """
     items = context.item_bank.get_items(context.administered_items)
-    log_likelihood = irt.log_likelihood_function(context.responses, items)
+    examinee_log_likelihood = irt.log_likelihood_function([context.responses], items)
+
+    def log_likelihood(theta: float | FloatArray) -> FloatArray:
+      return examinee_log_likelihood(theta)[0]
+
     nodes = numpy.linspace(self._bounds[0], self._bounds[1], _MODE_SEARCH_POINTS)
     log_post = log_likelihood(nodes) + self._log_prior(nodes)
     peak = numpy.max(log_post)

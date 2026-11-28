@@ -64,12 +64,13 @@ estimator puts that examinee at a finite ability.
     :caption: The likelihood of two patterns of five responses, relative to its maximum. The dashed line in each curve's colour marks its EAP estimate; the black lines mark the other estimators' estimates after the five correct responses.
 
     import matplotlib.pyplot as plt
-    from catsim import CatEngine, ItemBank, simulate
+    from catsim import CatEngine, simulate
     from catsim.estimation import EAPEstimator, MAPEstimator, NumericalSearchEstimator, WarmLikelihoodEstimator
     from catsim.initialization import FixedPointInitializer
     from catsim.plot import likelihood
     from catsim.selection import LinearSelector
     from catsim.stopping import MaxLengthStopper
+    from irtlib import ItemBank
 
     item_bank = ItemBank.generate(5, "2PL", rng=4)
 

@@ -2,9 +2,9 @@
 
 import numpy as np
 import pytest
+from irtlib import ItemBank, irt
 from scipy.integrate import quad
 
-from catsim import ItemBank, irt
 from catsim.selection import IntervalInfoSelector, MaxInfoSelector, UrrySelector
 from tests.banks import two_pl_bank
 from tests.contexts import make_context

@@ -10,14 +10,15 @@ from typing import override
 
 import numpy as np
 import pytest
+from irtlib import ItemBank
+from irtlib.typing import FloatArray
 
-from catsim import CatEngine, Estimate, ItemBank, Session, SimulationResult, StepContext, StopReason, simulate
+from catsim import CatEngine, Estimate, Session, SimulationResult, StepContext, StopReason, simulate
 from catsim.estimation import EAPEstimator, NumericalSearchEstimator
 from catsim.exposure import BaseExposureControl
 from catsim.initialization import BaseInitializer, FixedPointInitializer, UniformInitializer
 from catsim.selection import BaseSelector, MaxInfoSelector, ProgressiveSelector, RandomesqueSelector, RandomSelector
 from catsim.stopping import BaseStopper, MaxLengthStopper, StandardErrorStopper, StopRule
-from catsim.typing import FloatArray
 
 
 class FirstRemainingSelector(BaseSelector):

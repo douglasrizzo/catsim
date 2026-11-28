@@ -23,8 +23,9 @@ acceleration of the progressive schedule (ADR-0019).
   - one documented command regenerates the files, when the cases change or the pinned catR version
     moves. It needs R and catR.
 - Agreement is checked at three levels:
-  1. single computations (probabilities, information, each estimator on fixed response patterns,
-     each selector's scores and choice in a fixed context, stopping decisions, initial values):
+  1. single computations (each estimator on fixed response patterns, each selector's scores and
+     choice in a fixed context, stopping decisions, initial values; the probabilities and the
+     information are irtlib's, and its parity tests check them against catR, ADR-0024):
      closed forms to a relative $10^{-10}$, iterative estimators within the sum of the two
      packages' tolerances, since their errors can point in opposite directions;
   2. whole tests on recorded responses, with no randomization: the same items in the same order,

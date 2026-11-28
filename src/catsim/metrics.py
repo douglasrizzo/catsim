@@ -19,13 +19,11 @@ import math
 from typing import TYPE_CHECKING, NamedTuple
 
 import numpy
-
-from .typing import FloatArray
+from irtlib.typing import FloatArray
 
 if TYPE_CHECKING:
   import numpy.typing as npt
-
-  from .typing import IntArray
+  from irtlib.typing import IntArray
 
 
 class Metric[T: (float, FloatArray)](NamedTuple):

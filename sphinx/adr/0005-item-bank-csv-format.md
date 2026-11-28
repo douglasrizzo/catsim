@@ -2,46 +2,24 @@
 
 ## Status
 
-Accepted 2026-11-25
+Accepted 2026-11-25; superseded 2026-11-27 by irtlib's ADR-0009, the item bank format
 
 ## Context
 
-An item bank could only be built from a NumPy matrix, so every study began by parsing its bank
-file by hand, and a generated bank could not be saved to repeat or share a study. Researchers asked
-to load a bank from a CSV file.
+catsim's item bank read and wrote one CSV format: a header row, the parameter columns `a` to `d` by
+name with the defaults of ADR-0003 for the missing ones, an optional name column, and nothing else.
+The item bank is irtlib's (ADR-0024), and so is its file format.
 
 ## Decision
 
-- `ItemBank.from_csv(path)` reads a bank, and `bank.to_csv(path)` writes one, in one format:
-  - comma-separated, with a dot as the decimal mark;
-  - a header row, which is required;
-  - the parameter columns named `a`, `b`, `c` and `d`, in any order. `b` is required; a missing `a`
-    is 1, a missing `c` is 0 and a missing `d` is 1, the rule of ADR-0003 applied by column name;
-  - an optional name column, headed `name` or with an empty header, the header R's `write.csv`
-    gives row names. Without it, names are generated (ADR-0004).
-- Any other column is an error that names it.
-- `to_csv` writes the name column and the four parameter columns, with each number written so that
-  it reads back exactly, so `ItemBank.from_csv(path)` gives back the bank that wrote it.
-- The reader uses Python's `csv` module, and the bank validates what it reads as it validates a
-  matrix.
+Item banks are read and written by irtlib's `ItemBank.from_csv` and `ItemBank.to_csv`, in the
+format irtlib's ADR-0009 sets out. catsim has no reader or writer of its own.
 
 ## Consequences
 
-- A bank saved from R with `write.csv(bank)` loads with its names, when its columns are named `a` to
-  `d`.
-- A generated bank can be saved with a study and shared with the R scripts of the parity tests
-  (ADR-0020).
-- A misspelled column, `A` or `disc`, raises an error instead of silently falling back to a default.
-- Files in another layout, with other column names, other delimiters or a decimal comma, are read
-  with pandas or NumPy and passed as `ItemBank(matrix, names=...)`.
-- Reading a CSV file adds no dependency.
+- A bank file that a study saves loads in catsim and in irtlib alike, since there is one reader.
+- A change to the format is made, and recorded, in irtlib.
 
 ## Alternatives Considered
 
-- Columns by position, as in the matrix: a file with an extra or reordered column would load
-  silently wrong.
-- Ignoring unknown columns, so a file can carry other metadata: a misspelled parameter column would
-  be ignored too, and its parameter defaulted.
-- Options for the delimiter, the decimal mark and the column names: pandas already reads every
-  layout, and one format is what a saved study needs.
-- A reader built on pandas: a dependency for one file format (ADR-0021).
+- Keeping this record of the format beside irtlib's: two records of one decision drift.

@@ -179,11 +179,11 @@ import math
 from typing import override
 
 import numpy
+from irtlib import irt
+from irtlib.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
+from irtlib.typing import FloatArray
 
-from .. import irt
 from ..context import Estimate, StepContext
-from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
-from ..typing import FloatArray
 from .base import BaseEstimator
 
 _MIN_LOCAL_NODES = 5
@@ -205,7 +205,7 @@ def _owen_update(
   """
   nodes = numpy.linspace(mu - half_width * sigma, mu + half_width * sigma, n_nodes)
   # log_likelihood works from the logit, so log(1 - P) stays exact where P rounds to 1
-  log_post = -0.5 * ((nodes - mu) / sigma) ** 2 + irt.log_likelihood(nodes, (response,), item[numpy.newaxis])
+  log_post = -0.5 * ((nodes - mu) / sigma) ** 2 + irt.log_likelihood(nodes, [(response,)], item[numpy.newaxis])[0]
   post = numpy.exp(log_post - log_post.max())
   post /= post.sum()
   new_mu = float(post @ nodes)

@@ -17,7 +17,7 @@ item that gives the most information at his estimated ability level".
 For each item $i$ that is neither administered nor excluded, the selector
 evaluates the item information $I_i(\hat{\theta})$ at the current estimate:
 the general item information of {cite:t}`Magis12{p. 4, Equation 4}`, which
-{py:func}`catsim.irt.information` computes under the 4PL. The selected item is
+`irtlib.irt.information` computes under the 4PL. The selected item is
 
 $$
 i^*

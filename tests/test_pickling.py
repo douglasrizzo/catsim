@@ -7,8 +7,9 @@ import pickle
 
 import numpy as np
 import pytest
+from irtlib import ItemBank
 
-from catsim import CatEngine, ItemBank, StepContext, simulate
+from catsim import CatEngine, StepContext, simulate
 from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,

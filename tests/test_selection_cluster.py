@@ -2,8 +2,8 @@
 
 import numpy as np
 import pytest
+from irtlib import ItemBank
 
-from catsim import ItemBank
 from catsim.selection import ClusterSelector
 from tests.banks import two_pl_bank
 from tests.contexts import make_context

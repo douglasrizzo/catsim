@@ -5,8 +5,7 @@ from __future__ import annotations
 from typing import override
 
 import numpy as np
-
-from catsim.typing import FloatArray, IntArray
+from irtlib.typing import FloatArray, IntArray
 
 
 class DeterministicRNG(np.random.Generator):

@@ -7,8 +7,9 @@ from typing import override
 
 import numpy as np
 import pytest
+from irtlib import ItemBank
 
-from catsim import CatEngine, Estimate, ItemBank, SimulationResult, StepContext, StopReason, simulate
+from catsim import CatEngine, Estimate, SimulationResult, StepContext, StopReason, simulate
 from catsim.estimation import BaseEstimator, EAPEstimator, MAPEstimator, NumericalSearchEstimator
 from catsim.initialization import UniformInitializer
 from catsim.selection import (

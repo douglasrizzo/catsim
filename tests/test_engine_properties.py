@@ -7,8 +7,9 @@ from typing import TYPE_CHECKING
 
 from hypothesis import assume, given, settings
 from hypothesis import strategies as st
+from irtlib import ItemBank
 
-from catsim import CatEngine, Estimate, ItemBank, Session
+from catsim import CatEngine, Estimate, Session
 from catsim.estimation import NumericalSearchEstimator
 from catsim.initialization import FixedPointInitializer
 from catsim.selection import MaxInfoSelector

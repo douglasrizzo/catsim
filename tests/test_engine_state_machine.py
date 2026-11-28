@@ -9,8 +9,9 @@ import numpy as np
 from hypothesis import settings
 from hypothesis import strategies as st
 from hypothesis.stateful import RuleBasedStateMachine, initialize, invariant, rule, run_state_machine_as_test
+from irtlib import ItemBank
 
-from catsim import CatEngine, Estimate, ItemBank, NoItemsAvailableError, Session, StepContext, StopReason
+from catsim import CatEngine, Estimate, NoItemsAvailableError, Session, StepContext, StopReason
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.exposure import BaseExposureControl
 from catsim.initialization import FixedPointInitializer

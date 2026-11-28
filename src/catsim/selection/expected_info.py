@@ -4,8 +4,8 @@ import dataclasses
 from typing import override
 
 import numpy
+from irtlib import irt
 
-from .. import irt
 from ..context import StepContext
 from ..estimation.base import BaseEstimator
 from ..estimation.numerical import NumericalSearchEstimator

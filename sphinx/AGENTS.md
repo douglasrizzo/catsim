@@ -66,9 +66,9 @@ citation, not a mention: cite it like any other source.
   the call contract and links the page: "The root of Warm's modified score equation, which removes
   the MLE's first-order bias; see the WLE page."
 - A **quantity's** formula (the item characteristic curve, information, the log-likelihood, test
-  information, the standard error) lives in the docstring of its `catsim.irt` function. Those
-  functions have no technique page, and their return value is the formula. Technique pages refer to
-  the function and do not re-derive the quantity.
+  information, the standard error) lives in the docstring of its `irtlib.irt` function, in irtlib
+  (ADR-0024). catsim has no page for those functions. Technique pages refer to the function by name
+  and do not re-derive the quantity.
 - The introduction shows $P(\theta)$ and $I(\theta)$ to teach the concepts. It is not a second
   reference.
 - No formula appears twice on one rendered page. A technique page renders its class's docstring
@@ -104,7 +104,7 @@ do not re-explain it. The map names ADRs by topic.
 | A test step by step: the `start`/`select`/`answer` loop, stop reasons | "Embedding catsim" guide | the step-by-step notebook |
 | What catsim checks in its inputs, and what the application owns (sessions, the item shown, exposure counts, concurrency) | "Embedding catsim" guide | the explicit-inputs and input-checking ADRs for why |
 | Seeds, each examinee's streams, parts and workers | "Reproducibility" guide | the random-numbers and parallel-runs ADRs for why |
-| Item names; reading and writing a bank as CSV | `ItemBank` docstring | "Running simulations" |
+| Item names; reading and writing a bank as CSV | irtlib's `ItemBank` docstring | "Running simulations" |
 | Custom strategies: `StepContext`, `Estimate`, the base classes and their helpers | "Extending catsim" guide | the custom-strategies notebook |
 | How a simulation counts exposure rates (their denominator) | `simulate` docstring | the exposure-rates ADR for why; "Embedding catsim" for the rates an application passes |
 | A method's definition, parameters and behaviour | its technique page | its docstring (one link) |
@@ -113,7 +113,7 @@ do not re-explain it. The map names ADRs by topic.
 | Estimates within $[-6, 6]$; all-correct and all-incorrect patterns | estimation index page | the ability-scale ADR for why |
 | Combining stoppers with `StopRule` | stopping index page | each stopper's page |
 | Tie-breaking and exposure control in selection | selection index page | the tie-breaking ADR for why |
-| A quantity's formula | its `catsim.irt` function's docstring | technique pages |
+| A quantity's formula | its `irtlib.irt` function's docstring, in irtlib | technique pages |
 | A metric's formula (bias, MSE, RMSE, overlap rate) | the metric function's docstring | "Running simulations" |
 | Planned methods, and all other planned work | its card in `backlog/` | the backlog's generated index |
 | How to contribute; the gate; the release process | `CONTRIBUTING.md` | |
@@ -216,7 +216,7 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
   - test specifications ("any correct implementation must..."): properties only an implementation
     sees ("keeps no per-session state", "the evaluation count is the grid's node count") go to
     docstrings and tests;
-  - a quantity's formula (refer to its `catsim.irt` function);
+  - a quantity's formula (refer to its `irtlib.irt` function);
   - history.
 - **References:** generated from `sphinx/references.bib`, never typed on the page.
   - Cite with `` {cite:t}`key{p. N}` `` in a sentence and `` {cite:p}`key{p. N}` `` in parentheses,

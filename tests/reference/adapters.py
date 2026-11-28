@@ -1,7 +1,7 @@
 """The one place where the reference cases call catsim's step, session, simulation and metrics API.
 
-The cases call catsim's computations directly where their calling convention is stable: the
-functions of ``catsim.irt``, the item bank, and each strategy given a ``StepContext``. Everything
+The cases call catsim's computations directly where their calling convention is stable: the item
+bank and each strategy given a ``StepContext``. Everything
 whose calling convention the rescoping changes goes through this module instead: building step
 contexts, building an engine and running whole tests, the exposure control the whole tests use, and
 the metric functions. A later item that changes one of those rewrites the functions here, keeping
@@ -28,13 +28,13 @@ if TYPE_CHECKING:
 
   import numpy
   import numpy.typing as npt
+  from irtlib import ItemBank
+  from irtlib.typing import FloatArray
 
-  from catsim import ItemBank
   from catsim.estimation import BaseEstimator
   from catsim.initialization import BaseInitializer
   from catsim.selection import BaseSelector
   from catsim.stopping import BaseStopper
-  from catsim.typing import FloatArray
 
 
 def step_context(

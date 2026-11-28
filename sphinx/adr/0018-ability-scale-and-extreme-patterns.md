@@ -25,7 +25,8 @@ range.
 
 The ability scale's default range is [-6, 6], six standard deviations either side of the mean of a
 standard normal population: wider than any plausible examinee or item bank, and narrow enough that
-every search ends.
+every search ends. Its bounds are irtlib's `THETA_MIN_EXTENDED` and `THETA_MAX_EXTENDED`
+(ADR-0024).
 
 Every estimator returns a finite estimate inside its bounds once an item has been administered,
 whatever the response pattern. `BaseEstimator.estimate` states this as the contract, and the engine

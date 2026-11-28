@@ -31,7 +31,7 @@ PACKAGES = (
   "catsim.stopping",
   "catsim.exposure",
 )
-MODULES = ("catsim.irt", "catsim.metrics", "catsim.plot", "catsim.typing")
+MODULES = ("catsim.metrics", "catsim.plot")
 
 
 # Spellings that differ only in how a module imports a name, rewritten to one form so that two

@@ -5,11 +5,11 @@ from abc import abstractmethod
 from typing import override
 
 import numpy
+from irtlib import ItemBank
+from irtlib.typing import FloatArray, IntArray
 
 from ..context import StepContext
 from ..exceptions import NoItemsAvailableError
-from ..item_bank import ItemBank
-from ..typing import FloatArray, IntArray
 from .base import BaseSelector, check_test_size, pick_best, remaining
 
 

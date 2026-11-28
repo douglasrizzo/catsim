@@ -25,13 +25,3 @@ def item_params_matrix(draw: DrawFn, *, min_items: int = 1, max_items: int = 18)
   n = draw(st.integers(min_value=min_items, max_value=max_items))
   rows = [draw(pl4_item_row()) for _ in range(n)]
   return np.asarray(rows, dtype=np.float64)
-
-
-@composite
-def scale_mapping(draw: DrawFn) -> tuple[float, float, float, float]:
-  """``theta_min, theta_max, scale_min, scale_max`` with strict ordering."""
-  theta_min = draw(st.floats(min_value=-5.0, max_value=2.0, allow_nan=False, allow_infinity=False))
-  theta_max = draw(st.floats(min_value=theta_min + 0.5, max_value=6.0, allow_nan=False, allow_infinity=False))
-  scale_min = draw(st.floats(min_value=-200.0, max_value=400.0, allow_nan=False, allow_infinity=False))
-  scale_max = draw(st.floats(min_value=scale_min + 1.0, max_value=900.0, allow_nan=False, allow_infinity=False))
-  return (theta_min, theta_max, scale_min, scale_max)

@@ -8,8 +8,9 @@ import numpy as np
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
+from irtlib import ItemBank
 
-from catsim import ItemBank, NoItemsAvailableError
+from catsim import NoItemsAvailableError
 from catsim.selection import BaseSelector, ClusterSelector
 from tests.conftest import HALF_BANK_SELECTORS, SELECTOR_FACTORIES
 from tests.contexts import make_context

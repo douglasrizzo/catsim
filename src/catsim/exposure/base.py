@@ -15,7 +15,8 @@ class BaseExposureControl(ABC):
   A control holds configuration only, never per-session state, and draws from ``context.rng``. This
   one administers each proposed item with probability one half:
 
-  >>> from catsim import CatEngine, ItemBank
+  >>> from catsim import CatEngine
+  >>> from irtlib import ItemBank
   >>> from catsim.estimation import EAPEstimator
   >>> from catsim.exposure import BaseExposureControl
   >>> from catsim.initialization import FixedPointInitializer

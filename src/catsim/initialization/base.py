@@ -3,8 +3,7 @@
 from abc import ABC, abstractmethod
 
 import numpy
-
-from ..item_bank import ItemBank
+from irtlib import ItemBank
 
 
 class BaseInitializer(ABC):

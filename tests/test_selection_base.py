@@ -6,8 +6,9 @@ from collections.abc import Callable
 
 import numpy as np
 import pytest
+from irtlib import ItemBank
 
-from catsim import ItemBank, NoItemsAvailableError, StepContext
+from catsim import NoItemsAvailableError, StepContext
 from catsim.estimation import NumericalSearchEstimator
 from catsim.selection import (
   AStratBBlockSelector,

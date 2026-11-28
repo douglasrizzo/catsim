@@ -150,9 +150,9 @@ from typing import override
 
 import numpy
 import numpy.typing as npt
+from irtlib.typing import FloatArray
 
 from ..context import StepContext
-from ..typing import FloatArray
 from .base import BaseExposureControl
 
 
@@ -306,8 +306,8 @@ def calibrate(
 - The calibration follows the first form of the update, from proposal rates, because the form
   with administration rates is undefined for an item that was proposed but never administered.
   The convergence check uses the expected exposure rate $K_i s_i$ of the same simulation.
-- The module imports only the layers below `exposure` (`catsim.context` and `catsim.typing`), as
-  the import-linter layers contract requires; `calibrate` takes the
+- The module imports only the layers below `exposure` (`catsim.context`) and irtlib, as the
+  import-linter layers contract requires; `calibrate` takes the
   simulation as a callable, since the strategy layers may not import `catsim.simulation`.
 - The acceptance draw uses the context's `rng`, the generator of the `select` call, which
   `simulate` gives each examinee's session (ADR-0013), and an item with $K_i = 1$ draws nothing.

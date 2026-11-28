@@ -5,7 +5,6 @@ import importlib.metadata
 from .context import Estimate, StepContext
 from .engine import CatEngine, Selection
 from .exceptions import ExcludedItemError, NoItemsAvailableError
-from .item_bank import IrtModel, ItemBank
 from .session import Session, StopReason
 from .simulation import SimulationResult, simulate
 
@@ -19,8 +18,6 @@ __all__ = [
   "CatEngine",
   "Estimate",
   "ExcludedItemError",
-  "IrtModel",
-  "ItemBank",
   "NoItemsAvailableError",
   "Selection",
   "Session",

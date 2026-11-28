@@ -5,10 +5,10 @@ from __future__ import annotations
 import numpy as np
 from hypothesis import assume, given, settings
 from hypothesis import strategies as st
+from irtlib import ItemBank, irt
+from irtlib.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 
-from catsim import ItemBank, irt
 from catsim.estimation import NumericalSearchEstimator
-from catsim.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from tests.contexts import make_context
 from tests.hypothesis_strategies import item_params_matrix
 
@@ -45,6 +45,5 @@ def test_estimate_is_a_likelihood_maximum_on_the_ability_scale(
   neighbours = np.clip([theta - 1e-3, theta + 1e-3], THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)
 
   assert THETA_MIN_EXTENDED <= theta <= THETA_MAX_EXTENDED
-  assert max(irt.log_likelihood(x, responses, items) for x in neighbours) <= (
-    irt.log_likelihood(theta, responses, items) + 1e-4
-  )
+  log_likelihood = irt.log_likelihood(np.append(neighbours, theta), [responses], items)[0]
+  assert max(log_likelihood[:2]) <= log_likelihood[2] + 1e-4

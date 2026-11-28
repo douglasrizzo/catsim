@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
-
-from catsim import ItemBank
+from irtlib import ItemBank
 
 
 def two_pl_bank(discriminations: list[float], difficulties: list[float]) -> ItemBank:

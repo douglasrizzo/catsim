@@ -11,7 +11,7 @@
 #
 # Each case script builds the cases of one JSON file beside it: the inputs, which the Python test
 # reads too, and catR's outputs, at the three levels of ADR-0020:
-# 1. single computations: irt.R, estimation.R, selection.R and stopping.R;
+# 1. single computations: estimation.R, selection.R and stopping.R;
 # 2. whole tests on recorded responses: whole_tests.R, on the banks of selection.R and
 #    simulations.R, which are sourced first;
 # 3. simulations of the randomized selection rules: simulations.R, which takes about two minutes.
@@ -60,13 +60,12 @@ stopifnot(has_pinned())
 suppressPackageStartupMessages(library(catR, lib.loc = lib))
 
 here <- script_dir()
-for (helper in c("json.R", "irt.R", "estimation.R", "selection.R", "stopping.R", "simulations.R", "whole_tests.R")) {
+for (helper in c("json.R", "estimation.R", "selection.R", "stopping.R", "simulations.R", "whole_tests.R")) {
   source(file.path(here, helper))
 }
 
 versions <- list(catr_version = CATR_VERSION, r_version = R.version.string)
 outputs <- list(
-  irt = irt_cases(),
   estimation = estimation_cases(),
   selection = selection_cases(),
   stopping = stopping_cases(),

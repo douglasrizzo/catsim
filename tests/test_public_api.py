@@ -3,6 +3,7 @@
 import ast
 import dataclasses
 import importlib
+import importlib.util
 import inspect
 import pkgutil
 import re
@@ -24,7 +25,7 @@ PACKAGES = [
   "catsim.exposure",
 ]
 # Top-level modules that are import paths of their own; catsim's other modules are internal.
-PUBLIC_MODULES = ["catsim.irt", "catsim.metrics", "catsim.plot", "catsim.typing"]
+PUBLIC_MODULES = ["catsim.metrics", "catsim.plot"]
 # Names that ADR-0023's list retired, each for the one its concept keeps; item_id is one of its rejected alternatives.
 # The rescoping retired the last four: a step result's selected_item_id (item), the metrics' actual and predicted
 # (true_thetas and thetas) and the engine's state (session).
@@ -58,6 +59,10 @@ RETIRED_EXPORTS = {
   "SimulatedResponseProvider",
   "SimulationRunner",
 }
+# The item response theory that catsim takes from irtlib (ADR-0024): no catsim package exports these names, and no
+# catsim module of these names exists.
+IRTLIB_NAMES = {"IrtModel", "ItemBank", "irt", "typing"}
+IRTLIB_MODULES = {"catsim.irt", "catsim.item_bank", "catsim.typing"}
 # The members that the classes catsim keeps lost: the engine's methods that changed a session in place (ADR-0006); the
 # session's identifier and true ability, which the caller keeps beside it (ADR-0006), and its flags and counts, which
 # stop_reason and its fields already give (ADR-0010); and the result's lists and aggregates of the sessions, which its
@@ -184,7 +189,7 @@ def test_every_public_definition_of_an_internal_module_is_exported(package_name:
 
 
 def test_the_tests_import_each_public_name_from_its_public_path() -> None:
-  """A test that imports ItemBank from ``catsim.item_bank`` breaks when that internal module is renamed.
+  """A test that imports MaxInfoSelector from ``catsim.selection.information`` breaks when that module is renamed.
 
   ADR-0023 lets catsim split, merge or rename its internal modules, so code outside catsim imports each name from its
   public path. A private name, which only its own tests reach, may come from its module.
@@ -207,7 +212,7 @@ def test_no_public_signature_takes_a_retired_name() -> None:
 
   ADR-0023 gives each concept one name; ``posterior`` took ``response_vector`` and ``ItemBank.test_information`` took
   ``item_indices`` where the rest of the API says ``responses`` and ``indices``. Only parameter names are checked, not
-  the functions' own names: ``irt.validate_response_vector`` keeps its name.
+  the functions' own names.
   """
   offenders = {
     f"{qualified}({parameter})"
@@ -262,3 +267,17 @@ def test_the_mutable_runtime_is_gone() -> None:
   members = {f"{cls.__name__}.{name}" for cls, names in RETIRED_MEMBERS.items() for name in names if hasattr(cls, name)}
 
   assert (exported, members) == (set(), set())
+
+
+def test_names_that_irtlib_holds_are_not_exported_by_catsim() -> None:
+  """A re-export such as ``catsim.ItemBank``, or a module such as ``catsim.irt``, gives an irtlib object a second import
+  path, which ADR-0024 and ADR-0023 rule out."""
+  exported = {
+    f"{package}.{name}"
+    for package in PACKAGES
+    for name in IRTLIB_NAMES
+    if hasattr(importlib.import_module(package), name)
+  }
+  modules = {name for name in IRTLIB_MODULES if importlib.util.find_spec(name) is not None}
+
+  assert (exported, modules) == (set(), set())

@@ -173,5 +173,7 @@ def test_searches_are_told_apart_from_closed_forms() -> None:
   assert cases.comparison("estimation", "EAPEstimator()|4pl") == cases.Comparison(unit=1.0, searched=False)
   assert cases.comparison("whole_tests", "KL|WLE|MaxLength(10)").searched
   assert not cases.comparison("whole_tests", "MEI(EAP)|EAP|MaxLength(6)").searched
-  assert cases.comparison("irt", "information|4pl") == cases.Comparison(unit=0.0, searched=False)
-  assert cases.comparison("irt", "log_likelihood|3pl").unit == 1.0
+  assert cases.comparison("selection", "ClusterSelector.sum_cluster_infos|theta=0.0") == cases.Comparison(
+    unit=0.0, searched=False
+  )
+  assert cases.comparison("estimation", "normal_log_prior(0.5, 1.5)").unit == 1.0

@@ -17,7 +17,6 @@ The folders follow catsim's modules:
 - `analysis/`: results, metrics and plots;
 - `estimation/`, `selection/`, `stopping/`, `exposure/` and `initialization/`;
 - `content/`: content-constrained CAT;
-- `item-bank/`;
 - `discovery/`: walkthroughs that find what catsim lacks;
 - `maintenance/`;
 - `scope/`: work outside the scope an ADR sets.
@@ -39,7 +38,7 @@ gives the better design (`AGENTS.md`).
 
 <!-- backlog-index:start -->
 
-49 cards: 27 ready, 6 needs-research, 9 needs-decision, 3 blocked, 4 parked.
+48 cards: 27 ready, 6 needs-research, 8 needs-decision, 3 blocked, 4 parked.
 
 ## Waiting for the maintainer
 
@@ -47,7 +46,6 @@ gives the better design (`AGENTS.md`).
 |---|---|---|
 | [Decide whether to reconsider the study layer that ADR-0016 ruled out](analysis/study-layer.md) | analysis | 2 |
 | [Build a live-testing package on catsim's public API](discovery/live-package.md) | discovery | 2 |
-| [Generate banks of a chosen shape, and document the scaling constant D where users look](item-bank/bank-generation.md) | item-bank | 2 |
 | [Save and load simulation results, and the cost of unpickling them](analysis/saving-results.md) | analysis | 3 |
 | [Give the worker tests a timeout, so a hang fails fast?](maintenance/worker-test-timeout.md) | maintenance | 3 |
 | [One annotation for responses across the package?](maintenance/responses-annotation.md) | maintenance | 3 |
@@ -77,7 +75,6 @@ gives the better design (`AGENTS.md`).
 | [Build a live-testing package on catsim's public API](discovery/live-package.md) | discovery | research | needs-decision | XL |  |  |
 | [Method-author walkthrough - implement a planned technique from its card](discovery/method-author-walkthrough.md) | discovery | research | ready | M |  |  |
 | [Sympson-Hetter Exposure Control](exposure/sympson-hetter.md) | exposure | technique | ready | M |  | Chang & Ying (1999) walkthrough |
-| [Generate banks of a chosen shape, and document the scaling constant D where users look](item-bank/bank-generation.md) | item-bank | decision | needs-decision | S |  | Wang & Vispoel (1998) walkthrough; Babcock & Weiss (2012) walkthrough; Chang & Ying (1999) walkthrough |
 | [Minimum Information in Bank Stopper](stopping/min-info-bank-stopper.md) | stopping | technique | ready | S |  | Babcock & Weiss (2012) walkthrough |
 
 ## Priority 3

@@ -10,11 +10,11 @@ import operator
 from abc import ABC, abstractmethod
 
 import numpy
+from irtlib.typing import FloatArray, IntArray
 from numpy.random import Generator
 
 from ..context import StepContext
 from ..exceptions import NoItemsAvailableError
-from ..typing import FloatArray, IntArray
 
 
 def remaining(context: StepContext) -> IntArray:

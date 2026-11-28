@@ -9,11 +9,12 @@ from itertools import pairwise, product
 
 import numpy as np
 import pytest
+from irtlib import ItemBank, irt
 from scipy.integrate import IntegrationWarning, quad
 from scipy.optimize import brentq, minimize_scalar
 from scipy.special import expit
 
-from catsim import Estimate, ItemBank, StepContext, irt
+from catsim import Estimate, StepContext
 from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,
@@ -125,7 +126,7 @@ class TestNumericalSearchEstimatorEstimate:
     administered_items = list(range(10))
     responses = [True, False] * 5
     reference = minimize_scalar(
-      lambda theta: -irt.log_likelihood(theta, responses, item_bank.get_items(administered_items)),
+      lambda theta: -irt.log_likelihood(theta, [responses], item_bank.get_items(administered_items))[0],
       bounds=(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED),
       method="bounded",
       options={"xatol": 1e-12},
@@ -166,7 +167,7 @@ class TestNumericalSearchEstimatorEstimate:
     administered_items = list(range(10))
     responses = [True, False] * 5
     reference = minimize_scalar(
-      lambda theta: -irt.log_likelihood(theta, responses, item_bank.get_items(administered_items)),
+      lambda theta: -irt.log_likelihood(theta, [responses], item_bank.get_items(administered_items))[0],
       bounds=(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED),
       method="bounded",
       options={"xatol": 1e-6},
@@ -553,11 +554,20 @@ class TestBayesianHelpers:
     with pytest.raises(ValueError, match="NaN or \\+inf"):
       posterior([], np.empty((0, 4)), grid, nan_prior)
 
+  @pytest.mark.parametrize("responses", [[1.0, 0.0], [math.nan, True]], ids=["floats", "nan"])
+  def test_posterior_rejects_responses_that_are_neither_booleans_nor_0_or_1(self, responses: list[float]) -> None:
+    """A float or NaN response read as an answer, or NaN read as a missing one, gives a posterior over other responses
+    than the session's (ADR-0009)."""
+    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0]])
+
+    with pytest.raises(TypeError, match=r"responses\[0\] is .*; responses must be bools or the integers 0 and 1"):
+      posterior(responses, items, QuadratureGrid.uniform(), normal_log_prior())  # ty: ignore[invalid-argument-type]
+
   def test_posterior_rejects_mismatched_responses_without_items(self) -> None:
     """Responses without matching items should raise, not silently return the prior."""
     grid = QuadratureGrid.uniform()
 
-    with pytest.raises(ValueError, match="there must be one response per item"):
+    with pytest.raises(ValueError, match="there must be one response per administered item"):
       posterior([True, False], np.empty((0, 4)), grid, normal_log_prior())
 
   def test_posterior_shifts_positive_after_correct_response(self) -> None:

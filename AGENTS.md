@@ -14,7 +14,7 @@ and simulation studies that compare them (ADR-0001). It builds on
 A live testing application can use its computations as its core, but catsim does not run, store or
 serve live tests. The architecture is centered on:
 
-- `ItemBank`, the immutable calibrated items, with their names (ADR-0003, ADR-0004)
+- `ItemBank`, irtlib's immutable calibrated items, with their names (ADR-0003, ADR-0004)
 - `CatEngine`, the immutable configuration of a test, whose step methods (`start`, `select`,
   `answer`) take a `Session` and return a new one (ADR-0006)
 - `Session`, an immutable value that the caller keeps
@@ -57,8 +57,8 @@ serve live tests. The architecture is centered on:
 - Prefer small, explicit changes over broad implicit behavior.
 - Preserve public API clarity over convenience wrappers that obscure state ownership.
 - Keep type annotations accurate; this repository uses `ty` as part of its quality gates.
-- Annotate NumPy arrays with the public aliases in `catsim.typing` (`FloatArray`, `IntArray`).
-  Ruff bans `numpy.typing.NDArray` elsewhere; for another dtype, add an alias there.
+- Annotate NumPy arrays with the aliases in `irtlib.typing` (`FloatArray`, `IntArray`, `BoolArray`).
+  Ruff bans `numpy.typing.NDArray`; another dtype gets an alias in irtlib.
 - A method that overrides a base-class method carries `@override`, from `typing`; ty's
   `missing-override-decorator` enforces it in `src/` and `tests/`.
 - Closed option sets are `StrEnum`s, like `IrtModel`; code that branches on one uses `match`, with

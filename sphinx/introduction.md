@@ -92,8 +92,8 @@ figure draws both curves for one item: the item is most informative near its dif
     :caption: Item characteristic and information curves for an item. The dot represents the point at which the item is most informative.
 
     import matplotlib.pyplot as plt
-    from catsim import ItemBank
     from catsim.plot import PlotType, item_curve
+    from irtlib import ItemBank
 
     item_bank = ItemBank.generate(1, rng=0)
     item_curve(0, item_bank, kind=PlotType.BOTH)
@@ -115,19 +115,19 @@ SE(\hat{\theta}) = \frac{1}{\sqrt{I(\hat{\theta})}}.
 $$
 
 Every item adds information, so the more items an examinee answers, the smaller the standard
-error. {py:mod}`catsim` computes these quantities with the functions of the {py:mod}`catsim.irt`
-module.
+error. These quantities come from [irtlib](https://github.com/douglasrizzo/irtlib), the item
+response theory package catsim builds on, in its `irtlib.irt` module.
 
 ### The Item Matrix
 
-In {py:mod}`catsim`, the items are a {py:class}`numpy.ndarray` with one row per item and one column
-per parameter, the *item matrix*. Its four columns hold $a$, $b$, $c$ and $d$, in this order. A
-matrix with one, two or three columns is read as $[b]$, $[a, b]$ or $[a, b, c]$, and the missing
-parameters take the values $a = 1$, $c = 0$ and $d = 1$. An {py:class}`~catsim.ItemBank` holds an
-item matrix, and {py:meth}`ItemBank.generate <catsim.ItemBank.generate>` draws one at random:
+In {py:mod}`catsim` and irtlib, the items are a {py:class}`numpy.ndarray` with one row per item and
+one column per parameter, the *item matrix*. Its four columns hold $a$, $b$, $c$ and $d$, in this
+order. A matrix with one, two or three columns is read as $[b]$, $[a, b]$ or $[a, b, c]$, and the missing
+parameters take the values $a = 1$, $c = 0$ and $d = 1$. An item bank, irtlib's `ItemBank`, holds
+an item matrix, and `ItemBank.generate` draws one at random:
 
 ```pycon
->>> from catsim import ItemBank
+>>> from irtlib import ItemBank
 >>> ItemBank.generate(5, "1PL")
 ItemBank(n_items=5, model=1PL)
 >>> ItemBank.generate(5, "2PL")
@@ -144,7 +144,7 @@ These examples draw five items under each logistic model. Whatever the model, th
 four columns. In the last example, the discrimination and the difficulty have a correlation of
 $0.5$, which simulations may need {cite:p}`Chang2001`. Each item also has a name, so that results
 can say which item is which; a calibrated bank and its names can be read from a CSV file
-({py:class}`~catsim.ItemBank`).
+(`ItemBank.from_csv`).
 
 ## Computerized Adaptive Tests
 
@@ -162,12 +162,13 @@ test's estimates come closer to the true abilities than the linear test's.
 
     import matplotlib.pyplot as plt
     import numpy
-    from catsim import CatEngine, ItemBank, simulate
+    from catsim import CatEngine, simulate
     from catsim.estimation import EAPEstimator
     from catsim.initialization import FixedPointInitializer
     from catsim.plot import metric_by_length
     from catsim.selection import LinearSelector, MaxInfoSelector
     from catsim.stopping import MaxLengthStopper
+    from irtlib import ItemBank
 
     item_bank = ItemBank.generate(200, rng=0)
     true_thetas = numpy.random.default_rng(1).normal(0, 1, 300)
@@ -249,7 +250,7 @@ given: `True` or 1 for a correct response, `False` or 0 for an incorrect one.
 ```
 
 Estimators fall into two groups. Maximum likelihood estimators return the ability at which the
-responses are most likely, the maximum of the *log-likelihood* ({py:func}`catsim.irt.log_likelihood`).
+responses are most likely, the maximum of the *log-likelihood* (`irtlib.irt.log_likelihood`).
 Bayesian estimators combine the likelihood with a prior distribution of the abilities in the
 population. Each estimator also gives the standard error of its estimate, by its own formula
 ({doc}`estimation techniques </api/techniques/estimation/index>`).
@@ -279,8 +280,8 @@ flowchart LR
     simulate -- returns --> result[SimulationResult]
 ```
 
-- **The item bank.** An {py:class}`~catsim.ItemBank` holds the calibrated items, their parameters
-  and their names, and never changes.
+- **The item bank.** An `ItemBank`, from irtlib, holds the calibrated items, their parameters and
+  their names, and never changes.
 - **The engine and the session.** A {py:class}`~catsim.CatEngine` holds an item bank and the
   strategies of a test. Its three steps follow the lifecycle above: `start` sets the initial
   estimate, `select` chooses the next item and `answer` records a response, updates the estimate
