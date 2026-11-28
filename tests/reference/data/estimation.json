@@ -6481,7 +6481,7 @@
         0.6888445825105329
       ]
     },
-    "NumericalSearchEstimator()|1pl": {
+    "MLEstimator()|1pl": {
       "L00": [
         0.3,
         Infinity
@@ -6643,7 +6643,7 @@
         0.6827884192695665
       ]
     },
-    "NumericalSearchEstimator()|2pl": {
+    "MLEstimator()|2pl": {
       "L00": [
         0.3,
         Infinity
@@ -6805,7 +6805,7 @@
         0.5246958087695793
       ]
     },
-    "NumericalSearchEstimator()|3pl": {
+    "MLEstimator()|3pl": {
       "L00": [
         0.3,
         Infinity
@@ -6967,7 +6967,7 @@
         0.6870556983190512
       ]
     },
-    "NumericalSearchEstimator()|4pl": {
+    "MLEstimator()|4pl": {
       "L00": [
         0.3,
         Infinity
@@ -7129,7 +7129,7 @@
         0.6888445788319945
       ]
     },
-    "NumericalSearchEstimator(bounds=(-3, 3))|1pl": {
+    "MLEstimator(bounds=(-3, 3))|1pl": {
       "L00": [
         0.3,
         Infinity
@@ -7291,7 +7291,7 @@
         0.6827884192695665
       ]
     },
-    "NumericalSearchEstimator(bounds=(-3, 3))|2pl": {
+    "MLEstimator(bounds=(-3, 3))|2pl": {
       "L00": [
         0.3,
         Infinity
@@ -7453,7 +7453,7 @@
         0.5246958087695793
       ]
     },
-    "NumericalSearchEstimator(bounds=(-3, 3))|3pl": {
+    "MLEstimator(bounds=(-3, 3))|3pl": {
       "L00": [
         0.3,
         Infinity
@@ -7615,7 +7615,7 @@
         0.6870556983190512
       ]
     },
-    "NumericalSearchEstimator(bounds=(-3, 3))|4pl": {
+    "MLEstimator(bounds=(-3, 3))|4pl": {
       "L00": [
         0.3,
         Infinity
@@ -7777,7 +7777,7 @@
         0.6888445788319988
       ]
     },
-    "NumericalSearchEstimator(tol=1e-9)|1pl": {
+    "MLEstimator(tol=1e-9)|1pl": {
       "L00": [
         0.3,
         Infinity
@@ -7939,7 +7939,7 @@
         0.682788419269568
       ]
     },
-    "NumericalSearchEstimator(tol=1e-9)|2pl": {
+    "MLEstimator(tol=1e-9)|2pl": {
       "L00": [
         0.3,
         Infinity
@@ -8101,7 +8101,7 @@
         0.5246958087695793
       ]
     },
-    "NumericalSearchEstimator(tol=1e-9)|3pl": {
+    "MLEstimator(tol=1e-9)|3pl": {
       "L00": [
         0.3,
         Infinity
@@ -8263,7 +8263,7 @@
         0.6870556983190512
       ]
     },
-    "NumericalSearchEstimator(tol=1e-9)|4pl": {
+    "MLEstimator(tol=1e-9)|4pl": {
       "L00": [
         0.3,
         Infinity
