@@ -1,8 +1,8 @@
 """Selectors that randomize the choice: random, randomesque and 5-4-3-2-1."""
 
 import operator
+from typing import override
 
-from ..compat import override
 from ..context import StepContext
 from .base import BaseSelector, best_pool, remaining
 

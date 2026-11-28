@@ -11,7 +11,7 @@ import re
 from collections.abc import Iterable
 from enum import StrEnum
 from pathlib import Path
-from typing import Any, Self, assert_never
+from typing import Any, Self, assert_never, override
 
 import numpy
 import numpy.typing as npt
@@ -19,7 +19,6 @@ from numpy.random import Generator
 
 from . import irt
 from .checks import _named
-from .compat import override
 from .typing import FloatArray, IntArray
 
 _N_PARAMS = 4

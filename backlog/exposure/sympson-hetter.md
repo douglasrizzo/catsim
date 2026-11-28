@@ -146,11 +146,11 @@ beside `BaseExposureControl`.
 """Sympson-Hetter exposure control."""
 
 from collections.abc import Callable
+from typing import override
 
 import numpy
 import numpy.typing as npt
 
-from ..compat import override
 from ..context import StepContext
 from ..typing import FloatArray
 from .base import BaseExposureControl

@@ -9,13 +9,12 @@ import math
 import secrets
 import time
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, NamedTuple, TypeVar, cast
+from typing import TYPE_CHECKING, NamedTuple, cast, override
 
 import numpy
 
 from . import metrics
 from .checks import _named
-from .compat import override
 from .engine import CatEngine
 from .item_bank import ItemBank
 from .metrics import Metric
@@ -28,8 +27,6 @@ if TYPE_CHECKING:
   import numpy.typing as npt
 
   from .typing import FloatArray, IntArray
-
-_Array = TypeVar("_Array", bound=numpy.ndarray)
 
 
 class _Stream(enum.IntEnum):
@@ -673,7 +670,7 @@ def _deciles(true_thetas: FloatArray) -> IntArray:
   return numpy.minimum(numpy.searchsorted(cuts, true_thetas, side="right"), _N_DECILES) - 1
 
 
-def _read_only(array: _Array) -> _Array:
+def _read_only[Array: numpy.ndarray](array: Array) -> Array:
   """Return ``array`` after making it read-only."""
   array.flags.writeable = False
   return array

@@ -2,12 +2,12 @@
 
 from collections import Counter
 from collections.abc import Callable
+from typing import override
 
 import numpy as np
 import pytest
 
 from catsim import ItemBank
-from catsim.compat import override
 from catsim.selection import (
   AStratSelector,
   BaseSelector,

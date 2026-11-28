@@ -6,7 +6,7 @@ import dataclasses
 import functools
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING
 
 from .checks import (
   _check_disjoint,
@@ -23,8 +23,6 @@ if TYPE_CHECKING:
 
   from .item_bank import ItemBank
   from .typing import FloatArray
-
-_T = TypeVar("_T", bound="DataclassInstance")
 
 
 # eq=False: a generated __eq__ would compare the exposure-rate arrays elementwise and raise, and a
@@ -170,7 +168,7 @@ def _field_defaults(cls: type[DataclassInstance]) -> tuple[tuple[str, object], .
   return tuple((field.name, field.default) for field in dataclasses.fields(cls))
 
 
-def _unchecked(cls: type[_T], /, **fields: object) -> _T:
+def _unchecked[T: "DataclassInstance"](cls: type[T], /, **fields: object) -> T:
   """Return an instance of a frozen dataclass built from checked fields, without checking them again.
 
   The engine builds every session and step context from inputs it has already checked, and
@@ -197,7 +195,7 @@ def _unchecked(cls: type[_T], /, **fields: object) -> _T:
   return instance
 
 
-def _replaced(instance: _T, /, **changes: object) -> _T:
+def _replaced[T: "DataclassInstance"](instance: T, /, **changes: object) -> T:
   """Return a copy of a frozen dataclass with some fields changed, as :func:`dataclasses.replace` does, unchecked.
 
   Parameters

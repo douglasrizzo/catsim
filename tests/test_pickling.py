@@ -4,7 +4,6 @@ import copy
 import importlib
 import inspect
 import pickle
-from typing import TypeVar
 
 import numpy as np
 import pytest
@@ -121,10 +120,7 @@ STRATEGIES = [
 ]
 
 
-T = TypeVar("T")
-
-
-def _round_trip(obj: T) -> T:
+def _round_trip[T](obj: T) -> T:
   """Return a copy of ``obj`` made by pickling it, as a worker process receives it."""
   return pickle.loads(pickle.dumps(obj))
 

@@ -13,7 +13,6 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Natural Language :: English",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
@@ -36,13 +35,14 @@ description = "Computerized adaptive testing toolkit"
 # The CI test job's lowest-direct entries install exactly these floors.
 # numpy: releases before 2.3.1 raise spurious matmul warnings when linked to Apple's Accelerate.
 # scipy: 1.13 and 1.14 require numpy < 2.3, and 1.15's macOS wheels do not load on macOS 27.
+# irtlib: the item response theory catsim builds on (ADR-0024), at a commit of its dev branch until its
+# first release, which the next release of catsim waits for, since PyPI refuses a dependency given as a URL.
 dependencies = [
+    "irtlib @ git+https://github.com/douglasrizzo/irtlib@ae6a45b03641af013770fc4b7688629da40b2988",
     "numpy>=2.3.1",
     "scipy>=1.16",
-    # override, which typing has from Python 3.12 (ADR-0021); 4.4 is the first release with it.
-    "typing-extensions>=4.4; python_version < '3.12'",
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 readme = "README.md"
 license = "BSD-3-Clause"
 
@@ -65,7 +65,7 @@ line-length = 120
 indent-width = 2
 preview = true
 
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = [
@@ -139,10 +139,6 @@ unfixable = []
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
-
-# Ruff treats catsim.compat.override as typing.override, so an override is exempt from the unused-argument,
-# no-self-use and docstring rules, as the base method already answers to them.
-typing-modules = ["catsim.compat"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
@@ -306,12 +302,6 @@ redundant-condition-strict = "error"
 # Every override carries @override, so a base-class rename fails the check at each orphaned override.
 missing-override-decorator = "error"
 
-[tool.uv]
-# soupsieve 4 (the first release without its ReDoS) needs Python >= 3.11.5. Resolving the lock
-# for 3.11.0-3.11.4 as well would keep a vulnerable soupsieve 2.x in uv.lock for those patch
-# releases. Published metadata still says >= 3.11; this only scopes the development lock.
-environments = ["python_full_version >= '3.11.5'"]
-
 # ---------------------------------------------------------------------------
 # Pylint
 # ---------------------------------------------------------------------------
@@ -368,7 +358,7 @@ layers = [
   "item_bank",
   "irt",
   "checks",  # the input checks of the explicit inputs (ADR-0009), which the domain makes too
-  "typing : exceptions : compat",
+  "typing : exceptions",
 ]
 ignore_imports = [
   # MEISelector runs one-step-ahead ability updates with an estimator.
@@ -401,7 +391,6 @@ type = "forbidden"
 source_modules = [
   "catsim.typing",
   "catsim.exceptions",
-  "catsim.compat",
   "catsim.irt",
   "catsim.item_bank",
   "catsim.metrics",

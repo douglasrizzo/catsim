@@ -19,9 +19,7 @@ import queue
 import sys
 import types
 from concurrent.futures import ProcessPoolExecutor
-from typing import TYPE_CHECKING, Any, TypeVar, cast
-
-from .compat import override
+from typing import TYPE_CHECKING, Any, cast, override
 
 if TYPE_CHECKING:
   from collections.abc import Callable, Sequence
@@ -30,8 +28,6 @@ if TYPE_CHECKING:
 
   from .engine import CatEngine
 
-_Task = TypeVar("_Task")
-_Result = TypeVar("_Result")
 
 # How long the calling process waits for a message before it checks whether a task has failed.
 _POLL_SECONDS = 0.1
@@ -184,14 +180,14 @@ def _checked_pickle(label: str, obj: object) -> bytes:
   return buffer.getvalue()
 
 
-def _run_on_workers(
-  function: Callable[[CatEngine, _Task, Callable[[], object] | None], _Result],
+def _run_on_workers[Task, Result](
+  function: Callable[[CatEngine, Task, Callable[[], object] | None], Result],
   payload: bytes,
-  tasks: Sequence[_Task],
+  tasks: Sequence[Task],
   *,
   workers: int,
   done: Callable[[], object] | None,
-) -> list[_Result]:
+) -> list[Result]:
   """Run ``function(engine, task, report)`` for every task on worker processes, and return the results in task order.
 
   Each task unpickles its own copy of the engine from ``payload``, so a task's result is what
@@ -238,7 +234,7 @@ def _run_on_workers(
     if messages is not None and done is not None:
       _relay(messages, futures, done)
     # The results cross from the workers as pickles, which carry no static type.
-    results = [cast("_Result", future.result()) for future in futures]
+    results = [cast("Result", future.result()) for future in futures]
   except BaseException:
     # Raise now rather than once the running tasks end, which they do in the background; the tasks
     # not yet started never run.

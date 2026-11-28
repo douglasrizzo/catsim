@@ -9,13 +9,12 @@ from __future__ import annotations
 import math
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 import numpy
 from scipy.optimize import minimize_scalar
 
 from .. import irt
-from ..compat import override
 from ..context import Estimate
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from ..typing import FloatArray

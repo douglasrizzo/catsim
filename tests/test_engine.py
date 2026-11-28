@@ -7,6 +7,7 @@ import math
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import override
 
 import numpy as np
 import pytest
@@ -21,7 +22,6 @@ from catsim import (
   StepContext,
   StopReason,
 )
-from catsim.compat import override
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.exposure import BaseExposureControl
 from catsim.initialization import BaseInitializer

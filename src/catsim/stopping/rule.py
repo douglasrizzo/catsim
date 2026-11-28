@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
-from ..compat import override
 from .base import BaseStopper
 from .length import MaxLengthStopper
 

@@ -1,10 +1,10 @@
 """Concrete initialization implementations."""
 
 import math
+from typing import override
 
 import numpy
 
-from ..compat import override
 from ..item_bank import ItemBank
 from .base import BaseInitializer
 

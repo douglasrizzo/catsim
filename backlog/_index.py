@@ -14,13 +14,11 @@ import sys
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
-from typing import TypeVar
 
 BACKLOG = Path(__file__).resolve().parent
 START = "<!-- backlog-index:start -->"
 END = "<!-- backlog-index:end -->"
 
-_Choice = TypeVar("_Choice", bound=StrEnum)
 # Code is stripped before links are read, so `table[i](x)` in a sketch is not taken for a link.
 _FENCED_CODE = re.compile(r"^(`{3,}|~{3,}).*?^\1", flags=re.DOTALL | re.MULTILINE)
 _INLINE_CODE = re.compile(r"`+[^`\n]*`+")
@@ -134,7 +132,7 @@ def _list(name: str, value: str) -> tuple[str, ...]:
   return tuple(item.strip() for item in value[1:-1].split(",") if item.strip())
 
 
-def _choice(name: str, value: str, choices: type[_Choice]) -> _Choice:
+def _choice[Choice: StrEnum](name: str, value: str, choices: type[Choice]) -> Choice:
   """Return ``value`` as a member of ``choices``."""
   try:
     return choices(value)
