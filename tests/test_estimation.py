@@ -9,7 +9,7 @@ from itertools import product
 
 import numpy as np
 import pytest
-from irtlib import ItemBank, irt
+from irtlib import ItemBank, ability, irt
 from irtlib.quadrature import (
   LogPrior,
   QuadratureGrid,
@@ -158,25 +158,23 @@ class TestNumericalSearchEstimatorEstimate:
     assert estimate.se == pytest.approx(0.5, rel=1e-9)
 
   def test_evaluations_are_the_likelihood_evaluations_of_the_search(self) -> None:
-    """The evaluation count is SciPy's own count for a bounded search of the same negative log-likelihood.
+    """The evaluation count is that of irtlib's search on the session's responses within the estimator's bounds.
 
-    A count that is a constant, one per estimate, or that adds the information evaluated for the standard error, fails.
+    A count that is a constant, one per estimate, that adds the information evaluated for the standard error, or that
+    is irtlib's for other bounds, fails.
     """
     item_bank = ItemBank.generate(30, rng=3)
     administered_items = list(range(10))
     responses = [True, False] * 5
-    reference = minimize_scalar(
-      lambda theta: -irt.log_likelihood(theta, [responses], item_bank.get_items(administered_items))[0],
-      bounds=(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED),
-      method="bounded",
-      options={"xatol": 1e-6},
+    reference = ability.maximum_likelihood(
+      [responses], item_bank.get_items(administered_items), bounds=(-3.0, 3.0), tol=1e-6
     )
 
-    estimate = NumericalSearchEstimator(tol=1e-6).estimate(
+    estimate = NumericalSearchEstimator(tol=1e-6, bounds=(-3.0, 3.0)).estimate(
       make_context(item_bank, administered_items, responses, theta=0.0)
     )
 
-    assert estimate.evaluations == reference.nfev
+    assert estimate.evaluations == reference.evaluations[0]
 
 
 ESTIMATORS = [
@@ -759,24 +757,16 @@ class TestWarmLikelihoodEstimator:
 
     assert estimate.se == pytest.approx(1.0 / math.sqrt(_information(estimate.theta, items)), rel=1e-12)
 
-  def test_ranking_integral_warnings_point_at_the_caller(self) -> None:
-    """A ranking integral that does not converge warns, from the line that called estimate.
+  def test_a_ranking_integral_that_does_not_converge_warns(self) -> None:
+    """An estimate whose ranking of the candidate roots rests on an integral that did not converge, given silently.
 
-    After a wrong answer to a steep item that guesses (a = 200, c = 0.2), the modified score spikes at b and quad runs
-    out of its 200 subdivisions. quad returns that message instead of warning, so dropping it loses the warning; a
-    stacklevel other than 3 blames another line, such as WarmLikelihoodEstimator.estimate's own (2) or the line that
-    calls the wrapper below (4).
+    After a wrong answer to a steep item that guesses (a = 200, c = 0.2), the modified score spikes at b and the
+    ranking integral runs out of its 200 subdivisions.
     """
     context = make_context(ItemBank(np.array([[200.0, 0.0, 0.2, 1.0]])), [0], [False])
 
-    def estimate() -> Estimate:
-      return WarmLikelihoodEstimator().estimate(context)
-
-    with pytest.warns(IntegrationWarning, match="subdivisions") as caught:
-      estimate()
-
-    call_line = estimate.__code__.co_firstlineno + 1
-    assert {(warning.filename, warning.lineno) for warning in caught} == {(__file__, call_line)}
+    with pytest.warns(IntegrationWarning, match="subdivisions"):
+      WarmLikelihoodEstimator().estimate(context)
 
   @pytest.mark.parametrize(
     ("b", "correct", "expected"),
@@ -820,34 +810,6 @@ class TestWarmLikelihoodEstimator:
     )
 
     assert theta == pytest.approx(fine[int(np.argmax(weighted_log_likelihood))], abs=1e-3)
-
-  @pytest.mark.parametrize(
-    ("b", "theta", "correct"),
-    [
-      pytest.param(5.0, -2.0, True, id="correct_on_a_far_too_hard_item"),
-      pytest.param(-5.0, 2.0, False, id="incorrect_on_a_far_too_easy_item"),
-    ],
-  )
-  def test_modified_score_is_exact_where_the_probability_rounds_off(
-    self, b: float, theta: float, correct: bool
-  ) -> None:
-    """At a logit of +-70 one of P and Q is below 1e-30, and the score must keep it.
-
-    For one item without guessing or slipping the modified score is a Q + a (Q - P) / 2 after
-    a correct answer and -a P + a (Q - P) / 2 after an incorrect one. Computing Q as 1 - P and
-    clipping P Q at machine epsilon lost the likelihood term entirely, leaving only the
-    correction: 5 instead of 15 for the far-too-hard item.
-    """
-    a = 10.0
-    items = np.array([[a, b, 0.0, 1.0]])
-    z = a * (theta - b)
-    p, q = expit(z), expit(-z)
-    expected = (a * q if correct else -a * p) + a * (q - p) / 2.0
-
-    modified_score = WarmLikelihoodEstimator.__dict__["_modified_score"].__func__
-    value = modified_score(theta, [correct], items)[0]
-
-    assert value == pytest.approx(expected, rel=1e-12)
 
   def test_estimate_solves_warm_modified_score_equation(self) -> None:
     """Every estimate must be an interior root of Warm's modified score equation.

@@ -1,14 +1,13 @@
-"""Numerical estimation methods for ability estimation."""
+"""The maximum likelihood estimator, with Dodd's step while the responses are all correct or all incorrect."""
 
 from typing import override
 
 import numpy
-from irtlib import ItemBank, irt
+from irtlib import ItemBank, ability, irt
 from irtlib.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
-from scipy.optimize import minimize_scalar
 
 from ..context import Estimate, StepContext
-from .base import BaseEstimator
+from .base import BaseEstimator, _session_estimate
 
 
 def _dodd(theta: float, item_bank: ItemBank, *, correct: bool, bounds: tuple[float, float]) -> float:
@@ -56,14 +55,15 @@ def _dodd(theta: float, item_bank: ItemBank, *, correct: bool, bounds: tuple[flo
 class NumericalSearchEstimator(BaseEstimator):
   """Estimate ability by numerically maximizing the IRT log-likelihood.
 
-  The maximum is searched for with SciPy's bounded scalar minimizer on ``bounds``. While every
-  response is correct, or every response is incorrect, the likelihood has no maximum, and the
-  estimate takes Dodd's step :cite:p:`Dod90` toward the bank's hardest or easiest item instead.
+  The maximum is irtlib's maximum likelihood estimate within ``bounds``, ``irtlib.ability.maximum_likelihood``,
+  which finds the highest of several maxima. While every response is correct, or every response is
+  incorrect, the likelihood has no maximum, and the estimate takes Dodd's step :cite:p:`Dod90`
+  toward the bank's hardest or easiest item instead.
 
   Parameters
   ----------
   tol : float, optional
-      Absolute tolerance of the bounded search, in the ability scale. Default is 1e-6.
+      Absolute tolerance of the search's refinement, in the ability scale. Default is 1e-6.
   bounds : tuple[float, float], optional
       Range of the estimate. Default is ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``.
 
@@ -95,9 +95,10 @@ class NumericalSearchEstimator(BaseEstimator):
     r"""Return the maximum likelihood estimate, or Dodd's step from ``context.theta`` while every response is the same.
 
     The standard error is the inverse square root of the test information at the estimate, or
-    ``math.inf`` where the information is 0. The evaluation count is the number of log-likelihood
-    evaluations SciPy's search made; Dodd's step makes none. With no administered item, the
-    estimate is ``context.theta`` and ``context.se``, unchanged, after no evaluation.
+    ``math.inf`` where the information is 0. The evaluation count is the number of abilities the
+    log-likelihood was evaluated at, the search's points and its refinement's; Dodd's step makes
+    none. With no administered item, the estimate is ``context.theta`` and ``context.se``,
+    unchanged, after no evaluation.
 
     Parameters
     ----------
@@ -119,17 +120,4 @@ class NumericalSearchEstimator(BaseEstimator):
       theta = _dodd(context.theta, context.item_bank, correct=responses[0], bounds=self._bounds)
       return Estimate(theta=theta, se=irt.see(theta, items), evaluations=0)
 
-    log_likelihood = irt.log_likelihood_function([responses], items)
-
-    def negative_log_likelihood(theta: float) -> float:
-      return -float(log_likelihood(theta)[0])
-
-    res = minimize_scalar(
-      negative_log_likelihood,
-      bounds=self._bounds,
-      method="bounded",
-      # SciPy's bounded method takes its absolute tolerance only through options
-      options={"xatol": self._tol},
-    )
-    theta = float(res.x)
-    return Estimate(theta=theta, se=irt.see(theta, items), evaluations=int(res.nfev))
+    return _session_estimate(ability.maximum_likelihood([responses], items, bounds=self._bounds, tol=self._tol))

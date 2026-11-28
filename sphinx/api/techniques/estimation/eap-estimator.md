@@ -67,7 +67,8 @@ standard error are the prior's mean and standard deviation on the grid.
 
 ### Computation
 
-By default the grid has 121 equally spaced nodes on $[-6, 6]$ (spacing 0.1) and the prior is
+The estimate is irtlib's, `irtlib.ability.expected_a_posteriori`. By default the grid has 121
+equally spaced nodes on $[-6, 6]$ (spacing 0.1) and the prior is
 $\mathcal{N}(0, 1)$. The grid is accurate while it resolves the posterior. Compared with a
 2,401-node reference, the default grid reproduces the posterior mean and standard deviation to
 within about 0.25% while the posterior standard deviation is at least 0.065, which takes a test

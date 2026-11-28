@@ -1,28 +1,17 @@
-"""The Bayesian ability estimators, EAP and MAP, over irtlib's quadrature grid, priors and posterior."""
+"""The Bayesian ability estimators, EAP and MAP, which irtlib's estimators compute for a session."""
 
 from __future__ import annotations
 
-import math
 from typing import TYPE_CHECKING, override
 
-import numpy
-from irtlib import irt
+from irtlib import ability
 from irtlib.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
-from irtlib.quadrature import LogPrior, QuadratureGrid, normal_log_prior, posterior, posterior_mean, posterior_variance
-from scipy.optimize import minimize_scalar
+from irtlib.quadrature import LogPrior, QuadratureGrid, normal_log_prior
 
-from ..context import Estimate
-from .base import BaseEstimator
+from .base import BaseEstimator, _session_estimate
 
 if TYPE_CHECKING:
-  from collections.abc import Callable
-
-  from irtlib.typing import FloatArray
-
-  from ..context import StepContext
-
-# Step of the central difference that gives a prior's curvature at the MAP estimate.
-_CURVATURE_STEP = 1e-4
+  from ..context import Estimate, StepContext
 
 __all__ = ["EAPEstimator", "MAPEstimator"]
 
@@ -86,24 +75,13 @@ class EAPEstimator(BaseEstimator):
         node.
     """
     items = context.item_bank.get_items(context.administered_items)
-    nodes = self._grid.nodes
-    post = posterior(irt.log_likelihood(nodes, [context.responses], items), self._grid, self._log_prior)
-    return Estimate(
-      theta=float(posterior_mean(post, nodes)[0]),
-      se=math.sqrt(posterior_variance(post, nodes)[0]),
-      evaluations=int(nodes.size),
-    )
+    estimates = ability.expected_a_posteriori([context.responses], items, grid=self._grid, log_prior=self._log_prior)
+    return _session_estimate(estimates)
 
   @property
   def grid(self) -> QuadratureGrid:
     """Return the quadrature grid used by the estimator."""
     return self._grid
-
-
-# Points on which MAPEstimator locates the posterior mode before refining it (0.06 apart on [-6, 6]).
-_MODE_SEARCH_POINTS = 201
-# Equal maxima on this many search points mean a flat posterior; two can flank a symmetric peak.
-_FLAT_MAXIMUM_POINTS = 3
 
 
 class MAPEstimator(BaseEstimator):
@@ -145,39 +123,6 @@ class MAPEstimator(BaseEstimator):
     """Return the estimator as a constructor call that names every argument, with None for a default prior."""
     return f"{type(self).__name__}(log_prior={self._log_prior_argument!r}, tol={self._tol!r}, bounds={self._bounds!r})"
 
-  def _negative_log_posterior(
-    self, theta: float, log_likelihood: Callable[[float | FloatArray], float | FloatArray]
-  ) -> float:
-    """Return the negative log-posterior at a candidate theta."""
-    log_lik = float(log_likelihood(theta))
-    log_pr = float(self._log_prior(numpy.array([theta], dtype=float))[0])
-    return -(log_lik + log_pr)
-
-  def _standard_error(self, theta: float, items: FloatArray) -> float:
-    r"""Return the standard error of a posterior mode, :math:`1/\sqrt{I(\hat\theta) - (\log p)''(\hat\theta)}`.
-
-    The prior's curvature is a central difference, so any ``LogPrior`` works. Where it is not
-    finite, as at the edge of a bounded prior's support, the prior adds nothing and the error is
-    the Fisher one. Where the sum is not positive, the error is ``math.inf``.
-
-    Parameters
-    ----------
-    theta : float
-        The posterior mode.
-    items : numpy.ndarray
-        Parameters of the administered items.
-
-    Returns
-    -------
-    float
-        The standard error, finite and positive, or ``math.inf``.
-    """
-    h = _CURVATURE_STEP
-    below, at, above = self._log_prior(numpy.array([theta - h, theta, theta + h], dtype=float))
-    curvature = float((above - 2.0 * at + below) / h**2)
-    precision = irt.total_information(theta, items) - (curvature if math.isfinite(curvature) else 0.0)
-    return 1.0 / math.sqrt(precision) if precision > 0.0 and math.isfinite(precision) else math.inf
-
   @override
   def estimate(self, context: StepContext) -> Estimate:
     r"""Return the posterior mode within the search bounds, the prior mode when no item has been administered.
@@ -205,39 +150,7 @@ class MAPEstimator(BaseEstimator):
         If the log-posterior has no finite maximum within the search bounds.
     """
     items = context.item_bank.get_items(context.administered_items)
-    examinee_log_likelihood = irt.log_likelihood_function([context.responses], items)
-
-    def log_likelihood(theta: float | FloatArray) -> FloatArray:
-      return examinee_log_likelihood(theta)[0]
-
-    nodes = numpy.linspace(self._bounds[0], self._bounds[1], _MODE_SEARCH_POINTS)
-    log_post = log_likelihood(nodes) + self._log_prior(nodes)
-    peak = numpy.max(log_post)
-    if not numpy.isfinite(peak):
-      msg = (
-        f"the log-posterior is not finite at any of the {nodes.size} search points in {self._bounds}; "
-        "the prior's support must contain at least one of them"
-      )
-      raise ValueError(msg)
-
-    ties = numpy.flatnonzero(log_post == peak)
-    best = int(ties[ties.size // 2])
-    # A flat maximum, such as a uniform prior with no responses, has no unique mode
-    if ties.size >= _FLAT_MAXIMUM_POINTS:
-      theta = float(nodes[best])
-      return Estimate(theta=theta, se=self._standard_error(theta, items), evaluations=int(nodes.size))
-
-    # Past a narrow prior's support the objective is +inf, and SciPy's parabolic step then
-    # subtracts infinities; the result is checked against the best point below
-    with numpy.errstate(invalid="ignore"):
-      result = minimize_scalar(
-        self._negative_log_posterior,
-        args=(log_likelihood,),
-        bounds=(nodes[max(best - 1, 0)], nodes[min(best + 1, nodes.size - 1)]),
-        method="bounded",
-        options={"xatol": self._tol},
-      )
-    # A neighbour can lie outside a narrow prior's support, so keep the refinement only if it
-    # did at least as well as the best node; the estimate then always lies inside the support
-    theta = float(result.x) if result.fun <= -peak else float(nodes[best])
-    return Estimate(theta=theta, se=self._standard_error(theta, items), evaluations=int(nodes.size + result.nfev))
+    estimates = ability.maximum_a_posteriori(
+      [context.responses], items, log_prior=self._log_prior, bounds=self._bounds, tol=self._tol
+    )
+    return _session_estimate(estimates)

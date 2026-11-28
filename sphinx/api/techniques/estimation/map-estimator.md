@@ -53,7 +53,8 @@ with a uniform prior and no responses, the standard error is infinite.
 
 ### Computation
 
-The implementation minimizes the negative log-posterior
+The estimate is irtlib's, `irtlib.ability.maximum_a_posteriori`, which minimizes the negative
+log-posterior
 
 $$
 -\log p(\theta) - \log L(\mathbf{u}\mid\theta)
