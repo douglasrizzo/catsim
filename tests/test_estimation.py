@@ -245,7 +245,7 @@ def test_repr_of_a_built_in_prior_is_its_factory_call(source: str) -> None:
 
   The priors were closures, whose repr is an address such as ``<function normal_log_prior.<locals>._log_prior at ...>``.
   """
-  namespace = vars(importlib.import_module("catsim.estimation"))
+  namespace = vars(importlib.import_module("catsim.estimation")) | vars(importlib.import_module("irtlib.quadrature"))
 
   assert repr(eval(source, namespace)) == source
 
