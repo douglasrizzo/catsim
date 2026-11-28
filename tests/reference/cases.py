@@ -787,6 +787,7 @@ RESULT_EXEMPT = {
   "steps": "the table of the sessions' steps, added after adda72dc",
   "examinees": "the table of the sessions, added after adda72dc",
   "deciles": "the metrics by decile of the true ability, added after adda72dc",
+  "ability_levels": "the metrics at each distinct true ability, added after adda72dc",
   "test_length": "the mean length of the sessions, added after adda72dc",
   "se": "the mean standard error of the sessions' final estimates, added after adda72dc",
 }
