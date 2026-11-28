@@ -20,7 +20,8 @@ maintainer is satisfied with the package.
   released irtlib, run `uv lock`, and add irtlib's floor to the CI job that tests the lowest direct
   dependencies. PyPI rejects an upload whose metadata holds a URL dependency, and the publish job
   runs after the production docs deploy, so a release with the URL still in place deploys the docs
-  and then fails to publish.
+  and then fails to publish. TestPyPI rejects it too, so until then the TestPyPI job of the dev →
+  main pull request fails after the dev docs deploy; it is not a required check.
 - Bump the version with `uv version` only; `pyproject.toml` is its single source.
 - The release tag equals the version exactly, with no `v`.
 - Bump `UV_VERSION` by hand in `ci-cd.yml` and `linkcheck.yml`, which must stay equal (0.13.9 when
