@@ -32,7 +32,7 @@ $$
      {\int p(\theta)\,L(\mathbf{u}\mid\theta)\,d\theta}.
 $$
 
-On a grid of nodes $\theta_q$, $q = 1, \dots, Q$, with weights $w_q$, irtlib's `QuadratureGrid`,
+On a grid of nodes $\theta_q$, $q = 1, \dots, Q$, with weights $w_q$, an `irtlib.quadrature.QuadratureGrid`,
 the posterior mass at a node is proportional to $w_q\,p(\theta_q)\,L(\mathbf{u}\mid\theta_q)$ and
 the masses $\tilde{p}(\theta_q \mid \mathbf{u})$ sum to 1. The implementation approximates the
 integral as
@@ -53,11 +53,11 @@ $$
 \tilde{p}(\theta_q \mid \mathbf{u}).
 $$
 
-These are Equations 4 and 5 of {cite:t}`Bock1982{p. 433}`, who credit the quadrature formulas to
-{cite:t}`Bock1981` (p. 432); catsim returns the variance, the square of their Equation 5, without
-the Sheppard's correction they apply (p. 433). Like Bock and Mislevy, catsim uses evenly spaced
-nodes rather than Gauss–Hermite points, which offer little advantage here because the likelihood is
-not a polynomial (p. 433).
+These are Equations 4 and 5 of {cite:t}`Bock1982{p. 433}`; {cite:t}`Bock1982{p. 432}` credit the
+quadrature formulas to {cite:t}`Bock1981`. catsim returns the variance, the square of their
+Equation 5, without the Sheppard's correction they apply (p. 433). Like Bock and Mislevy, catsim
+uses evenly spaced nodes rather than Gauss–Hermite points, which offer little advantage here
+because the likelihood is not a polynomial (p. 433).
 
 The estimator returns a {py:class}`~catsim.Estimate` with
 $\hat{\theta}_{\mathrm{EAP}}$ and the posterior standard deviation

@@ -45,7 +45,7 @@ What each estimator does with an all-correct or all-incorrect pattern:
 - `EAPEstimator` returns the posterior mean over its grid, which the prior pulls toward the prior
   mean.
 - `MAPEstimator` returns the posterior mode inside its bounds. With the default normal prior the mode
-  is interior; with `uniform_log_prior()` it is, to within `tol`, the bound the responses point to,
+  is interior; with irtlib's `uniform_log_prior()` it is, to within `tol`, the bound the responses point to,
   which is the maximum likelihood estimate restricted to the bounds.
 - `WarmLikelihoodEstimator` returns the root of Warm's modified score, which is finite for these
   patterns, or the bound the modified score points to when the root lies beyond the bounds.

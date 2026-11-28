@@ -47,7 +47,7 @@ infinite, and each estimator handles them its own way:
 - {py:class}`~catsim.estimation.EAPEstimator` and
   {py:class}`~catsim.estimation.MAPEstimator` return the posterior mean and mode,
   which the prior draws toward its center; with
-  irtlib's `uniform_log_prior`, the MAP estimate is the bound
+  `irtlib.quadrature.uniform_log_prior`, the MAP estimate is the bound
   the responses point to, the maximum likelihood estimate within the bounds;
 - {py:class}`~catsim.estimation.WarmLikelihoodEstimator` returns the root of
   Warm's modified score, which is finite for these responses, or the bound it

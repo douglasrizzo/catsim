@@ -77,6 +77,13 @@ class EAPEstimator(BaseEstimator):
     Estimate
         The posterior mean of :math:`\theta`, the posterior standard deviation and the number of
         grid nodes.
+
+    Raises
+    ------
+    ValueError
+        If the prior is NaN or :math:`+\infty` at a node of the grid, or the posterior has no mass at
+        any node: a prior whose support misses the grid, or responses whose likelihood is 0 at every
+        node.
     """
     items = context.item_bank.get_items(context.administered_items)
     nodes = self._grid.nodes
