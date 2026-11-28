@@ -39,7 +39,7 @@ gives the better design (`AGENTS.md`).
 
 <!-- backlog-index:start -->
 
-47 cards: 26 ready, 6 needs-research, 9 needs-decision, 2 blocked, 4 parked.
+49 cards: 27 ready, 6 needs-research, 9 needs-decision, 3 blocked, 4 parked.
 
 ## Waiting for the maintainer
 
@@ -92,9 +92,11 @@ gives the better design (`AGENTS.md`).
 | [Choose the WLE's standard error (Warm's corrected SE, the sandwich SE)](estimation/wle-standard-errors.md) | estimation | technique | needs-research | S |  | Wang & Vispoel (1998) walkthrough |
 | [Owen Sequential Bayesian Estimator](estimation/owen-estimator.md) | estimation | technique | ready | M |  |  |
 | [Starting rules (catR `randomCAT`'s `start` list)](initialization/starting-rules.md) | initialization | technique | needs-research | M |  | catR comparison |
+| [Build catsim on irtlib's item response theory and remove catsim's copies](maintenance/build-on-irtlib.md) | maintenance | maintenance | ready | L |  | irtlib ADR-0004 and the maintainer on 2026-11-27 |
 | [Compute normal quantiles with scipy.special instead of importing scipy.stats](maintenance/normal-quantile-import.md) | maintenance | maintenance | ready | XS |  | import-time measurement of 2026-11-26 |
 | [Editorial review of every document against the charter, and drift checks](maintenance/editorial-review.md) | maintenance | maintenance | ready | M |  | documentation charter |
 | [Give the worker tests a timeout, so a hang fails fast?](maintenance/worker-test-timeout.md) | maintenance | decision | needs-decision | XS |  | parallel parts (#222) |
+| [Link irtlib's names in the documentation once irtlib publishes its own](maintenance/irtlib-docs-links.md) | maintenance | docs | blocked | S | [build-on-irtlib](maintenance/build-on-irtlib.md) | maintainer on 2026-11-27 |
 | [Make the stratified selectors' strata cache one attribute](maintenance/strata-cache-thread-race.md) | maintenance | fix | ready | XS |  | ADR audit (#225) |
 | [One annotation for responses across the package?](maintenance/responses-annotation.md) | maintenance | decision | needs-decision | S |  | ADR audit (#225) |
 | [Release the next version](maintenance/release-checklist.md) | maintenance | maintenance | blocked | M |  | rescoping plan |
