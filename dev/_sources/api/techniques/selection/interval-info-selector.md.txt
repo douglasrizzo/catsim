@@ -75,7 +75,7 @@ information averaged over the interval. With a
 fixed `interval` $\delta$, the interval is $[\hat{\theta} - \delta, \hat{\theta} + \delta]$
 throughout the test.
 
-The integral has a closed form, which {py:func}`catsim.irt.info_integral`
+The integral has a closed form, which `irtlib.irt.info_integral`
 computes, so the scores of all items are computed exactly, without numerical
 quadrature. It extends the 3PL closed form of
 {cite:t}`Veerkamp1994{pp. 21–22, Appendix, Equation 25}`, to which it reduces

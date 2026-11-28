@@ -459,18 +459,21 @@ of strategy must do, and ends by running all four in one simulation. It assumes
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">Estimate</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">NoItemsAvailableError</span><span class="p">,</span> <span class="n">StepContext</span><span class="p">,</span> <span class="n">simulate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">Estimate</span><span class="p">,</span> <span class="n">NoItemsAvailableError</span><span class="p">,</span> <span class="n">StepContext</span><span class="p">,</span> <span class="n">simulate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseInitializer</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.irt</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_likelihood</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span><span class="p">,</span> <span class="n">below_cap</span><span class="p">,</span> <span class="n">check_r_max</span><span class="p">,</span> <span class="n">pick_best</span><span class="p">,</span> <span class="n">remaining</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseStopper</span><span class="p">,</span> <span class="n">MaxLengthStopper</span><span class="p">,</span> <span class="n">StopRule</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">irtlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">irtlib.irt</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_likelihood</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">irtlib.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntArray</span>
 </pre></div>
 </div>
+<p>The item bank, the item response functions and the array types come from
+<a class="reference external" href="https://github.com/douglasrizzo/irtlib">irtlib</a>, the item response theory package catsim builds
+on.</p>
 <p><code class="docutils literal notranslate"><span class="pre">&#64;override</span></code> marks each method that implements one of a base class, so that a type checker reports a
-method that overrides nothing, such as one with a misspelt name. It is in <code class="docutils literal notranslate"><span class="pre">typing</span></code> from Python 3.12
-on, and in the <code class="docutils literal notranslate"><span class="pre">typing_extensions</span></code> package on Python 3.11.</p>
+method that overrides nothing, such as one with a misspelt name.</p>
 <section id="an-initializer">
 <h2>An Initializer<a class="headerlink" href="#an-initializer" title="Link to this heading">#</a></h2>
 <p>An initializer gives each session its ability estimate before the first item. When every examinee
@@ -525,7 +528,8 @@ the 1 comes from the prior.</p>
     <span class="nd">@override</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Estimate</span><span class="p">:</span>
         <span class="n">items</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span>
-        <span class="n">log_posterior</span> <span class="o">=</span> <span class="n">log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="c1"># one row of responses, the session's, gives one row of log-likelihoods</span>
+        <span class="n">log_posterior</span> <span class="o">=</span> <span class="n">log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="p">[</span><span class="n">context</span><span class="o">.</span><span class="n">responses</span><span class="p">],</span> <span class="n">items</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">2</span>
         <span class="n">theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">log_posterior</span><span class="p">)])</span>
         <span class="n">information</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">total_information</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Estimate</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">information</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">evaluations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
@@ -541,7 +545,7 @@ may read about the session, built anew by the engine for every call.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">item_bank</span></code></p></td>
-<td><p>the session’s <a class="reference internal" href="api/item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code></a></p></td>
+<td><p>the session’s <code class="docutils literal notranslate"><span class="pre">ItemBank</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">administered_items</span></code>, <code class="docutils literal notranslate"><span class="pre">responses</span></code></p></td>
 <td><p>the items given so far and the responses to them, in order</p></td>
@@ -575,10 +579,10 @@ stoppers that target a precision compare it with their targets;</p></li>
 </ul>
 <p>Look-ahead selectors, such as MEI, also call the estimator with responses the examinee has not
 given, which is one more reason for it to keep nothing about a session. For the likelihood,
-<a class="reference internal" href="api/irt.html#catsim.irt.log_likelihood_function" title="catsim.irt.log_likelihood_function"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.log_likelihood_function()</span></code></a> returns the log-likelihood of the responses as a
-function of the ability, and <a class="reference internal" href="api/irt.html#catsim.irt.log_response_probabilities" title="catsim.irt.log_response_probabilities"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.log_response_probabilities()</span></code></a> returns
-<span class="math notranslate nohighlight">\(\log P_i(\theta)\)</span> and <span class="math notranslate nohighlight">\(\log Q_i(\theta)\)</span>. A Bayesian estimator can build on the priors and the
-posterior of <a class="reference internal" href="api/techniques/estimation/bayesian-infrastructure.html"><span class="doc">Bayesian Estimation Infrastructure</span></a>.</p>
+<code class="docutils literal notranslate"><span class="pre">irtlib.irt.log_likelihood_function</span></code> returns the log-likelihood of each row of responses as a
+function of the ability, and <code class="docutils literal notranslate"><span class="pre">irtlib.irt.log_response_probabilities</span></code> returns
+<span class="math notranslate nohighlight">\(\log P_i(\theta)\)</span> and <span class="math notranslate nohighlight">\(\log Q_i(\theta)\)</span>. A Bayesian estimator can build on irtlib’s quadrature
+grid, priors and posterior, in <code class="docutils literal notranslate"><span class="pre">irtlib.quadrature</span></code>.</p>
 </section>
 <section id="a-selector">
 <h2>A Selector<a class="headerlink" href="#a-selector" title="Link to this heading">#</a></h2>

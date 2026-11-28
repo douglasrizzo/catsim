@@ -772,347 +772,22 @@ window.runMermaid = runMermaid;</script>
                 <article class="bd-article">
                   
   <h1>Source code for catsim.estimation.bayesian</h1><div class="highlight"><pre>
-<span></span><span class="sd">"""Shared Bayesian helpers for ability estimation in CAT.</span>
-
-<span class="sd">For the full posterior specification and quadrature contract, see</span>
-<span class="sd">:doc:`/api/techniques/estimation/bayesian-infrastructure`.</span>
-<span class="sd">"""</span>
+<span></span><span class="sd">"""The Bayesian ability estimators, EAP and MAP, which irtlib's estimators compute for a session."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">override</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">minimize_scalar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">irtlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ability</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">irtlib.irt</span><span class="w"> </span><span class="kn">import</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MIN_EXTENDED</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">irtlib.quadrature</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogPrior</span><span class="p">,</span> <span class="n">QuadratureGrid</span><span class="p">,</span> <span class="n">normal_log_prior</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimate</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..irt</span><span class="w"> </span><span class="kn">import</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MIN_EXTENDED</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">_session_estimate</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-  <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimate</span><span class="p">,</span> <span class="n">StepContext</span>
 
-<span class="n">LogPrior</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">FloatArray</span><span class="p">],</span> <span class="n">FloatArray</span><span class="p">]</span>
-<span class="sd">"""A log prior density: maps an array of abilities to their log-densities, elementwise."""</span>
-
-<span class="n">_MIN_QUADRATURE_NODES</span> <span class="o">=</span> <span class="mi">2</span>
-<span class="c1"># Step of the central difference that gives a prior's curvature at the MAP estimate.</span>
-<span class="n">_CURVATURE_STEP</span> <span class="o">=</span> <span class="mf">1e-4</span>
-
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-  <span class="s2">"EAPEstimator"</span><span class="p">,</span>
-  <span class="s2">"LogPrior"</span><span class="p">,</span>
-  <span class="s2">"MAPEstimator"</span><span class="p">,</span>
-  <span class="s2">"QuadratureGrid"</span><span class="p">,</span>
-  <span class="s2">"normal_log_prior"</span><span class="p">,</span>
-  <span class="s2">"posterior"</span><span class="p">,</span>
-  <span class="s2">"posterior_mean"</span><span class="p">,</span>
-  <span class="s2">"posterior_variance"</span><span class="p">,</span>
-  <span class="s2">"uniform_log_prior"</span><span class="p">,</span>
-<span class="p">]</span>
-
-
-<div class="viewcode-block" id="normal_log_prior">
-<a class="viewcode-back" href="../../../api/techniques/estimation/bayesian-infrastructure.html#catsim.estimation.normal_log_prior">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">normal_log_prior</span><span class="p">(</span><span class="n">mean</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">sd</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LogPrior</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the log-density of a normal prior.</span>
-
-<span class="sd">  Parameters</span>
-<span class="sd">  ----------</span>
-<span class="sd">  mean : float, optional</span>
-<span class="sd">      Mean of the prior. Default is 0.</span>
-<span class="sd">  sd : float, optional</span>
-<span class="sd">      Standard deviation of the prior. Default is 1.</span>
-
-<span class="sd">  Returns</span>
-<span class="sd">  -------</span>
-<span class="sd">  LogPrior</span>
-<span class="sd">      A vectorized callable mapping ability values to their log-density under</span>
-<span class="sd">      :math:`\mathcal{N}(\text{mean}, \text{sd}^2)`. It pickles, equals any prior this function</span>
-<span class="sd">      returns for the same arguments, and its repr is the call that builds it.</span>
-
-<span class="sd">  Raises</span>
-<span class="sd">  ------</span>
-<span class="sd">  ValueError</span>
-<span class="sd">      If ``mean`` is not finite, or ``sd`` is not finite and positive.</span>
-<span class="sd">  """</span>
-  <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">mean</span><span class="p">):</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"mean must be finite, got </span><span class="si">{</span><span class="n">mean</span><span class="si">}</span><span class="s2">"</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-  <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">sd</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sd</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"sd must be positive and finite, got </span><span class="si">{</span><span class="n">sd</span><span class="si">}</span><span class="s2">"</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-  <span class="k">return</span> <span class="n">_NormalLogPrior</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">mean</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">sd</span><span class="p">))</span></div>
-
-
-
-<span class="c1"># The priors are module-level classes rather than closures so that an estimator holding one pickles, as an engine sent</span>
-<span class="c1"># to a worker process must (ADR-0015).</span>
-<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">_NormalLogPrior</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""The normal log-density that :func:`normal_log_prior` returns."""</span>
-
-  <span class="n">mean</span><span class="p">:</span> <span class="nb">float</span>
-  <span class="n">sd</span><span class="p">:</span> <span class="nb">float</span>
-
-  <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the log-density at each ability."""</span>
-    <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span>
-    <span class="k">return</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">var</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">theta</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">var</span>
-
-  <span class="nd">@override</span>
-  <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the call to :func:`normal_log_prior` that builds this prior."""</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">"normal_log_prior(mean=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="si">!r}</span><span class="s2">, sd=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="si">!r}</span><span class="s2">)"</span>
-
-
-<div class="viewcode-block" id="uniform_log_prior">
-<a class="viewcode-back" href="../../../api/techniques/estimation/bayesian-infrastructure.html#catsim.estimation.uniform_log_prior">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">uniform_log_prior</span><span class="p">(</span><span class="n">low</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">high</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LogPrior</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the log-density of a uniform prior on ``[low, high]``.</span>
-
-<span class="sd">  Parameters</span>
-<span class="sd">  ----------</span>
-<span class="sd">  low : float, optional</span>
-<span class="sd">      Lower bound of the prior's support. Default is ``THETA_MIN_EXTENDED``.</span>
-<span class="sd">  high : float, optional</span>
-<span class="sd">      Upper bound of the prior's support. Default is ``THETA_MAX_EXTENDED``.</span>
-
-<span class="sd">  Returns</span>
-<span class="sd">  -------</span>
-<span class="sd">  LogPrior</span>
-<span class="sd">      A vectorized callable returning :math:`-\log(\text{high} - \text{low})` inside the</span>
-<span class="sd">      bounds and :math:`-\infty` outside them. It pickles, equals any prior this function returns</span>
-<span class="sd">      for the same arguments, and its repr is the call that builds it.</span>
-
-<span class="sd">  Raises</span>
-<span class="sd">  ------</span>
-<span class="sd">  ValueError</span>
-<span class="sd">      If either bound is not finite or ``high &lt;= low``.</span>
-<span class="sd">  """</span>
-  <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">low</span><span class="p">)</span> <span class="ow">and</span> <span class="n">math</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">high</span><span class="p">)):</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"low and high must be finite, got low=</span><span class="si">{</span><span class="n">low</span><span class="si">}</span><span class="s2">, high=</span><span class="si">{</span><span class="n">high</span><span class="si">}</span><span class="s2">"</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">high</span> <span class="o">&lt;=</span> <span class="n">low</span><span class="p">:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"high must be greater than low, got low=</span><span class="si">{</span><span class="n">low</span><span class="si">}</span><span class="s2">, high=</span><span class="si">{</span><span class="n">high</span><span class="si">}</span><span class="s2">"</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-  <span class="k">return</span> <span class="n">_UniformLogPrior</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">low</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">high</span><span class="p">))</span></div>
-
-
-
-<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">_UniformLogPrior</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""The uniform log-density that :func:`uniform_log_prior` returns."""</span>
-
-  <span class="n">low</span><span class="p">:</span> <span class="nb">float</span>
-  <span class="n">high</span><span class="p">:</span> <span class="nb">float</span>
-
-  <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the log-density at each ability: minus the log of the width inside the bounds, -inf outside."""</span>
-    <span class="n">inside</span> <span class="o">=</span> <span class="p">(</span><span class="n">theta</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">low</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">theta</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">high</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">inside</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">high</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">low</span><span class="p">))),</span> <span class="o">-</span><span class="n">numpy</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
-
-  <span class="nd">@override</span>
-  <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the call to :func:`uniform_log_prior` that builds this prior."""</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">"uniform_log_prior(low=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">low</span><span class="si">!r}</span><span class="s2">, high=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">high</span><span class="si">!r}</span><span class="s2">)"</span>
-
-
-<span class="c1"># eq=False: generated equality and hashing would compare the arrays, which raises; a grid is compared by identity</span>
-<div class="viewcode-block" id="QuadratureGrid">
-<a class="viewcode-back" href="../../../api/techniques/estimation/bayesian-infrastructure.html#catsim.estimation.QuadratureGrid">[docs]</a>
-<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eq</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">QuadratureGrid</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""A fixed quadrature grid for posterior computations.</span>
-
-<span class="sd">  A node's posterior mass is proportional to its weight times the prior density and the likelihood</span>
-<span class="sd">  there, so the weights take part in the posterior itself; equal weights, as :meth:`uniform` builds,</span>
-<span class="sd">  cancel in the normalization. Two grids are equal only if they are the same object, and a grid can</span>
-<span class="sd">  be a set member or a dictionary key.</span>
-
-<span class="sd">  Parameters</span>
-<span class="sd">  ----------</span>
-<span class="sd">  nodes : numpy.ndarray</span>
-<span class="sd">      One-dimensional array of finite ability values.</span>
-<span class="sd">  weights : numpy.ndarray</span>
-<span class="sd">      One-dimensional array of finite, positive quadrature weights, one per node.</span>
-
-<span class="sd">  Raises</span>
-<span class="sd">  ------</span>
-<span class="sd">  ValueError</span>
-<span class="sd">      If the arrays are not one-dimensional, differ in length, have fewer than</span>
-<span class="sd">      two entries, or hold non-finite nodes or non-positive weights.</span>
-<span class="sd">  """</span>
-
-  <span class="n">nodes</span><span class="p">:</span> <span class="n">FloatArray</span>
-  <span class="n">weights</span><span class="p">:</span> <span class="n">FloatArray</span>
-
-  <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Validate the nodes and weights."""</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"nodes and weights must be one-dimensional"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"nodes and weights must have the same length, got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2">"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="n">_MIN_QUADRATURE_NODES</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"a grid needs at least </span><span class="si">{</span><span class="n">_MIN_QUADRATURE_NODES</span><span class="si">}</span><span class="s2"> nodes, got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2">"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"nodes must be finite"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()):</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"weights must be finite and positive"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-<div class="viewcode-block" id="QuadratureGrid.uniform">
-<a class="viewcode-back" href="../../../api/techniques/estimation/bayesian-infrastructure.html#catsim.estimation.QuadratureGrid.uniform">[docs]</a>
-  <span class="nd">@classmethod</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">uniform</span><span class="p">(</span>
-    <span class="bp">cls</span><span class="p">,</span>
-    <span class="n">n_nodes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">121</span><span class="p">,</span>
-    <span class="n">low</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span>
-    <span class="n">high</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">,</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QuadratureGrid</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Create a grid of equally spaced nodes with equal weights spanning ``[low, high]``.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    n_nodes : int, optional</span>
-<span class="sd">        Number of nodes, including both bounds. Default is 121, a spacing of 0.1 on the</span>
-<span class="sd">        default bounds.</span>
-<span class="sd">    low : float, optional</span>
-<span class="sd">        First node. Default is ``THETA_MIN_EXTENDED``.</span>
-<span class="sd">    high : float, optional</span>
-<span class="sd">        Last node. Default is ``THETA_MAX_EXTENDED``.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    QuadratureGrid</span>
-<span class="sd">        The grid, with every weight equal to the node spacing.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If ``n_nodes &lt; 2`` or ``high &lt;= low``.</span>
-<span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">n_nodes</span> <span class="o">&lt;</span> <span class="n">_MIN_QUADRATURE_NODES</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"n_nodes must be at least </span><span class="si">{</span><span class="n">_MIN_QUADRATURE_NODES</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">n_nodes</span><span class="si">}</span><span class="s2">"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">high</span> <span class="o">&lt;=</span> <span class="n">low</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"high must be greater than low, got low=</span><span class="si">{</span><span class="n">low</span><span class="si">}</span><span class="s2">, high=</span><span class="si">{</span><span class="n">high</span><span class="si">}</span><span class="s2">"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-    <span class="n">nodes</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">n_nodes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-    <span class="n">weights</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">n_nodes</span><span class="p">,</span> <span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_nodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span></div>
-</div>
-
-
-
-<div class="viewcode-block" id="posterior">
-<a class="viewcode-back" href="../../../api/techniques/estimation/bayesian-infrastructure.html#catsim.estimation.posterior">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">posterior</span><span class="p">(</span>
-  <span class="n">responses</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
-  <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span>
-  <span class="n">grid</span><span class="p">:</span> <span class="n">QuadratureGrid</span><span class="p">,</span>
-  <span class="n">log_prior</span><span class="p">:</span> <span class="n">LogPrior</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the normalized discrete posterior over ``grid.nodes``.</span>
-
-<span class="sd">  Each node's mass is proportional to its weight times the prior density and the likelihood there,</span>
-<span class="sd">  computed in log space and shifted by its maximum before exponentiating, so the likelihood of many</span>
-<span class="sd">  responses does not underflow.</span>
-
-<span class="sd">  Parameters</span>
-<span class="sd">  ----------</span>
-<span class="sd">  responses : Sequence[bool]</span>
-<span class="sd">      Responses to the administered items, in the same order as ``items``: each a Boolean or the</span>
-<span class="sd">      integer 0 or 1.</span>
-<span class="sd">  items : numpy.ndarray</span>
-<span class="sd">      Parameter matrix of the administered items, one row per item.</span>
-<span class="sd">  grid : QuadratureGrid</span>
-<span class="sd">      Nodes and weights of the discrete approximation.</span>
-<span class="sd">  log_prior : LogPrior</span>
-<span class="sd">      Vectorized log-density of the prior.</span>
-
-<span class="sd">  Returns</span>
-<span class="sd">  -------</span>
-<span class="sd">  numpy.ndarray</span>
-<span class="sd">      Posterior probabilities, one per node, summing to 1.</span>
-
-<span class="sd">  Raises</span>
-<span class="sd">  ------</span>
-<span class="sd">  ValueError</span>
-<span class="sd">      If the log-prior or log-likelihood is NaN or :math:`+\infty` at any node, if every node has</span>
-<span class="sd">      zero posterior mass, if ``responses`` and ``items`` differ in length, or if an integer response</span>
-<span class="sd">      is not 0 or 1.</span>
-<span class="sd">  TypeError</span>
-<span class="sd">      If a response is neither a Boolean nor an integer.</span>
-<span class="sd">  """</span>
-  <span class="n">log_lik</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">responses</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
-  <span class="n">log_post</span> <span class="o">=</span> <span class="n">log_prior</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span> <span class="o">+</span> <span class="n">log_lik</span> <span class="o">+</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">log_post</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">or</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isposinf</span><span class="p">(</span><span class="n">log_post</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"posterior is undefined: the log-prior or log-likelihood is NaN or +inf at some node"</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-  <span class="n">finite</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">log_post</span><span class="p">)</span>
-  <span class="k">if</span> <span class="ow">not</span> <span class="n">finite</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"posterior is undefined on the provided grid: every node has zero mass"</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-  <span class="n">unnorm</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_post</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">log_post</span><span class="p">[</span><span class="n">finite</span><span class="p">])))</span>
-  <span class="k">return</span> <span class="n">unnorm</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">unnorm</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span></div>
-
-
-
-<div class="viewcode-block" id="posterior_mean">
-<a class="viewcode-back" href="../../../api/techniques/estimation/bayesian-infrastructure.html#catsim.estimation.posterior_mean">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">posterior_mean</span><span class="p">(</span><span class="n">post</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">nodes</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the mean of a discrete posterior.</span>
-
-<span class="sd">  Parameters</span>
-<span class="sd">  ----------</span>
-<span class="sd">  post : numpy.ndarray</span>
-<span class="sd">      Normalized posterior probabilities, as returned by :func:`posterior`.</span>
-<span class="sd">  nodes : numpy.ndarray</span>
-<span class="sd">      The nodes the probabilities refer to.</span>
-
-<span class="sd">  Returns</span>
-<span class="sd">  -------</span>
-<span class="sd">  float</span>
-<span class="sd">      The probability-weighted mean of the nodes.</span>
-<span class="sd">  """</span>
-  <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">nodes</span> <span class="o">*</span> <span class="n">post</span><span class="p">))</span></div>
-
-
-
-<div class="viewcode-block" id="posterior_variance">
-<a class="viewcode-back" href="../../../api/techniques/estimation/bayesian-infrastructure.html#catsim.estimation.posterior_variance">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">posterior_variance</span><span class="p">(</span><span class="n">post</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">nodes</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the variance of a discrete posterior.</span>
-
-<span class="sd">  Parameters</span>
-<span class="sd">  ----------</span>
-<span class="sd">  post : numpy.ndarray</span>
-<span class="sd">      Normalized posterior probabilities, as returned by :func:`posterior`.</span>
-<span class="sd">  nodes : numpy.ndarray</span>
-<span class="sd">      The nodes the probabilities refer to.</span>
-
-<span class="sd">  Returns</span>
-<span class="sd">  -------</span>
-<span class="sd">  float</span>
-<span class="sd">      The probability-weighted mean of the squared distances between the nodes and</span>
-<span class="sd">      :func:`posterior_mean`.</span>
-<span class="sd">  """</span>
-  <span class="n">mean</span> <span class="o">=</span> <span class="n">posterior_mean</span><span class="p">(</span><span class="n">post</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
-  <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(((</span><span class="n">nodes</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">post</span><span class="p">))</span></div>
-
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"EAPEstimator"</span><span class="p">,</span> <span class="s2">"MAPEstimator"</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="EAPEstimator">
@@ -1122,15 +797,16 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">  The mean of the ability's posterior over a quadrature grid, with the posterior standard deviation</span>
 <span class="sd">  as its standard error; see :doc:`/api/techniques/estimation/eap-estimator`. The estimator keeps no</span>
-<span class="sd">  posterior between calls: :py:func:`posterior` computes a session's posterior when it is needed.</span>
+<span class="sd">  posterior between calls: it computes a session's posterior when it is needed.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  grid : QuadratureGrid or None, optional</span>
-<span class="sd">      Quadrature grid over which the posterior is evaluated. Default is</span>
-<span class="sd">      ``QuadratureGrid.uniform()``.</span>
+<span class="sd">      irtlib's quadrature grid over which the posterior is evaluated. Default is</span>
+<span class="sd">      ``QuadratureGrid.uniform()``, 121 nodes on [-6, 6].</span>
 <span class="sd">  log_prior : LogPrior or None, optional</span>
-<span class="sd">      Vectorized log-density of the prior. Default is ``normal_log_prior()``, the standard normal.</span>
+<span class="sd">      Vectorized log-density of the prior, such as irtlib's ``normal_log_prior`` or</span>
+<span class="sd">      ``uniform_log_prior``. Default is ``normal_log_prior()``, the standard normal.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -1168,15 +844,17 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    Estimate</span>
 <span class="sd">        The posterior mean of :math:`\theta`, the posterior standard deviation and the number of</span>
 <span class="sd">        grid nodes.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If the prior is NaN or :math:`+\infty` at a node of the grid, or the posterior has no mass at</span>
+<span class="sd">        any node: a prior whose support misses the grid, or responses whose likelihood is 0 at every</span>
+<span class="sd">        node.</span>
 <span class="sd">    """</span>
     <span class="n">items</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span>
-    <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="o">.</span><span class="n">nodes</span>
-    <span class="n">post</span> <span class="o">=</span> <span class="n">posterior</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">Estimate</span><span class="p">(</span>
-      <span class="n">theta</span><span class="o">=</span><span class="n">posterior_mean</span><span class="p">(</span><span class="n">post</span><span class="p">,</span> <span class="n">nodes</span><span class="p">),</span>
-      <span class="n">se</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">posterior_variance</span><span class="p">(</span><span class="n">post</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)),</span>
-      <span class="n">evaluations</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">nodes</span><span class="o">.</span><span class="n">size</span><span class="p">),</span>
-    <span class="p">)</span></div>
+    <span class="n">estimates</span> <span class="o">=</span> <span class="n">ability</span><span class="o">.</span><span class="n">expected_a_posteriori</span><span class="p">([</span><span class="n">context</span><span class="o">.</span><span class="n">responses</span><span class="p">],</span> <span class="n">items</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span> <span class="n">log_prior</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_session_estimate</span><span class="p">(</span><span class="n">estimates</span><span class="p">)</span></div>
 
 
   <span class="nd">@property</span>
@@ -1184,12 +862,6 @@ window.runMermaid = runMermaid;</script>
 <span class="w">    </span><span class="sd">"""Return the quadrature grid used by the estimator."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span></div>
 
-
-
-<span class="c1"># Points on which MAPEstimator locates the posterior mode before refining it (0.06 apart on [-6, 6]).</span>
-<span class="n">_MODE_SEARCH_POINTS</span> <span class="o">=</span> <span class="mi">201</span>
-<span class="c1"># Equal maxima on this many search points mean a flat posterior; two can flank a symmetric peak.</span>
-<span class="n">_FLAT_MAXIMUM_POINTS</span> <span class="o">=</span> <span class="mi">3</span>
 
 
 <div class="viewcode-block" id="MAPEstimator">
@@ -1233,39 +905,6 @@ window.runMermaid = runMermaid;</script>
 <span class="w">    </span><span class="sd">"""Return the estimator as a constructor call that names every argument, with None for a default prior."""</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(log_prior=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_prior_argument</span><span class="si">!r}</span><span class="s2">, tol=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_tol</span><span class="si">!r}</span><span class="s2">, bounds=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="si">!r}</span><span class="s2">)"</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">_negative_log_posterior</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">log_likelihood</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span> <span class="o">|</span> <span class="n">FloatArray</span><span class="p">],</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">FloatArray</span><span class="p">]</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the negative log-posterior at a candidate theta."""</span>
-    <span class="n">log_lik</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span>
-    <span class="n">log_pr</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">theta</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">log_lik</span> <span class="o">+</span> <span class="n">log_pr</span><span class="p">)</span>
-
-  <span class="k">def</span><span class="w"> </span><span class="nf">_standard_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""Return the standard error of a posterior mode, :math:`1/\sqrt{I(\hat\theta) - (\log p)''(\hat\theta)}`.</span>
-
-<span class="sd">    The prior's curvature is a central difference, so any :data:`LogPrior` works. Where it is not</span>
-<span class="sd">    finite, as at the edge of a bounded prior's support, the prior adds nothing and the error is</span>
-<span class="sd">    the Fisher one. Where the sum is not positive, the error is ``math.inf``.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    theta : float</span>
-<span class="sd">        The posterior mode.</span>
-<span class="sd">    items : numpy.ndarray</span>
-<span class="sd">        Parameters of the administered items.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        The standard error, finite and positive, or ``math.inf``.</span>
-<span class="sd">    """</span>
-    <span class="n">h</span> <span class="o">=</span> <span class="n">_CURVATURE_STEP</span>
-    <span class="n">below</span><span class="p">,</span> <span class="n">at</span><span class="p">,</span> <span class="n">above</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">theta</span> <span class="o">-</span> <span class="n">h</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">theta</span> <span class="o">+</span> <span class="n">h</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
-    <span class="n">curvature</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">above</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">at</span> <span class="o">+</span> <span class="n">below</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">precision</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">total_information</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">curvature</span> <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">curvature</span><span class="p">)</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">)</span>
-    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">precision</span><span class="p">)</span> <span class="k">if</span> <span class="n">precision</span> <span class="o">&gt;</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="n">math</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">precision</span><span class="p">)</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">inf</span>
-
 <div class="viewcode-block" id="MAPEstimator.estimate">
 <a class="viewcode-back" href="../../../api/techniques/estimation/map-estimator.html#catsim.estimation.MAPEstimator.estimate">[docs]</a>
   <span class="nd">@override</span>
@@ -1295,38 +934,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        If the log-posterior has no finite maximum within the search bounds.</span>
 <span class="sd">    """</span>
     <span class="n">items</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span>
-    <span class="n">log_likelihood</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood_function</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
-    <span class="n">nodes</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">_MODE_SEARCH_POINTS</span><span class="p">)</span>
-    <span class="n">log_post</span> <span class="o">=</span> <span class="n">log_likelihood</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
-    <span class="n">peak</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">log_post</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">peak</span><span class="p">):</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">"the log-posterior is not finite at any of the </span><span class="si">{</span><span class="n">nodes</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2"> search points in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="si">}</span><span class="s2">; "</span>
-        <span class="s2">"the prior's support must contain at least one of them"</span>
-      <span class="p">)</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-    <span class="n">ties</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">log_post</span> <span class="o">==</span> <span class="n">peak</span><span class="p">)</span>
-    <span class="n">best</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ties</span><span class="p">[</span><span class="n">ties</span><span class="o">.</span><span class="n">size</span> <span class="o">//</span> <span class="mi">2</span><span class="p">])</span>
-    <span class="c1"># A flat maximum, such as a uniform prior with no responses, has no unique mode</span>
-    <span class="k">if</span> <span class="n">ties</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="n">_FLAT_MAXIMUM_POINTS</span><span class="p">:</span>
-      <span class="n">theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">best</span><span class="p">])</span>
-      <span class="k">return</span> <span class="n">Estimate</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_standard_error</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">),</span> <span class="n">evaluations</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">nodes</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
-
-    <span class="c1"># Past a narrow prior's support the objective is +inf, and SciPy's parabolic step then</span>
-    <span class="c1"># subtracts infinities; the result is checked against the best point below</span>
-    <span class="k">with</span> <span class="n">numpy</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">):</span>
-      <span class="n">result</span> <span class="o">=</span> <span class="n">minimize_scalar</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_negative_log_posterior</span><span class="p">,</span>
-        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">log_likelihood</span><span class="p">,),</span>
-        <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">best</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span> <span class="n">nodes</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">best</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nodes</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]),</span>
-        <span class="n">method</span><span class="o">=</span><span class="s2">"bounded"</span><span class="p">,</span>
-        <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">"xatol"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span><span class="p">},</span>
-      <span class="p">)</span>
-    <span class="c1"># A neighbour can lie outside a narrow prior's support, so keep the refinement only if it</span>
-    <span class="c1"># did at least as well as the best node; the estimate then always lies inside the support</span>
-    <span class="n">theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">fun</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="n">peak</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">best</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">Estimate</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_standard_error</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">),</span> <span class="n">evaluations</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">nodes</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="n">result</span><span class="o">.</span><span class="n">nfev</span><span class="p">))</span></div>
+    <span class="n">estimates</span> <span class="o">=</span> <span class="n">ability</span><span class="o">.</span><span class="n">maximum_a_posteriori</span><span class="p">(</span>
+      <span class="p">[</span><span class="n">context</span><span class="o">.</span><span class="n">responses</span><span class="p">],</span> <span class="n">items</span><span class="p">,</span> <span class="n">log_prior</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tol</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">_session_estimate</span><span class="p">(</span><span class="n">estimates</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

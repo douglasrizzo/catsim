@@ -740,7 +740,6 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l1"><a class="reference internal" href="../selection/index.html">Selection Techniques</a></li>
 <li class="toctree-l1 current active has-children"><a aria-current="page" class="current reference internal" href="#">Estimation Techniques</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="numerical-search-estimator.html">Numerical Search Estimator (MLE)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bayesian-infrastructure.html">Bayesian Estimation Infrastructure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="eap-estimator.html">Expected A Posteriori Estimator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="map-estimator.html">Maximum A Posteriori Estimator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="warm-wle.html">Warm Weighted Likelihood Estimator</a></li>
@@ -863,7 +862,7 @@ the current estimate toward the bank’s hardest or easiest item;</p></li>
 <li><p><a class="reference internal" href="eap-estimator.html#catsim.estimation.EAPEstimator" title="catsim.estimation.EAPEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EAPEstimator</span></code></a> and
 <a class="reference internal" href="map-estimator.html#catsim.estimation.MAPEstimator" title="catsim.estimation.MAPEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">MAPEstimator</span></code></a> return the posterior mean and mode,
 which the prior draws toward its center; with
-<a class="reference internal" href="bayesian-infrastructure.html#catsim.estimation.uniform_log_prior" title="catsim.estimation.uniform_log_prior"><code class="xref py py-func docutils literal notranslate"><span class="pre">uniform_log_prior()</span></code></a>, the MAP estimate is the bound
+<code class="docutils literal notranslate"><span class="pre">irtlib.quadrature.uniform_log_prior</span></code>, the MAP estimate is the bound
 the responses point to, the maximum likelihood estimate within the bounds;</p></li>
 <li><p><a class="reference internal" href="warm-wle.html#catsim.estimation.WarmLikelihoodEstimator" title="catsim.estimation.WarmLikelihoodEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">WarmLikelihoodEstimator</span></code></a> returns the root of
 Warm’s modified score, which is finite for these responses, or the bound it
@@ -885,7 +884,6 @@ estimator puts that examinee at a finite ability.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="numerical-search-estimator.html">Numerical Search Estimator (MLE)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bayesian-infrastructure.html">Bayesian Estimation Infrastructure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="eap-estimator.html">Expected A Posteriori Estimator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="map-estimator.html">Maximum A Posteriori Estimator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="warm-wle.html">Warm Weighted Likelihood Estimator</a></li>
@@ -929,7 +927,7 @@ look-ahead selectors such as MEI call it with hypothetical responses. The <a cla
 lists what an estimator receives and returns.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.estimation.BaseEstimator.estimate">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../context.html#catsim.Estimate" title="catsim.context.Estimate"><span class="pre">Estimate</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/estimation/base.html#BaseEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.BaseEstimator.estimate" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.StepContext" title="catsim.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../context.html#catsim.Estimate" title="catsim.Estimate"><span class="pre">Estimate</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/estimation/base.html#BaseEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.BaseEstimator.estimate" title="Link to this definition">#</a></dt>
 <dd><p>Return the updated ability estimate given the responses so far, with its standard error.</p>
 <p>Once an item has been administered, the estimate is finite and lies within the estimator’s
 bounds, whatever the responses, all correct and all incorrect included.</p>

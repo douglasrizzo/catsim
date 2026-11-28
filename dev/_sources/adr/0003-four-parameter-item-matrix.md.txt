@@ -18,8 +18,11 @@ no error.
 
 ## Decision
 
+The item bank is irtlib's `ItemBank` (ADR-0024), whose ADR-0009 records the rules below; catsim's
+strategies rely on them.
+
 - Every item bank holds an n×4 matrix of 4PL parameters, one row per item, with the columns $a$,
-  $b$, $c$ and $d$. Every function of `catsim.irt` and every strategy reads that shape.
+  $b$, $c$ and $d$. Every item response function and every strategy reads that shape.
 - `ItemBank(items)` takes a matrix of one to four columns, read as $[b]$, $[a, b]$, $[a, b, c]$ or
   $[a, b, c, d]$, and fills the missing parameters with $a = 1$, $c = 0$ and $d = 1$; a 1-D array
   is one item. A matrix with more than four columns is rejected, never truncated.

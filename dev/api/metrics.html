@@ -52,7 +52,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Plotting Functions – catsim.plot" href="plot.html" />
-    <link rel="prev" title="Item Response Theory Functions – catsim.irt" href="irt.html" />
+    <link rel="prev" title="Exposure Controls – catsim.exposure" href="exposure.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -383,12 +383,9 @@
 <li class="toctree-l1"><a class="reference internal" href="session.html">Sessions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="context.html">Strategy Inputs and Estimates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation Runs and Results</a></li>
-<li class="toctree-l1"><a class="reference internal" href="item_bank.html">Item Bank</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exposure.html">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot.html">Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="typing.html">Array Type Aliases – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 </ul>
 </div>
@@ -465,7 +462,7 @@ depends on the ones before it, so the errors are approximations, and replication
 the exact spread (ADR-0016).</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.metrics.Metric">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.metrics.</span></span><span class="sig-name descname"><span class="pre">Metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mc_se</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/metrics.html#Metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.metrics.Metric" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.metrics.</span></span><span class="sig-name descname"><span class="pre">Metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mc_se</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/metrics.html#Metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.metrics.Metric" title="Link to this definition">#</a></dt>
 <dd><p>A performance measure of a simulation run, with its Monte Carlo standard error.</p>
 <p>A metric unpacks as a pair, <code class="docutils literal notranslate"><span class="pre">value,</span> <span class="pre">mc_se</span> <span class="pre">=</span> <span class="pre">metrics.bias(true_thetas,</span> <span class="pre">thetas)</span></code>. A measure with
 one value per item, such as the exposure rates, holds one array of values and one of errors.</p>
@@ -489,13 +486,13 @@ session cannot.</p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="catsim.metrics.Metric.mc_se">
-<span class="sig-name descname"><span class="pre">mc_se</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">_T</span></span><a class="headerlink" href="#catsim.metrics.Metric.mc_se" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">mc_se</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">T</span></span><a class="headerlink" href="#catsim.metrics.Metric.mc_se" title="Link to this definition">#</a></dt>
 <dd><p>Alias for field number 1</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="catsim.metrics.Metric.value">
-<span class="sig-name descname"><span class="pre">value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">_T</span></span><a class="headerlink" href="#catsim.metrics.Metric.value" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">T</span></span><a class="headerlink" href="#catsim.metrics.Metric.value" title="Link to this definition">#</a></dt>
 <dd><p>Alias for field number 0</p>
 </dd></dl>
 
@@ -548,7 +545,7 @@ since each examinee has their own true ability: the error of the mean of the err
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.metrics.exposure_rates">
-<span class="sig-prename descclassname"><span class="pre">catsim.metrics.</span></span><span class="sig-name descname"><span class="pre">exposure_rates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">npt.ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sessions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#catsim.metrics.Metric" title="catsim.metrics.Metric"><span class="pre">Metric</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="typing.html#catsim.typing.FloatArray" title="catsim.typing.FloatArray"><span class="pre">FloatArray</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/catsim/metrics.html#exposure_rates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.metrics.exposure_rates" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">catsim.metrics.</span></span><span class="sig-name descname"><span class="pre">exposure_rates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">npt.ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sessions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#catsim.metrics.Metric" title="catsim.metrics.Metric"><span class="pre">Metric</span></a><span class="p"><span class="pre">[</span></span><span class="pre">FloatArray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/catsim/metrics.html#exposure_rates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.metrics.exposure_rates" title="Link to this definition">#</a></dt>
 <dd><p>Return each item’s exposure rate, the share of a run’s sessions given it, with its Monte Carlo standard error.</p>
 <div class="math notranslate nohighlight">
 \[r_i = \frac{c_i}{N}, \qquad \widehat{\mathrm{SE}}(r_i) = \sqrt{\frac{r_i (1 - r_i)}{N}}\]</div>
@@ -801,12 +798,12 @@ RMSE (Table 3). It is 0 when every estimate equals its true ability.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="irt.html"
+       href="exposure.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></p>
+        <p class="prev-next-title">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></p>
       </div>
     </a>
     <a class="right-next"

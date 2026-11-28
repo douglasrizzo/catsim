@@ -791,7 +791,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  A control holds configuration only, never per-session state, and draws from ``context.rng``. This</span>
 <span class="sd">  one administers each proposed item with probability one half:</span>
 
-<span class="sd">  &gt;&gt;&gt; from catsim import CatEngine, ItemBank</span>
+<span class="sd">  &gt;&gt;&gt; from catsim import CatEngine</span>
+<span class="sd">  &gt;&gt;&gt; from irtlib import ItemBank</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.estimation import EAPEstimator</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.exposure import BaseExposureControl</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.initialization import FixedPointInitializer</span>

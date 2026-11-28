@@ -19,11 +19,12 @@ tie-breaks, and the decisions of the engine's exposure control, if it has one. I
 
 ```pycon
 >>> import numpy
->>> from catsim import CatEngine, ItemBank, simulate
+>>> from catsim import CatEngine, simulate
 >>> from catsim.estimation import NumericalSearchEstimator
 >>> from catsim.initialization import UniformInitializer
 >>> from catsim.selection import MaxInfoSelector
 >>> from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
+>>> from irtlib import ItemBank
 >>> item_bank = ItemBank.generate(500, rng=42)
 >>> stopper = StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20))
 >>> engine = CatEngine(item_bank, UniformInitializer(), MaxInfoSelector(), NumericalSearchEstimator(), stopper)
@@ -46,7 +47,7 @@ A seeded run repeats on the same versions of catsim and NumPy, and across platfo
 agree up to floating-point rounding. Seeded results can change between catsim versions, when a
 strategy changes how many random numbers it draws, so record the versions with a study's seeds.
 
-{py:meth}`ItemBank.generate <catsim.ItemBank.generate>` takes an `rng` of its own, with the same
+`ItemBank.generate` takes an `rng` of its own, with the same
 rules, so a generated bank depends on no run. A calibrated bank read from a file needs none.
 
 ## The Population Is an Input
@@ -142,11 +143,12 @@ study again, which fails.
 # study.py
 import numpy
 
-from catsim import CatEngine, ItemBank, simulate
+from catsim import CatEngine, simulate
 from catsim.estimation import EAPEstimator
 from catsim.initialization import FixedPointInitializer
 from catsim.selection import MaxInfoSelector
 from catsim.stopping import MaxLengthStopper
+from irtlib import ItemBank
 
 
 def main() -> None:

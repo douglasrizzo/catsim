@@ -47,7 +47,7 @@ infinite, and each estimator handles them its own way:
 - {py:class}`~catsim.estimation.EAPEstimator` and
   {py:class}`~catsim.estimation.MAPEstimator` return the posterior mean and mode,
   which the prior draws toward its center; with
-  {py:func}`~catsim.estimation.uniform_log_prior`, the MAP estimate is the bound
+  `irtlib.quadrature.uniform_log_prior`, the MAP estimate is the bound
   the responses point to, the maximum likelihood estimate within the bounds;
 - {py:class}`~catsim.estimation.WarmLikelihoodEstimator` returns the root of
   Warm's modified score, which is finite for these responses, or the bound it
@@ -64,12 +64,13 @@ estimator puts that examinee at a finite ability.
     :caption: The likelihood of two patterns of five responses, relative to its maximum. The dashed line in each curve's colour marks its EAP estimate; the black lines mark the other estimators' estimates after the five correct responses.
 
     import matplotlib.pyplot as plt
-    from catsim import CatEngine, ItemBank, simulate
+    from catsim import CatEngine, simulate
     from catsim.estimation import EAPEstimator, MAPEstimator, NumericalSearchEstimator, WarmLikelihoodEstimator
     from catsim.initialization import FixedPointInitializer
     from catsim.plot import likelihood
     from catsim.selection import LinearSelector
     from catsim.stopping import MaxLengthStopper
+    from irtlib import ItemBank
 
     item_bank = ItemBank.generate(5, "2PL", rng=4)
 
@@ -97,7 +98,6 @@ estimator puts that examinee at a finite ability.
 :maxdepth: 1
 
 numerical-search-estimator
-bayesian-infrastructure
 eap-estimator
 map-estimator
 warm-wle

@@ -502,7 +502,7 @@ the integral on a fixed grid
 \approx
 \sum_{q=1}^{Q} I_i(\theta_q)\,L(\mathbf{u}\mid\theta_q)\,\Delta_q.\]</div>
 <p>catsim divides the likelihood values by their sum over the grid, which makes them
-the posterior that <a class="reference internal" href="../estimation/bayesian-infrastructure.html#catsim.estimation.posterior" title="catsim.estimation.posterior"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.estimation.posterior()</span></code></a> computes under a
+the posterior that <code class="docutils literal notranslate"><span class="pre">irtlib.quadrature.posterior</span></code> computes under a
 uniform prior on <code class="docutils literal notranslate"><span class="pre">bounds</span></code>. That division and the spacing <span class="math notranslate nohighlight">\(\Delta_q\)</span>, the same
 at every node, scale every item’s score by one constant, so they do not change
 which item is selected.</p>

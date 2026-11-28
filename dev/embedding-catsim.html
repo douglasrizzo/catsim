@@ -457,11 +457,12 @@ step by step, then lists what catsim checks in its inputs and what stays with th
 <h2>Configure the Test Once<a class="headerlink" href="#configure-the-test-once" title="Link to this heading">#</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">ItemBank</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">EAPEstimator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">FixedPointInitializer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxInfoSelector</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLengthStopper</span><span class="p">,</span> <span class="n">StandardErrorStopper</span><span class="p">,</span> <span class="n">StopRule</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">irtlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 
 <span class="n">item_bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="s2">"3PL"</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
 <span class="n">stopper</span> <span class="o">=</span> <span class="n">StopRule</span><span class="p">(</span><span class="n">StandardErrorStopper</span><span class="p">(</span><span class="mf">0.4</span><span class="p">),</span> <span class="n">MaxLengthStopper</span><span class="p">(</span><span class="mi">25</span><span class="p">),</span> <span class="n">min_items</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
@@ -473,10 +474,9 @@ where it starts, how it chooses items, how it estimates ability and when it stop
 starts at an ability of 0, gives the most informative item at the current estimate, and stops once
 the standard error of the estimate is at most 0.4, after at least 5 and at most 25 items.
 <a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a> shows how to compare such choices before going live.</p>
-<p>The generated bank stands in for yours: read a calibrated bank with
-<a class="reference internal" href="api/item_bank.html#catsim.ItemBank.from_csv" title="catsim.ItemBank.from_csv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ItemBank.from_csv</span></code></a>, or pass its parameters to
-<a class="reference internal" href="api/item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code></a>. catsim refers to an item by its row in the bank, its <em>index</em>, counted
-from 0, and each item also has a name, <code class="docutils literal notranslate"><span class="pre">item_bank.names[item]</span></code>. Mapping indices or names to the
+<p>The generated bank stands in for yours: read a calibrated bank with <code class="docutils literal notranslate"><span class="pre">ItemBank.from_csv</span></code>, or pass
+its parameters to <code class="docutils literal notranslate"><span class="pre">ItemBank</span></code>, both from irtlib. catsim refers to an item by its row in the bank, its
+<em>index</em>, counted from 0, and each item also has a name, <code class="docutils literal notranslate"><span class="pre">item_bank.names[item]</span></code>. Mapping indices or names to the
 application’s own item records is the application’s.</p>
 <p>An engine never changes, and neither does its bank: build them once, when the application starts,
 and share them between requests, threads and processes.</p>

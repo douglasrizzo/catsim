@@ -397,9 +397,10 @@
 <li class="toctree-l1"><a class="reference internal" href="0018-ability-scale-and-extreme-patterns.html">ADR-0018: Ability Scale and Extreme Response Patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0019-published-progressive-schedule.html">ADR-0019: Progressive and Proportional Follow the Published Schedule</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0020-catr-as-the-reference.html">ADR-0020: Parity Tests Check catsim Against catR</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0021-dependencies.html">ADR-0021: NumPy and SciPy Are the Only Runtime Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0021-dependencies.html">ADR-0021: NumPy, SciPy and irtlib Are the Only Runtime Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0022-plotting-as-an-optional-extra.html">ADR-0022: Plotting Is an Optional Module With One Calling Convention</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0023-public-import-paths-and-names.html">ADR-0023: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0024-catsim-builds-on-irtlib.html">ADR-0024: catsim Builds on irtlib’s Item Response Theory</a></li>
 </ul>
 </div>
 </nav></div>
@@ -481,7 +482,6 @@ computations to the catR package.</p>
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
 <p>catsim is a library for computing and evaluating computerized adaptive tests:</p>
 <ul class="simple">
-<li><p>the IRT quantities of its models;</p></li>
 <li><p>the CAT strategies: initialization, item selection, ability estimation, stopping and exposure
 control, built in or written by method authors;</p></li>
 <li><p>simulation studies that run and compare them.</p></li>
@@ -489,7 +489,9 @@ control, built in or written by method authors;</p></li>
 <p>A live testing application can use catsim’s computations as its core. catsim does not run, store or serve live tests: storing sessions, the item on screen, concurrency,
 sharing exposure counts across sessions, persistence and audits belong to the application
 (ADR-0006).</p>
-<p>catsim does not calibrate items, and it has no graphical or web interface.</p>
+<p>The item response theory those computations rest on, the response functions, the item bank and the
+estimators’ mathematics, is irtlib’s (ADR-0024). catsim does not calibrate items, and it has no
+graphical or web interface.</p>
 </section>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>

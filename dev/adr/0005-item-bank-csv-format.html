@@ -397,9 +397,10 @@
 <li class="toctree-l1"><a class="reference internal" href="0018-ability-scale-and-extreme-patterns.html">ADR-0018: Ability Scale and Extreme Response Patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0019-published-progressive-schedule.html">ADR-0019: Progressive and Proportional Follow the Published Schedule</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0020-catr-as-the-reference.html">ADR-0020: Parity Tests Check catsim Against catR</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0021-dependencies.html">ADR-0021: NumPy and SciPy Are the Only Runtime Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0021-dependencies.html">ADR-0021: NumPy, SciPy and irtlib Are the Only Runtime Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0022-plotting-as-an-optional-extra.html">ADR-0022: Plotting Is an Optional Module With One Calling Convention</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0023-public-import-paths-and-names.html">ADR-0023: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0024-catsim-builds-on-irtlib.html">ADR-0024: catsim Builds on irtlib’s Item Response Theory</a></li>
 </ul>
 </div>
 </nav></div>
@@ -464,57 +465,30 @@
 <h1>ADR-0005: Item Banks Read and Write One CSV Format<a class="headerlink" href="#adr-0005-item-banks-read-and-write-one-csv-format" title="Link to this heading">#</a></h1>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
-<p>Accepted 2026-11-25</p>
+<p>Accepted 2026-11-25; superseded 2026-11-27 by irtlib’s ADR-0009, the item bank format</p>
 </section>
 <section id="context">
 <h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
-<p>An item bank could only be built from a NumPy matrix, so every study began by parsing its bank
-file by hand, and a generated bank could not be saved to repeat or share a study. Researchers asked
-to load a bank from a CSV file.</p>
+<p>catsim’s item bank read and wrote one CSV format: a header row, the parameter columns <code class="docutils literal notranslate"><span class="pre">a</span></code> to <code class="docutils literal notranslate"><span class="pre">d</span></code> by
+name with the defaults of ADR-0003 for the missing ones, an optional name column, and nothing else.
+The item bank is irtlib’s (ADR-0024), and so is its file format.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ItemBank.from_csv(path)</span></code> reads a bank, and <code class="docutils literal notranslate"><span class="pre">bank.to_csv(path)</span></code> writes one, in one format:</p>
-<ul>
-<li><p>comma-separated, with a dot as the decimal mark;</p></li>
-<li><p>a header row, which is required;</p></li>
-<li><p>the parameter columns named <code class="docutils literal notranslate"><span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">b</span></code>, <code class="docutils literal notranslate"><span class="pre">c</span></code> and <code class="docutils literal notranslate"><span class="pre">d</span></code>, in any order. <code class="docutils literal notranslate"><span class="pre">b</span></code> is required; a missing <code class="docutils literal notranslate"><span class="pre">a</span></code>
-is 1, a missing <code class="docutils literal notranslate"><span class="pre">c</span></code> is 0 and a missing <code class="docutils literal notranslate"><span class="pre">d</span></code> is 1, the rule of ADR-0003 applied by column name;</p></li>
-<li><p>an optional name column, headed <code class="docutils literal notranslate"><span class="pre">name</span></code> or with an empty header, the header R’s <code class="docutils literal notranslate"><span class="pre">write.csv</span></code>
-gives row names. Without it, names are generated (ADR-0004).</p></li>
-</ul>
-</li>
-<li><p>Any other column is an error that names it.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">to_csv</span></code> writes the name column and the four parameter columns, with each number written so that
-it reads back exactly, so <code class="docutils literal notranslate"><span class="pre">ItemBank.from_csv(path)</span></code> gives back the bank that wrote it.</p></li>
-<li><p>The reader uses Python’s <code class="docutils literal notranslate"><span class="pre">csv</span></code> module, and the bank validates what it reads as it validates a
-matrix.</p></li>
-</ul>
+<p>Item banks are read and written by irtlib’s <code class="docutils literal notranslate"><span class="pre">ItemBank.from_csv</span></code> and <code class="docutils literal notranslate"><span class="pre">ItemBank.to_csv</span></code>, in the
+format irtlib’s ADR-0009 sets out. catsim has no reader or writer of its own.</p>
 </section>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>A bank saved from R with <code class="docutils literal notranslate"><span class="pre">write.csv(bank)</span></code> loads with its names, when its columns are named <code class="docutils literal notranslate"><span class="pre">a</span></code> to
-<code class="docutils literal notranslate"><span class="pre">d</span></code>.</p></li>
-<li><p>A generated bank can be saved with a study and shared with the R scripts of the parity tests
-(ADR-0020).</p></li>
-<li><p>A misspelled column, <code class="docutils literal notranslate"><span class="pre">A</span></code> or <code class="docutils literal notranslate"><span class="pre">disc</span></code>, raises an error instead of silently falling back to a default.</p></li>
-<li><p>Files in another layout, with other column names, other delimiters or a decimal comma, are read
-with pandas or NumPy and passed as <code class="docutils literal notranslate"><span class="pre">ItemBank(matrix,</span> <span class="pre">names=...)</span></code>.</p></li>
-<li><p>Reading a CSV file adds no dependency.</p></li>
+<li><p>A bank file that a study saves loads in catsim and in irtlib alike, since there is one reader.</p></li>
+<li><p>A change to the format is made, and recorded, in irtlib.</p></li>
 </ul>
 </section>
 <section id="alternatives-considered">
 <h2>Alternatives Considered<a class="headerlink" href="#alternatives-considered" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>Columns by position, as in the matrix: a file with an extra or reordered column would load
-silently wrong.</p></li>
-<li><p>Ignoring unknown columns, so a file can carry other metadata: a misspelled parameter column would
-be ignored too, and its parameter defaulted.</p></li>
-<li><p>Options for the delimiter, the decimal mark and the column names: pandas already reads every
-layout, and one format is what a saved study needs.</p></li>
-<li><p>A reader built on pandas: a dependency for one file format (ADR-0021).</p></li>
+<li><p>Keeping this record of the format beside irtlib’s: two records of one decision drift.</p></li>
 </ul>
 </section>
 </section>

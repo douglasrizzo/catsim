@@ -50,7 +50,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Bibliography" href="references.html" />
-    <link rel="prev" title="ADR-0023: Public Import Paths and One Name per Concept" href="adr/0023-public-import-paths-and-names.html" />
+    <link rel="prev" title="ADR-0024: catsim Builds on irtlib’s Item Response Theory" href="adr/0024-catsim-builds-on-irtlib.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -434,7 +434,7 @@
                   
   <section class="tex2jax_ignore mathjax_ignore" id="contributing">
 <h1>Contributing<a class="headerlink" href="#contributing" title="Link to this heading">#</a></h1>
-<p><strong>catsim</strong> is built in an object-oriented paradigm (or as object-oriented as Python allows) so it is rather simple to extend it. You can write new <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/initialization/index.html">initializers</a>, <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/selection/index.html">selectors</a>, <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/estimation/index.html">estimators</a> or <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/stopping/index.html">stopping criteria</a> by extending the base classes that are present in each of the corresponding modules. You can also write new <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/irt.html">IRT-related functions</a>, as long as you have the right academic papers to prove they are relevant.</p>
+<p><strong>catsim</strong> is built in an object-oriented paradigm (or as object-oriented as Python allows) so it is rather simple to extend it. You can write new <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/initialization/index.html">initializers</a>, <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/selection/index.html">selectors</a>, <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/estimation/index.html">estimators</a> or <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/stopping/index.html">stopping criteria</a> by extending the base classes that are present in each of the corresponding modules. Item response theory, the response functions, the item bank and the estimators’ mathematics, belongs to <a class="reference external" href="https://github.com/douglasrizzo/irtlib">irtlib</a>, the package catsim builds on (<a class="reference internal" href="adr/0024-catsim-builds-on-irtlib.html"><span class="std std-doc">ADR-0024</span></a>): contribute those there.</p>
 <p>If you think the <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/engine.html">CAT engine</a> or <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/simulation.html"><code class="docutils literal notranslate"><span class="pre">simulate</span></code></a> could be doing something it is not doing, feel free to study it and make a contribution.</p>
 <p>If you know a better way to present all the data collected during simulation, feel free to contribute with your own <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/plot.html">plots</a>.</p>
 <section id="psychometrics">
@@ -497,7 +497,7 @@ uv<span class="w"> </span>run<span class="w"> </span>pre-commit<span class="w"> 
 <h2>Parity tests<a class="headerlink" href="#parity-tests" title="Link to this heading">#</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">tests/test_parity_catr.py</span></code> checks catsim against the R package <a class="reference external" href="https://cran.r-project.org/package=catR">catR</a> on fixed cases (<a class="reference internal" href="adr/0020-catr-as-the-reference.html"><span class="std std-doc">ADR-0020</span></a>). It runs with the rest of the suite and needs no R: catR’s outputs are JSON files in <code class="docutils literal notranslate"><span class="pre">tests/parity/catr/</span></code>, written with the R and catR versions by the R scripts beside them. The cases are at three levels:</p>
 <ol class="arabic simple">
-<li><p>single computations (<code class="docutils literal notranslate"><span class="pre">irt.R</span></code>, <code class="docutils literal notranslate"><span class="pre">estimation.R</span></code>, <code class="docutils literal notranslate"><span class="pre">selection.R</span></code>, <code class="docutils literal notranslate"><span class="pre">stopping.R</span></code>);</p></li>
+<li><p>single computations (<code class="docutils literal notranslate"><span class="pre">estimation.R</span></code>, <code class="docutils literal notranslate"><span class="pre">selection.R</span></code>, <code class="docutils literal notranslate"><span class="pre">stopping.R</span></code>);</p></li>
 <li><p>whole tests on recorded responses (<code class="docutils literal notranslate"><span class="pre">whole_tests.R</span></code>), which must give the same items in the same order and the same estimates;</p></li>
 <li><p>simulations of the randomized selectors (<code class="docutils literal notranslate"><span class="pre">simulations.R</span></code>), whose metrics must agree within their Monte Carlo error, since R and NumPy draw different numbers.</p></li>
 </ol>
@@ -541,12 +541,12 @@ uv<span class="w"> </span>run<span class="w"> </span>pre-commit<span class="w"> 
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="adr/0023-public-import-paths-and-names.html"
+       href="adr/0024-catsim-builds-on-irtlib.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ADR-0023: Public Import Paths and One Name per Concept</p>
+        <p class="prev-next-title">ADR-0024: catsim Builds on irtlib’s Item Response Theory</p>
       </div>
     </a>
     <a class="right-next"

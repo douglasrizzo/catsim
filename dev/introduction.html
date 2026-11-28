@@ -895,16 +895,16 @@ likelihood estimate it is <span class="bibtex-citation" id="id6">[<a class="refe
 <div class="math notranslate nohighlight">
 \[SE(\hat{\theta}) = \frac{1}{\sqrt{I(\hat{\theta})}}.\]</div>
 <p>Every item adds information, so the more items an examinee answers, the smaller the standard
-error. <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> computes these quantities with the functions of the <a class="reference internal" href="api/irt.html#module-catsim.irt" title="catsim.irt"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a>
-module.</p>
+error. These quantities come from <a class="reference external" href="https://github.com/douglasrizzo/irtlib">irtlib</a>, the item
+response theory package catsim builds on, in its <code class="docutils literal notranslate"><span class="pre">irtlib.irt</span></code> module.</p>
 <section id="the-item-matrix">
 <h3>The Item Matrix<a class="headerlink" href="#the-item-matrix" title="Link to this heading">#</a></h3>
-<p>In <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>, the items are a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> with one row per item and one column
-per parameter, the <em>item matrix</em>. Its four columns hold <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(c\)</span> and <span class="math notranslate nohighlight">\(d\)</span>, in this order. A
-matrix with one, two or three columns is read as <span class="math notranslate nohighlight">\([b]\)</span>, <span class="math notranslate nohighlight">\([a, b]\)</span> or <span class="math notranslate nohighlight">\([a, b, c]\)</span>, and the missing
-parameters take the values <span class="math notranslate nohighlight">\(a = 1\)</span>, <span class="math notranslate nohighlight">\(c = 0\)</span> and <span class="math notranslate nohighlight">\(d = 1\)</span>. An <a class="reference internal" href="api/item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code></a> holds an
-item matrix, and <a class="reference internal" href="api/item_bank.html#catsim.ItemBank.generate" title="catsim.ItemBank.generate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ItemBank.generate</span></code></a> draws one at random:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
+<p>In <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> and irtlib, the items are a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> with one row per item and
+one column per parameter, the <em>item matrix</em>. Its four columns hold <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(c\)</span> and <span class="math notranslate nohighlight">\(d\)</span>, in this
+order. A matrix with one, two or three columns is read as <span class="math notranslate nohighlight">\([b]\)</span>, <span class="math notranslate nohighlight">\([a, b]\)</span> or <span class="math notranslate nohighlight">\([a, b, c]\)</span>, and the missing
+parameters take the values <span class="math notranslate nohighlight">\(a = 1\)</span>, <span class="math notranslate nohighlight">\(c = 0\)</span> and <span class="math notranslate nohighlight">\(d = 1\)</span>. An item bank, irtlib’s <code class="docutils literal notranslate"><span class="pre">ItemBank</span></code>, holds
+an item matrix, and <code class="docutils literal notranslate"><span class="pre">ItemBank.generate</span></code> draws one at random:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">irtlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ItemBank</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">"1PL"</span><span class="p">)</span>
 <span class="go">ItemBank(n_items=5, model=1PL)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ItemBank</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">"2PL"</span><span class="p">)</span>
@@ -921,7 +921,7 @@ item matrix, and <a class="reference internal" href="api/item_bank.html#catsim.I
 four columns. In the last example, the discrimination and the difficulty have a correlation of
 <span class="math notranslate nohighlight">\(0.5\)</span>, which simulations may need <span class="bibtex-citation" id="id7">[<a class="reference internal" href="references.html#id14" title="H.-H. Chang, J. Qian, and Z. Ying. a-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. Not openly available; Barrada et al. (2006) describe the method. doi:10.1177/01466210122032181.">Chang <em>et al.</em>, 2001</a>]</span>. Each item also has a name, so that results
 can say which item is which; a calibrated bank and its names can be read from a CSV file
-(<a class="reference internal" href="api/item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code></a>).</p>
+(<code class="docutils literal notranslate"><span class="pre">ItemBank.from_csv</span></code>).</p>
 </section>
 </section>
 <section id="computerized-adaptive-tests">
@@ -996,7 +996,7 @@ given: <code class="docutils literal notranslate"><span class="pre">True</span><
 </pre></div>
 </div>
 <p>Estimators fall into two groups. Maximum likelihood estimators return the ability at which the
-responses are most likely, the maximum of the <em>log-likelihood</em> (<a class="reference internal" href="api/irt.html#catsim.irt.log_likelihood" title="catsim.irt.log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.log_likelihood()</span></code></a>).
+responses are most likely, the maximum of the <em>log-likelihood</em> (<code class="docutils literal notranslate"><span class="pre">irtlib.irt.log_likelihood</span></code>).
 Bayesian estimators combine the likelihood with a prior distribution of the abilities in the
 population. Each estimator also gives the standard error of its estimate, by its own formula
 (<a class="reference internal" href="api/techniques/estimation/index.html"><span class="doc">estimation techniques</span></a>).</p>
@@ -1025,8 +1025,8 @@ holds, after an optional minimum number of items.</p>
     simulate[simulate] -- &quot;one session per&lt;br&gt;examinee&quot; --&gt; engine
     simulate -- returns --&gt; result[SimulationResult]
     </pre><ul class="simple">
-<li><p><strong>The item bank.</strong> An <a class="reference internal" href="api/item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code></a> holds the calibrated items, their parameters
-and their names, and never changes.</p></li>
+<li><p><strong>The item bank.</strong> An <code class="docutils literal notranslate"><span class="pre">ItemBank</span></code>, from irtlib, holds the calibrated items, their parameters and
+their names, and never changes.</p></li>
 <li><p><strong>The engine and the session.</strong> A <a class="reference internal" href="api/engine.html#catsim.CatEngine" title="catsim.CatEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">CatEngine</span></code></a> holds an item bank and the
 strategies of a test. Its three steps follow the lifecycle above: <code class="docutils literal notranslate"><span class="pre">start</span></code> sets the initial
 estimate, <code class="docutils literal notranslate"><span class="pre">select</span></code> chooses the next item and <code class="docutils literal notranslate"><span class="pre">answer</span></code> records a response, updates the estimate

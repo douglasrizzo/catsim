@@ -397,9 +397,10 @@
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0018: Ability Scale and Extreme Response Patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0019-published-progressive-schedule.html">ADR-0019: Progressive and Proportional Follow the Published Schedule</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0020-catr-as-the-reference.html">ADR-0020: Parity Tests Check catsim Against catR</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0021-dependencies.html">ADR-0021: NumPy and SciPy Are the Only Runtime Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0021-dependencies.html">ADR-0021: NumPy, SciPy and irtlib Are the Only Runtime Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0022-plotting-as-an-optional-extra.html">ADR-0022: Plotting Is an Optional Module With One Calling Convention</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0023-public-import-paths-and-names.html">ADR-0023: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0024-catsim-builds-on-irtlib.html">ADR-0024: catsim Builds on irtlib’s Item Response Theory</a></li>
 </ul>
 </div>
 </nav></div>
@@ -486,7 +487,8 @@ range.</p>
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
 <p>The ability scale’s default range is [-6, 6], six standard deviations either side of the mean of a
 standard normal population: wider than any plausible examinee or item bank, and narrow enough that
-every search ends.</p>
+every search ends. Its bounds are irtlib’s <code class="docutils literal notranslate"><span class="pre">THETA_MIN_EXTENDED</span></code> and <code class="docutils literal notranslate"><span class="pre">THETA_MAX_EXTENDED</span></code>
+(ADR-0024).</p>
 <p>Every estimator returns a finite estimate inside its bounds once an item has been administered,
 whatever the response pattern. <code class="docutils literal notranslate"><span class="pre">BaseEstimator.estimate</span></code> states this as the contract, and the engine
 and the selectors rely on it. The estimators that search the scale, <code class="docutils literal notranslate"><span class="pre">NumericalSearchEstimator</span></code>,
@@ -503,7 +505,7 @@ it off.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">EAPEstimator</span></code> returns the posterior mean over its grid, which the prior pulls toward the prior
 mean.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">MAPEstimator</span></code> returns the posterior mode inside its bounds. With the default normal prior the mode
-is interior; with <code class="docutils literal notranslate"><span class="pre">uniform_log_prior()</span></code> it is, to within <code class="docutils literal notranslate"><span class="pre">tol</span></code>, the bound the responses point to,
+is interior; with irtlib’s <code class="docutils literal notranslate"><span class="pre">uniform_log_prior()</span></code> it is, to within <code class="docutils literal notranslate"><span class="pre">tol</span></code>, the bound the responses point to,
 which is the maximum likelihood estimate restricted to the bounds.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">WarmLikelihoodEstimator</span></code> returns the root of Warm’s modified score, which is finite for these
 patterns, or the bound the modified score points to when the root lies beyond the bounds.</p></li>

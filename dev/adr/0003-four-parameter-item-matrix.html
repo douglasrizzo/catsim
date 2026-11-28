@@ -399,9 +399,10 @@
 <li class="toctree-l1"><a class="reference internal" href="0018-ability-scale-and-extreme-patterns.html">ADR-0018: Ability Scale and Extreme Response Patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0019-published-progressive-schedule.html">ADR-0019: Progressive and Proportional Follow the Published Schedule</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0020-catr-as-the-reference.html">ADR-0020: Parity Tests Check catsim Against catR</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0021-dependencies.html">ADR-0021: NumPy and SciPy Are the Only Runtime Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0021-dependencies.html">ADR-0021: NumPy, SciPy and irtlib Are the Only Runtime Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0022-plotting-as-an-optional-extra.html">ADR-0022: Plotting Is an Optional Module With One Calling Convention</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0023-public-import-paths-and-names.html">ADR-0023: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0024-catsim-builds-on-irtlib.html">ADR-0024: catsim Builds on irtlib’s Item Response Theory</a></li>
 </ul>
 </div>
 </nav></div>
@@ -481,9 +482,11 @@ no error.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
+<p>The item bank is irtlib’s <code class="docutils literal notranslate"><span class="pre">ItemBank</span></code> (ADR-0024), whose ADR-0009 records the rules below; catsim’s
+strategies rely on them.</p>
 <ul class="simple">
 <li><p>Every item bank holds an n×4 matrix of 4PL parameters, one row per item, with the columns <span class="math notranslate nohighlight">\(a\)</span>,
-<span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(c\)</span> and <span class="math notranslate nohighlight">\(d\)</span>. Every function of <code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code> and every strategy reads that shape.</p></li>
+<span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(c\)</span> and <span class="math notranslate nohighlight">\(d\)</span>. Every item response function and every strategy reads that shape.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ItemBank(items)</span></code> takes a matrix of one to four columns, read as <span class="math notranslate nohighlight">\([b]\)</span>, <span class="math notranslate nohighlight">\([a, b]\)</span>, <span class="math notranslate nohighlight">\([a, b, c]\)</span> or
 <span class="math notranslate nohighlight">\([a, b, c, d]\)</span>, and fills the missing parameters with <span class="math notranslate nohighlight">\(a = 1\)</span>, <span class="math notranslate nohighlight">\(c = 0\)</span> and <span class="math notranslate nohighlight">\(d = 1\)</span>; a 1-D array
 is one item. A matrix with more than four columns is rejected, never truncated.</p></li>

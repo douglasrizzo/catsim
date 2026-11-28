@@ -34,4 +34,5 @@ adr/0020-catr-as-the-reference
 adr/0021-dependencies
 adr/0022-plotting-as-an-optional-extra
 adr/0023-public-import-paths-and-names
+adr/0024-catsim-builds-on-irtlib
 ```

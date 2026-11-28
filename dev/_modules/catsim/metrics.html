@@ -790,23 +790,19 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">NamedTuple</span><span class="p">,</span> <span class="n">TypeVar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">NamedTuple</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">irtlib.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
   <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
-
-  <span class="kn">from</span><span class="w"> </span><span class="nn">.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntArray</span>
-
-<span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"_T"</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">FloatArray</span><span class="p">)</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">irtlib.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntArray</span>
 
 
 <div class="viewcode-block" id="Metric">
 <a class="viewcode-back" href="../../api/metrics.html#catsim.metrics.Metric">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Metric</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_T</span><span class="p">]):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Metric</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">FloatArray</span><span class="p">)](</span><span class="n">NamedTuple</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""A performance measure of a simulation run, with its Monte Carlo standard error.</span>
 
 <span class="sd">  A metric unpacks as a pair, ``value, mc_se = metrics.bias(true_thetas, thetas)``. A measure with</span>
@@ -828,8 +824,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  (0.5, 0.5774)</span>
 <span class="sd">  """</span>
 
-  <span class="n">value</span><span class="p">:</span> <span class="n">_T</span>
-  <span class="n">mc_se</span><span class="p">:</span> <span class="n">_T</span></div>
+  <span class="n">value</span><span class="p">:</span> <span class="n">T</span>
+  <span class="n">mc_se</span><span class="p">:</span> <span class="n">T</span></div>
 
 
 

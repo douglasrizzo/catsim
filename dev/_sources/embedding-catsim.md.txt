@@ -13,11 +13,12 @@ step by step, then lists what catsim checks in its inputs and what stays with th
 ```python
 import numpy
 
-from catsim import CatEngine, ItemBank
+from catsim import CatEngine
 from catsim.estimation import EAPEstimator
 from catsim.initialization import FixedPointInitializer
 from catsim.selection import MaxInfoSelector
 from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
+from irtlib import ItemBank
 
 item_bank = ItemBank.generate(200, "3PL", rng=7)
 stopper = StopRule(StandardErrorStopper(0.4), MaxLengthStopper(25), min_items=5)
@@ -30,10 +31,9 @@ starts at an ability of 0, gives the most informative item at the current estima
 the standard error of the estimate is at most 0.4, after at least 5 and at most 25 items.
 {doc}`running-simulations` shows how to compare such choices before going live.
 
-The generated bank stands in for yours: read a calibrated bank with
-{py:meth}`ItemBank.from_csv <catsim.ItemBank.from_csv>`, or pass its parameters to
-{py:class}`~catsim.ItemBank`. catsim refers to an item by its row in the bank, its *index*, counted
-from 0, and each item also has a name, `item_bank.names[item]`. Mapping indices or names to the
+The generated bank stands in for yours: read a calibrated bank with `ItemBank.from_csv`, or pass
+its parameters to `ItemBank`, both from irtlib. catsim refers to an item by its row in the bank, its
+*index*, counted from 0, and each item also has a name, `item_bank.names[item]`. Mapping indices or names to the
 application's own item records is the application's.
 
 An engine never changes, and neither does its bank: build them once, when the application starts,

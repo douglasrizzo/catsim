@@ -812,12 +812,13 @@ window.runMermaid = runMermaid;</script>
   <span class="n">_missing</span> <span class="o">=</span> <span class="s2">"catsim.plot needs matplotlib; install it with: pip install 'catsim[plot]'"</span>
   <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">_missing</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span><span class="p">,</span> <span class="n">metrics</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">irtlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">irt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">irtlib.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">IntArray</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">metrics</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.checks</span><span class="w"> </span><span class="kn">import</span> <span class="n">_check_in_bank</span><span class="p">,</span> <span class="n">_item</span><span class="p">,</span> <span class="n">_item_indices</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">Session</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.simulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimulationResult</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">IntArray</span>
 
 <span class="c1"># The most items an x axis names, one tick each: at matplotlib's default figure width, more names overlap.</span>
 <span class="n">_MAX_NAMED_TICKS</span> <span class="o">=</span> <span class="mi">30</span>
@@ -870,7 +871,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      :caption: One item's characteristic and information curves, apart and together. The dot marks its peak.</span>
 
 <span class="sd">      import matplotlib.pyplot as plt</span>
-<span class="sd">      from catsim import ItemBank</span>
+<span class="sd">      from irtlib import ItemBank</span>
 <span class="sd">      from catsim.plot import PlotType, item_curve</span>
 <span class="sd">      item_bank = ItemBank.generate(1, rng=7)</span>
 <span class="sd">      fig, axes = plt.subplots(3, 1, figsize=(7, 15))</span>
@@ -1039,7 +1040,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      :caption: The information of a 100-item bank, with its standard error.</span>
 
 <span class="sd">      import matplotlib.pyplot as plt</span>
-<span class="sd">      from catsim import ItemBank</span>
+<span class="sd">      from irtlib import ItemBank</span>
 <span class="sd">      from catsim import plot</span>
 
 <span class="sd">      plot.bank_information(ItemBank.generate(100, "3PL", rng=0))</span>
@@ -1115,7 +1116,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      :caption: The expected proportion correct of a 100-item bank and of its first 20 items.</span>
 
 <span class="sd">      import matplotlib.pyplot as plt</span>
-<span class="sd">      from catsim import ItemBank</span>
+<span class="sd">      from irtlib import ItemBank</span>
 <span class="sd">      from catsim import plot</span>
 
 <span class="sd">      item_bank = ItemBank.generate(100, "3PL", rng=0)</span>
@@ -1169,7 +1170,7 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">  Both histograms share one :math:`\theta` scale and its bins, and each shows shares, so a bank and a</span>
 <span class="sd">  population of any sizes compare: the examinees' bars sum to 1 above the axis and the items' bars</span>
-<span class="sd">  to 1 below it. An item sits at :attr:`~catsim.ItemBank.max_info_thetas`, which is its difficulty</span>
+<span class="sd">  to 1 below it. An item sits at ``ItemBank.max_info_thetas``, which is its difficulty</span>
 <span class="sd">  for one- and two-parameter items.</span>
 
 <span class="sd">  .. plot::</span>
@@ -1177,7 +1178,7 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">      import matplotlib.pyplot as plt</span>
 <span class="sd">      import numpy</span>
-<span class="sd">      from catsim import ItemBank</span>
+<span class="sd">      from irtlib import ItemBank</span>
 <span class="sd">      from catsim import plot</span>
 
 <span class="sd">      thetas = numpy.random.default_rng(1).normal(0, 1, 500)</span>
@@ -1288,7 +1289,8 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">      import matplotlib.pyplot as plt</span>
 <span class="sd">      import numpy</span>
-<span class="sd">      from catsim import CatEngine, ItemBank, simulate</span>
+<span class="sd">      from catsim import CatEngine, simulate</span>
+<span class="sd">      from irtlib import ItemBank</span>
 <span class="sd">      from catsim import plot</span>
 <span class="sd">      from catsim.estimation import EAPEstimator</span>
 <span class="sd">      from catsim.initialization import FixedPointInitializer</span>
@@ -1409,7 +1411,8 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">      import matplotlib.pyplot as plt</span>
 <span class="sd">      import numpy</span>
-<span class="sd">      from catsim import CatEngine, ItemBank, simulate</span>
+<span class="sd">      from catsim import CatEngine, simulate</span>
+<span class="sd">      from irtlib import ItemBank</span>
 <span class="sd">      from catsim import plot</span>
 <span class="sd">      from catsim.estimation import NumericalSearchEstimator</span>
 <span class="sd">      from catsim.initialization import UniformInitializer</span>
@@ -1509,7 +1512,8 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">      import matplotlib.pyplot as plt</span>
 <span class="sd">      import numpy</span>
-<span class="sd">      from catsim import CatEngine, ItemBank, simulate</span>
+<span class="sd">      from catsim import CatEngine, simulate</span>
+<span class="sd">      from irtlib import ItemBank</span>
 <span class="sd">      from catsim import plot</span>
 <span class="sd">      from catsim.estimation import EAPEstimator</span>
 <span class="sd">      from catsim.initialization import FixedPointInitializer</span>
@@ -1555,7 +1559,7 @@ window.runMermaid = runMermaid;</script>
   <span class="c1"># The session checked its indices when it was built, but it does not know the bank.</span>
   <span class="n">_check_in_bank</span><span class="p">(</span><span class="s2">"administered_items"</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">)</span>
   <span class="n">items</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)]</span>
-  <span class="n">log_likelihood</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">_LIKELIHOOD_THETAS</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+  <span class="n">log_likelihood</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">_LIKELIHOOD_THETAS</span><span class="p">,</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">responses</span><span class="p">],</span> <span class="n">items</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
   <span class="n">ax</span> <span class="o">=</span> <span class="n">_prepare_axes</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
   <span class="p">(</span><span class="n">line</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">_LIKELIHOOD_THETAS</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_likelihood</span> <span class="o">-</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">log_likelihood</span><span class="p">)),</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
   <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">current_theta</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">line</span><span class="o">.</span><span class="n">get_color</span><span class="p">(),</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -1610,7 +1614,8 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">      import matplotlib.pyplot as plt</span>
 <span class="sd">      import numpy</span>
-<span class="sd">      from catsim import CatEngine, ItemBank, simulate</span>
+<span class="sd">      from catsim import CatEngine, simulate</span>
+<span class="sd">      from irtlib import ItemBank</span>
 <span class="sd">      from catsim import plot</span>
 <span class="sd">      from catsim.estimation import EAPEstimator</span>
 <span class="sd">      from catsim.initialization import FixedPointInitializer</span>
@@ -1688,7 +1693,8 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">      import matplotlib.pyplot as plt</span>
 <span class="sd">      import numpy</span>
-<span class="sd">      from catsim import CatEngine, ItemBank, simulate</span>
+<span class="sd">      from catsim import CatEngine, simulate</span>
+<span class="sd">      from irtlib import ItemBank</span>
 <span class="sd">      from catsim import plot</span>
 <span class="sd">      from catsim.estimation import EAPEstimator</span>
 <span class="sd">      from catsim.initialization import FixedPointInitializer</span>
@@ -1785,7 +1791,8 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">      import matplotlib.pyplot as plt</span>
 <span class="sd">      import numpy</span>
-<span class="sd">      from catsim import CatEngine, ItemBank, simulate</span>
+<span class="sd">      from catsim import CatEngine, simulate</span>
+<span class="sd">      from irtlib import ItemBank</span>
 <span class="sd">      from catsim import plot</span>
 <span class="sd">      from catsim.estimation import EAPEstimator</span>
 <span class="sd">      from catsim.initialization import FixedPointInitializer</span>
@@ -1857,7 +1864,8 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">      import matplotlib.pyplot as plt</span>
 <span class="sd">      import numpy</span>
-<span class="sd">      from catsim import CatEngine, ItemBank, simulate</span>
+<span class="sd">      from catsim import CatEngine, simulate</span>
+<span class="sd">      from irtlib import ItemBank</span>
 <span class="sd">      from catsim import plot</span>
 <span class="sd">      from catsim.estimation import EAPEstimator</span>
 <span class="sd">      from catsim.initialization import FixedPointInitializer</span>

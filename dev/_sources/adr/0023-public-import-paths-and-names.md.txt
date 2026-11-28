@@ -16,14 +16,15 @@ and `updated_theta`, the responses `response_vector` and `responses`, the random
 
 - The public import paths are:
   - `catsim`, for the core types and functions: `CatEngine`, `Session`, `Selection`, `StopReason`,
-    `StepContext`, `Estimate`, `ItemBank`, `IrtModel`, `simulate`, `SimulationResult` and the
-    exceptions;
+    `StepContext`, `Estimate`, `simulate`, `SimulationResult` and the exceptions;
   - `catsim.selection`, `catsim.estimation`, `catsim.initialization`, `catsim.stopping` and
     `catsim.exposure`, for the strategies, their base classes and the helpers documented for custom
     strategies;
-  - `catsim.irt`, `catsim.metrics`, `catsim.plot` and `catsim.typing`, modules of functions and
-    type aliases, with the constants and types their functions take or return, such as
-    `irt.THETA_MIN_EXTENDED`, `plot.PlotType` and `metrics.Metric`.
+  - `catsim.metrics` and `catsim.plot`, modules of functions, with the types their functions take
+    or return, such as `plot.PlotType` and `metrics.Metric`.
+- The item bank, the item response functions and the array types are irtlib's, imported from
+  irtlib's paths: `irtlib.ItemBank`, `irtlib.IrtModel`, `irtlib.irt` and `irtlib.typing`
+  (ADR-0024). catsim does not re-export them.
 - Every other module is internal. Code outside catsim imports each name from its public path. A
   package's `__all__` lists every public name its modules define, and nothing else.
 - A module is named after what it holds, never after its package or a standard-library module.

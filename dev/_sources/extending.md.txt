@@ -14,18 +14,22 @@ from typing import override
 
 import numpy
 
-from catsim import CatEngine, Estimate, ItemBank, NoItemsAvailableError, StepContext, simulate
+from catsim import CatEngine, Estimate, NoItemsAvailableError, StepContext, simulate
 from catsim.estimation import BaseEstimator
 from catsim.initialization import BaseInitializer
-from catsim.irt import log_likelihood
 from catsim.selection import BaseSelector, below_cap, check_r_max, pick_best, remaining
 from catsim.stopping import BaseStopper, MaxLengthStopper, StopRule
-from catsim.typing import IntArray
+from irtlib import ItemBank
+from irtlib.irt import log_likelihood
+from irtlib.typing import IntArray
 ```
 
+The item bank, the item response functions and the array types come from
+[irtlib](https://github.com/douglasrizzo/irtlib), the item response theory package catsim builds
+on.
+
 `@override` marks each method that implements one of a base class, so that a type checker reports a
-method that overrides nothing, such as one with a misspelt name. It is in `typing` from Python 3.12
-on, and in the `typing_extensions` package on Python 3.11.
+method that overrides nothing, such as one with a misspelt name.
 
 ## An Initializer
 
@@ -86,7 +90,8 @@ class GridMAPEstimator(BaseEstimator):
     @override
     def estimate(self, context: StepContext) -> Estimate:
         items = context.item_bank.get_items(context.administered_items)
-        log_posterior = log_likelihood(self.grid, context.responses, items) - self.grid**2 / 2
+        # one row of responses, the session's, gives one row of log-likelihoods
+        log_posterior = log_likelihood(self.grid, [context.responses], items)[0] - self.grid**2 / 2
         theta = float(self.grid[numpy.argmax(log_posterior)])
         information = context.item_bank.total_information(theta, context.administered_items)
         return Estimate(theta=theta, se=1 / numpy.sqrt(information + 1), evaluations=self.grid.size)
@@ -97,7 +102,7 @@ may read about the session, built anew by the engine for every call.
 
 | Field | What it holds |
 |---|---|
-| `item_bank` | the session's {py:class}`~catsim.ItemBank` |
+| `item_bank` | the session's `ItemBank` |
 | `administered_items`, `responses` | the items given so far and the responses to them, in order |
 | `excluded_items` | the items the session must not be given, although it has not had them |
 | `theta`, `se` | the current ability estimate and its standard error |
@@ -119,10 +124,10 @@ returns an {py:class}`~catsim.Estimate` of three fields:
 
 Look-ahead selectors, such as MEI, also call the estimator with responses the examinee has not
 given, which is one more reason for it to keep nothing about a session. For the likelihood,
-{py:func}`catsim.irt.log_likelihood_function` returns the log-likelihood of the responses as a
-function of the ability, and {py:func}`catsim.irt.log_response_probabilities` returns
-$\log P_i(\theta)$ and $\log Q_i(\theta)$. A Bayesian estimator can build on the priors and the
-posterior of {doc}`/api/techniques/estimation/bayesian-infrastructure`.
+`irtlib.irt.log_likelihood_function` returns the log-likelihood of each row of responses as a
+function of the ability, and `irtlib.irt.log_response_probabilities` returns
+$\log P_i(\theta)$ and $\log Q_i(\theta)$. A Bayesian estimator can build on irtlib's quadrature
+grid, priors and posterior, in `irtlib.quadrature`.
 
 ## A Selector
 

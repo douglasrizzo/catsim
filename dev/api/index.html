@@ -381,12 +381,9 @@
 <li class="toctree-l1"><a class="reference internal" href="session.html">Sessions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="context.html">Strategy Inputs and Estimates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation Runs and Results</a></li>
-<li class="toctree-l1"><a class="reference internal" href="item_bank.html">Item Bank</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exposure.html">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="metrics.html">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot.html">Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="typing.html">Array Type Aliases – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 </ul>
 </div>
@@ -451,10 +448,13 @@
 <p>Each object is documented at its public import path. The core types come from <a class="reference internal" href="#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>; the
 strategies, their base classes and the helpers for custom strategies from
 <a class="reference internal" href="techniques/selection/index.html#module-catsim.selection" title="catsim.selection"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a>, <a class="reference internal" href="techniques/estimation/index.html#module-catsim.estimation" title="catsim.estimation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a>, <a class="reference internal" href="techniques/initialization/index.html#module-catsim.initialization" title="catsim.initialization"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a>,
-<a class="reference internal" href="techniques/stopping/index.html#module-catsim.stopping" title="catsim.stopping"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a> and <a class="reference internal" href="exposure.html#module-catsim.exposure" title="catsim.exposure"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a>; functions and type aliases, with the constants
-and types the functions take or return, from <a class="reference internal" href="irt.html#module-catsim.irt" title="catsim.irt"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a>, <a class="reference internal" href="metrics.html#module-catsim.metrics" title="catsim.metrics"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a>,
-<a class="reference internal" href="plot.html#module-catsim.plot" title="catsim.plot"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a> and <a class="reference internal" href="typing.html#module-catsim.typing" title="catsim.typing"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></a>. The technique pages document each strategy with its
-method.</p>
+<a class="reference internal" href="techniques/stopping/index.html#module-catsim.stopping" title="catsim.stopping"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a> and <a class="reference internal" href="exposure.html#module-catsim.exposure" title="catsim.exposure"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a>; functions, with the types they take or return,
+from <a class="reference internal" href="metrics.html#module-catsim.metrics" title="catsim.metrics"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a> and <a class="reference internal" href="plot.html#module-catsim.plot" title="catsim.plot"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a>. The technique pages document each strategy with
+its method.</p>
+<p>The item bank (<code class="docutils literal notranslate"><span class="pre">irtlib.ItemBank</span></code>, with <code class="docutils literal notranslate"><span class="pre">irtlib.IrtModel</span></code>), the item response functions
+(<code class="docutils literal notranslate"><span class="pre">irtlib.irt</span></code>) and the array types (<code class="docutils literal notranslate"><span class="pre">irtlib.typing</span></code>) come from
+<a class="reference external" href="https://github.com/douglasrizzo/irtlib">irtlib</a>, the item response theory package catsim builds
+on; their docstrings are their reference.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="engine.html">CAT Engine</a><ul>
@@ -477,35 +477,8 @@ method.</p>
 <li class="toctree-l2"><a class="reference internal" href="simulation.html#catsim.SimulationResult"><code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="item_bank.html">Item Bank</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="item_bank.html#catsim.ItemBank"><code class="docutils literal notranslate"><span class="pre">ItemBank</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="item_bank.html#catsim.IrtModel"><code class="docutils literal notranslate"><span class="pre">IrtModel</span></code></a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="exposure.html">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="exposure.html#catsim.exposure.BaseExposureControl"><code class="docutils literal notranslate"><span class="pre">BaseExposureControl</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.THETA_MAX_EXTENDED"><code class="docutils literal notranslate"><span class="pre">THETA_MAX_EXTENDED</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.THETA_MAX_TYPICAL"><code class="docutils literal notranslate"><span class="pre">THETA_MAX_TYPICAL</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.THETA_MIN_EXTENDED"><code class="docutils literal notranslate"><span class="pre">THETA_MIN_EXTENDED</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.THETA_MIN_TYPICAL"><code class="docutils literal notranslate"><span class="pre">THETA_MIN_TYPICAL</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.confidence_interval"><code class="docutils literal notranslate"><span class="pre">confidence_interval()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.icc"><code class="docutils literal notranslate"><span class="pre">icc()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.info_integral"><code class="docutils literal notranslate"><span class="pre">info_integral()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.information"><code class="docutils literal notranslate"><span class="pre">information()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.log_likelihood"><code class="docutils literal notranslate"><span class="pre">log_likelihood()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.log_likelihood_function"><code class="docutils literal notranslate"><span class="pre">log_likelihood_function()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.log_response_probabilities"><code class="docutils literal notranslate"><span class="pre">log_response_probabilities()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.max_info_theta"><code class="docutils literal notranslate"><span class="pre">max_info_theta()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.reliability"><code class="docutils literal notranslate"><span class="pre">reliability()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.scale_to_theta"><code class="docutils literal notranslate"><span class="pre">scale_to_theta()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.see"><code class="docutils literal notranslate"><span class="pre">see()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.theta_to_scale"><code class="docutils literal notranslate"><span class="pre">theta_to_scale()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.total_information"><code class="docutils literal notranslate"><span class="pre">total_information()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.validate_response_vector"><code class="docutils literal notranslate"><span class="pre">validate_response_vector()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="irt.html#catsim.irt.var"><code class="docutils literal notranslate"><span class="pre">var()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="metrics.html">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a><ul>
@@ -531,11 +504,6 @@ method.</p>
 <li class="toctree-l2"><a class="reference internal" href="plot.html#catsim.plot.metric_by_length"><code class="docutils literal notranslate"><span class="pre">metric_by_length()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot.html#catsim.plot.recovery"><code class="docutils literal notranslate"><span class="pre">recovery()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot.html#catsim.plot.session_progress"><code class="docutils literal notranslate"><span class="pre">session_progress()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="typing.html">Array Type Aliases – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="typing.html#catsim.typing.FloatArray"><code class="docutils literal notranslate"><span class="pre">FloatArray</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="typing.html#catsim.typing.IntArray"><code class="docutils literal notranslate"><span class="pre">IntArray</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a><ul>

@@ -772,17 +772,16 @@ window.runMermaid = runMermaid;</script>
                 <article class="bd-article">
                   
   <h1>Source code for catsim.estimation.numerical</h1><div class="highlight"><pre>
-<span></span><span class="sd">"""Numerical estimation methods for ability estimation."""</span>
+<span></span><span class="sd">"""The maximum likelihood estimator, with Dodd's step while the responses are all correct or all incorrect."""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">minimize_scalar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">irtlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">ability</span><span class="p">,</span> <span class="n">irt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">irtlib.irt</span><span class="w"> </span><span class="kn">import</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MIN_EXTENDED</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimate</span><span class="p">,</span> <span class="n">StepContext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..irt</span><span class="w"> </span><span class="kn">import</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MIN_EXTENDED</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">_session_estimate</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_dodd</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">correct</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">bounds</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -832,14 +831,15 @@ window.runMermaid = runMermaid;</script>
 <span class="k">class</span><span class="w"> </span><span class="nc">NumericalSearchEstimator</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Estimate ability by numerically maximizing the IRT log-likelihood.</span>
 
-<span class="sd">  The maximum is searched for with SciPy's bounded scalar minimizer on ``bounds``. While every</span>
-<span class="sd">  response is correct, or every response is incorrect, the likelihood has no maximum, and the</span>
-<span class="sd">  estimate takes Dodd's step :cite:p:`Dod90` toward the bank's hardest or easiest item instead.</span>
+<span class="sd">  The maximum is irtlib's maximum likelihood estimate within ``bounds``, ``irtlib.ability.maximum_likelihood``,</span>
+<span class="sd">  which finds the highest of several maxima. While every response is correct, or every response is</span>
+<span class="sd">  incorrect, the likelihood has no maximum, and the estimate takes Dodd's step :cite:p:`Dod90`</span>
+<span class="sd">  toward the bank's hardest or easiest item instead.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  tol : float, optional</span>
-<span class="sd">      Absolute tolerance of the bounded search, in the ability scale. Default is 1e-6.</span>
+<span class="sd">      Absolute tolerance of the search's refinement, in the ability scale. Default is 1e-6.</span>
 <span class="sd">  bounds : tuple[float, float], optional</span>
 <span class="sd">      Range of the estimate. Default is ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``.</span>
 
@@ -873,9 +873,10 @@ window.runMermaid = runMermaid;</script>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Return the maximum likelihood estimate, or Dodd's step from ``context.theta`` while every response is the same.</span>
 
 <span class="sd">    The standard error is the inverse square root of the test information at the estimate, or</span>
-<span class="sd">    ``math.inf`` where the information is 0. The evaluation count is the number of log-likelihood</span>
-<span class="sd">    evaluations SciPy's search made; Dodd's step makes none. With no administered item, the</span>
-<span class="sd">    estimate is ``context.theta`` and ``context.se``, unchanged, after no evaluation.</span>
+<span class="sd">    ``math.inf`` where the information is 0. The evaluation count is the number of abilities the</span>
+<span class="sd">    log-likelihood was evaluated at, the search's points and its refinement's; Dodd's step makes</span>
+<span class="sd">    none. With no administered item, the estimate is ``context.theta`` and ``context.se``,</span>
+<span class="sd">    unchanged, after no evaluation.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -897,20 +898,7 @@ window.runMermaid = runMermaid;</script>
       <span class="n">theta</span> <span class="o">=</span> <span class="n">_dodd</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">correct</span><span class="o">=</span><span class="n">responses</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bounds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="p">)</span>
       <span class="k">return</span> <span class="n">Estimate</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="n">irt</span><span class="o">.</span><span class="n">see</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">),</span> <span class="n">evaluations</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-    <span class="n">log_likelihood</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood_function</span><span class="p">(</span><span class="n">responses</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">negative_log_likelihood</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-      <span class="k">return</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span>
-
-    <span class="n">res</span> <span class="o">=</span> <span class="n">minimize_scalar</span><span class="p">(</span>
-      <span class="n">negative_log_likelihood</span><span class="p">,</span>
-      <span class="n">bounds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="p">,</span>
-      <span class="n">method</span><span class="o">=</span><span class="s2">"bounded"</span><span class="p">,</span>
-      <span class="c1"># SciPy's bounded method takes its absolute tolerance only through options</span>
-      <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">"xatol"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span><span class="p">},</span>
-    <span class="p">)</span>
-    <span class="n">theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">Estimate</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">se</span><span class="o">=</span><span class="n">irt</span><span class="o">.</span><span class="n">see</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">),</span> <span class="n">evaluations</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">nfev</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">_session_estimate</span><span class="p">(</span><span class="n">ability</span><span class="o">.</span><span class="n">maximum_likelihood</span><span class="p">([</span><span class="n">responses</span><span class="p">],</span> <span class="n">items</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tol</span><span class="p">))</span></div>
 </div>
 
 </pre></div>

@@ -460,24 +460,25 @@ replications and plots them. The <a class="reference internal" href="introductio
 <em>stopper</em> ends the test. A <a class="reference internal" href="api/engine.html#catsim.CatEngine" title="catsim.CatEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">CatEngine</span></code></a> holds them.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">simulate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">simulate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">EAPEstimator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">FixedPointInitializer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxInfoSelector</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLengthStopper</span><span class="p">,</span> <span class="n">StandardErrorStopper</span><span class="p">,</span> <span class="n">StopRule</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">irtlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 
 <span class="n">item_bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="s2">"3PL"</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">stopper</span> <span class="o">=</span> <span class="n">StopRule</span><span class="p">(</span><span class="n">StandardErrorStopper</span><span class="p">(</span><span class="mf">0.35</span><span class="p">),</span> <span class="n">MaxLengthStopper</span><span class="p">(</span><span class="mi">30</span><span class="p">))</span>
 <span class="n">engine</span> <span class="o">=</span> <span class="n">CatEngine</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">FixedPointInitializer</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">MaxInfoSelector</span><span class="p">(),</span> <span class="n">EAPEstimator</span><span class="p">(),</span> <span class="n">stopper</span><span class="p">)</span>
 </pre></div>
 </div>
-<p><a class="reference internal" href="api/item_bank.html#catsim.ItemBank.generate" title="catsim.ItemBank.generate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ItemBank.generate</span></code></a> draws 300 items of the three-parameter
+<p><code class="docutils literal notranslate"><span class="pre">ItemBank.generate</span></code> draws 300 items of the three-parameter
 logistic model, and its seed gives the same bank every time. A calibrated bank comes from a CSV
 file, <code class="docutils literal notranslate"><span class="pre">ItemBank.from_csv(&quot;items.csv&quot;)</span></code>, with the columns <code class="docutils literal notranslate"><span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">b</span></code>, <code class="docutils literal notranslate"><span class="pre">c</span></code> and <code class="docutils literal notranslate"><span class="pre">d</span></code> and an optional
 <code class="docutils literal notranslate"><span class="pre">name</span></code> column, or from an array of parameters, <code class="docutils literal notranslate"><span class="pre">ItemBank(items,</span> <span class="pre">names=...)</span></code>. Every item has a name,
 generated as <code class="docutils literal notranslate"><span class="pre">item_000</span></code> to <code class="docutils literal notranslate"><span class="pre">item_299</span></code> when none is given, and <code class="docutils literal notranslate"><span class="pre">item_bank.to_csv(&quot;items.csv&quot;)</span></code> saves
-a bank, names included, to repeat or share a study. <a class="reference internal" href="api/item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code></a> gives the file
-format.</p>
+a bank, names included, to repeat or share a study. The bank is irtlib’s <code class="docutils literal notranslate"><span class="pre">ItemBank</span></code>, whose docstring
+gives the file format.</p>
 <p>Each strategy is a choice of method. The technique pages define each method and say when to choose
 it: <a class="reference internal" href="api/techniques/initialization/index.html"><span class="doc">initializers</span></a>,
 <a class="reference internal" href="api/techniques/selection/index.html"><span class="doc">selectors</span></a>,
@@ -498,7 +499,7 @@ otherwise give them every item in the bank.</p>
 never draws the abilities itself: draw them with a generator of your own, as above, so that the
 same population can be passed to every engine you compare. Each examinee answers an item correctly
 with the probability that the item’s characteristic curve gives at their true ability,
-<span class="math notranslate nohighlight">\(P_i(\theta)\)</span> (<a class="reference internal" href="api/irt.html#catsim.irt.icc" title="catsim.irt.icc"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.icc()</span></code></a>), and on the same seed answers it the same way whichever
+<span class="math notranslate nohighlight">\(P_i(\theta)\)</span> (<code class="docutils literal notranslate"><span class="pre">irtlib.irt.icc</span></code>), and on the same seed answers it the same way whichever
 engine gives it, and whenever.</p>
 <p><code class="docutils literal notranslate"><span class="pre">rng</span></code> seeds every random draw of the run, so the same seed and the same true abilities give the
 same result; <a class="reference internal" href="reproducibility.html"><span class="doc">Reproducibility</span></a> explains how a study is seeded. <code class="docutils literal notranslate"><span class="pre">progress</span></code> takes a function that

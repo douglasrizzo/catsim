@@ -49,7 +49,7 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Contributing" href="../contributing.html" />
+    <link rel="next" title="ADR-0024: catsim Builds on irtlib’s Item Response Theory" href="0024-catsim-builds-on-irtlib.html" />
     <link rel="prev" title="ADR-0022: Plotting Is an Optional Module With One Calling Convention" href="0022-plotting-as-an-optional-extra.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
@@ -397,9 +397,10 @@
 <li class="toctree-l1"><a class="reference internal" href="0018-ability-scale-and-extreme-patterns.html">ADR-0018: Ability Scale and Extreme Response Patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0019-published-progressive-schedule.html">ADR-0019: Progressive and Proportional Follow the Published Schedule</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0020-catr-as-the-reference.html">ADR-0020: Parity Tests Check catsim Against catR</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0021-dependencies.html">ADR-0021: NumPy and SciPy Are the Only Runtime Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0021-dependencies.html">ADR-0021: NumPy, SciPy and irtlib Are the Only Runtime Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0022-plotting-as-an-optional-extra.html">ADR-0022: Plotting Is an Optional Module With One Calling Convention</a></li>
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0023: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0024-catsim-builds-on-irtlib.html">ADR-0024: catsim Builds on irtlib’s Item Response Theory</a></li>
 </ul>
 </div>
 </nav></div>
@@ -480,16 +481,17 @@ and <code class="docutils literal notranslate"><span class="pre">updated_theta</
 <li><p>The public import paths are:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">catsim</span></code>, for the core types and functions: <code class="docutils literal notranslate"><span class="pre">CatEngine</span></code>, <code class="docutils literal notranslate"><span class="pre">Session</span></code>, <code class="docutils literal notranslate"><span class="pre">Selection</span></code>, <code class="docutils literal notranslate"><span class="pre">StopReason</span></code>,
-<code class="docutils literal notranslate"><span class="pre">StepContext</span></code>, <code class="docutils literal notranslate"><span class="pre">Estimate</span></code>, <code class="docutils literal notranslate"><span class="pre">ItemBank</span></code>, <code class="docutils literal notranslate"><span class="pre">IrtModel</span></code>, <code class="docutils literal notranslate"><span class="pre">simulate</span></code>, <code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code> and the
-exceptions;</p></li>
+<code class="docutils literal notranslate"><span class="pre">StepContext</span></code>, <code class="docutils literal notranslate"><span class="pre">Estimate</span></code>, <code class="docutils literal notranslate"><span class="pre">simulate</span></code>, <code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code> and the exceptions;</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">catsim.selection</span></code>, <code class="docutils literal notranslate"><span class="pre">catsim.estimation</span></code>, <code class="docutils literal notranslate"><span class="pre">catsim.initialization</span></code>, <code class="docutils literal notranslate"><span class="pre">catsim.stopping</span></code> and
 <code class="docutils literal notranslate"><span class="pre">catsim.exposure</span></code>, for the strategies, their base classes and the helpers documented for custom
 strategies;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code>, <code class="docutils literal notranslate"><span class="pre">catsim.metrics</span></code>, <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code> and <code class="docutils literal notranslate"><span class="pre">catsim.typing</span></code>, modules of functions and
-type aliases, with the constants and types their functions take or return, such as
-<code class="docutils literal notranslate"><span class="pre">irt.THETA_MIN_EXTENDED</span></code>, <code class="docutils literal notranslate"><span class="pre">plot.PlotType</span></code> and <code class="docutils literal notranslate"><span class="pre">metrics.Metric</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">catsim.metrics</span></code> and <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code>, modules of functions, with the types their functions take
+or return, such as <code class="docutils literal notranslate"><span class="pre">plot.PlotType</span></code> and <code class="docutils literal notranslate"><span class="pre">metrics.Metric</span></code>.</p></li>
 </ul>
 </li>
+<li><p>The item bank, the item response functions and the array types are irtlib’s, imported from
+irtlib’s paths: <code class="docutils literal notranslate"><span class="pre">irtlib.ItemBank</span></code>, <code class="docutils literal notranslate"><span class="pre">irtlib.IrtModel</span></code>, <code class="docutils literal notranslate"><span class="pre">irtlib.irt</span></code> and <code class="docutils literal notranslate"><span class="pre">irtlib.typing</span></code>
+(ADR-0024). catsim does not re-export them.</p></li>
 <li><p>Every other module is internal. Code outside catsim imports each name from its public path. A
 package’s <code class="docutils literal notranslate"><span class="pre">__all__</span></code> lists every public name its modules define, and nothing else.</p></li>
 <li><p>A module is named after what it holds, never after its package or a standard-library module.</p></li>
@@ -553,11 +555,11 @@ and <code class="docutils literal notranslate"><span class="pre">__all__</span><
       </div>
     </a>
     <a class="right-next"
-       href="../contributing.html"
+       href="0024-catsim-builds-on-irtlib.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Contributing</p>
+        <p class="prev-next-title">ADR-0024: catsim Builds on irtlib’s Item Response Theory</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

@@ -777,9 +777,8 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">override</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">..compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseStopper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.length</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLengthStopper</span>
 
@@ -823,7 +822,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Examples</span>
 <span class="sd">  --------</span>
 <span class="sd">  &gt;&gt;&gt; import numpy</span>
-<span class="sd">  &gt;&gt;&gt; from catsim import ItemBank, StepContext</span>
+<span class="sd">  &gt;&gt;&gt; from catsim import StepContext</span>
+<span class="sd">  &gt;&gt;&gt; from irtlib import ItemBank</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule</span>
 <span class="sd">  &gt;&gt;&gt; rule = StopRule(StandardErrorStopper(0.5), MaxLengthStopper(20), min_items=5)</span>
 <span class="sd">  &gt;&gt;&gt; rule</span>

@@ -61,7 +61,7 @@ item information $I_i(\theta)$
 
 test information $I(\theta)$
 : The sum of the information of the administered items. The more information, the smaller the
-  standard error. The functions for these quantities are in the `catsim.irt` module.
+  standard error. The functions for these quantities are in irtlib's `irtlib.irt` module.
 
 ## The adaptive test
 

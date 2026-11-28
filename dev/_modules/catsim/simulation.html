@@ -783,15 +783,14 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">import</span><span class="w"> </span><span class="nn">secrets</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">NamedTuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">NamedTuple</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">override</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">irtlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">metrics</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.checks</span><span class="w"> </span><span class="kn">import</span> <span class="n">_named</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">Metric</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">Session</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.workers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_payload</span><span class="p">,</span> <span class="n">_run_on_workers</span>
@@ -800,10 +799,7 @@ window.runMermaid = runMermaid;</script>
   <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Sequence</span>
 
   <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
-
-  <span class="kn">from</span><span class="w"> </span><span class="nn">.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">IntArray</span>
-
-<span class="n">_Array</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"_Array"</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">irtlib.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">IntArray</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">_Stream</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">):</span>
@@ -937,7 +933,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Generated examinees, drawn from a standard normal population:</span>
 
 <span class="sd">  &gt;&gt;&gt; import numpy</span>
-<span class="sd">  &gt;&gt;&gt; from catsim import CatEngine, ItemBank, simulate</span>
+<span class="sd">  &gt;&gt;&gt; from catsim import CatEngine, simulate</span>
+<span class="sd">  &gt;&gt;&gt; from irtlib import ItemBank</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.estimation import EAPEstimator</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.initialization import FixedPointInitializer</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.selection import MaxInfoSelector</span>
@@ -1450,7 +1447,7 @@ window.runMermaid = runMermaid;</script>
   <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">cuts</span><span class="p">,</span> <span class="n">true_thetas</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">"right"</span><span class="p">),</span> <span class="n">_N_DECILES</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_read_only</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">_Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Array</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_read_only</span><span class="p">[</span><span class="n">Array</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">](</span><span class="n">array</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Return ``array`` after making it read-only."""</span>
   <span class="n">array</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">writeable</span> <span class="o">=</span> <span class="kc">False</span>
   <span class="k">return</span> <span class="n">array</span>
@@ -1685,7 +1682,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  TypeError</span>
-<span class="sd">      If ``item_bank`` is not an :class:`~catsim.ItemBank`, ``duration`` is not a number, a session</span>
+<span class="sd">      If ``item_bank`` is not an ``irtlib.ItemBank``, ``duration`` is not a number, a session</span>
 <span class="sd">      is not a :class:`~catsim.Session`, the proposal counts are not integers, or ``parts`` is not</span>
 <span class="sd">      an integer.</span>
 <span class="sd">  ValueError</span>
@@ -1697,7 +1694,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Examples</span>
 <span class="sd">  --------</span>
 <span class="sd">  &gt;&gt;&gt; import numpy</span>
-<span class="sd">  &gt;&gt;&gt; from catsim import CatEngine, ItemBank, simulate</span>
+<span class="sd">  &gt;&gt;&gt; from catsim import CatEngine, simulate</span>
+<span class="sd">  &gt;&gt;&gt; from irtlib import ItemBank</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.estimation import EAPEstimator</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.initialization import FixedPointInitializer</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.selection import MaxInfoSelector</span>

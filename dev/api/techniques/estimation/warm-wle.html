@@ -382,7 +382,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../selection/index.html">Selection Techniques</a></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Estimation Techniques</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="numerical-search-estimator.html">Numerical Search Estimator (MLE)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bayesian-infrastructure.html">Bayesian Estimation Infrastructure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="eap-estimator.html">Expected A Posteriori Estimator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="map-estimator.html">Maximum A Posteriori Estimator</a></li>
 <li class="toctree-l2 current active"><a aria-current="page" class="current reference internal" href="#">Warm Weighted Likelihood Estimator</a></li>
@@ -516,8 +515,9 @@ standard error: 13 of 3,920 sets of responses (0.4% of their probability) on ran
 3PL tests of 2 to 8 items, none of 4,560 on 2PL tests.</p>
 <section id="computation">
 <h3>Computation<a class="headerlink" href="#computation" title="Link to this heading">#</a></h3>
-<p>The modified score is evaluated at 121 equally spaced points over the search
-range <span class="math notranslate nohighlight">\([\theta_{\min}, \theta_{\max}]\)</span> given by <code class="docutils literal notranslate"><span class="pre">bounds</span></code>, by default <span class="math notranslate nohighlight">\([-6, 6]\)</span>
+<p>The estimate is irtlib’s, <code class="docutils literal notranslate"><span class="pre">irtlib.ability.weighted_likelihood</span></code>. The modified score is evaluated at
+121 equally spaced points over the search range <span class="math notranslate nohighlight">\([\theta_{\min}, \theta_{\max}]\)</span> given by
+<code class="docutils literal notranslate"><span class="pre">bounds</span></code>, by default <span class="math notranslate nohighlight">\([-6, 6]\)</span>
 (<code class="docutils literal notranslate"><span class="pre">THETA_MIN_EXTENDED</span></code>, <code class="docutils literal notranslate"><span class="pre">THETA_MAX_EXTENDED</span></code>), to bracket its roots. On the
 default range the points are 0.1 apart, so two roots closer than that can fall
 in one interval and go unseen. Each sign change from positive to negative brackets a maximum
@@ -670,7 +670,8 @@ score points to.</p>
 <dd><p>Return the root of Warm’s modified score equation, or <code class="docutils literal notranslate"><span class="pre">context.theta</span></code> when no item has been administered.</p>
 <p>The standard error is the inverse square root of the test information at the estimate, without
 Warm’s correction (the technique page compares the two), or <code class="docutils literal notranslate"><span class="pre">math.inf</span></code> where the information
-is 0. The evaluation count is the number of modified-score evaluations. With no administered
+is 0. The evaluation count is the number of modified-score evaluations. A ranking integral that
+does not converge warns with <code class="docutils literal notranslate"><span class="pre">scipy.integrate.IntegrationWarning</span></code>. With no administered
 item, the estimate is <code class="docutils literal notranslate"><span class="pre">context.theta</span></code> and <code class="docutils literal notranslate"><span class="pre">context.se</span></code>, unchanged, after no evaluation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

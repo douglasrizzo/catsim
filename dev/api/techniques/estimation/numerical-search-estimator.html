@@ -51,7 +51,7 @@
     <link rel="icon" href="../../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Bayesian Estimation Infrastructure" href="bayesian-infrastructure.html" />
+    <link rel="next" title="Expected A Posteriori Estimator" href="eap-estimator.html" />
     <link rel="prev" title="Estimation Techniques" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
@@ -382,7 +382,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../selection/index.html">Selection Techniques</a></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Estimation Techniques</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 current active"><a aria-current="page" class="current reference internal" href="#">Numerical Search Estimator (MLE)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bayesian-infrastructure.html">Bayesian Estimation Infrastructure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="eap-estimator.html">Expected A Posteriori Estimator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="map-estimator.html">Maximum A Posteriori Estimator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="warm-wle.html">Warm Weighted Likelihood Estimator</a></li>
@@ -468,7 +467,7 @@
 <p>The numerical-search estimator is the package’s frequentist maximum-likelihood
 ability estimator. Given administered items and observed binary responses, it
 finds the ability value that maximizes the item-response-theory log-likelihood.</p>
-<p>It searches the ability scale with a single bounded one-dimensional optimizer
+<p>It searches the ability scale on a grid of points, refines the best of them,
 and includes Dodd’s heuristic to handle all-correct and all-incorrect
 responses, so every estimate is finite and inside the search bounds.</p>
 </section>
@@ -476,7 +475,7 @@ responses, so every estimate is finite and inside the search bounds.</p>
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
 <p>The estimator maximizes the log-likelihood <span class="math notranslate nohighlight">\(\log L(\theta)\)</span> of the responses
 <span class="math notranslate nohighlight">\(u_i \in \{0,1\}\)</span> to the administered items, which
-<a class="reference internal" href="../../irt.html#catsim.irt.log_likelihood" title="catsim.irt.log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.log_likelihood()</span></code></a> computes. The returned estimate is</p>
+<code class="docutils literal notranslate"><span class="pre">irtlib.irt.log_likelihood</span></code> computes. The returned estimate is</p>
 <div class="math notranslate nohighlight">
 \[\hat{\theta}_{\mathrm{MLE}}
 =
@@ -517,10 +516,13 @@ where <span class="math notranslate nohighlight">\(I(\hat{\theta}) = 0\)</span>.
 stepped estimate.</p>
 <section id="computation">
 <h3>Computation<a class="headerlink" href="#computation" title="Link to this heading">#</a></h3>
-<p>For mixed responses, the implementation minimizes <span class="math notranslate nohighlight">\(-\log L(\theta)\)</span> with
-SciPy’s bounded Brent method, <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize_scalar.html#scipy.optimize.minimize_scalar" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.minimize_scalar()</span></code></a>
-<span class="bibtex-citation" id="id7">[<a class="reference internal" href="#id48" title="R. P. Brent. Algorithms for Minimization Without Derivatives. Dover Publications, Mineola, NY, 2002. A reprint of the 1973 Prentice-Hall edition; the URL is the author's page, which has a scan of it. URL: https://maths-people.anu.edu.au/~brent/pub/pub011.html.">Brent, 2002</a>]</span>, which never evaluates outside the bounds and takes <code class="docutils literal notranslate"><span class="pre">tol</span></code> as its absolute
-tolerance on <span class="math notranslate nohighlight">\(\theta\)</span> (SciPy’s <code class="docutils literal notranslate"><span class="pre">xatol</span></code>).</p>
+<p>For mixed responses, the estimate is irtlib’s maximum likelihood estimate within the bounds,
+<code class="docutils literal notranslate"><span class="pre">irtlib.ability.maximum_likelihood</span></code>. It evaluates <span class="math notranslate nohighlight">\(\log L(\theta)\)</span> at 201 equally spaced
+abilities of the bounds, 0.06 apart on <span class="math notranslate nohighlight">\([-6, 6]\)</span>, and refines the best of them between its two
+neighbours with SciPy’s bounded Brent method, <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize_scalar.html#scipy.optimize.minimize_scalar" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.minimize_scalar()</span></code></a>
+<span class="bibtex-citation" id="id7">[<a class="reference internal" href="#id48" title="R. P. Brent. Algorithms for Minimization Without Derivatives. Dover Publications, Mineola, NY, 2002. A reprint of the 1973 Prentice-Hall edition; the URL is the author's page, which has a scan of it. URL: https://maths-people.anu.edu.au/~brent/pub/pub011.html.">Brent, 2002</a>]</span>, which takes <code class="docutils literal notranslate"><span class="pre">tol</span></code> as its absolute tolerance on <span class="math notranslate nohighlight">\(\theta\)</span> (SciPy’s <code class="docutils literal notranslate"><span class="pre">xatol</span></code>).
+The refinement is kept only if it is no worse than the best point. The search never evaluates
+outside the bounds, and its evaluation count is the 201 points plus the refinement’s.</p>
 </section>
 </section>
 <section id="parameters">
@@ -540,7 +542,7 @@ tolerance on <span class="math notranslate nohighlight">\(\theta\)</span> (SciPy
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">tol</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1e-6</span></code></p></td>
-<td><p>Absolute tolerance of the search, in the ability scale. Must be positive.</p></td>
+<td><p>Absolute tolerance of the search’s refinement, in the ability scale. Must be positive.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bounds</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">(THETA_MIN_EXTENDED,</span> <span class="pre">THETA_MAX_EXTENDED)</span></code></p></td>
@@ -554,7 +556,8 @@ Must be finite, with the lower bound below the upper one.</p></td>
 <section id="behavior-and-comparison">
 <h2>Behavior and Comparison<a class="headerlink" href="#behavior-and-comparison" title="Link to this heading">#</a></h2>
 <p>With guessing, the likelihood can have several local maxima <span class="bibtex-citation" id="id8">[<a class="reference internal" href="#id27" title="H.-H. Chang and Z. Ying. A global information approach to computerized adaptive testing. Applied Psychological Measurement, 20(3):213–229, 1996. Open copy: https://hdl.handle.net/11299/119092. doi:10.1177/014662169602000303.">Chang and Ying, 1996</a>, p. 223]</span>;
-<span class="bibtex-citation" id="id9">[<a class="reference internal" href="#id47" title="Wim J. J. Veerkamp and Martijn P. F. Berger. Some new item selection criteria for adaptive testing. Research Report 94-6, University of Twente, Enschede, 1994. Open copy: https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf.">Veerkamp and Berger, 1994</a>, p. 4]</span>, and the search returns one of them. With
+<span class="bibtex-citation" id="id9">[<a class="reference internal" href="#id47" title="Wim J. J. Veerkamp and Martijn P. F. Berger. Some new item selection criteria for adaptive testing. Research Report 94-6, University of Twente, Enschede, 1994. Open copy: https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf.">Veerkamp and Berger, 1994</a>, p. 4]</span>; the search returns the highest of the maxima that its 201 points
+tell apart. With
 guessing or slipping parameters, the likelihood of a mixed pattern can also
 still be rising at a bound, and the estimate is then within <code class="docutils literal notranslate"><span class="pre">tol</span></code> of that bound.</p>
 <details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
@@ -601,7 +604,7 @@ bound, 4, where the likelihood still rises.</p></li>
 <section id="guarantees">
 <h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
-<li><p>For mixed responses, the estimate is a local maximum of the log-likelihood inside <code class="docutils literal notranslate"><span class="pre">bounds</span></code>, to within <code class="docutils literal notranslate"><span class="pre">tol</span></code>.</p></li>
+<li><p>For mixed responses, the estimate is a local maximum of the log-likelihood inside <code class="docutils literal notranslate"><span class="pre">bounds</span></code>, to within <code class="docutils literal notranslate"><span class="pre">tol</span></code>, and none of the 201 equally spaced abilities of <code class="docutils literal notranslate"><span class="pre">bounds</span></code> has a higher log-likelihood.</p></li>
 <li><p>For all-correct and all-incorrect patterns, the estimate is Dodd’s step: finite, inside <code class="docutils literal notranslate"><span class="pre">bounds</span></code>, and never moved against the responses.</p></li>
 <li><p>The standard error is the asymptotic one above, at the returned estimate, and <code class="docutils literal notranslate"><span class="pre">math.inf</span></code> where the test information is 0.</p></li>
 </ol>
@@ -653,13 +656,14 @@ bound, 4, where the likelihood still rises.</p></li>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.estimation.</span></span><span class="sig-name descname"><span class="pre">NumericalSearchEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(-6.0,</span> <span class="pre">6.0)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/estimation/numerical.html#NumericalSearchEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.NumericalSearchEstimator" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="index.html#catsim.estimation.BaseEstimator" title="catsim.estimation.base.BaseEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code></a></p>
 <p>Estimate ability by numerically maximizing the IRT log-likelihood.</p>
-<p>The maximum is searched for with SciPy’s bounded scalar minimizer on <code class="docutils literal notranslate"><span class="pre">bounds</span></code>. While every
-response is correct, or every response is incorrect, the likelihood has no maximum, and the
-estimate takes Dodd’s step <span class="bibtex-citation" id="id1">[<a class="reference internal" href="#id14" title="B. G. Dodd. The effect of item selection procedure and stepsize on computerized adaptive attitude measurement using the rating scale model. Applied Psychological Measurement, 14(4):355–366, 1990. Open copy: https://hdl.handle.net/11299/113936. doi:10.1177/014662169001400403.">Dodd, 1990</a>]</span> toward the bank’s hardest or easiest item instead.</p>
+<p>The maximum is irtlib’s maximum likelihood estimate within <code class="docutils literal notranslate"><span class="pre">bounds</span></code>, <code class="docutils literal notranslate"><span class="pre">irtlib.ability.maximum_likelihood</span></code>,
+which finds the highest of several maxima. While every response is correct, or every response is
+incorrect, the likelihood has no maximum, and the estimate takes Dodd’s step <span class="bibtex-citation" id="id1">[<a class="reference internal" href="#id14" title="B. G. Dodd. The effect of item selection procedure and stepsize on computerized adaptive attitude measurement using the rating scale model. Applied Psychological Measurement, 14(4):355–366, 1990. Open copy: https://hdl.handle.net/11299/113936. doi:10.1177/014662169001400403.">Dodd, 1990</a>]</span>
+toward the bank’s hardest or easiest item instead.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Absolute tolerance of the bounded search, in the ability scale. Default is 1e-6.</p>
+<dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Absolute tolerance of the search’s refinement, in the ability scale. Default is 1e-6.</p>
 </dd>
 <dt><strong>bounds</strong><span class="classifier">tuple[float, float], optional</span></dt><dd><p>Range of the estimate. Default is <code class="docutils literal notranslate"><span class="pre">(THETA_MIN_EXTENDED,</span> <span class="pre">THETA_MAX_EXTENDED)</span></code>.</p>
 </dd>
@@ -679,9 +683,10 @@ estimate takes Dodd’s step <span class="bibtex-citation" id="id1">[<a class="r
 <span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../context.html#catsim.Estimate" title="catsim.context.Estimate"><span class="pre">Estimate</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/estimation/numerical.html#NumericalSearchEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.NumericalSearchEstimator.estimate" title="Link to this definition">#</a></dt>
 <dd><p>Return the maximum likelihood estimate, or Dodd’s step from <code class="docutils literal notranslate"><span class="pre">context.theta</span></code> while every response is the same.</p>
 <p>The standard error is the inverse square root of the test information at the estimate, or
-<code class="docutils literal notranslate"><span class="pre">math.inf</span></code> where the information is 0. The evaluation count is the number of log-likelihood
-evaluations SciPy’s search made; Dodd’s step makes none. With no administered item, the
-estimate is <code class="docutils literal notranslate"><span class="pre">context.theta</span></code> and <code class="docutils literal notranslate"><span class="pre">context.se</span></code>, unchanged, after no evaluation.</p>
+<code class="docutils literal notranslate"><span class="pre">math.inf</span></code> where the information is 0. The evaluation count is the number of abilities the
+log-likelihood was evaluated at, the search’s points and its refinement’s; Dodd’s step makes
+none. With no administered item, the estimate is <code class="docutils literal notranslate"><span class="pre">context.theta</span></code> and <code class="docutils literal notranslate"><span class="pre">context.se</span></code>,
+unchanged, after no evaluation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -724,11 +729,11 @@ the number of log-likelihood evaluations.</p>
       </div>
     </a>
     <a class="right-next"
-       href="bayesian-infrastructure.html"
+       href="eap-estimator.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Bayesian Estimation Infrastructure</p>
+        <p class="prev-next-title">Expected A Posteriori Estimator</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

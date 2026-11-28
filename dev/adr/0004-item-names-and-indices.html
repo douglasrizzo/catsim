@@ -397,9 +397,10 @@
 <li class="toctree-l1"><a class="reference internal" href="0018-ability-scale-and-extreme-patterns.html">ADR-0018: Ability Scale and Extreme Response Patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0019-published-progressive-schedule.html">ADR-0019: Progressive and Proportional Follow the Published Schedule</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0020-catr-as-the-reference.html">ADR-0020: Parity Tests Check catsim Against catR</a></li>
-<li class="toctree-l1"><a class="reference internal" href="0021-dependencies.html">ADR-0021: NumPy and SciPy Are the Only Runtime Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0021-dependencies.html">ADR-0021: NumPy, SciPy and irtlib Are the Only Runtime Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0022-plotting-as-an-optional-extra.html">ADR-0022: Plotting Is an Optional Module With One Calling Convention</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0023-public-import-paths-and-names.html">ADR-0023: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0024-catsim-builds-on-irtlib.html">ADR-0024: catsim Builds on irtlib’s Item Response Theory</a></li>
 </ul>
 </div>
 </nav></div>
@@ -477,7 +478,8 @@ identification.</p>
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p>Every item has a name: a non-empty string, unique within its bank. <code class="docutils literal notranslate"><span class="pre">ItemBank(items,</span> <span class="pre">names=None)</span></code>
-takes one name per row, or generates them.</p></li>
+takes one name per row, or generates them. The bank is irtlib’s (ADR-0024), and irtlib’s ADR-0009
+holds its rules for names.</p></li>
 <li><p>A generated name is <code class="docutils literal notranslate"><span class="pre">item_</span></code> followed by the row index, zero-based like the indices, and
 zero-padded to the width of the last index: <code class="docutils literal notranslate"><span class="pre">item_000</span></code> to <code class="docutils literal notranslate"><span class="pre">item_499</span></code> in a 500-item bank.</p></li>
 <li><p>Computations use row indices. The strategy contract, the step context, the session and the step

@@ -780,7 +780,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">TypeVar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.checks</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
   <span class="n">_check_disjoint</span><span class="p">,</span>
@@ -794,11 +794,8 @@ window.runMermaid = runMermaid;</script>
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
   <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">_typeshed</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataclassInstance</span>
-
-  <span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
-  <span class="kn">from</span><span class="w"> </span><span class="nn">.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
-
-<span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"_T"</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s2">"DataclassInstance"</span><span class="p">)</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">irtlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">irtlib.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 
 
 <span class="c1"># eq=False: a generated __eq__ would compare the exposure-rate arrays elementwise and raise, and a</span>
@@ -818,7 +815,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  generator are required; the other fields describe a session with no responses yet:</span>
 
 <span class="sd">  &gt;&gt;&gt; import numpy</span>
-<span class="sd">  &gt;&gt;&gt; from catsim import ItemBank, StepContext</span>
+<span class="sd">  &gt;&gt;&gt; from catsim import StepContext</span>
+<span class="sd">  &gt;&gt;&gt; from irtlib import ItemBank</span>
 <span class="sd">  &gt;&gt;&gt; from catsim.estimation import EAPEstimator</span>
 <span class="sd">  &gt;&gt;&gt; bank = ItemBank.generate(20, rng=0)</span>
 <span class="sd">  &gt;&gt;&gt; context = StepContext(</span>
@@ -950,7 +948,7 @@ window.runMermaid = runMermaid;</script>
   <span class="k">return</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_unchecked</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">_T</span><span class="p">],</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_T</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_unchecked</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="s2">"DataclassInstance"</span><span class="p">](</span><span class="bp">cls</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Return an instance of a frozen dataclass built from checked fields, without checking them again.</span>
 
 <span class="sd">  The engine builds every session and step context from inputs it has already checked, and</span>
@@ -977,7 +975,7 @@ window.runMermaid = runMermaid;</script>
   <span class="k">return</span> <span class="n">instance</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_replaced</span><span class="p">(</span><span class="n">instance</span><span class="p">:</span> <span class="n">_T</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">changes</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_T</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_replaced</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="s2">"DataclassInstance"</span><span class="p">](</span><span class="n">instance</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">changes</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Return a copy of a frozen dataclass with some fields changed, as :func:`dataclasses.replace` does, unchecked.</span>
 
 <span class="sd">  Parameters</span>

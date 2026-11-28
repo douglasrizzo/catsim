@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ADR-0021: NumPy and SciPy Are the Only Runtime Dependencies &#8212; catsim 0.21.0 documentation</title>
+    <title>ADR-0021: NumPy, SciPy and irtlib Are the Only Runtime Dependencies &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -397,9 +397,10 @@
 <li class="toctree-l1"><a class="reference internal" href="0018-ability-scale-and-extreme-patterns.html">ADR-0018: Ability Scale and Extreme Response Patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0019-published-progressive-schedule.html">ADR-0019: Progressive and Proportional Follow the Published Schedule</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0020-catr-as-the-reference.html">ADR-0020: Parity Tests Check catsim Against catR</a></li>
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0021: NumPy and SciPy Are the Only Runtime Dependencies</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0021: NumPy, SciPy and irtlib Are the Only Runtime Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0022-plotting-as-an-optional-extra.html">ADR-0022: Plotting Is an Optional Module With One Calling Convention</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0023-public-import-paths-and-names.html">ADR-0023: Public Import Paths and One Name per Concept</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0024-catsim-builds-on-irtlib.html">ADR-0024: catsim Builds on irtlib’s Item Response Theory</a></li>
 </ul>
 </div>
 </nav></div>
@@ -443,7 +444,7 @@
     
     <li class="breadcrumb-item"><a href="../architecture_decisions.html" class="nav-link">Architecture Decision Records</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0021: NumPy and SciPy Are the Only Runtime Dependencies</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ADR-0021: NumPy, SciPy and irtlib Are the Only Runtime Dependencies</span></li>
   </ul>
 </nav>
 </div>
@@ -460,8 +461,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="adr-0021-numpy-and-scipy-are-the-only-runtime-dependencies">
-<h1>ADR-0021: NumPy and SciPy Are the Only Runtime Dependencies<a class="headerlink" href="#adr-0021-numpy-and-scipy-are-the-only-runtime-dependencies" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="adr-0021-numpy-scipy-and-irtlib-are-the-only-runtime-dependencies">
+<h1>ADR-0021: NumPy, SciPy and irtlib Are the Only Runtime Dependencies<a class="headerlink" href="#adr-0021-numpy-scipy-and-irtlib-are-the-only-runtime-dependencies" title="Link to this heading">#</a></h1>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
 <p>Accepted 2026-11-25</p>
@@ -478,8 +479,8 @@ newest versions and with the lowest ones allowed.</p>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>catsim’s runtime dependencies are NumPy and SciPy, and typing-extensions on Python versions below
-3.12 only.</p></li>
+<li><p>catsim’s runtime dependencies are NumPy, SciPy and irtlib, the item response theory catsim builds
+on (ADR-0024), which itself requires only NumPy and SciPy.</p></li>
 <li><p>Plotting is the optional <code class="docutils literal notranslate"><span class="pre">plot</span></code> extra, with matplotlib (ADR-0022).</p></li>
 <li><p>Progress is reported through a callback: <code class="docutils literal notranslate"><span class="pre">simulate(...,</span> <span class="pre">progress=None)</span></code> takes a callable that is
 told how many sessions have finished and how many the run has (ADR-0015). catsim draws no progress
@@ -490,10 +491,11 @@ bar itself.</p></li>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>An application or a study environment that installs catsim gets two well-known libraries.</p></li>
+<li><p>An application or a study environment that installs catsim gets two well-known libraries and
+irtlib, which adds no dependency of its own.</p></li>
 <li><p>A researcher who wants a progress bar passes one, for example a tqdm bar’s <code class="docutils literal notranslate"><span class="pre">update</span></code>, in a line.</p></li>
-<li><p>On Python 3.12 and later, catsim installs nothing but NumPy and SciPy, so an application has two
-version ranges to reconcile, and the tests two to cover at both ends.</p></li>
+<li><p>An application has three version ranges to reconcile, and the tests cover NumPy’s and SciPy’s at
+both ends; irtlib’s is one commit until its first release.</p></li>
 <li><p>Pandas, polars and file formats other than CSV stay out of catsim; its tables are plain NumPy
 columns that those libraries read (ADR-0016).</p></li>
 </ul>
@@ -503,7 +505,8 @@ columns that those libraries read (ADR-0016).</p></li>
 <ul class="simple">
 <li><p>tqdm as an optional extra: an extra to maintain for one bar that a callback already gives.</p></li>
 <li><p>Keeping tqdm required: every installation carries it for a feature most runs do not use.</p></li>
-<li><p>Dropping typing-extensions on 3.11 too: <code class="docutils literal notranslate"><span class="pre">override</span></code> would have to be redefined in catsim.</p></li>
+<li><p>typing-extensions for <code class="docutils literal notranslate"><span class="pre">override</span></code> on Python 3.11: catsim requires 3.12, where <code class="docutils literal notranslate"><span class="pre">typing</span></code> has it
+(ADR-0024).</p></li>
 </ul>
 </section>
 </section>
