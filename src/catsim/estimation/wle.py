@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 import numpy
 import numpy.typing as npt
@@ -12,7 +12,6 @@ from scipy.optimize import brentq
 from scipy.special import expit
 
 from .. import irt
-from ..compat import override
 from ..context import Estimate
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from .base import BaseEstimator

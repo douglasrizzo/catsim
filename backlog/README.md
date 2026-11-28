@@ -224,8 +224,7 @@ pages generate theirs from `sphinx/references.bib`:
    - selectors break exact ties with `pick_best` or `best_pool` (ADR-0017), and sum scores over a
      grid's node axis rather than with a matrix product, which can round identical items' columns
      differently;
-   - code inside the package imports `override` from `catsim.compat`, never from
-     `typing_extensions`, which catsim installs only below Python 3.12 (ADR-0021);
+   - an override carries `@override`, from `typing`;
    - strategy objects hold configuration and caches derived from the item bank, never per-session
      state, because one engine serves many sessions (ADR-0007, ADR-0008);
    - each stopper is a single criterion, combined with others by `StopRule`;

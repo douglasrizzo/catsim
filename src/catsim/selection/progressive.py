@@ -1,8 +1,9 @@
 """Progressive and proportional selector implementations."""
 
+from typing import override
+
 import numpy
 
-from ..compat import override
 from ..context import StepContext
 from .base import BaseSelector, below_cap, check_r_max, check_test_size, pick_best, remaining
 

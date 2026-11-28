@@ -2,10 +2,10 @@
 
 import operator
 from abc import abstractmethod
+from typing import override
 
 import numpy
 
-from ..compat import override
 from ..context import StepContext
 from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank

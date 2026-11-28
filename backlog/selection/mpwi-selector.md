@@ -131,11 +131,11 @@ It is removed when the spec is promoted to a technique page.
 # src/catsim/selection/weighted_info.py (added to the existing module)
 
 from collections.abc import Callable
+from typing import override
 
 import numpy
 
 from .. import irt
-from ..compat import override
 from ..context import StepContext
 from ..estimation import LogPrior, QuadratureGrid, normal_log_prior, posterior
 from ..item_bank import ItemBank

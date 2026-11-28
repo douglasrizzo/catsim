@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import override
 
 import numpy as np
 import pytest
 
 from catsim import CatEngine, Estimate, ItemBank, SimulationResult, StepContext, StopReason, simulate
-from catsim.compat import override
 from catsim.estimation import BaseEstimator, EAPEstimator, MAPEstimator, NumericalSearchEstimator
 from catsim.initialization import UniformInitializer
 from catsim.selection import (

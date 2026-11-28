@@ -6,10 +6,10 @@ cluster has no item below the exposure cap.
 """
 
 from enum import StrEnum
+from typing import override
 
 import numpy
 
-from ..compat import override
 from ..context import StepContext
 from ..item_bank import ItemBank
 from ..typing import FloatArray, IntArray

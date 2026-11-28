@@ -15,6 +15,13 @@ maintainer is satisfied with the package.
 
 ## Mechanics
 
+- Wait for irtlib's first release on PyPI, with a license (ADR-0024). Then replace the direct
+  reference `irtlib @ git+https://...@<sha>` in `pyproject.toml` with a version range of the
+  released irtlib, run `uv lock`, and add irtlib's floor to the CI job that tests the lowest direct
+  dependencies. PyPI rejects an upload whose metadata holds a URL dependency, and the publish job
+  runs after the production docs deploy, so a release with the URL still in place deploys the docs
+  and then fails to publish. TestPyPI rejects it too, so until then the TestPyPI job of the dev →
+  main pull request fails after the dev docs deploy; it is not a required check.
 - Bump the version with `uv version` only; `pyproject.toml` is its single source.
 - The release tag equals the version exactly, with no `v`.
 - Bump `UV_VERSION` by hand in `ci-cd.yml` and `linkcheck.yml`, which must stay equal (0.13.9 when
@@ -68,9 +75,9 @@ maintainer is satisfied with the package.
 - **Plots** take their data first and a bank: `item_curve(item, item_bank, ...)`,
   `item_exposure(rates, item_bank, ...)`, `session_progress(session, item_bank, *, true_theta=None)`.
 - **Custom strategies** must be picklable classes defined in a module to run on workers.
-  `override` comes from `typing` (3.12+) or `typing_extensions` (3.11): catsim installs
-  typing-extensions only below 3.12.
-- **Dependencies.** tqdm is not a dependency; matplotlib is the `plot` extra.
+  `override` comes from `typing`.
+- **Python 3.12 or later.** catsim builds on irtlib (ADR-0024), which requires 3.12.
+- **Dependencies.** tqdm is not a dependency; matplotlib is the `plot` extra; irtlib is.
 
 ### Results that change for the same seed
 

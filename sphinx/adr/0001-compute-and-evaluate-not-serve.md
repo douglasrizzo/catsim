@@ -20,7 +20,6 @@ computations to the catR package.
 
 catsim is a library for computing and evaluating computerized adaptive tests:
 
-- the IRT quantities of its models;
 - the CAT strategies: initialization, item selection, ability estimation, stopping and exposure
   control, built in or written by method authors;
 - simulation studies that run and compare them.
@@ -29,7 +28,9 @@ A live testing application can use catsim's computations as its core. catsim doe
 sharing exposure counts across sessions, persistence and audits belong to the application
 (ADR-0006).
 
-catsim does not calibrate items, and it has no graphical or web interface.
+The item response theory those computations rest on, the response functions, the item bank and the
+estimators' mathematics, is irtlib's (ADR-0024). catsim does not calibrate items, and it has no
+graphical or web interface.
 
 ## Consequences
 

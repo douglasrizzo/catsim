@@ -1,11 +1,11 @@
 """Expected information selector implementations."""
 
 import dataclasses
+from typing import override
 
 import numpy
 
 from .. import irt
-from ..compat import override
 from ..context import StepContext
 from ..estimation.base import BaseEstimator
 from ..estimation.numerical import NumericalSearchEstimator

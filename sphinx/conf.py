@@ -250,9 +250,8 @@ nitpick_ignore = [
   ("py:class", "numpy._typing._array_like.NDArray"),
   ("py:class", "numpy._typing._array_like.ArrayLike"),
   ("py:class", "npt.ArrayLike"),
-  # catsim.metrics.Metric's fields share a private type variable: float, or an array for per-item metrics.
-  ("py:class", "_T"),
-  ("py:class", "catsim.metrics._T"),
+  # catsim.metrics.Metric's fields share its type parameter: float, or an array for per-item metrics.
+  ("py:class", "T"),
 ]
 
 # The build fails for a public callable whose docstring leaves out a parameter (numpydoc's PR01).

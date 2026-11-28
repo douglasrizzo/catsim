@@ -8,10 +8,11 @@ These instructions apply to the entire repository unless a deeper `AGENTS.md` ov
 
 ## Project Summary
 
-`catsim` is a library for computing and evaluating computerized adaptive tests: the IRT quantities,
-the CAT strategies, and simulation studies that compare them (ADR-0001). A live testing application
-can use its computations as its core, but catsim does not run, store or serve live tests. The
-architecture is centered on:
+`catsim` is a library for computing and evaluating computerized adaptive tests: the CAT strategies,
+and simulation studies that compare them (ADR-0001). It builds on
+[irtlib](https://github.com/douglasrizzo/irtlib), which holds the item response theory (ADR-0024).
+A live testing application can use its computations as its core, but catsim does not run, store or
+serve live tests. The architecture is centered on:
 
 - `ItemBank`, the immutable calibrated items, with their names (ADR-0003, ADR-0004)
 - `CatEngine`, the immutable configuration of a test, whose step methods (`start`, `select`,
@@ -45,7 +46,9 @@ architecture is centered on:
 - Every random draw comes from a generator the caller passes; simulations draw from one stream per
   examinee (ADR-0013).
 - Keep every built-in strategy picklable, so runs can use workers (ADR-0015).
-- Runtime dependencies are NumPy and SciPy only (ADR-0021).
+- Runtime dependencies are NumPy, SciPy and irtlib only (ADR-0021). irtlib is installed from a commit
+  of its GitHub repository until its first release (ADR-0024); IRT code belongs in irtlib, and catsim
+  keeps only what is meaningful for an adaptive test.
 - Performance is not a requirement. When a change makes catsim slower, say so to the maintainer
   when it happens, with measurements.
 
@@ -56,9 +59,8 @@ architecture is centered on:
 - Keep type annotations accurate; this repository uses `ty` as part of its quality gates.
 - Annotate NumPy arrays with the public aliases in `catsim.typing` (`FloatArray`, `IntArray`).
   Ruff bans `numpy.typing.NDArray` elsewhere; for another dtype, add an alias there.
-- A method that overrides a base-class method carries `@override`, imported from `catsim.compat` in
-  `src/` and `tests/` (typing-extensions is installed only below Python 3.12); ty's
-  `missing-override-decorator` enforces it in both.
+- A method that overrides a base-class method carries `@override`, from `typing`; ty's
+  `missing-override-decorator` enforces it in `src/` and `tests/`.
 - Closed option sets are `StrEnum`s, like `IrtModel`; code that branches on one uses `match`, with
   a final `case _`.
 - Breaking an interface is fine when it gives the better design. A renamed or removed name is gone,
@@ -111,8 +113,7 @@ Hard rules:
 
 - Use `uv` for project commands.
 - Local commands run on Python 3.13 (`.python-version`), the version of CI's pre-commit job, because
-  `uv.lock` resolves some dependencies per Python version (numpy 2.4 on 3.11, 2.5 from 3.12) and ty
-  checks against the installed stubs. CI's test matrix still runs 3.11 to 3.15.
+  ty checks against the installed stubs. CI's test matrix runs 3.12 to 3.15.
 - Pre-commit runs ruff, ty, pylint, import-linter, vulture, typos and the notebooks; run them all
   with `uv run pre-commit run --all-files`.
 - Preferred validation commands:

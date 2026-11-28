@@ -1,11 +1,11 @@
 """Kullback-Leibler item selector."""
 
 import functools
+from typing import override
 
 import numpy
 
 from .. import irt
-from ..compat import override
 from ..context import StepContext
 from ..typing import FloatArray
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining

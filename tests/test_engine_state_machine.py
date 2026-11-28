@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import override
 
 import numpy as np
 from hypothesis import settings
@@ -10,7 +11,6 @@ from hypothesis import strategies as st
 from hypothesis.stateful import RuleBasedStateMachine, initialize, invariant, rule, run_state_machine_as_test
 
 from catsim import CatEngine, Estimate, ItemBank, NoItemsAvailableError, Session, StepContext, StopReason
-from catsim.compat import override
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.exposure import BaseExposureControl
 from catsim.initialization import FixedPointInitializer

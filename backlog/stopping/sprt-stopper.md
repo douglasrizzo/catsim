@@ -170,12 +170,11 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 import numpy
 
 from .. import irt
-from ..compat import override
 from .base import BaseStopper
 
 if TYPE_CHECKING:

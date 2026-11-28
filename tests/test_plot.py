@@ -22,6 +22,7 @@ from catsim.plot import PlotType
 from catsim.typing import FloatArray
 
 if TYPE_CHECKING:
+  import numpy.typing as npt
   from matplotlib.axes import Axes
   from matplotlib.lines import Line2D
 
@@ -587,7 +588,7 @@ class TestBankInformation:
     ],
   )
   def test_bank_information_rejects_items_that_are_not_a_set_of_the_banks_before_drawing(
-    self, items: list[object], error: type[Exception], message: str
+    self, items: npt.ArrayLike, error: type[Exception], message: str
   ) -> None:
     """Fails if an empty set draws a flat zero, an item outside the bank is read past its end, an item counts twice, a
     single number reads as one item (``items=2`` would plot item 2 alone, not two items), a matrix is flattened, a bad
@@ -657,7 +658,7 @@ class TestItemPersonMap:
     ],
   )
   def test_item_person_map_rejects_abilities_that_are_not_finite_numbers_before_drawing(
-    self, thetas: list[object], message: str
+    self, thetas: npt.ArrayLike, message: str
   ) -> None:
     """Fails if NaN abilities are dropped silently from the shares, or a figure is left open behind the error."""
     with pytest.raises(ValueError, match=message):

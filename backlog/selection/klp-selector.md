@@ -140,10 +140,11 @@ It is removed when the spec is promoted to a technique page.
 ```python
 # src/catsim/selection/kl.py (added to the existing module)
 
+from typing import override
+
 import numpy
 
 from .. import irt
-from ..compat import override
 from ..context import StepContext
 from ..estimation import LogPrior, QuadratureGrid, normal_log_prior, posterior
 from ..typing import FloatArray

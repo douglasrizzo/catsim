@@ -187,10 +187,9 @@ def test_the_tests_import_each_public_name_from_its_public_path() -> None:
   """A test that imports ItemBank from ``catsim.item_bank`` breaks when that internal module is renamed.
 
   ADR-0023 lets catsim split, merge or rename its internal modules, so code outside catsim imports each name from its
-  public path. A private name, which only its own tests reach, may come from its module, and so may ``catsim.compat``'s
-  ``override``, which is the standard library's.
+  public path. A private name, which only its own tests reach, may come from its module.
   """
-  public_paths = {*PACKAGES, *PUBLIC_MODULES, "catsim.compat"}
+  public_paths = {*PACKAGES, *PUBLIC_MODULES}
   offenders = {
     f"{path.relative_to(TESTS)}: from {node.module} import {alias.name}"
     for path in TESTS.rglob("*.py")

@@ -16,7 +16,7 @@ the exact spread (ADR-0016).
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING, Generic, NamedTuple, TypeVar
+from typing import TYPE_CHECKING, NamedTuple
 
 import numpy
 
@@ -27,10 +27,8 @@ if TYPE_CHECKING:
 
   from .typing import IntArray
 
-_T = TypeVar("_T", float, FloatArray)
 
-
-class Metric(NamedTuple, Generic[_T]):
+class Metric[T: (float, FloatArray)](NamedTuple):
   """A performance measure of a simulation run, with its Monte Carlo standard error.
 
   A metric unpacks as a pair, ``value, mc_se = metrics.bias(true_thetas, thetas)``. A measure with
@@ -52,8 +50,8 @@ class Metric(NamedTuple, Generic[_T]):
   (0.5, 0.5774)
   """
 
-  value: _T
-  mc_se: _T
+  value: T
+  mc_se: T
 
 
 def _vector(name: str, values: npt.ArrayLike) -> FloatArray:

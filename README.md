@@ -32,7 +32,7 @@ The plotting functions in `catsim.plot` need matplotlib, which the `plot` extra 
 pip install 'catsim[plot]'
 ```
 
-_catsim_ supports Python 3.11 to 3.15.
+_catsim_ supports Python 3.12 to 3.15.
 
 ## Quickstart
 

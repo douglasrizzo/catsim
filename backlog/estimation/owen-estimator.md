@@ -176,11 +176,11 @@ It is removed when the spec is promoted to a technique page.
 # src/catsim/estimation/bayesian.py (added to the existing module)
 
 import math
+from typing import override
 
 import numpy
 
 from .. import irt
-from ..compat import override
 from ..context import Estimate, StepContext
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from ..typing import FloatArray

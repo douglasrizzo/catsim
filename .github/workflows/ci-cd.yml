@@ -70,7 +70,7 @@ jobs:
       matrix:
         # Test on primary OS with all Python versions
         os: [ubuntu-latest]
-        python-version: ["3.11", "3.12", "3.13", "3.14", "3.15"]
+        python-version: ["3.12", "3.13", "3.14", "3.15"]
         resolution: [highest]
         include:
           # Add cross-platform testing on one Python only
@@ -84,10 +84,10 @@ jobs:
           # so the floors stay ones CI has tested. macOS too: its numpy wheels link Apple's Accelerate
           # rather than OpenBLAS, so a floor that passes on Linux can fail there.
           - os: ubuntu-latest
-            python-version: "3.11"
+            python-version: "3.12"
             resolution: lowest-direct
           - os: macos-latest
-            python-version: "3.11"
+            python-version: "3.12"
             resolution: lowest-direct
 
     steps:
@@ -222,7 +222,7 @@ jobs:
         run: |
           # Without the source tree, the only catsim the tests can import is the installed wheel.
           rm -rf src
-          uv venv --python 3.11 "$RUNNER_TEMP/wheel-venv"
+          uv venv --python 3.12 "$RUNNER_TEMP/wheel-venv"
           # The plot extra: the tests import matplotlib.
           wheel=(dist/*.whl)
           uv pip install --python "$RUNNER_TEMP/wheel-venv" "${wheel[0]}[plot]" pytest hypothesis

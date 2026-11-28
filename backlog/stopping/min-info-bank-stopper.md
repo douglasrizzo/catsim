@@ -105,12 +105,11 @@ what the remaining items can still add (this one, the KL stopper and the predict
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 import numpy
 
 from .. import irt
-from ..compat import override
 from .base import BaseStopper
 
 if TYPE_CHECKING:

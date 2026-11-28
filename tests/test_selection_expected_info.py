@@ -1,10 +1,11 @@
 """Tests for MEISelector."""
 
+from typing import override
+
 import numpy as np
 import pytest
 
 from catsim import Estimate, ItemBank, StepContext
-from catsim.compat import override
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.selection import MaxInfoSelector, MEISelector
 from tests.contexts import make_context

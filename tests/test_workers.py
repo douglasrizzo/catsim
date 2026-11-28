@@ -9,13 +9,12 @@ import textwrap
 import threading
 from concurrent.futures.process import BrokenProcessPool
 from types import ModuleType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 import numpy as np
 import pytest
 
 from catsim import CatEngine, ItemBank, StepContext, simulate
-from catsim.compat import override
 from catsim.estimation import EAPEstimator, MAPEstimator
 from catsim.initialization import FixedPointInitializer, UniformInitializer
 from catsim.selection import BaseSelector, MaxInfoSelector, MEISelector, ProgressiveSelector

@@ -6,12 +6,12 @@ import dataclasses
 import math
 import re
 from collections.abc import Callable
+from typing import override
 
 import numpy as np
 import pytest
 
 from catsim import CatEngine, Estimate, ItemBank, Session, SimulationResult, StepContext, StopReason, simulate
-from catsim.compat import override
 from catsim.estimation import EAPEstimator, NumericalSearchEstimator
 from catsim.exposure import BaseExposureControl
 from catsim.initialization import BaseInitializer, FixedPointInitializer, UniformInitializer

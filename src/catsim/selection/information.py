@@ -1,12 +1,12 @@
 """Information-based selectors: maximum information, Urry's rule and interval information."""
 
 import math
+from typing import override
 
 import numpy
 from scipy import stats
 
 from .. import irt
-from ..compat import override
 from ..context import StepContext
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 

@@ -24,8 +24,7 @@ from catsim.typing import IntArray
 ```
 
 `@override` marks each method that implements one of a base class, so that a type checker reports a
-method that overrides nothing, such as one with a misspelt name. It is in `typing` from Python 3.12
-on, and in the `typing_extensions` package on Python 3.11.
+method that overrides nothing, such as one with a misspelt name.
 
 ## An Initializer
 

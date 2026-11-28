@@ -5,11 +5,10 @@ from __future__ import annotations
 import itertools
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from scipy import stats
 
-from ..compat import override
 from .base import BaseStopper
 
 if TYPE_CHECKING:

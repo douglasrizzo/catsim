@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from typing import override
+
 import numpy as np
 
-from catsim.compat import override
 from catsim.typing import FloatArray, IntArray
 
 
