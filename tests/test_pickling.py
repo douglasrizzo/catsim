@@ -8,6 +8,7 @@ import pickle
 import numpy as np
 import pytest
 from irtlib import ItemBank
+from irtlib.quadrature import QuadratureGrid, normal_log_prior, uniform_log_prior
 
 from catsim import CatEngine, StepContext, simulate
 from catsim.estimation import (
@@ -15,10 +16,7 @@ from catsim.estimation import (
   EAPEstimator,
   MAPEstimator,
   NumericalSearchEstimator,
-  QuadratureGrid,
   WarmLikelihoodEstimator,
-  normal_log_prior,
-  uniform_log_prior,
 )
 from catsim.exposure import BaseExposureControl
 from catsim.initialization import BaseInitializer, FixedPointInitializer, NormalInitializer, UniformInitializer

@@ -173,6 +173,7 @@ redirects = {
   "api/techniques/stopping/test-length-stopper": "max-length-stopper.html",
   # Planned work, including the planned techniques, is a card in backlog/ on GitHub.
   "planned-techniques": "https://github.com/douglasrizzo/catsim/tree/dev/backlog",
+  "api/techniques/estimation/bayesian-infrastructure": "eap-estimator.html",
   "api/techniques/estimation/owen-estimator": "https://github.com/douglasrizzo/catsim/blob/dev/backlog/estimation/owen-estimator.md",
   "api/techniques/selection/klp-selector": "https://github.com/douglasrizzo/catsim/blob/dev/backlog/selection/klp-selector.md",
   "api/techniques/selection/mepv-selector": "https://github.com/douglasrizzo/catsim/blob/dev/backlog/selection/mepv-selector.md",

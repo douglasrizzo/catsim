@@ -24,19 +24,16 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 from irtlib import ItemBank
+from irtlib.quadrature import LogPrior, QuadratureGrid, normal_log_prior, uniform_log_prior
 from irtlib.typing import FloatArray
 
 from catsim import CatEngine, StepContext, simulate
 from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,
-  LogPrior,
   MAPEstimator,
   NumericalSearchEstimator,
-  QuadratureGrid,
   WarmLikelihoodEstimator,
-  normal_log_prior,
-  uniform_log_prior,
 )
 from catsim.initialization import FixedPointInitializer
 from catsim.selection import (

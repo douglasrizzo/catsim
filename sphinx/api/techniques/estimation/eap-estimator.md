@@ -1,7 +1,7 @@
 # Expected A Posteriori Estimator
 
 :Class: {py:class}`catsim.estimation.EAPEstimator`
-:Sources: {cite:t}`Bock1982`
+:Sources: {cite:t}`Bock1982`; {cite:t}`Bock1981`
 
 ## Motivation
 
@@ -32,9 +32,10 @@ $$
      {\int p(\theta)\,L(\mathbf{u}\mid\theta)\,d\theta}.
 $$
 
-Using the shared quadrature grid from the
-{doc}`Bayesian infrastructure </api/techniques/estimation/bayesian-infrastructure>`,
-the implementation approximates this as
+On a grid of nodes $\theta_q$, $q = 1, \dots, Q$, with weights $w_q$, irtlib's `QuadratureGrid`,
+the posterior mass at a node is proportional to $w_q\,p(\theta_q)\,L(\mathbf{u}\mid\theta_q)$ and
+the masses $\tilde{p}(\theta_q \mid \mathbf{u})$ sum to 1. The implementation approximates the
+integral as
 
 $$
 \hat{\theta}_{\mathrm{EAP}}
@@ -42,7 +43,7 @@ $$
 \sum_{q=1}^{Q}\theta_q\,\tilde{p}(\theta_q \mid \mathbf{u}),
 $$
 
-with posterior variance, computed by `posterior_variance()`,
+with posterior variance
 
 $$
 \operatorname{Var}(\theta \mid \mathbf{u})
@@ -52,15 +53,32 @@ $$
 \tilde{p}(\theta_q \mid \mathbf{u}).
 $$
 
-These are Equations 4 and 5 of {cite:t}`Bock1982{p. 433}`; catsim returns
-the variance, the square of their Equation 5, without Sheppard's correction (see
-{doc}`/api/techniques/estimation/bayesian-infrastructure`).
+These are Equations 4 and 5 of {cite:t}`Bock1982{p. 433}`, who credit the quadrature formulas to
+{cite:t}`Bock1981` (p. 432); catsim returns the variance, the square of their Equation 5, without
+the Sheppard's correction they apply (p. 433). Like Bock and Mislevy, catsim uses evenly spaced
+nodes rather than Gauss–Hermite points, which offer little advantage here because the likelihood is
+not a polynomial (p. 433).
 
 The estimator returns a {py:class}`~catsim.Estimate` with
 $\hat{\theta}_{\mathrm{EAP}}$ and the posterior standard deviation
 $\sqrt{\operatorname{Var}(\theta \mid \mathbf{u})}$ as its standard error. With
 no administered item the posterior is the prior, so the estimate and its
 standard error are the prior's mean and standard deviation on the grid.
+
+### Computation
+
+By default the grid has 121 equally spaced nodes on $[-6, 6]$ (spacing 0.1) and the prior is
+$\mathcal{N}(0, 1)$. The grid is accurate while it resolves the posterior. Compared with a
+2,401-node reference, the default grid reproduces the posterior mean and standard deviation to
+within about 0.25% while the posterior standard deviation is at least 0.065, which takes a test
+information of about 240. Below that it degrades: errors reach about 6% at a posterior standard
+deviation of 0.05 and about 44% at 0.035. The default follows the advice of
+{cite:t}`Bock1982{p. 433}`, who suggested about 80 points between $\pm 4$ standard deviations, also
+a spacing of 0.1, to keep precision down to a posterior standard deviation of 0.2. A coarser grid
+degrades sooner: with 41 nodes (spacing 0.3), errors reach about 7% at a posterior standard
+deviation of 0.15 and about 44% at 0.11. The estimator reports the posterior standard deviation as
+its standard error, so a precision stopper with a threshold below about 0.065 needs a finer grid
+than the default.
 
 ## Parameters
 
@@ -84,8 +102,7 @@ standard error are the prior's mean and standard deviation on the grid.
 
 The estimate depends on the prior and on the grid. The default grid (121 nodes
 on $[-6, 6]$) is accurate while the posterior standard deviation is at least
-about 0.065; longer tests need a finer grid (see
-{doc}`/api/techniques/estimation/bayesian-infrastructure`).
+about 0.065; longer tests need a finer grid (see Computation above).
 
 :::{dropdown} Comparison with catR
 
@@ -99,7 +116,8 @@ weights reproduces catR's estimator:
 
 ```python
 import numpy
-from catsim.estimation import EAPEstimator, QuadratureGrid
+from catsim.estimation import EAPEstimator
+from irtlib.quadrature import QuadratureGrid
 
 weights = numpy.full(33, 8 / 32)
 weights[[0, -1]] /= 2
@@ -126,10 +144,6 @@ this estimator too. They find no departure.
 
 Wang1998
 ```
-
-:::{seealso}
-Depends on {doc}`/api/techniques/estimation/bayesian-infrastructure`
-:::
 
 ## API Reference
 

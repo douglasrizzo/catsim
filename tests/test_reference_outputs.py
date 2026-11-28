@@ -176,4 +176,4 @@ def test_searches_are_told_apart_from_closed_forms() -> None:
   assert cases.comparison("selection", "ClusterSelector.sum_cluster_infos|theta=0.0") == cases.Comparison(
     unit=0.0, searched=False
   )
-  assert cases.comparison("estimation", "normal_log_prior(0.5, 1.5)").unit == 1.0
+  assert cases.comparison("metrics", "rmse|five").unit == 1.0

@@ -5,10 +5,10 @@ from typing import override
 
 from irtlib import irt
 from irtlib.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
+from irtlib.quadrature import QuadratureGrid, posterior, uniform_log_prior
 from irtlib.typing import FloatArray, IntArray
 
 from ..context import StepContext
-from ..estimation import QuadratureGrid, posterior, uniform_log_prior
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 _MIN_NODES = 5
@@ -88,7 +88,9 @@ class MLWISelector(BaseSelector):
     """Return each candidate's information averaged over the grid, weighted by the likelihood of the responses."""
     item_bank = context.item_bank
     # under a flat prior the posterior over the grid is the likelihood, normalized to sum to 1
-    weights = posterior(context.responses, item_bank.get_items(context.administered_items), self._grid, self._log_prior)
+    administered = item_bank.get_items(context.administered_items)
+    log_likelihood = irt.log_likelihood(self._grid.nodes, [context.responses], administered)
+    weights = posterior(log_likelihood, self._grid, self._log_prior)[0]
     information = irt.information(self._grid.nodes, item_bank.get_items(candidates))
     # a sum over the node axis adds each column in the same order, so identical items tie exactly
     # (ADR-0017); a matrix product may round columns differently
