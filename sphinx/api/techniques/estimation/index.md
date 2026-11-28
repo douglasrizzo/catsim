@@ -9,7 +9,7 @@ accuracy, bias, and the availability of uncertainty quantification.
 
 Every estimator returns a {py:class}`~catsim.Estimate`: the estimate,
 its standard error by the estimator's own formula, which the precision stoppers
-judge, and the number of objective evaluations it took. The session records one
+judge, and the number of evaluations of its objective, or of its derivatives, it took. The session records one
 per step.
 
 | Estimator | Standard error |

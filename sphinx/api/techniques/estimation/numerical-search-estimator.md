@@ -9,7 +9,7 @@ The numerical-search estimator is the package's frequentist maximum-likelihood
 ability estimator. Given administered items and observed binary responses, it
 finds the ability value that maximizes the item-response-theory log-likelihood.
 
-It searches the ability scale on a grid of points, refines the best of them,
+It searches the ability scale for the highest maximum of the likelihood,
 and includes Dodd's heuristic to handle all-correct and all-incorrect
 responses, so every estimate is finite and inside the search bounds.
 
@@ -71,12 +71,23 @@ stepped estimate.
 ### Computation
 
 For mixed responses, the estimate is irtlib's maximum likelihood estimate within the bounds,
-`irtlib.ability.maximum_likelihood`. It evaluates $\log L(\theta)$ at 201 equally spaced
-abilities of the bounds, 0.06 apart on $[-6, 6]$, and refines the best of them between its two
-neighbours with SciPy's bounded Brent method, {py:func}`scipy.optimize.minimize_scalar`
-{cite:p}`Brent2002`, which takes `tol` as its absolute tolerance on $\theta$ (SciPy's `xatol`).
-The refinement is kept only if it is no worse than the best point. The search never evaluates
-outside the bounds, and its evaluation count is the 201 points plus the refinement's.
+`irtlib.ability.maximum_likelihood`, found to within `tol` on $\theta$.
+
+When every administered item has $c_i = 0$ and $d_i = 1$, as under the 1PL and 2PL models, the
+log-likelihood is concave and has at most one maximum. The estimate is then the bound that the
+log-likelihood's first derivative points out of, or the zero of that derivative, which Newton's
+method on the first and second derivatives finds from the middle of the bounds. Each step stays
+inside a bracket around the zero, and the method bisects the bracket where a step would leave it.
+
+Otherwise the likelihood can have several maxima, and the search first evaluates
+$\log L(\theta)$ at equally spaced abilities of the bounds: 101, 0.12 apart on $[-6, 6]$, when
+no administered item has a discrimination $a_i$ above 2.5, and otherwise
+$\lceil 40 \max_i a_i \rceil + 1$, up to 2,401, so that a steep item's narrow peak falls between
+two points. The same bracketed Newton's method refines the best point between its two
+neighbours, and the refinement is kept only if it is no worse than the best point.
+
+The search never evaluates outside the bounds. Its evaluation count is the number of evaluations
+of the log-likelihood or of its derivatives.
 
 ## Parameters
 
@@ -90,7 +101,7 @@ outside the bounds, and its evaluation count is the 201 points plus the refineme
      - Description
    * - ``tol``
      - ``1e-6``
-     - Absolute tolerance of the search's refinement, in the ability scale. Must be positive.
+     - Absolute tolerance of the search, in the ability scale. Must be positive.
    * - ``bounds``
      - ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``
      - Range of the estimate: the search interval, and the interval Dodd's step is clipped to.
@@ -100,8 +111,11 @@ outside the bounds, and its evaluation count is the 201 points plus the refineme
 ## Behavior and Comparison
 
 With guessing, the likelihood can have several local maxima {cite:p}`Chang1996{p. 223}`;
-{cite:p}`Veerkamp1994{p. 4}`; the search returns the highest of the maxima that its 201 points
-tell apart. With
+{cite:p}`Veerkamp1994{p. 4}`; the search returns the highest of the maxima that its points
+tell apart. The notes of `irtlib.ability` report that on about 38,000 random mixed responses
+to 1 to 60 3PL and 4PL items with discriminations from 0.5 to 2.5, the points locate the global
+maximum on $[-6, 6]$ every time, while a local search over the whole range misses it on about
+0.5% of them, by a median of 3.7 in ability. With
 guessing or slipping parameters, the likelihood of a mixed pattern can also
 still be rising at a bound, and the estimate is then within `tol` of that bound.
 
@@ -146,7 +160,7 @@ places, which the parity tests keep as expected failures:
 
 ## Guarantees
 
-1. For mixed responses, the estimate is a local maximum of the log-likelihood inside `bounds`, to within `tol`, and none of the 201 equally spaced abilities of `bounds` has a higher log-likelihood.
+1. For mixed responses, the estimate is a local maximum of the log-likelihood inside `bounds`, to within `tol`, and none of the search's equally spaced abilities has a higher log-likelihood; when every administered item has $c_i = 0$ and $d_i = 1$, it is the maximum within `bounds`.
 2. For all-correct and all-incorrect patterns, the estimate is Dodd's step: finite, inside `bounds`, and never moved against the responses.
 3. The standard error is the asymptotic one above, at the returned estimate, and `math.inf` where the test information is 0.
 

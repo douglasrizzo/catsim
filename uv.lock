@@ -129,7 +129,7 @@ docs = [
 
 [package.metadata]
 requires-dist = [
-    { name = "irtlib", git = "https://github.com/douglasrizzo/irtlib?rev=cfa55021ac53ef32850b5c01560817b809c75317" },
+    { name = "irtlib", git = "https://github.com/douglasrizzo/irtlib?rev=05896734172d5fb557ed6b2745c7d291ec8c4089" },
     { name = "matplotlib", marker = "extra == 'plot'", specifier = ">=3.10.7" },
     { name = "numpy", specifier = ">=2.3.1" },
     { name = "scipy", specifier = ">=1.16" },
@@ -1054,7 +1054,7 @@ wheels = [
 [[package]]
 name = "irtlib"
 version = "0.1.0"
-source = { git = "https://github.com/douglasrizzo/irtlib?rev=cfa55021ac53ef32850b5c01560817b809c75317#cfa55021ac53ef32850b5c01560817b809c75317" }
+source = { git = "https://github.com/douglasrizzo/irtlib?rev=05896734172d5fb557ed6b2745c7d291ec8c4089#05896734172d5fb557ed6b2745c7d291ec8c4089" }
 dependencies = [
     { name = "numpy" },
     { name = "scipy" },

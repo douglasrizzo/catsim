@@ -66,7 +66,8 @@ class BaseEstimator(ABC):
     -------
     Estimate
         The updated ability estimate :math:`\hat\theta`, its standard error (positive, possibly
-        ``math.inf``) and the number of objective evaluations it took.
+        ``math.inf``) and the number of evaluations of its objective, or of its derivatives, it
+        took.
     """
 
   @staticmethod

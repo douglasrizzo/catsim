@@ -53,20 +53,24 @@ with a uniform prior and no responses, the standard error is infinite.
 
 ### Computation
 
-The estimate is irtlib's, `irtlib.ability.maximum_a_posteriori`, which minimizes the negative
-log-posterior
+The estimate is irtlib's, `irtlib.ability.maximum_a_posteriori`, which maximizes the
+log-posterior over the configured theta bounds, to within `tol` on $\theta$.
 
-$$
--\log p(\theta) - \log L(\mathbf{u}\mid\theta)
-$$
+Under a prior from `normal_log_prior`, the search is the
+{doc}`numerical-search estimator's </api/techniques/estimation/numerical-search-estimator>`,
+with the prior's derivatives added to the log-likelihood's. When every administered item has
+$c_i = 0$ and $d_i = 1$, the log-posterior is concave, and Newton's method finds its mode
+directly. Otherwise the search evaluates the log-posterior at the same equally spaced points as
+that estimator's search and refines the best between its two neighbours by Newton's method.
 
-over the configured theta bounds. The estimator first evaluates the
-log-posterior at 201 equally spaced points across the bounds (0.06 apart on the
-default $[-6, 6]$), in one vectorized call, and takes the best point. A bounded
-scalar optimizer (SciPy's bounded Brent method) then refines the mode between
-that point's two neighbors, to within `tol`.
+Under any other prior, a normal density written by hand included, the search evaluates the log-posterior at 201 equally spaced points across
+the bounds (0.06 apart on the default $[-6, 6]$), in one vectorized call, and takes the best
+point. A bounded scalar optimizer, SciPy's bounded Brent method {cite:p}`Brent2002`, then refines
+the mode between that point's two neighbors. Under every prior the refinement is kept only if it
+is no worse than the best point. The evaluation count is the number of evaluations of the
+log-posterior or of its derivatives.
 
-The grid search matters for two reasons. A prior that is zero on part of the
+The search over points matters for two reasons. A prior that is zero on part of the
 bounds, such as `uniform_log_prior(-1, 1)` searched over $[-6, 6]$, makes the
 objective $+\infty$ there, and a bounded scalar search cannot cross that flat
 region; it would drift to a bound outside the prior's support. And a multimodal
@@ -93,7 +97,7 @@ spacing does.
      - Prior used to regularize the likelihood objective.
    * - ``tol``
      - ``1e-6``
-     - Absolute tolerance of the refinement step, passed to the bounded scalar optimizer.
+     - Absolute tolerance of the refinement, in the ability scale.
    * - ``bounds``
      - ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``
      - Search range for the penalized objective.

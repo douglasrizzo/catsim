@@ -38,7 +38,7 @@ description = "Computerized adaptive testing toolkit"
 # irtlib: the item response theory catsim builds on (ADR-0024), at a commit of its dev branch until its
 # first release, which the next release of catsim waits for, since PyPI refuses a dependency given as a URL.
 dependencies = [
-    "irtlib @ git+https://github.com/douglasrizzo/irtlib@cfa55021ac53ef32850b5c01560817b809c75317",
+    "irtlib @ git+https://github.com/douglasrizzo/irtlib@05896734172d5fb557ed6b2745c7d291ec8c4089",
     "numpy>=2.3.1",
     "scipy>=1.16",
 ]
