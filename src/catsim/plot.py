@@ -620,7 +620,7 @@ def session_progress(
       from catsim import CatEngine, simulate
       from irtlib import ItemBank
       from catsim import plot
-      from catsim.estimation import NumericalSearchEstimator
+      from catsim.estimation import MLEstimator
       from catsim.initialization import UniformInitializer
       from catsim.selection import MaxInfoSelector
       from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
@@ -629,7 +629,7 @@ def session_progress(
           ItemBank.generate(100, rng=0),
           UniformInitializer(),
           MaxInfoSelector(),
-          NumericalSearchEstimator(),
+          MLEstimator(),
           StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),
       )
       true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)

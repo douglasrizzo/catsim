@@ -361,7 +361,7 @@ layers = [
 ignore_imports = [
   # MEISelector runs one-step-ahead ability updates with an estimator.
   "catsim.selection.expected_info -> catsim.estimation.base",
-  "catsim.selection.expected_info -> catsim.estimation.numerical",
+  "catsim.selection.expected_info -> catsim.estimation.ml",
 ]
 
 [[tool.importlinter.contracts]]

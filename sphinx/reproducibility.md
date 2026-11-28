@@ -20,14 +20,14 @@ tie-breaks, and the decisions of the engine's exposure control, if it has one. I
 ```pycon
 >>> import numpy
 >>> from catsim import CatEngine, simulate
->>> from catsim.estimation import NumericalSearchEstimator
+>>> from catsim.estimation import MLEstimator
 >>> from catsim.initialization import UniformInitializer
 >>> from catsim.selection import MaxInfoSelector
 >>> from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
 >>> from irtlib import ItemBank
 >>> item_bank = ItemBank.generate(500, rng=42)
 >>> stopper = StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20))
->>> engine = CatEngine(item_bank, UniformInitializer(), MaxInfoSelector(), NumericalSearchEstimator(), stopper)
+>>> engine = CatEngine(item_bank, UniformInitializer(), MaxInfoSelector(), MLEstimator(), stopper)
 >>> true_thetas = numpy.random.default_rng(7).normal(0, 1, 10)
 >>> first = simulate(engine, true_thetas=true_thetas, rng=42)
 >>> first.sessions == simulate(engine, true_thetas=true_thetas, rng=42).sessions
@@ -81,7 +81,7 @@ examinee 14 of the items the first engine gave, and the answers to them agree:
 
 ```pycon
 >>> from catsim.selection import RandomesqueSelector
->>> other = CatEngine(item_bank, UniformInitializer(), RandomesqueSelector(bin_size=5), NumericalSearchEstimator(), stopper)
+>>> other = CatEngine(item_bank, UniformInitializer(), RandomesqueSelector(bin_size=5), MLEstimator(), stopper)
 >>> second = simulate(other, true_thetas=true_thetas, rng=42)
 >>> answers = dict(zip(first.sessions[0].administered_items, first.sessions[0].responses))
 >>> others = dict(zip(second.sessions[0].administered_items, second.sessions[0].responses))

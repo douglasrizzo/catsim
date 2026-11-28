@@ -10,7 +10,7 @@ import pytest
 from irtlib import ItemBank
 
 from catsim import CatEngine, Estimate, SimulationResult, StepContext, StopReason, simulate
-from catsim.estimation import BaseEstimator, EAPEstimator, MAPEstimator, NumericalSearchEstimator
+from catsim.estimation import BaseEstimator, EAPEstimator, MAPEstimator, MLEstimator
 from catsim.initialization import UniformInitializer
 from catsim.selection import (
   AStratBBlockSelector,
@@ -40,9 +40,7 @@ def run_simulation(
   seed: int = 42,
 ) -> SimulationResult:
   """Run a small deterministic simulation of examinees drawn from N(0, 1) and return its aggregate result."""
-  engine = CatEngine(
-    item_bank, UniformInitializer(low=-2.0, high=2.0), selector, estimator or NumericalSearchEstimator(), stopper
-  )
+  engine = CatEngine(item_bank, UniformInitializer(low=-2.0, high=2.0), selector, estimator or MLEstimator(), stopper)
   true_thetas = np.random.default_rng(seed).normal(0, 1, examinees)
   result = simulate(engine, true_thetas=true_thetas, rng=seed)
   assert len(result.sessions) == examinees

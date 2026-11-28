@@ -10,7 +10,7 @@ from hypothesis import strategies as st
 from irtlib import ItemBank
 
 from catsim import CatEngine, Estimate, Session
-from catsim.estimation import NumericalSearchEstimator
+from catsim.estimation import MLEstimator
 from catsim.initialization import FixedPointInitializer
 from catsim.selection import MaxInfoSelector
 from catsim.stopping import MaxLengthStopper
@@ -45,7 +45,7 @@ def test_select_returns_unseen_item_within_bank(
     bank,
     FixedPointInitializer(0.0),
     MaxInfoSelector(),
-    NumericalSearchEstimator(),
+    MLEstimator(),
     MaxLengthStopper(500),
   )
   administered = tuple(range(administered_prefix))

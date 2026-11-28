@@ -269,7 +269,7 @@ class GLRStopper(BaseStopper):
   defined there, and the test can stop there (Contract 1).
 - $\hat\theta$ is the context's `theta`, the engine's current estimate. The definition's
   $\hat\theta_n$ is the maximum-likelihood estimate, so pair the stopper with
-  `NumericalSearchEstimator`; with EAP or MAP the estimate is drawn toward the prior, its
+  `MLEstimator`; with EAP or MAP the estimate is drawn toward the prior, its
   log-likelihood is below the maximum, and both statistics are smaller than the GLR's.
 - The default threshold, $\log(1/\alpha)$ for both decisions, is the spec's uncalibrated choice;
   Bartroff et al. calibrate separate thresholds by simulation or normal approximation (Section

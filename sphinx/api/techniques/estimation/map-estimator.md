@@ -57,7 +57,7 @@ The estimate is irtlib's, `irtlib.ability.maximum_a_posteriori`, which maximizes
 log-posterior over the configured theta bounds, to within `tol` on $\theta$.
 
 Under a prior from `normal_log_prior`, the search is the
-{doc}`numerical-search estimator's </api/techniques/estimation/numerical-search-estimator>`,
+{doc}`ML estimator's </api/techniques/estimation/ml-estimator>`,
 with the prior's derivatives added to the log-likelihood's. When every administered item has
 $c_i = 0$ and $d_i = 1$, the log-posterior is concave, and Newton's method finds its mode
 directly. Otherwise the search evaluates the log-posterior at the same equally spaced points as

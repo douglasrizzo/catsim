@@ -14,7 +14,7 @@ per step.
 
 | Estimator | Standard error |
 |---|---|
-| {py:class}`~catsim.estimation.NumericalSearchEstimator` | $1/\sqrt{I(\hat\theta)}$, the Fisher standard error {cite:p}`Magis12{Eq. 3, p. 4}` |
+| {py:class}`~catsim.estimation.MLEstimator` | $1/\sqrt{I(\hat\theta)}$, the Fisher standard error {cite:p}`Magis12{Eq. 3, p. 4}` |
 | {py:class}`~catsim.estimation.EAPEstimator` | the posterior standard deviation {cite:p}`Magis12{Eq. 11, p. 6}` |
 | {py:class}`~catsim.estimation.MAPEstimator` | $1/\sqrt{I(\hat\theta) - (\log p)''(\hat\theta)}$, where $\log p$ is the prior's log-density; $1/\sqrt{I(\hat\theta) + 1/\sigma^2}$ for a normal prior of variance $\sigma^2$ {cite:p}`Magis12{Eq. 6, p. 5}` |
 | {py:class}`~catsim.estimation.WarmLikelihoodEstimator` | $1/\sqrt{I(\hat\theta)}$, the Fisher standard error at the estimate |
@@ -42,7 +42,7 @@ bound, the estimate is that bound.
 After all-correct or all-incorrect responses the maximum likelihood estimate is
 infinite, and each estimator handles them its own way:
 
-- {py:class}`~catsim.estimation.NumericalSearchEstimator` takes Dodd's step from
+- {py:class}`~catsim.estimation.MLEstimator` takes Dodd's step from
   the current estimate toward the bank's hardest or easiest item;
 - {py:class}`~catsim.estimation.EAPEstimator` and
   {py:class}`~catsim.estimation.MAPEstimator` return the posterior mean and mode,
@@ -65,7 +65,7 @@ estimator puts that examinee at a finite ability.
 
     import matplotlib.pyplot as plt
     from catsim import CatEngine, simulate
-    from catsim.estimation import EAPEstimator, MAPEstimator, NumericalSearchEstimator, WarmLikelihoodEstimator
+    from catsim.estimation import EAPEstimator, MAPEstimator, MLEstimator, WarmLikelihoodEstimator
     from catsim.initialization import FixedPointInitializer
     from catsim.plot import likelihood
     from catsim.selection import LinearSelector
@@ -84,7 +84,7 @@ estimator puts that examinee at a finite ability.
     others = [
         ("MAP", MAPEstimator(), "-."),
         ("WLE", WarmLikelihoodEstimator(), ":"),
-        ("Numerical search", NumericalSearchEstimator(), (0, (5, 2, 1, 2, 1, 2))),
+        ("ML", MLEstimator(), (0, (5, 2, 1, 2, 1, 2))),
     ]
     for name, estimator, style in others:
         ax.axvline(session([1] * 5, estimator).current_theta, color="black", linestyle=style, linewidth=1, label=name)
@@ -97,7 +97,7 @@ estimator puts that examinee at a finite ability.
 ```{toctree}
 :maxdepth: 1
 
-numerical-search-estimator
+ml-estimator
 eap-estimator
 map-estimator
 warm-wle

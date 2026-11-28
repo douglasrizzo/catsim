@@ -26,7 +26,7 @@ $$
 
 where $\tau$ is the configured `max_se`. Each estimator computes that error by
 its own formula {cite:p}`Magis12{pp. 4-6}`. For
-{doc}`maximum likelihood </api/techniques/estimation/numerical-search-estimator>`
+{doc}`maximum likelihood </api/techniques/estimation/ml-estimator>`
 and the {doc}`WLE </api/techniques/estimation/warm-wle>` it is the Fisher
 standard error, $1/\sqrt{I(\hat{\theta})}$, with $I(\hat{\theta})$ the
 information of the administered test at the current estimate. For
@@ -81,7 +81,7 @@ the standard error just above, at and just below the threshold and before any
 response, alone and with a length rule, and catR's test lengths in whole tests
 on recorded responses with each estimator. They find no departure in the
 stopper; the standard error it judges is the estimator's, and the
-{doc}`maximum likelihood estimator's page </api/techniques/estimation/numerical-search-estimator>`
+{doc}`maximum likelihood estimator's page </api/techniques/estimation/ml-estimator>`
 states how its error after all-correct or all-incorrect responses departs from
 catR's.
 :::

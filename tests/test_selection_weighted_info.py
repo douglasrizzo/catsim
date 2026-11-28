@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from irtlib import ItemBank, irt
 
-from catsim.estimation import NumericalSearchEstimator
+from catsim.estimation import MLEstimator
 from catsim.selection import MaxInfoSelector, MLWISelector
 from tests.contexts import make_context
 
@@ -110,11 +110,7 @@ class TestMLWISelector:
     rng = np.random.default_rng(5)
     administered_items = list(range(20))
     responses = [bool(rng.random() < irt.icc(theta_true, item_bank.items[idx])) for idx in administered_items]
-    mle_theta = (
-      NumericalSearchEstimator()
-      .estimate(make_context(item_bank, administered_items, responses, theta=theta_true))
-      .theta
-    )
+    mle_theta = MLEstimator().estimate(make_context(item_bank, administered_items, responses, theta=theta_true)).theta
 
     mlwi = MLWISelector(n_nodes=81)
     max_info = MaxInfoSelector()

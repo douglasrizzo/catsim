@@ -13,7 +13,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from irtlib import ItemBank
 
-from catsim.estimation import NumericalSearchEstimator
+from catsim.estimation import MLEstimator
 from catsim.selection import (
   AStratBBlockSelector,
   AStratSelector,
@@ -91,9 +91,9 @@ def max_info_selector() -> MaxInfoSelector:
 
 
 @pytest.fixture
-def estimator() -> NumericalSearchEstimator:
-  """Provide the default numerical estimator."""
-  return NumericalSearchEstimator()
+def estimator() -> MLEstimator:
+  """Provide the default ML estimator."""
+  return MLEstimator()
 
 
 @pytest.fixture(autouse=True)

@@ -9,7 +9,7 @@ import pytest
 from irtlib import ItemBank
 
 from catsim import NoItemsAvailableError, StepContext
-from catsim.estimation import NumericalSearchEstimator
+from catsim.estimation import MLEstimator
 from catsim.selection import (
   AStratBBlockSelector,
   AStratSelector,
@@ -184,10 +184,8 @@ SELECTOR_REPRS = {
   "AStratBBlockSelector": "AStratBBlockSelector(test_size=12, n_strata=4)",
   "MaxInfoStratSelector": "MaxInfoStratSelector(test_size=12, n_strata=4)",
   "MaxInfoBBlockSelector": "MaxInfoBBlockSelector(test_size=12, n_strata=4)",
-  "MEISelector": "MEISelector(estimator=NumericalSearchEstimator(tol=0.001, bounds=(-4.0, 4.0)), r_max=0.5)",
-  "MEISelector-default-estimator": (
-    "MEISelector(estimator=NumericalSearchEstimator(tol=1e-06, bounds=(-6.0, 6.0)), r_max=1.0)"
-  ),
+  "MEISelector": "MEISelector(estimator=MLEstimator(tol=0.001, bounds=(-4.0, 4.0)), r_max=0.5)",
+  "MEISelector-default-estimator": ("MEISelector(estimator=MLEstimator(tol=1e-06, bounds=(-6.0, 6.0)), r_max=1.0)"),
   "MLWISelector": "MLWISelector(n_nodes=21, bounds=(-4.0, 4.0), r_max=0.5)",
 }
 
@@ -201,7 +199,7 @@ def test_repr_is_the_constructor_call(source: str) -> None:
   """
   namespace = {
     **vars(importlib.import_module("catsim.selection")),
-    "NumericalSearchEstimator": NumericalSearchEstimator,
+    "MLEstimator": MLEstimator,
   }
 
   assert repr(eval(source, namespace)) == source

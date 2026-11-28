@@ -8,7 +8,7 @@ from hypothesis import strategies as st
 from irtlib import ItemBank, irt
 from irtlib.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 
-from catsim.estimation import NumericalSearchEstimator
+from catsim.estimation import MLEstimator
 from tests.contexts import make_context
 from tests.hypothesis_strategies import item_params_matrix
 
@@ -40,7 +40,7 @@ def test_estimate_is_a_likelihood_maximum_on_the_ability_scale(
   assume(len(set(responses)) > 1)
   bank = ItemBank(params)
   items = bank.get_items(administered_items)
-  estimator = NumericalSearchEstimator()
+  estimator = MLEstimator()
   theta = estimator.estimate(make_context(bank, administered_items, responses, theta=0.0)).theta
   neighbours = np.clip([theta - 1e-3, theta + 1e-3], THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)
 

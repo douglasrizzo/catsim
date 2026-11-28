@@ -8,11 +8,11 @@ Accepted 2026-11-23
 
 `catsim.irt` defines two ability ranges: `THETA_MIN_TYPICAL` and `THETA_MAX_TYPICAL` (±4) and
 `THETA_MIN_EXTENDED` and `THETA_MAX_EXTENDED` (±6). Every search and grid in the package defaults to
-the extended range, but only `MAPEstimator` let its range be changed: `NumericalSearchEstimator` and
+the extended range, but only `MAPEstimator` let its range be changed: `MLEstimator` and
 `WarmLikelihoodEstimator` searched [-6, 6], and `EAPEstimator` averaged over its quadrature grid.
 
 After an all-correct or all-incorrect response pattern the likelihood keeps rising toward one end of
-the scale, and the maximum likelihood estimate is infinite. `NumericalSearchEstimator(dodd=False)`
+the scale, and the maximum likelihood estimate is infinite. `MLEstimator(dodd=False)`
 returned that infinity. The engine stored it as the session's estimate, every item then had zero
 information at it, and the selectors picked uniformly from the whole bank (ADR-0017); a session that
 ended on such a pattern reported an infinite estimate, and `MEISelector` needed a special case for
@@ -30,14 +30,14 @@ every search ends. Its bounds are irtlib's `THETA_MIN_EXTENDED` and `THETA_MAX_E
 
 Every estimator returns a finite estimate inside its bounds once an item has been administered,
 whatever the response pattern. `BaseEstimator.estimate` states this as the contract, and the engine
-and the selectors rely on it. The estimators that search the scale, `NumericalSearchEstimator`,
+and the selectors rely on it. The estimators that search the scale, `MLEstimator`,
 `MAPEstimator` and `WarmLikelihoodEstimator`, take the same `bounds` parameter, by default
 `(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)`, and reject bounds that are not finite with the lower one
 below the upper. `EAPEstimator`'s range is its quadrature grid.
 
 What each estimator does with an all-correct or all-incorrect pattern:
 
-- `NumericalSearchEstimator` always takes Dodd's step (Dodd, 1990): half the distance from the
+- `MLEstimator` always takes Dodd's step (Dodd, 1990): half the distance from the
   current estimate to the bank's largest difficulty after correct answers, or to its smallest after
   incorrect ones. The step never moves against the responses, so an estimate already beyond that
   difficulty stays where it is, and the result is clipped to the bounds. There is no switch to turn

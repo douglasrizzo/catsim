@@ -51,7 +51,7 @@ from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,
   MAPEstimator,
-  NumericalSearchEstimator,
+  MLEstimator,
   WarmLikelihoodEstimator,
 )
 from catsim.exposure import BaseExposureControl
@@ -155,9 +155,9 @@ _UNEVEN_GRID = QuadratureGrid(
 )
 
 ESTIMATORS: dict[str, Callable[[], BaseEstimator]] = {
-  "NumericalSearchEstimator()": NumericalSearchEstimator,
-  "NumericalSearchEstimator(bounds=(-3, 3))": lambda: NumericalSearchEstimator(bounds=(-3.0, 3.0)),
-  "NumericalSearchEstimator(tol=1e-9)": lambda: NumericalSearchEstimator(tol=1e-9),
+  "MLEstimator()": MLEstimator,
+  "MLEstimator(bounds=(-3, 3))": lambda: MLEstimator(bounds=(-3.0, 3.0)),
+  "MLEstimator(tol=1e-9)": lambda: MLEstimator(tol=1e-9),
   "EAPEstimator()": EAPEstimator,
   "EAPEstimator(grid=uniform(33, -4, 4))": lambda: EAPEstimator(grid=QuadratureGrid.uniform(33, -4.0, 4.0)),
   "EAPEstimator(grid=uneven)": lambda: EAPEstimator(grid=_UNEVEN_GRID),
@@ -577,9 +577,9 @@ def _bank_clusters() -> list[int]:
 # of the StopRule tests end some sessions by standard error and others by length, and two sessions of
 # the min_items test reach its standard error at the third item and are held to the fourth.
 WHOLE_TESTS: dict[str, Callable[[], dict[str, Any]]] = {
-  "MaxInfo|NumericalSearch|MaxLength(10)": lambda: {
+  "MaxInfo|ML|MaxLength(10)": lambda: {
     "selector": MaxInfoSelector(),
-    "estimator": NumericalSearchEstimator(),
+    "estimator": MLEstimator(),
     "stopper": MaxLengthStopper(10),
   },
   "MaxInfo|EAP|StopRule(SE(0.49), MaxLength(15))": lambda: {
@@ -612,9 +612,9 @@ WHOLE_TESTS: dict[str, Callable[[], dict[str, Any]]] = {
     "estimator": MAPEstimator(log_prior=uniform_log_prior()),
     "stopper": MaxLengthStopper(8),
   },
-  "Linear(10 items)|NumericalSearch|MaxLength(15)": lambda: {
+  "Linear(10 items)|ML|MaxLength(15)": lambda: {
     "selector": LinearSelector(_linear_items(WHOLE_TEST_BANK)),
-    "estimator": NumericalSearchEstimator(),
+    "estimator": MLEstimator(),
     "stopper": MaxLengthStopper(15),
   },
   "AStrat(10, 5)|EAP|MaxLength(10)": lambda: {
@@ -632,9 +632,9 @@ WHOLE_TESTS: dict[str, Callable[[], dict[str, Any]]] = {
     "estimator": MAPEstimator(),
     "stopper": MaxLengthStopper(10),
   },
-  "MaxInfoBBlock(10, 5)|NumericalSearch|MaxLength(10)": lambda: {
+  "MaxInfoBBlock(10, 5)|ML|MaxLength(10)": lambda: {
     "selector": MaxInfoBBlockSelector(test_size=10, n_strata=5),
-    "estimator": NumericalSearchEstimator(),
+    "estimator": MLEstimator(),
     "stopper": MaxLengthStopper(10),
   },
   "Cluster(cluster_info)|EAP|MaxLength(10)": lambda: {
@@ -655,9 +655,9 @@ WHOLE_TESTS: dict[str, Callable[[], dict[str, Any]]] = {
     "stopper": MaxLengthStopper(8),
     "exposure_control": adapters.DeclineListed((0, 3, 7, 12, 19, 25)),
   },
-  "MaxInfo|NumericalSearch|MaxLength(12)|missing responses": lambda: {
+  "MaxInfo|ML|MaxLength(12)|missing responses": lambda: {
     "selector": MaxInfoSelector(),
-    "estimator": NumericalSearchEstimator(),
+    "estimator": MLEstimator(),
     "stopper": MaxLengthStopper(12),
     "responses": GAPPED_RESPONSES,
   },
@@ -775,7 +775,7 @@ FAMILIES: dict[str, dict[str, Case]] = {
 
 # The estimators whose estimate ends a numerical search, so that it is defined only to within the
 # search's tolerance (see tests/reference/records.py).
-SEARCHING_ESTIMATORS = (NumericalSearchEstimator, MAPEstimator, WarmLikelihoodEstimator)
+SEARCHING_ESTIMATORS = (MLEstimator, MAPEstimator, WarmLikelihoodEstimator)
 
 
 @dataclass(frozen=True, slots=True)
