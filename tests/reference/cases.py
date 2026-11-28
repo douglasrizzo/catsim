@@ -330,8 +330,9 @@ def _selection_contexts(selector: str) -> dict[str, tuple[ItemBank, dict[str, An
       contexts[f"4pl|{name}|{rates}"] = (BANKS["4pl"], {**settings, "exposure_rates": EXPOSURE_RATES[rates]})
   # KL integrates its divergence over quadrature nodes in node order, so an item mirrored around the
   # estimate adds the same terms in reverse order, and whether the two tie depends on how the sums
-  # round (ADR-0017). That differs between platforms, so the tie bank leaves KL out.
-  if not selector.startswith("KLSelector"):
+  # round (ADR-0017). MEI with EAP does too, through each posterior's mean over the nodes. That
+  # differs between platforms, so the tie bank leaves both out.
+  if not selector.startswith(("KLSelector", "MEISelector(estimator=EAPEstimator())")):
     for name, settings in TIE_CONTEXTS.items():
       contexts[f"tie_bank|{name}"] = (TIE_BANK, settings)
   return contexts
