@@ -2,10 +2,6 @@
 
 from __future__ import annotations
 
-import os
-import re
-import warnings
-from pathlib import Path
 from typing import TYPE_CHECKING, override
 
 from irtlib import ability
@@ -16,11 +12,6 @@ from .base import BaseEstimator, _session_estimate
 
 if TYPE_CHECKING:
   from ..context import StepContext
-
-# The start of an irtlib warning about one examinee of its response matrix, such as "examinee in row 0: ".
-_ROW = re.compile(r"^examinee in row \d+: ")
-# catsim's source directory: a warning skips its frames, to point at the caller.
-_PACKAGE = str(Path(__file__).parents[1]) + os.sep
 
 
 class WarmLikelihoodEstimator(BaseEstimator):
@@ -64,7 +55,8 @@ class WarmLikelihoodEstimator(BaseEstimator):
 
     The standard error is the inverse square root of the test information at the estimate, without
     Warm's correction (the technique page compares the two), or ``math.inf`` where the information
-    is 0. The evaluation count is the number of modified-score evaluations. With no administered
+    is 0. The evaluation count is the number of modified-score evaluations. A ranking integral that
+    does not converge warns with ``scipy.integrate.IntegrationWarning``. With no administered
     item, the estimate is ``context.theta`` and ``context.se``, unchanged, after no evaluation.
 
     Parameters
@@ -82,11 +74,6 @@ class WarmLikelihoodEstimator(BaseEstimator):
       return Estimate(theta=float(context.theta), se=context.se, evaluations=0)
 
     items = context.item_bank.get_items(context.administered_items)
-    # irtlib's warnings name the row of its response matrix, and the frame outside irtlib, which is this one; they are
-    # given again without the row, from the frame outside catsim, the caller's
-    with warnings.catch_warnings(record=True) as caught:
-      warnings.simplefilter("always")
-      estimates = ability.weighted_likelihood([context.responses], items, bounds=self._bounds, tol=self._tol)
-    for warning in caught:
-      warnings.warn(_ROW.sub("", str(warning.message)), warning.category, skip_file_prefixes=(_PACKAGE,))
-    return _session_estimate(estimates)
+    return _session_estimate(
+      ability.weighted_likelihood([context.responses], items, bounds=self._bounds, tol=self._tol)
+    )

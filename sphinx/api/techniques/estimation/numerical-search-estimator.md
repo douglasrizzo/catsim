@@ -100,8 +100,8 @@ outside the bounds, and its evaluation count is the 201 points plus the refineme
 ## Behavior and Comparison
 
 With guessing, the likelihood can have several local maxima {cite:p}`Chang1996{p. 223}`;
-{cite:p}`Veerkamp1994{p. 4}`, and the search returns the highest of those its 201 points
-separate. With
+{cite:p}`Veerkamp1994{p. 4}`; the search returns the highest of the maxima that its 201 points
+tell apart. With
 guessing or slipping parameters, the likelihood of a mixed pattern can also
 still be rising at a bound, and the estimate is then within `tol` of that bound.
 
@@ -146,7 +146,7 @@ places, which the parity tests keep as expected failures:
 
 ## Guarantees
 
-1. For mixed responses, the estimate is a local maximum of the log-likelihood inside `bounds`, to within `tol`, and no point of the search's grid has a higher log-likelihood.
+1. For mixed responses, the estimate is a local maximum of the log-likelihood inside `bounds`, to within `tol`, and none of the 201 equally spaced abilities of `bounds` has a higher log-likelihood.
 2. For all-correct and all-incorrect patterns, the estimate is Dodd's step: finite, inside `bounds`, and never moved against the responses.
 3. The standard error is the asymptotic one above, at the returned estimate, and `math.inf` where the test information is 0.
 

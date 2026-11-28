@@ -757,24 +757,16 @@ class TestWarmLikelihoodEstimator:
 
     assert estimate.se == pytest.approx(1.0 / math.sqrt(_information(estimate.theta, items)), rel=1e-12)
 
-  def test_ranking_integral_warnings_point_at_the_caller(self) -> None:
-    """A ranking integral that does not converge warns, from the line that called estimate.
+  def test_a_ranking_integral_that_does_not_converge_warns(self) -> None:
+    """An estimate whose ranking of the candidate roots rests on an integral that did not converge, given silently.
 
-    After a wrong answer to a steep item that guesses (a = 200, c = 0.2), the modified score spikes at b and quad runs
-    out of its 200 subdivisions. quad returns that message instead of warning, so dropping it loses the warning; a
-    stacklevel other than 3 blames another line, such as WarmLikelihoodEstimator.estimate's own (2) or the line that
-    calls the wrapper below (4).
+    After a wrong answer to a steep item that guesses (a = 200, c = 0.2), the modified score spikes at b and the
+    ranking integral runs out of its 200 subdivisions.
     """
     context = make_context(ItemBank(np.array([[200.0, 0.0, 0.2, 1.0]])), [0], [False])
 
-    def estimate() -> Estimate:
-      return WarmLikelihoodEstimator().estimate(context)
-
-    with pytest.warns(IntegrationWarning, match="subdivisions") as caught:
-      estimate()
-
-    call_line = estimate.__code__.co_firstlineno + 1
-    assert {(warning.filename, warning.lineno) for warning in caught} == {(__file__, call_line)}
+    with pytest.warns(IntegrationWarning, match="subdivisions"):
+      WarmLikelihoodEstimator().estimate(context)
 
   @pytest.mark.parametrize(
     ("b", "correct", "expected"),
