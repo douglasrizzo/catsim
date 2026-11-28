@@ -16,7 +16,7 @@ raised_by: []
 
 ## Why this is a discussion card
 
-MCAT replaces unidimensional ability $\theta \in \mathbb{R}$ with a multidimensional ability vector $\boldsymbol{\theta} \in \mathbb{R}^D$, backed by a multidimensional IRT (MIRT) model. irtlib's `irtlib.irt`, which catsim builds on (ADR-0024), is hardcoded to the 4PL unidimensional logistic. There is **no matrix theta state, no multidimensional ICC, no Fisher-information matrix** anywhere in the package. Adding MCAT is not a strategy card — it is a fundamental extension of `irt.py`, `ItemBank`, `CatSessionState`, and every estimator/selector/stopper. This card documents the scope and what would need to change.
+MCAT replaces unidimensional ability $\theta \in \mathbb{R}$ with a multidimensional ability vector $\boldsymbol{\theta} \in \mathbb{R}^D$, backed by a multidimensional IRT (MIRT) model. irtlib's `irtlib.irt`, which catsim builds on (ADR-0024), is hardcoded to the 4PL unidimensional logistic. There is **no matrix theta state, no multidimensional ICC, no Fisher-information matrix** anywhere in the package. Adding MCAT is not a strategy card — it is a fundamental extension of irtlib's response functions and `ItemBank`, and of catsim's sessions and every estimator/selector/stopper. This card documents the scope and what would need to change.
 
 ## References
 

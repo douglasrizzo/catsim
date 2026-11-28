@@ -554,11 +554,20 @@ class TestBayesianHelpers:
     with pytest.raises(ValueError, match="NaN or \\+inf"):
       posterior([], np.empty((0, 4)), grid, nan_prior)
 
+  @pytest.mark.parametrize("responses", [[1.0, 0.0], [math.nan, True]], ids=["floats", "nan"])
+  def test_posterior_rejects_responses_that_are_neither_booleans_nor_0_or_1(self, responses: list[float]) -> None:
+    """A float or NaN response read as an answer, or NaN read as a missing one, gives a posterior over other responses
+    than the session's (ADR-0009)."""
+    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0]])
+
+    with pytest.raises(TypeError, match=r"responses\[0\] is .*; responses must be bools or the integers 0 and 1"):
+      posterior(responses, items, QuadratureGrid.uniform(), normal_log_prior())  # ty: ignore[invalid-argument-type]
+
   def test_posterior_rejects_mismatched_responses_without_items(self) -> None:
     """Responses without matching items should raise, not silently return the prior."""
     grid = QuadratureGrid.uniform()
 
-    with pytest.raises(ValueError, match="there must be one item per column"):
+    with pytest.raises(ValueError, match="there must be one response per administered item"):
       posterior([True, False], np.empty((0, 4)), grid, normal_log_prior())
 
   def test_posterior_shifts_positive_after_correct_response(self) -> None:

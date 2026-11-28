@@ -17,6 +17,7 @@ from irtlib.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from irtlib.typing import FloatArray
 from scipy.optimize import minimize_scalar
 
+from ..checks import _responses
 from ..context import Estimate
 from .base import BaseEstimator
 
@@ -267,7 +268,7 @@ def posterior(
   TypeError
       If a response is neither a Boolean nor an integer.
   """
-  log_lik = irt.log_likelihood(grid.nodes, [responses], items)[0]
+  log_lik = irt.log_likelihood(grid.nodes, [_responses(responses, len(items))], items)[0]
   log_post = log_prior(grid.nodes) + log_lik + numpy.log(grid.weights)
   if numpy.isnan(log_post).any() or numpy.isposinf(log_post).any():
     msg = "posterior is undefined: the log-prior or log-likelihood is NaN or +inf at some node"
