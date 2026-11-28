@@ -66,7 +66,8 @@ standard error: 13 of 3,920 sets of responses (0.4% of their probability) on ran
 
 ### Computation
 
-The modified score is evaluated at 121 equally spaced points over the search
+The estimate is irtlib's, `irtlib.ability.weighted_likelihood`. The modified score is evaluated at
+121 equally spaced points over the search
 range $[\theta_{\min}, \theta_{\max}]$ given by `bounds`, by default $[-6, 6]$
 (`THETA_MIN_EXTENDED`, `THETA_MAX_EXTENDED`), to bracket its roots. On the
 default range the points are 0.1 apart, so two roots closer than that can fall

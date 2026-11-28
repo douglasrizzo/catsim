@@ -94,7 +94,12 @@ maintainer is satisfied with the package.
 - A generator passed as `rng` gives other results than the int it was built from: `simulate` draws
   one 128-bit seed from it.
 - Runs on recorded responses without randomization give the same items and estimates as before
-  (the reference baseline in `tests/reference/`).
+  (the reference baseline in `tests/reference/`), to rounding: the estimators are irtlib's
+  (ADR-0024). `NumericalSearchEstimator` searches 201 points before refining the best, so its
+  estimates move within `tol`, it finds the highest maximum where Brent's search alone could stop
+  at a lower one, and its evaluation counts are 201 or more where they were about 11.
+- Simulations run slower than on 0.21's code at the same seed, for the estimators irtlib computes:
+  measure them again against irtlib's release before writing a number here.
 
 ### Highlights
 

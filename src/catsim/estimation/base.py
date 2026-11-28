@@ -1,9 +1,37 @@
 """Base class for ability estimators."""
 
+from __future__ import annotations
+
 import math
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
-from ..context import Estimate, StepContext
+from ..context import Estimate
+
+if TYPE_CHECKING:
+  from irtlib.ability import AbilityEstimates
+
+  from ..context import StepContext
+
+
+def _session_estimate(estimates: AbilityEstimates) -> Estimate:
+  """Return the estimate of the one examinee, a session, that an estimator of ``irtlib.ability`` was given.
+
+  Parameters
+  ----------
+  estimates : irtlib.ability.AbilityEstimates
+      The estimates of a response matrix of one row.
+
+  Returns
+  -------
+  Estimate
+      The row's estimate, standard error and evaluation count.
+  """
+  return Estimate(
+    theta=float(estimates.theta[0]),
+    se=float(estimates.standard_errors[0]),
+    evaluations=int(estimates.evaluations[0]),
+  )
 
 
 class BaseEstimator(ABC):
