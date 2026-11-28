@@ -40,7 +40,7 @@ $$
 $$
 
 catsim divides the likelihood values by their sum over the grid, which makes them
-the posterior that {py:func}`catsim.estimation.posterior` computes under a
+the posterior that irtlib's `irtlib.quadrature.posterior` computes under a
 uniform prior on `bounds`. That division and the spacing $\Delta_q$, the same
 at every node, scale every item's score by one constant, so they do not change
 which item is selected.

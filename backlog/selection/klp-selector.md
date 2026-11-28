@@ -144,10 +144,10 @@ from typing import override
 
 import numpy
 from irtlib import irt
+from irtlib.quadrature import LogPrior, QuadratureGrid, normal_log_prior, posterior
 from irtlib.typing import FloatArray
 
 from ..context import StepContext
-from ..estimation import LogPrior, QuadratureGrid, normal_log_prior, posterior
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 
@@ -219,7 +219,9 @@ class KLPSelector(BaseSelector):
     """
     candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
     item_bank = context.item_bank
-    post = posterior(context.responses, item_bank.get_items(context.administered_items), self._grid, self._log_prior)
+    administered = item_bank.get_items(context.administered_items)
+    log_likelihood = irt.log_likelihood(self._grid.nodes, [context.responses], administered)
+    post = posterior(log_likelihood, self._grid, self._log_prior)[0]
     divergences = _kl_divergences(self._grid.nodes, context.theta, item_bank.get_items(candidates))
     return pick_best(candidates, (post[:, None] * divergences).sum(axis=0), context.rng)
 ```
@@ -227,7 +229,7 @@ class KLPSelector(BaseSelector):
 **Implementation notes:**
 
 - The posterior comes from the context's responses at every call: estimators keep no per-session
-  posterior ({doc}`ADR-0007 </adr/0007-strategy-contracts>`), and `posterior()` is one
+  posterior ({doc}`ADR-0007 </adr/0007-strategy-contracts>`), and irtlib's `posterior` is one
   vectorized pass over the grid. With no responses it is the prior on the grid.
 - The reference point of the divergence is the context's `theta`, the engine's current estimate
   from whichever estimator it runs, not the posterior mean; the definition's $\hat\theta$ is the
@@ -240,10 +242,8 @@ class KLPSelector(BaseSelector):
 - The score sums over the nodes rather than using `post @ divergences`, as `KLSelector` and
   `MLWISelector` do: a matrix product can round identical columns differently, which breaks the
   exact ties of {doc}`ADR-0017 </adr/0017-random-tie-breaking>`.
-- The selection and estimation layers do not import each other (`[tool.importlinter]` in
-  `pyproject.toml`). Add `"catsim.selection.kl -> catsim.estimation"` to that contract's
-  `ignore_imports`, as `MLWISelector` does for the same helpers, or move the grid and posterior
-  helpers to a lower layer.
+- The grid, the priors and the posterior are irtlib's, in `irtlib.quadrature` (ADR-0024), which
+  every layer may import, as `MLWISelector` does.
 - The default grid is catsim's (121 nodes on $[-6, 6]$, equal weights). catR's 33 nodes on
   $[-4, 4]$ with the trapezoidal rule are a `QuadratureGrid` with trapezoid weights, for
   comparisons with catR.
