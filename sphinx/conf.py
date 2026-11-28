@@ -149,12 +149,16 @@ redirects = {
   "cat": "api/metrics.html",
   "estimation": "api/techniques/estimation/index.html",
   "initialization": "api/techniques/initialization/index.html",
-  "irt": "api/irt.html",
+  "irt": "https://github.com/douglasrizzo/irtlib/blob/dev/src/irtlib/irt.py",
   "plot": "api/plot.html",
   "selection": "api/techniques/selection/index.html",
   "simulation": "api/simulation.html",
   "stopping": "api/techniques/stopping/index.html",
   "api/cat": "metrics.html",
+  # The item response theory is irtlib's, which has no documentation site yet.
+  "api/irt": "https://github.com/douglasrizzo/irtlib/blob/dev/src/irtlib/irt.py",
+  "api/item_bank": "https://github.com/douglasrizzo/irtlib/blob/dev/src/irtlib/bank.py",
+  "api/typing": "https://github.com/douglasrizzo/irtlib/blob/dev/src/irtlib/typing.py",
   # Guides and reference pages renamed.
   "live-sessions": "embedding-catsim.html",
   "api/state": "session.html",
@@ -253,6 +257,10 @@ nitpick_ignore = [
   # catsim.metrics.Metric's fields share its type parameter: float, or an array for per-item metrics.
   ("py:class", "T"),
 ]
+# irtlib has no documentation site to link to yet: its objects, in signatures and in the text, are
+# literals (ADR-0024). Annotations that a module imports for the type checker only render as their
+# bare names.
+nitpick_ignore_regex = [("py:.*", r"irtlib(\..*)?"), ("py:class", r"ItemBank|IrtModel|FloatArray|IntArray|BoolArray")]
 
 # The build fails for a public callable whose docstring leaves out a parameter (numpydoc's PR01).
 # Ruff's DOC rules check the sections a docstring has against the code, not that they exist.
@@ -262,13 +270,10 @@ numpydoc_validation_checks = {"PR01"}
 numpydoc_validation_exclude = {
   # numpydoc reads the call signature of an Enum's metaclass as the class's
   # parameters, and that of an array alias as the alias's.
-  r"^catsim\.(IrtModel|StopReason)$",
+  r"^catsim\.StopReason$",
   r"^catsim\.selection\.(CapFallback|ClusterMethod)$",
   r"^catsim\.plot\.PlotType$",
-  r"^catsim\.typing\.(FloatArray|IntArray)$",
   # Autodoc reads the docstrings of the names a module imports before it leaves them off the page.
-  r"^catsim\.irt\.overload$",
   r"^catsim\.metrics\.NamedTuple$",
   r"^catsim\.plot\.(Axes|FuncFormatter|MaxNLocator|StrEnum|assert_never)$",
-  r"^catsim\.typing\.Any$",
 }

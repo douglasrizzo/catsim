@@ -6,9 +6,10 @@ import math
 from collections.abc import Sequence
 
 import numpy as np
+from irtlib import ItemBank
+from irtlib.typing import FloatArray
 
-from catsim import ItemBank, StepContext
-from catsim.typing import FloatArray
+from catsim import StepContext
 
 
 def make_context(

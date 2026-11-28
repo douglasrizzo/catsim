@@ -1,6 +1,6 @@
 # Contributing
 
-**catsim** is built in an object-oriented paradigm (or as object-oriented as Python allows) so it is rather simple to extend it. You can write new [initializers](https://douglasrizzo.com.br/catsim/api/techniques/initialization/index.html), [selectors](https://douglasrizzo.com.br/catsim/api/techniques/selection/index.html), [estimators](https://douglasrizzo.com.br/catsim/api/techniques/estimation/index.html) or [stopping criteria](https://douglasrizzo.com.br/catsim/api/techniques/stopping/index.html) by extending the base classes that are present in each of the corresponding modules. You can also write new [IRT-related functions](https://douglasrizzo.com.br/catsim/api/irt.html), as long as you have the right academic papers to prove they are relevant.
+**catsim** is built in an object-oriented paradigm (or as object-oriented as Python allows) so it is rather simple to extend it. You can write new [initializers](https://douglasrizzo.com.br/catsim/api/techniques/initialization/index.html), [selectors](https://douglasrizzo.com.br/catsim/api/techniques/selection/index.html), [estimators](https://douglasrizzo.com.br/catsim/api/techniques/estimation/index.html) or [stopping criteria](https://douglasrizzo.com.br/catsim/api/techniques/stopping/index.html) by extending the base classes that are present in each of the corresponding modules. Item response theory, the response functions, the item bank and the estimators' mathematics, belongs to [irtlib](https://github.com/douglasrizzo/irtlib), the package catsim builds on ([ADR-0024](sphinx/adr/0024-catsim-builds-on-irtlib.md)): contribute those there.
 
 If you think the [CAT engine](https://douglasrizzo.com.br/catsim/api/engine.html) or [`simulate`](https://douglasrizzo.com.br/catsim/api/simulation.html) could be doing something it is not doing, feel free to study it and make a contribution.
 
@@ -78,7 +78,7 @@ Each implemented technique has a page under `sphinx/api/techniques/` with its de
 
 `tests/test_parity_catr.py` checks catsim against the R package [catR](https://cran.r-project.org/package=catR) on fixed cases ([ADR-0020](sphinx/adr/0020-catr-as-the-reference.md)). It runs with the rest of the suite and needs no R: catR's outputs are JSON files in `tests/parity/catr/`, written with the R and catR versions by the R scripts beside them. The cases are at three levels:
 
-1. single computations (`irt.R`, `estimation.R`, `selection.R`, `stopping.R`);
+1. single computations (`estimation.R`, `selection.R`, `stopping.R`);
 1. whole tests on recorded responses (`whole_tests.R`), which must give the same items in the same order and the same estimates;
 1. simulations of the randomized selectors (`simulations.R`), whose metrics must agree within their Monte Carlo error, since R and NumPy draw different numbers.
 

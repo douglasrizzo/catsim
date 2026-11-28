@@ -2,8 +2,8 @@
 
 import numpy as np
 import pytest
+from irtlib import ItemBank, irt
 
-from catsim import ItemBank, irt
 from catsim.estimation import NumericalSearchEstimator
 from catsim.selection import MaxInfoSelector, MLWISelector
 from tests.contexts import make_context

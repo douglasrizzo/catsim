@@ -46,7 +46,8 @@ class StopRule(BaseStopper):
   Examples
   --------
   >>> import numpy
-  >>> from catsim import ItemBank, StepContext
+  >>> from catsim import StepContext
+  >>> from irtlib import ItemBank
   >>> from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
   >>> rule = StopRule(StandardErrorStopper(0.5), MaxLengthStopper(20), min_items=5)
   >>> rule

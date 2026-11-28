@@ -42,11 +42,12 @@ standard error is at most 0.5, or after 20 items.
 
 ```python
 import numpy
-from catsim import CatEngine, ItemBank, simulate
+from catsim import CatEngine, simulate
 from catsim.estimation import EAPEstimator
 from catsim.initialization import FixedPointInitializer
 from catsim.selection import MaxInfoSelector
 from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
+from irtlib import ItemBank
 
 engine = CatEngine(
     ItemBank.generate(100, rng=0),
@@ -68,6 +69,9 @@ RMSE 0.470 ± 0.025, mean test length 13.9
 It prints the root mean squared error of the final estimates, with its Monte Carlo standard error,
 and the mean test length: most tests reach the target before the 20-item limit. The result also
 holds every examinee's test, as tables, and the same `rng` gives the same result on every run.
+
+The item bank comes from [irtlib](https://github.com/douglasrizzo/irtlib), the item response theory
+package _catsim_ builds on, which installs with it and also holds the item response functions.
 
 ## Where to go next
 
@@ -105,7 +109,9 @@ Source code and issues: <https://github.com/douglasrizzo/catsim>.
 ## Calibrating items
 
 _catsim_ takes calibrated item parameters and does not estimate them. I calibrate items with the
-[mirt](https://cran.r-project.org/package=mirt) R package. For Python, these packages estimate item
-parameters, though I have not used them myself:
+[mirt](https://cran.r-project.org/package=mirt) R package. In Python,
+[irtlib](https://github.com/douglasrizzo/irtlib) calibrates the one- to four-parameter logistic
+models by marginal maximum likelihood, and these packages estimate item parameters too, though I
+have not used them myself:
 [girth](https://github.com/eribean/girth), [girth_mcmc](https://github.com/eribean/girth_mcmc) and
 [py-irt](https://github.com/nd-ball/py-irt).

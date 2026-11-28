@@ -4,8 +4,9 @@ from typing import override
 
 import numpy as np
 import pytest
+from irtlib import ItemBank
 
-from catsim import Estimate, ItemBank, StepContext
+from catsim import Estimate, StepContext
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.selection import MaxInfoSelector, MEISelector
 from tests.contexts import make_context

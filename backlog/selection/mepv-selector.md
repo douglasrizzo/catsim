@@ -138,12 +138,11 @@ It is removed when the spec is promoted to a technique page.
 from typing import override
 
 import numpy
+from irtlib import ItemBank, irt
+from irtlib.typing import FloatArray
 
-from .. import irt
 from ..context import StepContext
 from ..estimation import LogPrior, QuadratureGrid, normal_log_prior, posterior
-from ..item_bank import ItemBank
-from ..typing import FloatArray
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 

@@ -11,12 +11,13 @@ from typing import override
 
 import numpy as np
 import pytest
+from irtlib import ItemBank
+from irtlib.typing import FloatArray
 
 from catsim import (
   CatEngine,
   Estimate,
   ExcludedItemError,
-  ItemBank,
   NoItemsAvailableError,
   Session,
   StepContext,
@@ -27,7 +28,6 @@ from catsim.exposure import BaseExposureControl
 from catsim.initialization import BaseInitializer
 from catsim.selection import BaseSelector, LinearSelector, MaxInfoSelector, MEISelector, RandomSelector, remaining
 from catsim.stopping import BaseStopper, MaxLengthStopper, StandardErrorStopper, StopRule
-from catsim.typing import FloatArray
 from tests.contexts import make_context
 
 INITIAL = Estimate(0.0, math.inf, 0)

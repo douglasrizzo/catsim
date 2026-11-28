@@ -7,22 +7,23 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 import numpy
+from irtlib import ItemBank
 
 from .checks import _check_in_bank, _exposure_rates, _item, _item_indices, _named, _response
 from .context import Estimate, StepContext, _replaced, _unchecked
 from .exceptions import ExcludedItemError, NoItemsAvailableError
-from .item_bank import ItemBank
 from .session import Session, StopReason
 
 if TYPE_CHECKING:
   from collections.abc import Iterable
+
+  from irtlib.typing import FloatArray
 
   from .estimation import BaseEstimator
   from .exposure import BaseExposureControl
   from .initialization import BaseInitializer
   from .selection import BaseSelector
   from .stopping import BaseStopper
-  from .typing import FloatArray
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,14 +90,15 @@ class CatEngine:
   Raises
   ------
   TypeError
-      If ``item_bank`` is not an :class:`~catsim.ItemBank`.
+      If ``item_bank`` is not an ``irtlib.ItemBank``.
 
   Examples
   --------
   A test of five items, whose examinee answers every item easier than average correctly:
 
   >>> import numpy
-  >>> from catsim import CatEngine, ItemBank
+  >>> from catsim import CatEngine
+  >>> from irtlib import ItemBank
   >>> from catsim.estimation import EAPEstimator
   >>> from catsim.initialization import FixedPointInitializer
   >>> from catsim.selection import MaxInfoSelector
@@ -297,7 +299,8 @@ class CatEngine:
 
     Examples
     --------
-    >>> from catsim import CatEngine, ItemBank, simulate
+    >>> from catsim import CatEngine, simulate
+    >>> from irtlib import ItemBank
     >>> from catsim.estimation import EAPEstimator
     >>> from catsim.initialization import FixedPointInitializer
     >>> from catsim.selection import MaxInfoSelector

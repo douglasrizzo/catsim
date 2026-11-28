@@ -17,7 +17,7 @@ responses, so every estimate is finite and inside the search bounds.
 
 The estimator maximizes the log-likelihood $\log L(\theta)$ of the responses
 $u_i \in \{0,1\}$ to the administered items, which
-{py:func}`catsim.irt.log_likelihood` computes. The returned estimate is
+`irtlib.irt.log_likelihood` computes. The returned estimate is
 
 $$
 \hat{\theta}_{\mathrm{MLE}}

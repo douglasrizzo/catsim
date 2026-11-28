@@ -1,8 +1,8 @@
 """Tests for LinearSelector."""
 
 import pytest
+from irtlib import ItemBank
 
-from catsim import ItemBank
 from catsim.selection import LinearSelector
 from tests.contexts import make_context
 

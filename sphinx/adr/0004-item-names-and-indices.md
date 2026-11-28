@@ -14,7 +14,8 @@ identification.
 ## Decision
 
 - Every item has a name: a non-empty string, unique within its bank. `ItemBank(items, names=None)`
-  takes one name per row, or generates them.
+  takes one name per row, or generates them. The bank is irtlib's (ADR-0024), and irtlib's ADR-0009
+  holds its rules for names.
 - A generated name is `item_` followed by the row index, zero-based like the indices, and
   zero-padded to the width of the last index: `item_000` to `item_499` in a 500-item bank.
 - Computations use row indices. The strategy contract, the step context, the session and the step

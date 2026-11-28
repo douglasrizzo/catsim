@@ -38,12 +38,13 @@ except ImportError as error:
   _missing = "catsim.plot needs matplotlib; install it with: pip install 'catsim[plot]'"
   raise ImportError(_missing) from error
 
-from . import irt, metrics
+from irtlib import ItemBank, irt
+from irtlib.typing import FloatArray, IntArray
+
+from . import metrics
 from .checks import _check_in_bank, _item, _item_indices
-from .item_bank import ItemBank
 from .session import Session
 from .simulation import SimulationResult
-from .typing import FloatArray, IntArray
 
 # The most items an x axis names, one tick each: at matplotlib's default figure width, more names overlap.
 _MAX_NAMED_TICKS = 30
@@ -91,7 +92,7 @@ def item_curve(
       :caption: One item's characteristic and information curves, apart and together. The dot marks its peak.
 
       import matplotlib.pyplot as plt
-      from catsim import ItemBank
+      from irtlib import ItemBank
       from catsim.plot import PlotType, item_curve
       item_bank = ItemBank.generate(1, rng=7)
       fig, axes = plt.subplots(3, 1, figsize=(7, 15))
@@ -257,7 +258,7 @@ def bank_information(
       :caption: The information of a 100-item bank, with its standard error.
 
       import matplotlib.pyplot as plt
-      from catsim import ItemBank
+      from irtlib import ItemBank
       from catsim import plot
 
       plot.bank_information(ItemBank.generate(100, "3PL", rng=0))
@@ -330,7 +331,7 @@ def expected_score(
       :caption: The expected proportion correct of a 100-item bank and of its first 20 items.
 
       import matplotlib.pyplot as plt
-      from catsim import ItemBank
+      from irtlib import ItemBank
       from catsim import plot
 
       item_bank = ItemBank.generate(100, "3PL", rng=0)
@@ -381,7 +382,7 @@ def item_person_map(
 
   Both histograms share one :math:`\theta` scale and its bins, and each shows shares, so a bank and a
   population of any sizes compare: the examinees' bars sum to 1 above the axis and the items' bars
-  to 1 below it. An item sits at :attr:`~catsim.ItemBank.max_info_thetas`, which is its difficulty
+  to 1 below it. An item sits at ``ItemBank.max_info_thetas``, which is its difficulty
   for one- and two-parameter items.
 
   .. plot::
@@ -389,7 +390,7 @@ def item_person_map(
 
       import matplotlib.pyplot as plt
       import numpy
-      from catsim import ItemBank
+      from irtlib import ItemBank
       from catsim import plot
 
       thetas = numpy.random.default_rng(1).normal(0, 1, 500)
@@ -497,7 +498,8 @@ def item_exposure(  # noqa: PLR0913 - the rates and their bank, two views (par, 
 
       import matplotlib.pyplot as plt
       import numpy
-      from catsim import CatEngine, ItemBank, simulate
+      from catsim import CatEngine, simulate
+      from irtlib import ItemBank
       from catsim import plot
       from catsim.estimation import EAPEstimator
       from catsim.initialization import FixedPointInitializer
@@ -615,7 +617,8 @@ def session_progress(
 
       import matplotlib.pyplot as plt
       import numpy
-      from catsim import CatEngine, ItemBank, simulate
+      from catsim import CatEngine, simulate
+      from irtlib import ItemBank
       from catsim import plot
       from catsim.estimation import NumericalSearchEstimator
       from catsim.initialization import UniformInitializer
@@ -712,7 +715,8 @@ def likelihood(
 
       import matplotlib.pyplot as plt
       import numpy
-      from catsim import CatEngine, ItemBank, simulate
+      from catsim import CatEngine, simulate
+      from irtlib import ItemBank
       from catsim import plot
       from catsim.estimation import EAPEstimator
       from catsim.initialization import FixedPointInitializer
@@ -758,7 +762,7 @@ def likelihood(
   # The session checked its indices when it was built, but it does not know the bank.
   _check_in_bank("administered_items", session.administered_items, item_bank.n_items)
   items = item_bank.items[list(session.administered_items)]
-  log_likelihood = irt.log_likelihood(_LIKELIHOOD_THETAS, session.responses, items)
+  log_likelihood = irt.log_likelihood(_LIKELIHOOD_THETAS, [session.responses], items)[0]
   ax = _prepare_axes(ax, title)
   (line,) = ax.plot(_LIKELIHOOD_THETAS, numpy.exp(log_likelihood - numpy.max(log_likelihood)), label=label)
   ax.axvline(session.current_theta, color=line.get_color(), linestyle="--", linewidth=1)
@@ -810,7 +814,8 @@ def metric_by_ability(
 
       import matplotlib.pyplot as plt
       import numpy
-      from catsim import CatEngine, ItemBank, simulate
+      from catsim import CatEngine, simulate
+      from irtlib import ItemBank
       from catsim import plot
       from catsim.estimation import EAPEstimator
       from catsim.initialization import FixedPointInitializer
@@ -885,7 +890,8 @@ def metric_by_length(
 
       import matplotlib.pyplot as plt
       import numpy
-      from catsim import CatEngine, ItemBank, simulate
+      from catsim import CatEngine, simulate
+      from irtlib import ItemBank
       from catsim import plot
       from catsim.estimation import EAPEstimator
       from catsim.initialization import FixedPointInitializer
@@ -979,7 +985,8 @@ def recovery(result: SimulationResult, *, ax: Axes | None = None, title: str | N
 
       import matplotlib.pyplot as plt
       import numpy
-      from catsim import CatEngine, ItemBank, simulate
+      from catsim import CatEngine, simulate
+      from irtlib import ItemBank
       from catsim import plot
       from catsim.estimation import EAPEstimator
       from catsim.initialization import FixedPointInitializer
@@ -1048,7 +1055,8 @@ def length_distribution(
 
       import matplotlib.pyplot as plt
       import numpy
-      from catsim import CatEngine, ItemBank, simulate
+      from catsim import CatEngine, simulate
+      from irtlib import ItemBank
       from catsim import plot
       from catsim.estimation import EAPEstimator
       from catsim.initialization import FixedPointInitializer

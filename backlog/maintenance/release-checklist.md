@@ -77,6 +77,13 @@ maintainer is satisfied with the package.
 - **Custom strategies** must be picklable classes defined in a module to run on workers.
   `override` comes from `typing`.
 - **Python 3.12 or later.** catsim builds on irtlib (ADR-0024), which requires 3.12.
+- **The item response theory comes from irtlib.** `ItemBank` and `IrtModel` are imported from
+  `irtlib`, the functions of `catsim.irt` from `irtlib.irt`, and `FloatArray` and `IntArray` from
+  `irtlib.typing`; `catsim.irt`, `catsim.typing` and `catsim.ItemBank` are gone, with no alias.
+  `irtlib.irt.log_likelihood` and `log_likelihood_function` take one row of responses per
+  examinee, so one examinee's call is `log_likelihood(theta, [responses], items)[0]`.
+  `validate_response_vector` is gone. `irtlib.irt.reliability` is $I/(I + 1)$, the reliability for
+  abilities N(0, 1), where 0.21's `reliability` was $1 - 1/I$, negative when $I < 1$.
 - **Dependencies.** tqdm is not a dependency; matplotlib is the `plot` extra; irtlib is.
 
 ### Results that change for the same seed

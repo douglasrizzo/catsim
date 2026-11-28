@@ -108,13 +108,13 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, override
 
 import numpy
+from irtlib import irt
 
-from .. import irt
 from .base import BaseStopper
 
 if TYPE_CHECKING:
   from ..context import StepContext
-  from ..typing import IntArray
+  from irtlib.typing import IntArray
 
 
 def _remaining(context: StepContext) -> IntArray:

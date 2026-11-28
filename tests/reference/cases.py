@@ -7,8 +7,6 @@ out here, never derived from catsim's reprs, so a changed repr leaves the data a
 
 The families:
 
-- ``irt``: every public function of ``catsim.irt`` on fixed abilities and fixed 1PL to 4PL banks.
-- ``item_bank``: the bank's derived values, and ``ItemBank.generate`` with seeds.
 - ``estimation``: every estimator, with default and non-default settings, on fixed response patterns
   of every length up to the bank's, constant patterns included; and the Bayesian helpers.
 - ``selection``: every selector's choices in fixed contexts, with a seeded generator, with and
@@ -41,8 +39,9 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy
+from irtlib import ItemBank
 
-from catsim import ItemBank, NoItemsAvailableError, SimulationResult, irt
+from catsim import NoItemsAvailableError, SimulationResult
 from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,
@@ -95,7 +94,7 @@ from catsim.stopping import (
 from tests.reference import adapters
 
 if TYPE_CHECKING:
-  from catsim.typing import FloatArray, IntArray
+  from irtlib.typing import FloatArray, IntArray
 
 Case = Callable[[], object]
 
@@ -139,14 +138,6 @@ def _whole_test_bank(n_items: int) -> ItemBank:
 
 WHOLE_TEST_BANK = _whole_test_bank(30)
 
-THETAS = (-30.0, -6.0, -3.7, -1.25, -0.3, 0.0, 0.45, 1.6, 2.9, 6.0, 30.0)
-THETA_ARRAY = numpy.array(THETAS)
-SCORES = (-12.5, 0.0, 17.3, 50.0, 64.2, 100.0, 133.0)
-INTERVALS = ((-math.inf, math.inf), (-math.inf, 0.0), (-1.0, 1.0), (0.5, 0.7), (2.0, math.inf), (-30.0, 30.0))
-CONFIDENCES = (0.9, 0.95, 0.99)
-# Item subsets of the twelve-item banks, as index tuples: the whole bank, three items and none.
-ITEM_SETS: dict[str, tuple[int, ...]] = {"all": tuple(range(12)), "three": (4, 9, 0), "none": ()}
-
 # The order the estimation cases administer the twelve items in, and the responses of their mixed pattern.
 ITEM_ORDER = (5, 0, 9, 3, 11, 7, 1, 10, 2, 8, 4, 6)
 MIXED = (True, False, False, True, True, False, True, False, True, True, False, True)
@@ -155,161 +146,6 @@ PATTERNS: dict[str, tuple[bool, ...]] = {"correct": (True,) * 12, "incorrect": (
 RANKING_LENGTH = 6
 SELECTION_SEED = 20261125
 WHOLE_TEST_SEED = 1
-
-# The irt family.
-
-
-def _over_item_sets(function: Callable[[FloatArray], object], items: FloatArray) -> dict[str, object]:
-  """Return ``function`` of each subset of the items in ``ITEM_SETS``, by the subset's name."""
-  return {name: function(items[list(indices)]) for name, indices in ITEM_SETS.items()}
-
-
-def _at_each_theta(function: Callable[..., object], *args: object) -> Callable[[FloatArray], list[object]]:
-  """Return a function of the items that evaluates ``function(theta, items, *args)`` at every ability."""
-  return lambda items: [function(theta, items, *args) for theta in THETAS]
-
-
-def _log_likelihoods(items: FloatArray, *, closure: bool) -> dict[str, object]:
-  """Return each pattern's log-likelihood at the abilities, as an array and one ability at a time.
-
-  With ``closure``, the values come from :func:`catsim.irt.log_likelihood_function`'s function.
-  """
-  outputs: dict[str, object] = {}
-  for name, pattern in PATTERNS.items():
-    if closure:
-      function = irt.log_likelihood_function(pattern, items)
-      outputs[name] = [function(THETA_ARRAY), [function(theta) for theta in THETAS]]
-    else:
-      outputs[name] = [
-        irt.log_likelihood(THETA_ARRAY, pattern, items),
-        [irt.log_likelihood(theta, pattern, items) for theta in THETAS],
-      ]
-  return outputs
-
-
-def _scales(function: Callable[..., object], values: tuple[float, ...], settings: dict[str, Any]) -> list[object]:
-  """Return ``function`` of the values as an array and one value at a time, with the scale settings."""
-  return [function(numpy.array(values), **settings), [function(value, **settings) for value in values]]
-
-
-SCALE_SETTINGS: dict[str, dict[str, Any]] = {
-  "default": {},
-  "200_800": {"scale_min": 200, "scale_max": 800},
-  "custom": {"scale_min": -10.0, "scale_max": 37.5, "theta_min": -3.3, "theta_max": 2.7},
-}
-
-
-def _irt_cases() -> dict[str, Case]:
-  cases: dict[str, Case] = {}
-  for bank in MODEL_BANKS:
-    items = BANKS[bank].items
-    cases |= {
-      f"icc|{bank}": functools.partial(irt.icc, THETA_ARRAY, items),
-      f"icc|{bank}|first_item": functools.partial(_at_each_theta(irt.icc), items[0]),
-      f"information|{bank}": functools.partial(irt.information, THETA_ARRAY, items),
-      f"information|{bank}|first_item": functools.partial(_at_each_theta(irt.information), items[0]),
-      f"total_information|{bank}": functools.partial(
-        _over_item_sets,
-        lambda subset: [irt.total_information(THETA_ARRAY, subset), _at_each_theta(irt.total_information)(subset)],
-        items,
-      ),
-      f"var|{bank}": functools.partial(_over_item_sets, _at_each_theta(irt.var), items),
-      f"see|{bank}": functools.partial(_over_item_sets, _at_each_theta(irt.see), items),
-      f"reliability|{bank}": functools.partial(_over_item_sets, _at_each_theta(irt.reliability), items),
-      f"max_info_theta|{bank}": functools.partial(irt.max_info_theta, items),
-      f"info_integral|{bank}": functools.partial(
-        lambda items: [irt.info_integral(lower, upper, items) for lower, upper in INTERVALS], items
-      ),
-      f"log_response_probabilities|{bank}": functools.partial(irt.log_response_probabilities, THETA_ARRAY, items),
-      f"log_likelihood|{bank}": functools.partial(_log_likelihoods, items, closure=False),
-      f"log_likelihood_function|{bank}": functools.partial(_log_likelihoods, items, closure=True),
-    }
-    for level in CONFIDENCES:
-      cases[f"confidence_interval|{bank}|confidence={level}"] = functools.partial(
-        _over_item_sets, _at_each_theta(irt.confidence_interval, level), items
-      )
-  for name, settings in SCALE_SETTINGS.items():
-    cases[f"theta_to_scale|{name}"] = functools.partial(_scales, irt.theta_to_scale, THETAS, settings)
-    cases[f"scale_to_theta|{name}"] = functools.partial(_scales, irt.scale_to_theta, SCORES, settings)
-  cases["constants"] = lambda: {
-    "THETA_MAX_EXTENDED": irt.THETA_MAX_EXTENDED,
-    "THETA_MAX_TYPICAL": irt.THETA_MAX_TYPICAL,
-    "THETA_MIN_EXTENDED": irt.THETA_MIN_EXTENDED,
-    "THETA_MIN_TYPICAL": irt.THETA_MIN_TYPICAL,
-  }
-  return cases
-
-
-# Public functions of catsim.irt that no case is named after, with the reason.
-IRT_EXEMPT = {"validate_response_vector": "an input check with no output; ADR-0009 changes the responses it accepts"}
-
-# The item_bank family.
-
-
-def _bank_values(bank: ItemBank) -> dict[str, object]:
-  """Return the bank's normalized items and every value it derives from them."""
-  subset = (4, 9, 0) if bank.n_items > 9 else (0,)
-  indices: dict[str, tuple[int, ...] | None] = {"default": None, "subset": subset, "none": ()}
-  return {
-    "items": bank.items,
-    "n_items": bank.n_items,
-    "len": len(bank),
-    "model": bank.model,
-    "max_info_thetas": bank.max_info_thetas,
-    "max_info_values": bank.max_info_values,
-    "icc": bank.icc(THETA_ARRAY),
-    "information": bank.information(THETA_ARRAY),
-    "total_information": {
-      name: [bank.total_information(theta, subset) for theta in THETAS] for name, subset in indices.items()
-    },
-  }
-
-
-# (n_items, model, corr, seed) of the generated banks.
-GENERATED = (
-  (20, "1PL", 0.0, 0),
-  (20, "2PL", 0.0, 0),
-  (20, "3PL", 0.0, 0),
-  (20, "4PL", 0.0, 0),
-  (20, "1PL", 0.0, 7),
-  (20, "2PL", 0.0, 7),
-  (20, "3PL", 0.0, 7),
-  (20, "4PL", 0.0, 7),
-  (20, "3pl", 0.3, 11),
-  (25, "4PL", -0.5, 3),
-  (5, "2PL", 0.8, 123),
-)
-
-
-def _generated(n_items: int, model: str, corr: float, seed: int) -> FloatArray:
-  """Return the items of a bank that ``ItemBank.generate`` draws with the seed."""
-  return ItemBank.generate(n_items, model=model, corr=corr, rng=seed).items
-
-
-def _item_bank_cases() -> dict[str, Case]:
-  cases: dict[str, Case] = {f"derived|{name}": functools.partial(_bank_values, bank) for name, bank in BANKS.items()}
-  cases["derived|tie_bank"] = functools.partial(_bank_values, TIE_BANK)
-  cases["derived|whole_test_bank"] = lambda: WHOLE_TEST_BANK.items
-  for n_items, model, corr, seed in GENERATED:
-    cases[f"generate|n={n_items}|model={model}|corr={corr}|seed={seed}"] = functools.partial(
-      _generated, n_items, model, corr, seed
-    )
-  return cases
-
-
-# Public members of ItemBank that are neither derived values of the bank cases nor named by a case, with the reason.
-ITEM_BANK_EXEMPT = {
-  "discrimination": "a column of items, which the derived cases record",
-  "difficulty": "a column of items, which the derived cases record",
-  "pseudo_guessing": "a column of items, which the derived cases record",
-  "upper_asymptote": "a column of items, which the derived cases record",
-  "get_items": "rows of items, which the derived cases record",
-  # Added after adda72dc by ADR-0004 and ADR-0005, and tested by tests/test_item_bank.py.
-  "names": "item names, added after adda72dc",
-  "index": "translates item names into indices, added after adda72dc",
-  "from_csv": "reads a bank from CSV, added after adda72dc",
-  "to_csv": "writes a bank to CSV, added after adda72dc",
-}
 
 # The estimation family.
 
@@ -966,8 +802,6 @@ def _whole_test_cases() -> dict[str, Case]:
 # The families, and what they cover.
 
 FAMILIES: dict[str, dict[str, Case]] = {
-  "irt": _irt_cases(),
-  "item_bank": _item_bank_cases(),
   "estimation": _estimation_cases(),
   "selection": _selection_cases(),
   "stopping": _stopping_cases(),
@@ -982,9 +816,6 @@ FAMILIES: dict[str, dict[str, Case]] = {
 SEARCHING_ESTIMATORS = (NumericalSearchEstimator, MAPEstimator, WarmLikelihoodEstimator)
 # Cases whose floats are logarithms of probabilities or densities.
 _LOG_SCALE = (
-  "log_response_probabilities",
-  "log_likelihood",
-  "log_likelihood_function",
   "normal_log_prior",
   "uniform_log_prior",
 )
@@ -1088,9 +919,8 @@ def uncovered() -> list[str]:
   """Return every public strategy class, computational function and result member that no case exercises.
 
   Every concrete strategy class a strategy package exports must be the type of a strategy the cases
-  configure. Every other name a strategy package exports, every public function of ``catsim.irt``
-  and ``catsim.metrics``, and every public member of ``ItemBank`` must name a case, be one of the
-  item bank's derived values, or be exempt with a reason. Every public member of
+  configure. Every other name a strategy package exports, and every public function of
+  ``catsim.metrics``, must name a case or be exempt with a reason. Every public member of
   ``SimulationResult`` must name an output of the whole tests, or be exempt with a reason.
 
   Returns
@@ -1105,11 +935,8 @@ def uncovered() -> list[str]:
     names = {cls.__name__ for cls in strategies} | exempt.keys()
     exports = importlib.import_module(package).__all__
     missing |= {f"{package}.{name}" for name in exports if name not in names and not _named(family, name)}
-  for module, family, exempt in (("catsim.irt", "irt", IRT_EXEMPT), ("catsim.metrics", "metrics", METRICS_EXEMPT)):
-    missing |= {f"{module}.{name}" for name in _module_functions(module) - exempt.keys() if not _named(family, name)}
-  derived = set(_bank_values(BANKS["4pl"])) | ITEM_BANK_EXEMPT.keys()
-  members = {name for name in vars(ItemBank) if not name.startswith("_")}
-  missing |= {f"catsim.ItemBank.{name}" for name in members - derived if not _named("item_bank", name)}
+  functions = _module_functions("catsim.metrics") - METRICS_EXEMPT.keys()
+  missing |= {f"catsim.metrics.{name}" for name in functions if not _named("metrics", name)}
   recorded = set(whole_test(next(iter(WHOLE_TESTS)))) | RESULT_EXEMPT.keys()
   results = {name for name in dir(SimulationResult) if not name.startswith("_")}
   missing |= {f"catsim.SimulationResult.{name}" for name in results - recorded}

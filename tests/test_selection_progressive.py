@@ -5,10 +5,10 @@ from fractions import Fraction
 
 import numpy as np
 import pytest
+from irtlib import ItemBank
+from irtlib.typing import FloatArray
 
-from catsim import ItemBank
 from catsim.selection import BaseSelector, ProgressiveSelector, ProportionalSelector
-from catsim.typing import FloatArray
 from tests.banks import two_pl_bank
 from tests.contexts import make_context
 from tests.generators import DeterministicRNG

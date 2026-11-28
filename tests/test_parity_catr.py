@@ -23,8 +23,10 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pytest
+from irtlib import ItemBank
+from irtlib.typing import FloatArray
 
-from catsim import CatEngine, ItemBank, StepContext, irt, simulate
+from catsim import CatEngine, StepContext, simulate
 from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,
@@ -51,7 +53,6 @@ from catsim.selection import (
 )
 from catsim.selection.progressive import _position_weight  # noqa: PLC2701 - the selectors expose no weight
 from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthStopper, StandardErrorStopper, StopRule
-from catsim.typing import FloatArray
 from tests.banks import two_pl_bank
 from tests.generators import DeterministicRNG
 
@@ -70,8 +71,8 @@ def _load(name: str) -> dict[str, Any]:
     return json.load(file)
 
 
-_IRT, _ESTIMATION, _SELECTION, _STOPPING, _WHOLE_TESTS, _SIMULATIONS = (
-  _load(name) for name in ("irt", "estimation", "selection", "stopping", "whole_tests", "simulations")
+_ESTIMATION, _SELECTION, _STOPPING, _WHOLE_TESTS, _SIMULATIONS = (
+  _load(name) for name in ("estimation", "selection", "stopping", "whole_tests", "simulations")
 )
 
 # Closed forms, quadratures on the same nodes with the same weights, and KL's quadratures, which both packages take to
@@ -218,7 +219,7 @@ class TestData:
     """Files written by different R or catR versions would compare catsim with two references at once."""
     versions = {
       (data["catr_version"], data["r_version"])
-      for data in (_IRT, _ESTIMATION, _SELECTION, _STOPPING, _WHOLE_TESTS, _SIMULATIONS)
+      for data in (_ESTIMATION, _SELECTION, _STOPPING, _WHOLE_TESTS, _SIMULATIONS)
     }
 
     assert len(versions) == 1
@@ -229,28 +230,6 @@ class TestData:
       recorded = {case["id"] for case in _DEPARTURE_DATA[test]["cases"]}
 
       assert set(departures) <= recorded, test
-
-
-class TestItemResponseFunctions:
-  """catR's Pi and Ii, on 1PL to 4PL items, against catsim.irt."""
-
-  @pytest.mark.parametrize("case", _cases(_IRT, "probability"))
-  def test_probability(self, case: Case) -> None:
-    """A wrong logistic, or a guessing or slipping parameter entering it the wrong way, would move icc off catR's Pi."""
-    np.testing.assert_allclose(
-      irt.icc(_floats(case["thetas"]), np.array(case["items"], dtype=float)),
-      np.array(case["probability"], dtype=float),
-      rtol=_CLOSED_FORM_RTOL,
-    )
-
-  @pytest.mark.parametrize("case", _cases(_IRT, "information"))
-  def test_information(self, case: Case) -> None:
-    """An information formula that drops c or d, or squares the wrong term, would move off catR's Ii."""
-    np.testing.assert_allclose(
-      irt.information(_floats(case["thetas"]), np.array(case["items"], dtype=float)),
-      np.array(case["information"], dtype=float),
-      rtol=_CLOSED_FORM_RTOL,
-    )
 
 
 def _log_prior(prior: dict[str, Any]) -> LogPrior:

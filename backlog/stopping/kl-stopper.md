@@ -150,8 +150,7 @@ It is removed when the spec is promoted to a technique page.
 import math
 
 import numpy
-
-from .. import irt
+from irtlib import irt
 
 # KLSelector's Gauss-Legendre rule: four nodes per unit of the steepest item's discrimination times
 # the half-width, from 24 to 240
@@ -237,8 +236,8 @@ class KLInfoStopper(BaseStopper):
   `irt.log_response_probabilities`, as in KLSelector, and the sketch repeats KLSelector's
   Gauss-Legendre rule, whose number of nodes grows with the steepest item's discrimination times
   the half-width (the KL selector's technique page gives its accuracy). To share the integral itself, move `KLSelector._kl_global` from
-  `catsim/selection/kl.py` to a module both layers import, such as `catsim.irt`, rather than
-  importing a private name across layers.
+  `catsim/selection/kl.py` to irtlib's `irtlib.irt`, a function of the model alone (ADR-0024),
+  rather than importing a private name across layers.
 - The window uses $n$ = 1 before the first item, as KLSelector does, so the stopper needs no
   minimum length of its own; a minimum and a cap come from `StopRule`, as in
   `StopRule(KLInfoStopper(0.01), MaxLengthStopper(30), min_items=5)`.

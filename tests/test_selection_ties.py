@@ -6,8 +6,8 @@ from typing import override
 
 import numpy as np
 import pytest
+from irtlib import ItemBank
 
-from catsim import ItemBank
 from catsim.selection import (
   AStratSelector,
   BaseSelector,

@@ -7,8 +7,9 @@ import pytest
 from hypothesis import example, given, settings
 from hypothesis import strategies as st
 from hypothesis.strategies import DrawFn, composite
+from irtlib import ItemBank
 
-from catsim import CatEngine, ItemBank, NoItemsAvailableError, StopReason, simulate
+from catsim import CatEngine, NoItemsAvailableError, StopReason, simulate
 from catsim.estimation import NumericalSearchEstimator
 from catsim.initialization import FixedPointInitializer
 from catsim.selection import AStratBBlockSelector, AStratSelector, MaxInfoBBlockSelector, MaxInfoStratSelector

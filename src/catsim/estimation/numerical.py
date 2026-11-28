@@ -3,12 +3,11 @@
 from typing import override
 
 import numpy
+from irtlib import ItemBank, irt
+from irtlib.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from scipy.optimize import minimize_scalar
 
-from .. import irt
 from ..context import Estimate, StepContext
-from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
-from ..item_bank import ItemBank
 from .base import BaseEstimator
 
 
@@ -120,10 +119,10 @@ class NumericalSearchEstimator(BaseEstimator):
       theta = _dodd(context.theta, context.item_bank, correct=responses[0], bounds=self._bounds)
       return Estimate(theta=theta, se=irt.see(theta, items), evaluations=0)
 
-    log_likelihood = irt.log_likelihood_function(responses, items)
+    log_likelihood = irt.log_likelihood_function([responses], items)
 
     def negative_log_likelihood(theta: float) -> float:
-      return -float(log_likelihood(theta))
+      return -float(log_likelihood(theta)[0])
 
     res = minimize_scalar(
       negative_log_likelihood,

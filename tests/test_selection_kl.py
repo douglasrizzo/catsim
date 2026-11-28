@@ -2,9 +2,9 @@
 
 import numpy as np
 import pytest
+from irtlib import ItemBank
 from scipy.integrate import quad
 
-from catsim import ItemBank
 from catsim.selection import KLSelector
 from tests.contexts import make_context
 

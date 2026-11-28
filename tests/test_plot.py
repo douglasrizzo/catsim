@@ -12,14 +12,15 @@ from typing import TYPE_CHECKING, TypedDict
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+from irtlib import ItemBank
+from irtlib.typing import FloatArray
 from matplotlib.colors import same_color, to_rgb
 from matplotlib.container import ErrorbarContainer
 from matplotlib.lines import AxLine
 from matplotlib.patches import Polygon, Rectangle
 
-from catsim import Estimate, ItemBank, Session, SimulationResult, StopReason, plot
+from catsim import Estimate, Session, SimulationResult, StopReason, plot
 from catsim.plot import PlotType
-from catsim.typing import FloatArray
 
 if TYPE_CHECKING:
   import numpy.typing as npt
@@ -102,8 +103,8 @@ class TestOptionalMatplotlib:
     """
     result = _run_python(
       "import sys\n"
-      "import catsim, catsim.estimation, catsim.initialization, catsim.irt, catsim.metrics\n"
-      "import catsim.selection, catsim.stopping, catsim.typing\n"
+      "import catsim, catsim.estimation, catsim.initialization, catsim.metrics\n"
+      "import catsim.selection, catsim.stopping\n"
       "print(sorted(name for name in sys.modules if name.partition('.')[0] in {'matplotlib', 'mpl_toolkits'}"
       " or name == 'catsim.plot'))\n"
     )

@@ -173,8 +173,8 @@ from enum import StrEnum
 from typing import TYPE_CHECKING, override
 
 import numpy
+from irtlib import irt
 
-from .. import irt
 from .base import BaseStopper
 
 if TYPE_CHECKING:
@@ -250,7 +250,7 @@ class SPRTStopper(BaseStopper):
     """
     points = numpy.array([self.cut_score - self.indifference, self.cut_score + self.indifference])
     items = context.item_bank.get_items(context.administered_items)
-    at_lower, at_upper = irt.log_likelihood(points, context.responses, items)
+    at_lower, at_upper = irt.log_likelihood(points, [context.responses], items)[0]
     return float(at_upper - at_lower)
 
   @override

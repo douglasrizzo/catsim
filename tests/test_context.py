@@ -6,8 +6,9 @@ import re
 
 import numpy as np
 import pytest
+from irtlib import ItemBank
 
-from catsim import Estimate, ItemBank, StepContext
+from catsim import Estimate, StepContext
 
 BANK = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0], [1.0, -1.0, 0.0, 1.0]]))
 

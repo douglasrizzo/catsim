@@ -20,9 +20,8 @@ from .checks import (
 if TYPE_CHECKING:
   import numpy
   from _typeshed import DataclassInstance
-
-  from .item_bank import ItemBank
-  from .typing import FloatArray
+  from irtlib import ItemBank
+  from irtlib.typing import FloatArray
 
 
 # eq=False: a generated __eq__ would compare the exposure-rate arrays elementwise and raise, and a
@@ -40,7 +39,8 @@ class StepContext:
   generator are required; the other fields describe a session with no responses yet:
 
   >>> import numpy
-  >>> from catsim import ItemBank, StepContext
+  >>> from catsim import StepContext
+  >>> from irtlib import ItemBank
   >>> from catsim.estimation import EAPEstimator
   >>> bank = ItemBank.generate(20, rng=0)
   >>> context = StepContext(

@@ -30,26 +30,28 @@ Measured on 2026-11-26 at `97b89f50`, CPython 3.13.6 on an Apple M4 Pro, NumPy 2
 | the rest of `catsim` | 0.015 |
 | total | 0.40 |
 
-`import catsim` loads `catsim.irt`, which imports `scipy.stats` at module level.
+`import catsim` loads `irtlib.irt`, the item response functions catsim builds on (ADR-0024), which
+imports `scipy.stats` at module level.
 
 ## What catsim has now
 
-Three modules import `scipy.stats`, each only to call `stats.norm.ppf((1 + confidence) / 2)`:
+Two of catsim's modules import `scipy.stats`, each only to call `stats.norm.ppf((1 + confidence) / 2)`:
 
-- `src/catsim/irt.py:13`, used in `confidence_interval` (line 300); loaded by `import catsim`;
-- `src/catsim/stopping/precision.py:10`, used at line 134;
-- `src/catsim/selection/information.py:6`, used at line 185.
+- `src/catsim/stopping/precision.py`, in `ConfidenceIntervalStopper`;
+- `src/catsim/selection/information.py`, in `IntervalInfoSelector`.
+
+The third import is irtlib's, in `irtlib/irt.py` for `confidence_interval`, which `import catsim`
+loads through `irtlib.ItemBank`. irtlib's own card, `irt/normal-quantile-import`, replaces it.
 
 ## Proposal
 
 Replace each `stats.norm.ppf(p)` with `scipy.special.ndtri(p)`, the inverse of the standard normal
-distribution function, from `scipy.special`, which `irt.py` already imports (`expit`, `log_expit`).
-Drop the three `from scipy import stats` lines.
+distribution function, and drop the two `from scipy import stats` lines. `import catsim` stops
+loading `scipy.stats` once irtlib's card lands too.
 
 ## Tests
 
 - After `import catsim` in a fresh interpreter, `"scipy.stats"` is not in `sys.modules`. The test
-  fails on the current code.
-- `irt.confidence_interval` at `confidence=0.95` uses the published 97.5% quantile of the standard
-  normal, 1.959963984540054, to the last digit; the precision stopper and the selector that use a
-  confidence interval keep their parity cases against catR.
+  fails on the current code, and passes once irtlib's card has landed too.
+- The precision stopper and the selector that use a confidence interval keep their parity cases
+  against catR.

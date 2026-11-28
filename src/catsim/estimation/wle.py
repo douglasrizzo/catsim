@@ -7,20 +7,21 @@ from typing import TYPE_CHECKING, override
 
 import numpy
 import numpy.typing as npt
+from irtlib import irt
+from irtlib.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from scipy.integrate import IntegrationWarning, quad
 from scipy.optimize import brentq
 from scipy.special import expit
 
-from .. import irt
 from ..context import Estimate
-from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from .base import BaseEstimator
 
 if TYPE_CHECKING:
   from collections.abc import Callable, Sequence
 
+  from irtlib.typing import FloatArray
+
   from ..context import StepContext
-  from ..typing import FloatArray
 
 # Points on which the modified score is scanned to bracket its roots before Brent's method refines
 # them (0.1 apart on [-6, 6]).

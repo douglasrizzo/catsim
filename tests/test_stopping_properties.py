@@ -7,8 +7,8 @@ from typing import override
 
 from hypothesis import assume, example, given, settings
 from hypothesis import strategies as st
+from irtlib import ItemBank
 
-from catsim import ItemBank
 from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthStopper, StopRule
 from tests.contexts import make_context
 

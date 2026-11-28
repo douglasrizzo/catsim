@@ -156,11 +156,10 @@ convention = "numpy"
 ignore-one-line-docstrings = true
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
-"numpy.typing.NDArray".msg = "Use FloatArray or IntArray from catsim.typing; add an alias there for other dtypes."
+"numpy.typing.NDArray".msg = "Use FloatArray, IntArray or BoolArray from irtlib.typing; another dtype gets an alias there."
 "random".msg = "Take a numpy.random.Generator from the caller (ADR-0013); the global random module cannot be seeded per session."
 
 [tool.ruff.lint.per-file-ignores]
-"src/catsim/typing.py" = ["TID251"]  # the one place that defines the NDArray aliases
 "notebooks/*" = ["T20"]  # tutorials print their results
 "tests/*" = [
   "ANN",      # Test fixture wiring and local helpers do not need exhaustive annotations
@@ -174,6 +173,7 @@ ignore-one-line-docstrings = true
   "RUF069",   # Exact float expectations are acceptable in tests
   "S",        # Security rules are too noisy for intentionally non-production test code
   "TC001",    # Test-only type imports do not justify TYPE_CHECKING indirection
+  "TC002",    # Test-only type imports do not justify TYPE_CHECKING indirection
   "TC003",    # Test-only type imports do not justify TYPE_CHECKING indirection
 ]
 # Every test has a docstring naming the behaviour it checks, or the bug that would make it fail (AGENTS.md):
@@ -355,10 +355,8 @@ layers = [
   "session",  # Session: built by the engine, read by the runner and the plots, never by a strategy
   "context",  # StepContext: below the session and the strategies, which read it, and above the domain
   "metrics",
-  "item_bank",
-  "irt",
   "checks",  # the input checks of the explicit inputs (ADR-0009), which the domain makes too
-  "typing : exceptions",
+  "exceptions",
 ]
 ignore_imports = [
   # MEISelector runs one-step-ahead ability updates with an estimator.
@@ -373,8 +371,6 @@ id = "no-runtime-in-domain"
 name = "domain and strategies never import runtime objects"
 type = "forbidden"
 source_modules = [
-  "catsim.irt",
-  "catsim.item_bank",
   "catsim.metrics",
   "catsim.selection",
   "catsim.estimation",
@@ -389,10 +385,7 @@ id = "plot-only-matplotlib"
 name = "only catsim.plot imports matplotlib"
 type = "forbidden"
 source_modules = [
-  "catsim.typing",
   "catsim.exceptions",
-  "catsim.irt",
-  "catsim.item_bank",
   "catsim.metrics",
   "catsim.checks",
   "catsim.context",

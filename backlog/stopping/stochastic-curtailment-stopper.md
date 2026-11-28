@@ -189,7 +189,7 @@ from scipy import stats
 from .bank import _remaining
 
 if TYPE_CHECKING:
-  from ..typing import FloatArray
+  from irtlib.typing import FloatArray
 
 
 @dataclass(frozen=True, kw_only=True)

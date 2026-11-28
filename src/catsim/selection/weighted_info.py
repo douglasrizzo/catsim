@@ -3,11 +3,12 @@
 import math
 from typing import override
 
-from .. import irt
+from irtlib import irt
+from irtlib.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
+from irtlib.typing import FloatArray, IntArray
+
 from ..context import StepContext
 from ..estimation import QuadratureGrid, posterior, uniform_log_prior
-from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
-from ..typing import FloatArray, IntArray
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 _MIN_NODES = 5

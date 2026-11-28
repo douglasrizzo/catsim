@@ -150,9 +150,9 @@ from typing import override
 
 import numpy
 import numpy.typing as npt
+from irtlib.typing import FloatArray
 
 from ..context import StepContext
-from ..typing import FloatArray
 from .base import BaseExposureControl
 
 

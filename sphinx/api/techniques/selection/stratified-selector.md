@@ -61,7 +61,7 @@ $$
 I_i^{\max} = I_i(\theta_i^{\max}).
 $$
 
-{py:func}`catsim.irt.max_info_theta` computes $\theta_i^{\max}$.
+`irtlib.irt.max_info_theta` computes $\theta_i^{\max}$.
 
 {cite:t}`Barrada2006{p. 157, Equations 1 and 2}` give $I_i^{\max}$ and
 $\theta_i^{\max}$ in closed form for the 3PL model, with the scaling constant

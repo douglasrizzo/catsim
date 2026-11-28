@@ -16,7 +16,7 @@ raised_by: []
 
 ## Why this is a discussion card
 
-MCAT replaces unidimensional ability $\theta \in \mathbb{R}$ with a multidimensional ability vector $\boldsymbol{\theta} \in \mathbb{R}^D$, backed by a multidimensional IRT (MIRT) model. catsim's `irt.py` is hardcoded to the 4PL unidimensional logistic. There is **no matrix theta state, no multidimensional ICC, no Fisher-information matrix** anywhere in the package. Adding MCAT is not a strategy card — it is a fundamental extension of `irt.py`, `ItemBank`, `CatSessionState`, and every estimator/selector/stopper. This card documents the scope and what would need to change.
+MCAT replaces unidimensional ability $\theta \in \mathbb{R}$ with a multidimensional ability vector $\boldsymbol{\theta} \in \mathbb{R}^D$, backed by a multidimensional IRT (MIRT) model. irtlib's `irtlib.irt`, which catsim builds on (ADR-0024), is hardcoded to the 4PL unidimensional logistic. There is **no matrix theta state, no multidimensional ICC, no Fisher-information matrix** anywhere in the package. Adding MCAT is not a strategy card — it is a fundamental extension of `irt.py`, `ItemBank`, `CatSessionState`, and every estimator/selector/stopper. This card documents the scope and what would need to change.
 
 ## References
 
@@ -56,8 +56,8 @@ Estimation also generalizes: multivariate EAP (posterior over $\mathbb{R}^D$, qu
 
 ## What would need to change in catsim
 
-1. **`irt.py` refactor**: vectorize or templatize `icc`, `inf`, `test_info`, `log_likelihood` over dimensionality. The unidimensional case must remain a hot path — it is by far the most common use case.
-2. **`ItemBank` refactor**: item parameter storage is currently `(n_items, 5)`. MIRT items need `(n_items, D + 3)` or similar. Must decide: parallel `MIRTItemBank` vs. dimensionality-aware `ItemBank`.
+1. **`irtlib.irt` refactor, in irtlib** (its parked `scope/multidimensional-models` card): vectorize or templatize `icc`, `inf`, `test_info`, `log_likelihood` over dimensionality. The unidimensional case must remain a hot path — it is by far the most common use case.
+2. **irtlib's `ItemBank` refactor**: item parameter storage is currently `(n_items, 5)`. MIRT items need `(n_items, D + 3)` or similar. Must decide: parallel `MIRTItemBank` vs. dimensionality-aware `ItemBank`.
 3. **`CatSessionState`**: `theta` becomes a vector. `CatStepResult` records a vector path.
 4. **Estimators**: every current estimator is scalar. Need multivariate MLE (gradient/Hessian), multivariate EAP (tensor-product quadrature or sparse grid), multivariate MAP.
 5. **Selectors**: the whole selector family is scalar-theta. Need matrix-info variants (D/A/E-optimality, KL, posterior-KL).
@@ -70,7 +70,7 @@ Estimation also generalizes: multivariate EAP (posterior over $\mathbb{R}^D$, qu
 1. **Is MCAT in scope at all?** This is the decisive question. If the answer is "no", close this card. If "yes, eventually", file a scoping ADR. If "yes now", open a parallel roadmap.
 2. **Dimensionality ceiling**: most MCAT research uses $D \le 5$. Is that enough? Higher dimensions require sparse-grid or MCMC estimation and blow up the scope considerably.
 3. **Data layout**: parallel subpackage (`catsim.multidim.*`) vs. a refactored core. Parallel is safer (no regression risk for existing users) but fragments the library.
-4. **Backwards compatibility**: if `irt.py` is refactored, does the unidimensional API stay identical? It must, or every existing catsim user breaks.
+4. **Backwards compatibility**: if `irtlib.irt` is refactored, does the unidimensional API stay identical? It must, or every existing catsim user breaks.
 5. **Constraints on items**: MIRT item calibration is harder than unidimensional IRT. catsim is a CAT simulator, not a calibrator — but users will expect catsim to *consume* calibrated MIRT banks, and the file format question is open.
 
 ## Notes

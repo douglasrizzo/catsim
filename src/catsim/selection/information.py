@@ -4,9 +4,9 @@ import math
 from typing import override
 
 import numpy
+from irtlib import irt
 from scipy import stats
 
-from .. import irt
 from ..context import StepContext
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 

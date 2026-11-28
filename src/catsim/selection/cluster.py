@@ -9,10 +9,10 @@ from enum import StrEnum
 from typing import override
 
 import numpy
+from irtlib import ItemBank
+from irtlib.typing import FloatArray, IntArray
 
 from ..context import StepContext
-from ..item_bank import ItemBank
-from ..typing import FloatArray, IntArray
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 

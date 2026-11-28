@@ -30,7 +30,7 @@ $$
 \<What each component of the equation is. Cite the source of each formula where it appears, with
 its page and equation, e.g. {cite:t}`Barrada2008{p. 498, Equation 12}` or
 {cite:p}`Barrada2008{p. 498, Equation 12}`, citing only locations you have read. Refer to the
-`catsim.irt` function for a quantity such as information or the log-likelihood rather than
+`irtlib.irt` function for a quantity such as information or the log-likelihood rather than
 re-derive it. Use the symbols of terms-and-notation.md.>
 
 % Optional: how catsim solves the definition numerically (search range, grid, tolerance), when it
